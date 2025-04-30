@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="{% block html_class %}{% endblock %}" x-data>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Choyeon{% endblock %}</title>
+    
+    <!-- Favicon -->
+    {% load static %}
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+    {% block js %}
+    {% endblock %}
+    
+    <!-- Alpine.js 全局引入 -->
+    <script src="//unpkg.com/alpinejs" defer></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <!-- 配置 Tailwind -->
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {}
+            }
+        }
+    </script>
+    
+    <!-- 公共样式 -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* 隐藏滚动条但保持功能 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease-in forwards;
+        }
+        
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+    
+    <!-- 额外的头部内容 -->
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen{% endblock %}" x-data="siteControls">
+    <!-- 导航区域 -->
+    {% block navigation %}{% endblock %}
+    
+    <!-- 主要内容区域 -->
+    {% block content %}{% endblock %}
+    
+    <!-- 页脚区域 -->
+    {% block footer %}
+    <div class="mt-12 text-center py-4">
+        <p class="text-gray-500 dark:text-gray-400 text-sm">© {% now "Y" %} Choyeon. All rights reserved.</p>
+    </div>
+    {% endblock %}
+    
+    <!-- 右侧悬浮栏 -->
+    <div class="fixed right-6 bottom-8 flex flex-col gap-3 z-50">
+        <!-- 主题切换按钮 -->
+        <button 
+            @click="toggleTheme()" 
+            class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 border border-gray-200 dark:border-gray-700">
+            <i class="fas fa-sun" x-show="!isDarkMode"></i>
+            <i class="fas fa-moon" x-show="isDarkMode"></i>
+        </button>
+        
+        <!-- 回到顶部按钮 -->
+        <button 
+            @click="scrollToTop()" 
+            class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 border border-gray-200 dark:border-gray-700"
+            x-show="showBackToTop"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 transform translate-y-4"
+            x-transition:enter-end="opacity-100 transform translate-y-0"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100 transform translate-y-0"
+            x-transition:leave-end="opacity-0 transform translate-y-4">
+            <i class="fas fa-arrow-up text-lg"></i>
+        </button>
+    </div>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Alpine.js 相关脚本 -->
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('theme', {
+                dark: localStorage.theme === 'dark' || 
+                     (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
+                
+                toggle() {
+                    this.dark = !this.dark;
+                    this.applyTheme();
+                },
+                
+                applyTheme() {
+                    // 保存到本地存储
+                    localStorage.theme = this.dark ? 'dark' : 'light';
+                    
+                    // 应用类名
+                    if (this.dark) {
+                        document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
+                    }
+                },
+                
+                init() {
+                    // 初始应用主题
+                    this.applyTheme();
+                }
+            });
+            
+            Alpine.data('siteControls', () => ({
+                get isDarkMode() {
+                    return Alpine.store('theme').dark;
+                },
+                
+                toggleTheme() {
+                    Alpine.store('theme').toggle();
+                },
+                
+                showBackToTop: false,
+                
+                init() {
+                    // 监听滚动事件
+                    window.addEventListener('scroll', () => {
+                        this.showBackToTop = window.scrollY > 300;
+                    });
+                },
+                
+                scrollToTop() {
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
+                    });
+                }
+            }));
+        });
+    </script>
+    
+    <!-- 页面初始化脚本 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // 确保在Alpine.js完全初始化后应用主题
+            if (window.Alpine) {
+                setTimeout(() => {
+                    if (Alpine.store('theme')) {
+                        Alpine.store('theme').applyTheme();
+                    }
+                }, 10);
+            }
+        });
+    </script>
+    
+    <!-- 额外的脚本 -->
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
