@@ -4,19 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Choyeon{% endblock %}</title>
-    
     <!-- Favicon -->
     {% load static %}
     <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
     {% block js %}
     {% endblock %}
-    
     <!-- Alpine.js 全局引入 -->
     <script src="//unpkg.com/alpinejs" defer></script>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.bootcdn.net/ajax/libs/axios/1.8.4/axios.js"></script>
-    
+    <script src="{% static 'js/axios.js' %}"></script>
+ 
     <!-- 配置 Tailwind -->
     <script>
         tailwind.config = {

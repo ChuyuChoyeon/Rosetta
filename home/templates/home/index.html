@@ -2,7 +2,7 @@
 {% load static %}
 {% block html_class %}{% endblock %}
 
-{% block title %}Choyeon - 个人主页{% endblock %}
+{% block title %}{{ profile.name }} - 个人主页{% endblock %}
 
 {% block body_class %}bg-gray-50 dark:bg-gray-900 min-h-screen p-6 transition-colors duration-300{% endblock %}
 
@@ -11,19 +11,33 @@
     <div class="animate-fade-in" style="animation-delay: 0.1s">
         <div class="flex flex-col md:flex-row items-center mb-12">
             <div class="w-32 h-32 rounded-full overflow-hidden mb-6 md:mb-0 md:mr-8 border-4 border-white dark:border-gray-700 shadow-lg">
+                {% if profile.avatar %}
+                <img src="{{ profile.avatar.url }}" alt="{{ profile.name }}" class="w-full h-full object-cover">
+                {% else %}
                 <img src="{% static 'images/1.jpeg' %}" alt="Profile Photo" class="w-full h-full object-cover">
+                {% endif %}
             </div>
             <div>
-                <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">Choyeon</h1>
-                <p class="text-xl text-gray-600 dark:text-gray-400">人工智能应用开发工程师</p>
+                <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-2">{{ profile.name|default:"Choyeon" }}</h1>
+                <p class="text-xl text-gray-600 dark:text-gray-400">{{ profile.title|default:"人工智能应用开发工程师" }}</p>
                 <div class="mt-4 flex flex-wrap gap-2">
+                    {% for skill in skills %}
+                    <span class="px-3 py-1 bg-{{ skill.color }}-100 dark:bg-{{ skill.color }}-900 text-{{ skill.color }}-800 dark:text-{{ skill.color }}-200 rounded-full text-sm">{{ skill.name }}</span>
+                    {% empty %}
                     <span class="px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm">Python</span>
                     <span class="px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm">JavaScript</span>
                     <span class="px-3 py-1 bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200 rounded-full text-sm">Godot</span>
                     <span class="px-3 py-1 bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-200 rounded-full text-sm">C++</span>
+                    {% endfor %}
                 </div>
-                <!-- 添加博客按钮 -->
+                <!-- 导航链接 -->
                 <div class="mt-4 flex flex-wrap gap-2">
+                    {% for link in nav_links %}
+                    <a href="{{ link.url }}" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg transition-colors duration-200">
+                        <i class="{{ link.icon }} mr-2"></i>
+                        {{ link.name }}
+                    </a>
+                    {% empty %}
                     <a href="/blog" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 text-white rounded-lg transition-colors duration-200">
                         <i class="fas fa-book-open mr-2"></i>
                         访问博客
@@ -32,6 +46,7 @@
                         <i class="fa-solid fa-film mr-2"></i>
                         影视站点分享
                     </a>
+                    {% endfor %}
                 </div>
             </div>
         </div>
@@ -41,9 +56,7 @@
         <div class="mb-12 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
             <h2 class="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">关于我</h2>
             <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
-                我是一个充满激情的开发者，热衷于探索新技术和解决复杂问题。我的兴趣包括应用及Web开发、Web3.0、AI应用开发。同时是fastapi项目的共享者，我喜欢在GitHub上分享我的项目，并与其他开发者交流。
-                <br/>
-                掌握Python、JavaScript、C/C++等编程语言，各种Web相关前后端框架。熟悉PHP、Go、Java编程语言，各种人工智能、深度学习、数据科学相关框架。可以使用UnrealEngine、Godot等引擎开发。
+                {{ profile.about_me|default:"我是一个充满激情的开发者，热衷于探索新技术和解决复杂问题。我的兴趣包括应用及Web开发、Web3.0、AI应用开发。同时是fastapi项目的共享者，我喜欢在GitHub上分享我的项目，并与其他开发者交流。<br/>掌握Python、JavaScript、C/C++等编程语言，各种Web相关前后端框架。熟悉PHP、Go、Java编程语言，各种人工智能、深度学习、数据科学相关框架。可以使用UnrealEngine、Godot等引擎开发。"|safe }}
             </p>
         </div>
     </div>
@@ -52,7 +65,24 @@
         <h2 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">联系我</h2>
         <div class="mb-12 bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Email 联系方式 -->
+                {% for contact in contacts %}
+                <div class="flex items-center space-x-4">
+                    <div class="w-12 h-12 rounded-full bg-{{ contact.color }}-100 dark:bg-{{ contact.color }}-900 flex items-center justify-center">
+                        <i class="{{ contact.icon }} text-{{ contact.color }}-600 dark:text-{{ contact.color }}-300 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-gray-800 dark:text-white mb-1">{{ contact.method }}</h3>
+                        {% if "mailto:" in contact.value %}
+                        <a href="{{ contact.value }}" class="text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300">
+                            {{ contact.value|cut:"mailto:" }}
+                        </a>
+                        {% else %}
+                        <p class="text-gray-600 dark:text-gray-400">{{ contact.value }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <!-- 默认联系方式 -->
                 <div class="flex items-center space-x-4">
                     <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
                         <i class="fas fa-envelope text-blue-600 dark:text-blue-300 text-xl"></i>
@@ -64,39 +94,7 @@
                         </a>
                     </div>
                 </div>
-                
-                <!-- 微信联系方式 -->
-                <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                        <i class="fab fa-weixin text-green-600 dark:text-green-300 text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-medium text-gray-800 dark:text-white mb-1">微信</h3>
-                        <p class="text-gray-600 dark:text-gray-400">ChoyeonShine</p>
-                    </div>
-                </div>
-
-                <!-- QQ联系方式 -->
-                <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                        <i class="fab fa-qq text-green-600 dark:text-green-300 text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-medium text-gray-800 dark:text-white mb-1">QQ</h3>
-                        <p class="text-gray-600 dark:text-gray-400">952223950</p>
-                    </div>
-                </div>
-
-                <!-- telegram联系方式 -->
-                <div class="flex items-center space-x-4">
-                    <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                        <i class="fab fa-telegram text-green-600 dark:text-green-300 text-xl"></i>
-                    </div>
-                    <div>
-                        <h3 class="font-medium text-gray-800 dark:text-white mb-1">Telegram</h3>
-                        <p class="text-gray-600 dark:text-gray-400">@ChuyuChoyeon </p>
-                    </div>
-                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
@@ -104,44 +102,22 @@
     <div class="animate-fade-in" style="animation-delay: 0.5s">
         <h2 class="text-2xl font-semibold mb-6 text-gray-800 dark:text-white">链接</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- GitHub -->
+            {% for link in social_links %}
             <div class="social-link bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
-                <a href="https://github.com/ChuyuChoyeon" target="_blank" class="flex items-center">
+                <a href="{{ link.url }}" target="_blank" class="flex items-center">
                     <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xl">
-                        <i class="fab fa-github text-gray-800 dark:text-gray-200"></i>
+                        <i class="{{ link.icon }} text-gray-800 dark:text-gray-200"></i>
                     </div>
                     <div class="ml-4">
-                        <h3 class="font-medium text-gray-800 dark:text-white">GitHub</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">@ChuyuChoyeon</p>
+                        <h3 class="font-medium text-gray-800 dark:text-white">{{ link.name }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ link.username }}</p>
                     </div>
                 </a>
             </div>
-
-            <!-- X (Twitter) -->
-            <div class="social-link bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
-                <a href="https://x.com/chushines" target="_blank" class="flex items-center">
-                    <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xl">
-                        <i class="fab fa-twitter text-gray-800 dark:text-gray-200"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="font-medium text-gray-800 dark:text-white">X</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">@chushines</p>
-                    </div>
-                </a>
-            </div>
-
-            <!-- BiliBili -->
-            <div class="social-link bg-white dark:bg-gray-800 rounded-xl p-6 shadow-sm hover:shadow-md transition-all">
-                <a href="https://space.bilibili.com/3493260907514771" class="flex items-center">
-                    <div class="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center text-xl">
-                        <i class="fab fa-bilibili text-gray-800 dark:text-gray-200"></i>
-                    </div>
-                    <div class="ml-4">
-                        <h3 class="font-medium text-gray-800 dark:text-white">bilibili</h3>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">_Choyeon</p>
-                    </div>
-                </a>
-            </div>
+            {% empty %}
+            <!-- 默认链接 -->
+            <!-- ...现有默认链接代码... -->
+            {% endfor %}
         </div>
     </div>
 </div>

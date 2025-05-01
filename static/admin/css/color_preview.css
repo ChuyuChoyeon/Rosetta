@@ -1,0 +1,11 @@
+select.color-select {
+    padding: 5px;
+    min-width: 150px;
+    font-size: 14px;
+}
+
+select.color-select option {
+    padding: 5px;
+    border-radius: 3px;
+    margin-bottom: 2px;
+}
