@@ -61,3 +61,4 @@ env/
 # 缓存文件
 .cache/
 staticfiles/
+db.sqlite3
