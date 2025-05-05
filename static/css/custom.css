@@ -1,0 +1,33 @@
+/* Unfold Admin 自定义样式 */
+
+/* 导航项图标预览 */
+.navigation-icon-preview {
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+}
+
+/* 导航项链接样式 */
+.navigation-url {
+    color: #3b82f6;
+    text-decoration: none;
+}
+
+.navigation-url:hover {
+    text-decoration: underline;
+}
+
+/* 导航项在管理界面的样式 */
+.nav-item-active {
+    color: #22c55e;
+}
+
+.nav-item-inactive {
+    color: #ef4444;
+}
+
+/* 自定义输入框样式 */
+.field-icon .help {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #6b7280;
+}

@@ -1,0 +1,39 @@
+{% if footer_navigation %}
+<div class="bg-white dark:bg-gray-800 py-8 border-t border-gray-200 dark:border-gray-700">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {% for item in footer_navigation %}
+                <div>
+                    <h3 class="text-sm font-semibold text-gray-800 dark:text-white uppercase tracking-wider">
+                        {% if item.icon %}<i class="{{ item.icon }} mr-2"></i>{% endif %}
+                        {{ item.title }}
+                    </h3>
+                    {% if item.has_children %}
+                        <ul class="mt-4 space-y-2">
+                            {% for child in item.active_children %}
+                                <li>
+                                    <a href="{{ child.url }}" 
+                                       {% if child.is_external %}target="_blank" rel="noopener"{% endif %}
+                                       class="text-sm text-gray-600 dark:text-gray-400 hover:text-{{ child.color }}-500 dark:hover:text-{{ child.color }}-400 transition-colors duration-200 {{ child.css_class }}">
+                                        {% if child.icon %}<i class="{{ child.icon }} mr-2"></i>{% endif %}
+                                        {{ child.title }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <div class="mt-4">
+                            <a href="{{ item.url }}" 
+                               {% if item.is_external %}target="_blank" rel="noopener"{% endif %}
+                               class="text-sm text-gray-600 dark:text-gray-400 hover:text-{{ item.color }}-500 dark:hover:text-{{ item.color }}-400 transition-colors duration-200 {{ item.css_class }}">
+                                {% if item.icon %}<i class="{{ item.icon }} mr-2"></i>{% endif %}
+                                {{ item.url|truncatechars:30 }}
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}

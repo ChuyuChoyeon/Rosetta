@@ -2,10 +2,17 @@ from import_export import resources, fields
 from import_export.widgets import DateTimeWidget, BooleanWidget, ForeignKeyWidget, CharWidget
 from .models import VideoSite
 from django.core.exceptions import ValidationError
+import logging
+from urllib.parse import urlparse
+
+logger = logging.getLogger(__name__)
 
 class CategoryWidget(CharWidget):
     """处理分类的自定义 widget，允许使用显示名称或实际值"""
     def clean(self, value, row=None, *args, **kwargs):
+        if not value:
+            return 'movie'  # 默认为影视分类
+            
         if value in dict(VideoSite.CATEGORY_CHOICES).values():
             # 如果是显示名称，则转换为实际值
             for key, display in VideoSite.CATEGORY_CHOICES:
@@ -63,7 +70,6 @@ class VideoSiteResource(resources.ModelResource):
         
         # 如果没有提供名称，使用 URL 作为名称
         if 'name' in row and not row['name'] and 'url' in row and row['url']:
-            from urllib.parse import urlparse
             domain = urlparse(row['url']).netloc
             row['name'] = domain
                 
@@ -79,6 +85,6 @@ class VideoSiteResource(resources.ModelResource):
         try:
             instance.full_clean()
         except ValidationError as e:
-            # 在这里可以记录更详细的错误信息
-            pass
+            logger.error(f"验证错误: {e.message_dict}")
+            # 记录错误但继续保存
         return super().before_save_instance(instance, using_transactions, dry_run)

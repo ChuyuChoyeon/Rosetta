@@ -17,27 +17,42 @@ from django.templatetags.static import static
 from django.urls import reverse_lazy
 from django.utils.translation import gettext_lazy as _
 
+# 添加 python-decouple 支持环境变量
+from decouple import config, Csv
+
+# 在文件顶部添加必要的导入
+import logging.config
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-m0r*p^c-h+q@79$xt-k+8-v3)m2##crak1cz9%iij0d-hgufbh'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-m0r*p^c-h+q@79$xt-k+8-v3)m2##crak1cz9%iij0d-hgufbh')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = ['choyeon.cc', 'localhost', '127.0.0.1','blog.choyeon.cc']
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
 
+# 配置在生产环境中使用HTTPS
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+if not DEBUG:
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 31536000  # 1年
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+
 # Application definition
 
 INSTALLED_APPS = [
     'unfold',
-    "unfold.contrib.import_export", 
+    'unfold.contrib.import_export',
+    'rosetta',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -45,28 +60,46 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',
-    'import_export', 
+    'import_export',
+    'navigation.apps.NavigationConfig',  # 添加导航应用
     'videolist.apps.VideolistConfig',
     'home.apps.HomeConfig',
+    'blog.apps.BlogConfig',
+    'taggit',
 ]
+
+# 开发环境特有的应用
+if DEBUG:
+    INSTALLED_APPS += [
+        'debug_toolbar',
+    ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
 ]
+
+# 开发环境特有的中间件
+if DEBUG:
+    MIDDLEWARE += [
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    ]
+
+# Debug Toolbar设置
+INTERNAL_IPS = ['127.0.0.1']
 
 ROOT_URLCONF = 'Rosetta.urls'
 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')], 
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -74,6 +107,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.i18n',  # 添加国际化上下文处理器
+                'navigation.context_processors.navigation',  # 添加导航上下文处理器
             ],
         },
     },
@@ -81,17 +116,19 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'Rosetta.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': config('DB_ENGINE', default='django.db.backends.sqlite3'),
+        'NAME': config('DB_NAME', default=os.path.join(BASE_DIR, 'db.sqlite3')),
+        'USER': config('DB_USER', default=''),
+        'PASSWORD': config('DB_PASSWORD', default=''),
+        'HOST': config('DB_HOST', default=''),
+        'PORT': config('DB_PORT', default=''),
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
@@ -111,23 +148,21 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'zh-hans'
+LANGUAGE_CODE = config('LANGUAGE_CODE', default='zh-hans')
 
-TIME_ZONE = 'Asia/Shanghai'
+TIME_ZONE = config('TIME_ZONE', default='Asia/Shanghai')
 
 USE_I18N = True
 
 USE_TZ = True
 
-
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected')  # 更改这个以避免与STATICFILES_DIRS冲突
-STATIC_URL = 'static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected')
+STATIC_URL = config('STATIC_URL', default='static/')
 
 # 添加这个设置，指明在开发环境中Django在哪里查找静态文件
 STATICFILES_DIRS = [
@@ -135,7 +170,7 @@ STATICFILES_DIRS = [
 ]
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+MEDIA_URL = config('MEDIA_URL', default='/media/')
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
 
 # django-import-export 配置
@@ -153,7 +188,7 @@ UNFOLD = {
     "SITE_HEADER": "Rosetta",
     "SITE_SUBHEADER": "视频资源管理平台",
     "SITE_URL": "/",
-    "SITE_SYMBOL": "movie", 
+    "SITE_SYMBOL": "movie",
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "SHOW_BACK_BUTTON": True,
@@ -191,8 +226,30 @@ UNFOLD = {
                         "model": "videolist.videosite",
                         "link": reverse_lazy("admin:videolist_videosite_changelist"),
                     },
+                    {
+                        "title": "导航管理",
+                        "icon": "menu",
+                        "model": "navigation.navigationitem",
+                        "link": reverse_lazy("admin:navigation_navigationitem_changelist"),
+                    },
                 ],
             },
+            # {
+            #     "title": "博客管理",
+            #     "separator": True,
+            #     "items": [
+            #         {
+            #             "title": "文章",
+            #             "icon": "article",
+            #             "link": "/admin/blog/post/",
+            #         },
+            #         {
+            #             "title": "分类",
+            #             "icon": "category",
+            #             "link": "/admin/blog/category/",
+            #         },
+            #     ],
+            # },
             {
                 "title": "系统管理",
                 "separator": True,
@@ -221,6 +278,101 @@ UNFOLD = {
         },
     },
     "TABS": [],
+    "USE_TRANSLATIONS": True,
+    # Unfold 最新版本支持的配置
+    "THEME": "auto",  # 可选 'light', 'dark', 'auto'
+    "ENVIRONMENT": {
+        "name": "开发环境" if DEBUG else "生产环境",
+        "color": "blue" if DEBUG else "red",
+        "badge": True,
+    },
+}
+LANGUAGES = [
+    ('zh-hans', _('中文')),
+    ('en', _('英文')),
+]
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+LOCALE_PATHS = [
+    os.path.join(BASE_DIR, 'locale'),
+]
+
+# 缓存配置 - 生产环境使用Redis，开发环境使用本地内存
+if not DEBUG:
+    # Redis缓存设置
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': config('REDIS_URL', default='redis://127.0.0.1:6379/1'),
+            'OPTIONS': {
+                'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            }
+        }
+    }
+else:
+    # 开发环境使用本地内存缓存
+    CACHES = {
+        'default': {
+            'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        }
+    }
+
+# 电子邮件配置
+EMAIL_BACKEND = config(
+    'EMAIL_BACKEND',
+    default='django.core.mail.backends.console.EmailBackend' if DEBUG else 'django.core.mail.backends.smtp.EmailBackend'
+)
+EMAIL_HOST = config('EMAIL_HOST', default='')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='noreply@example.com')
+
+# 日志配置
+LOG_LEVEL = config('LOG_LEVEL', default='INFO')
+LOG_TO_FILE = config('LOG_TO_FILE', default=False, cast=bool)
+LOG_FILE_PATH = config('LOG_FILE_PATH', default='logs/django.log')
+
+# 确保日志目录存在
+if LOG_TO_FILE:
+    log_dir = os.path.dirname(os.path.join(BASE_DIR, LOG_FILE_PATH))
+    os.makedirs(log_dir, exist_ok=True)
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': LOG_LEVEL,
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': LOG_LEVEL,
+            'propagate': True,
+        },
+    },
 }
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+# 仅在需要时添加文件处理器
+if LOG_TO_FILE:
+    LOGGING['handlers']['file'] = {
+        'level': LOG_LEVEL,
+        'class': 'logging.FileHandler',
+        'filename': os.path.join(BASE_DIR, LOG_FILE_PATH),
+        'formatter': 'verbose',
+    }
+    LOGGING['loggers']['django']['handlers'].append('file')

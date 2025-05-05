@@ -14,7 +14,7 @@ class VideoSitemap(Sitemap):
         return obj.update_time
 
     def location(self, obj):
-        return f"/vl/site/{obj.id}/"
+        return reverse('videolist:site_detail', args=[obj.id])
 
 class StaticSitemap(Sitemap):
     changefreq = "monthly"
@@ -26,10 +26,8 @@ class StaticSitemap(Sitemap):
     def location(self, item):
         if item == 'home:index':
             return reverse(item)
-        elif item == 'blog:index':
-            return '/blog/'
         elif item == 'videolist:index':
-            return '/vl/'
+            return reverse(item)
         elif item == 'videolist:sitemap':
-            return '/vl/sitemap/'
+            return reverse(item)
         return reverse(item)

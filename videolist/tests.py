@@ -1,8 +1,9 @@
-from django.test import TestCase, Client
+from django.test import TestCase, Client, AsyncClient
 from django.urls import reverse
 from .models import VideoSite
 import json
 from datetime import datetime
+import asyncio
 
 class VideoSiteModelTests(TestCase):
     def setUp(self):
@@ -43,9 +44,24 @@ class VideoSiteModelTests(TestCase):
         
         site = VideoSite.objects.get(name="测试动漫站点")
         self.assertEqual(site.get_category_display(), "动漫")
+    
+    def test_videosite_slug_generation(self):
+        """测试 slug 自动生成"""
+        site = VideoSite.objects.get(name="测试影视站点")
+        self.assertEqual(site.slug, "ce-shi-ying-shi-zhan-dian")
 
 
 class VideoSiteViewTests(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        # 创建异步客户端
+        cls.async_client = AsyncClient()
+    
+    @classmethod
+    def tearDownClass(cls):
+        super().tearDownClass()
+    
     def setUp(self):
         # 创建测试数据
         VideoSite.objects.create(
@@ -73,6 +89,12 @@ class VideoSiteViewTests(TestCase):
         )
         
         self.client = Client()
+    
+    async def test_index_view_async(self):
+        """测试首页视图 (异步)"""
+        response = await self.async_client.get(reverse('videolist:index'))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'videolist/index.html')
     
     def test_index_view(self):
         """测试首页视图"""

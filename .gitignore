@@ -1,12 +1,62 @@
-# Python-generated files
+# Python
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
 build/
+develop-eggs/
 dist/
-wheels/
-*.egg-info
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Django
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/*
+!media/.gitkeep
+
+# 环境变量文件
+.env
+.env.local
+.env.*.local
+
+# 静态文件收集目录
+static_collected/*
+!static_collected/.gitkeep
+
+# 日志目录
+logs/*
+!logs/.gitkeep
+
+# 保留目录结构
+!.gitkeep
+
+# 编辑器和IDE文件
 .idea/
-# Virtual environments
-.venv
-uv.lock
-static_collected/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# 虚拟环境
+venv/
+.venv/
+ENV/
+env/
+
+# 缓存文件
+.cache/
