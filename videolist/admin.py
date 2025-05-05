@@ -7,9 +7,23 @@ from import_export import resources
 from .models import VideoSite
 from .resources import VideoSiteResource
 
+class VideoSiteResource(resources.ModelResource):
+    """视频站点资源类"""
+    
+    class Meta:
+        model = VideoSite
+        import_id_fields = ('id',)
+        skip_unchanged = True
+        report_skipped = False
+        
+    def before_save_instance(self, instance, row, **kwargs):
+        """在保存实例前进行处理，接受file_name等额外参数"""
+        # 可以添加自定义处理逻辑
+        pass
+
 @admin.register(VideoSite)
 class VideoSiteAdmin(ModelAdmin, ImportExportModelAdmin):
-    """VideoSite 的管理界面配置"""
+    """视频站点管理类"""
     resource_class = VideoSiteResource
     import_form_class = ImportForm
     export_form_class = ExportForm
