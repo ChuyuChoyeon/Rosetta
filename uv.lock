@@ -12,6 +12,15 @@ wheels = [
 ]
 
 [[package]]
+name = "attrs"
+version = "25.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/5a/b0/1367933a8532ee6ff8d63537de4f1177af4bff9f3e829baf7331f595bb24/attrs-25.3.0.tar.gz", hash = "sha256:75d7cefc7fb576747b2c81b4442d4d4a1ce0900973527c011d1030fd3bf4af1b", size = 812032 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/77/06/bb80f5f86020c4551da315d78b3ab75e8228f89f0162f2c3a819e407941a/attrs-25.3.0-py3-none-any.whl", hash = "sha256:427318ce031701fea540783410126f03899a97ffc6f61596ad581ac2e40e3bc3", size = 63815 },
+]
+
+[[package]]
 name = "certifi"
 version = "2025.4.26"
 source = { registry = "https://pypi.org/simple" }
@@ -124,6 +133,20 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/83/9d/2272742fdd9d0a9f0b28cd995b0539430c9467a2192e4de2cea9ea6ad38c/django-redis-5.4.0.tar.gz", hash = "sha256:6a02abaa34b0fea8bf9b707d2c363ab6adc7409950b2db93602e6cb292818c42", size = 52567 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/f1/63caad7c9222c26a62082f4f777de26389233b7574629996098bf6d25a4d/django_redis-5.4.0-py3-none-any.whl", hash = "sha256:ebc88df7da810732e2af9987f7f426c96204bf89319df4c6da6ca9a2942edd5b", size = 31119 },
+]
+
+[[package]]
+name = "django-redisboard"
+version = "8.4.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "attrs" },
+    { name = "django" },
+    { name = "redis" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/ee/68/c0faaebaf49da125fa807fce1bacf38ef301073c9e5a19c5624a02894128/django-redisboard-8.4.0.tar.gz", hash = "sha256:226f745995d34abd0e9893781581b86941b17e47555083fa2c7683c15ff78beb", size = 786604 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/b4/41/99a5919c5eef8d30bb43beac6f921e92dcf8ac379302de8a46e863c0f0bc/django_redisboard-8.4.0-py3-none-any.whl", hash = "sha256:a68efbba5a66e34e17c48de0f3f94eba6496ddca8fa5b594796359e6ee56ae15", size = 56954 },
 ]
 
 [[package]]
@@ -321,6 +344,7 @@ dependencies = [
     { name = "django-debug-toolbar" },
     { name = "django-import-export" },
     { name = "django-redis" },
+    { name = "django-redisboard" },
     { name = "django-rosetta" },
     { name = "django-taggit" },
     { name = "django-unfold" },
@@ -340,6 +364,7 @@ requires-dist = [
     { name = "django-debug-toolbar", specifier = ">=5.2.0" },
     { name = "django-import-export", specifier = ">=4.3.7" },
     { name = "django-redis", specifier = ">=5.4.0" },
+    { name = "django-redisboard", specifier = ">=8.4.0" },
     { name = "django-rosetta", specifier = ">=0.10.2" },
     { name = "django-taggit", specifier = ">=6.1.0" },
     { name = "django-unfold", specifier = ">=0.55.3" },

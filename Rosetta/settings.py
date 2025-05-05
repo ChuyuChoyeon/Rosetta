@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'unfold',
     'unfold.contrib.import_export',
     'rosetta',
+    'redisboard',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -65,6 +66,7 @@ INSTALLED_APPS = [
     'home.apps.HomeConfig',
     'blog.apps.BlogConfig',
     'taggit',
+
 ]
 
 # 开发环境特有的应用
@@ -191,9 +193,9 @@ IMPORT_EXPORT_FORMATS = [
 UNFOLD = {
     "SITE_TITLE": "Rosetta 管理系统",
     "SITE_HEADER": "Rosetta",
-    "SITE_SUBHEADER": "视频资源管理平台",
+    "SITE_SUBHEADER": "Rosetta",
     "SITE_URL": "/",
-    "SITE_SYMBOL": "movie",
+    "SITE_SYMBOL": "book",
     "SHOW_HISTORY": True,
     "SHOW_VIEW_ON_SITE": True,
     "SHOW_BACK_BUTTON": True,
@@ -231,12 +233,7 @@ UNFOLD = {
                         "model": "videolist.videosite",
                         "link": reverse_lazy("admin:videolist_videosite_changelist"),
                     },
-                    {
-                        "title": "导航管理",
-                        "icon": "menu",
-                        "model": "navigation.navigationitem",
-                        "link": reverse_lazy("admin:navigation_navigationitem_changelist"),
-                    },
+
                 ],
             },
             # {
@@ -260,6 +257,12 @@ UNFOLD = {
                 "separator": True,
                 "collapsible": True,
                 "items": [
+                    {
+                        "title": "导航管理",
+                        "icon": "menu",
+                        "model": "navigation.navigationitem",
+                        "link": reverse_lazy("admin:navigation_navigationitem_changelist"),
+                    },
                     {
                         "title": "用户管理",
                         "icon": "people",
