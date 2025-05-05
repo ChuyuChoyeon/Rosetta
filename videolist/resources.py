@@ -80,11 +80,11 @@ class VideoSiteResource(resources.ModelResource):
             return True
         return super().skip_row(instance, original, row, import_validation_errors)
         
-    def before_save_instance(self, instance, using_transactions, dry_run):
+    def before_save_instance(self, instance, using_transactions, dry_run, **kwargs):
         """在保存实例前执行额外验证"""
         try:
             instance.full_clean()
         except ValidationError as e:
             logger.error(f"验证错误: {e.message_dict}")
             # 记录错误但继续保存
-        return super().before_save_instance(instance, using_transactions, dry_run)
+        return super().before_save_instance(instance, using_transactions, dry_run, **kwargs)

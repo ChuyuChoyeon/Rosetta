@@ -55,14 +55,27 @@ class SkillAdmin(ModelAdmin):
 
 @admin.register(Link)
 class LinkAdmin(ModelAdmin):
-    list_display = ('name', 'url', 'is_relative', 'username', 'icon', 'order', 'is_navigation')
+    list_display = ('name', 'url', 'is_relative', 'username', 'icon','display_icon', 'order', 'is_navigation')
     list_filter = ('is_navigation', 'is_relative')
     search_fields = ('name', 'url', 'username')
     list_editable = ('order', 'is_navigation', 'is_relative')
+    def display_icon(self, obj):
+        """显示图标预览"""
+        if not obj.icon:
+            return '-'
+        return format_html(
+            '<i class="{}" style="font-size: 1.2rem;"></i>',
+            obj.icon
+        )
+    display_icon.short_description = '图标'
+    class Media:
+        css = {
+            'all': ['https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'],
+        }
 
 @admin.register(Contact)
 class ContactAdmin(ModelAdmin):
-    list_display = ('method', 'value', 'icon', 'color', 'color_sample', 'order')
+    list_display = ('method', 'value', 'icon', 'display_icon','color', 'color_sample', 'order')
     list_editable = ('order', 'color')
     search_fields = ('method', 'value')
 
@@ -72,6 +85,15 @@ class ContactAdmin(ModelAdmin):
             '<div style="background-color: {}; width: 30px; height: 30px; border-radius: 4px;"></div>',
             self.get_tailwind_color(obj.color)
         )
+    def display_icon(self, obj):
+        """显示图标预览"""
+        if not obj.icon:
+            return '-'
+        return format_html(
+            '<i class="{}" style="font-size: 1.2rem;"></i>',
+            obj.icon
+        )
+    display_icon.short_description = '图标'
     
     def get_tailwind_color(self, color_name):
         """将Tailwind颜色名称转换为对应的HEX值"""
@@ -98,3 +120,8 @@ class ContactAdmin(ModelAdmin):
         return color_map.get(color_name, '#3b82f6')  # 默认返回蓝色
     
     color_sample.short_description = '颜色预览'
+    class Media:
+        css = {
+            'all': ['https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'],
+        }
+
