@@ -160,14 +160,20 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
-STATIC_ROOT = os.path.join(BASE_DIR, 'static_collected')
 STATIC_URL = config('STATIC_URL', default='static/')
 
-# 添加这个设置，指明在开发环境中Django在哪里查找静态文件
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
-
+if DEBUG:
+    # 开发环境：定义静态文件源目录
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+    ]
+    STATIC_ROOT = None  # 开发环境不需要收集静态文件
+else:
+    # 生产环境：定义静态文件收集目标目录
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # 使用不同的目录名避免冲突
+    STATICFILES_DIRS = [
+        os.path.join(BASE_DIR, 'static'),
+    ]
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = config('MEDIA_URL', default='/media/')
 DATA_UPLOAD_MAX_NUMBER_FIELDS = 10_000
