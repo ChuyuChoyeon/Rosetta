@@ -1,0 +1,68 @@
+# =========================
+# 基本Django设置
+# =========================
+SECRET_KEY=choyeon@choyeon  # Django项目的密钥，生产环境请更换为更安全的值
+DEBUG=True                  # 是否开启调试模式，生产环境应为False
+ALLOWED_HOSTS=localhost,127.0.0.1,example.com  # 允许访问的主机名，多个用逗号分隔
+
+# =========================
+# 数据库配置
+# =========================
+DB_ENGINE=django.db.backends.sqlite3  # 数据库引擎，默认sqlite3
+DB_NAME=db.sqlite3                    # 数据库名称或路径
+# 如果使用MySQL/PostgreSQL，请配置以下参数
+# DB_ENGINE=django.db.backends.postgresql
+# DB_NAME=rosetta_db
+# DB_USER=db_user
+# DB_PASSWORD=db_password
+# DB_HOST=localhost
+# DB_PORT=5432
+
+# =========================
+# 静态文件和媒体文件URL
+# =========================
+STATIC_URL=static/    # 静态文件URL前缀
+MEDIA_URL=/media/     # 媒体文件URL前缀
+
+# =========================
+# 语言和时区
+# =========================
+LANGUAGE_CODE=zh-hans     # 语言代码
+TIME_ZONE=Asia/Shanghai   # 时区
+
+# =========================
+# Redis配置（生产环境）
+# =========================
+REDIS_URL=redis://127.0.0.1:6379/1  # Redis连接URL
+
+# =========================
+# 电子邮件配置
+# =========================
+# 开发环境使用控制台后端，生产环境使用SMTP
+EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend
+# EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=smtp.example.com         # SMTP服务器地址
+EMAIL_PORT=587                      # SMTP端口
+EMAIL_HOST_USER=your_email@example.com      # SMTP用户名
+EMAIL_HOST_PASSWORD=your_email_password    # SMTP密码
+EMAIL_USE_TLS=True                  # 是否启用TLS
+DEFAULT_FROM_EMAIL=noreply@example.com     # 默认发件人邮箱
+
+# =========================
+# 日志配置
+# =========================
+LOG_LEVEL=INFO              # 日志级别
+LOG_TO_FILE=False           # 是否写入日志文件
+LOG_FILE_PATH=logs/django.log   # 日志文件路径
+
+# =========================
+# 更多Django可选配置
+# =========================
+# CSRF_TRUSTED_ORIGINS=choyeon.cc  # 允许的CSRF来源
+# SESSION_COOKIE_AGE=1209600           # Session有效期（秒）
+# SESSION_ENGINE=django.contrib.sessions.backends.db  # Session存储后端
+# CACHES_BACKEND=django.core.cache.backends.locmem.LocMemCache  # 缓存后端
+# CACHES_LOCATION=unique-snowflake
+# SECURE_SSL_REDIRECT=True             # 是否强制HTTPS
+# X_FRAME_OPTIONS=DENY                 # 防止点击劫持
+# ALLOWED_CORS_ORIGINS=https://example.com,https://foo.com  # 允许跨域的域名
