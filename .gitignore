@@ -62,3 +62,11 @@ env/
 .cache/
 staticfiles/
 db.sqlite3
+
+# Django Tailwind
+node_modules/
+theme/static/css/dist/
+package-lock.json
+npm-debug.log
+*.lock
+uv.lock

@@ -105,7 +105,6 @@ UNFOLD = {
     "TABS": [],
     "USE_TRANSLATIONS": True,
     # Unfold 最新版本支持的配置
-    "THEME": "auto",  # 可选 'light', 'dark', 'auto'
     "ENVIRONMENT": {
         "name": "开发环境" if __import__('django.conf').conf.settings.DEBUG else "生产环境",
         "color": "blue" if __import__('django.conf').conf.settings.DEBUG else "red",

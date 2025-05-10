@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+{% load tailwind_tags %}
 <html lang="zh-CN" class="{% block html_class %}{% endblock %}" x-data>
 <head>
     <meta charset="UTF-8">
@@ -12,18 +13,8 @@
     <!-- Alpine.js 全局引入 -->
     <script src="//unpkg.com/alpinejs" defer></script>
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    {% tailwind_css %}
     <script src="{% static 'js/axios.js' %}"></script>
- 
-    <!-- 配置 Tailwind -->
-    <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {}
-            }
-        }
-    </script>
     
     <!-- 公共样式 -->
     <style>
@@ -89,7 +80,7 @@
     <!-- 额外的头部内容 -->
     {% block extra_head %}{% endblock %}
 </head>
-<body class="{% block body_class %}bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen{% endblock %}" x-data="siteControls">
+<body  class="{% block body_class %} bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen{% endblock %}" x-data="siteControls">
     <!-- 全局导航栏 -->
     <div class="fixed top-0 left-0 right-0 z-50 shadow-md bg-white dark:bg-gray-800 transition-colors duration-300">
         <div class="container mx-auto px-4" x-data="{ mobileMenuOpen: false, openSubMenu: null }">
@@ -202,7 +193,7 @@
                                     {% for sub_item in item.sub_items %}
                                         {% if sub_item.url_name %}
                                             <a href="{% url sub_item.url_name %}" 
-                                               {% if sub_item.target_blank %}target="_blank"{% endif %}
+                                               {% if sub_item.target_blank %}target="_blank{% endif %}
                                                class="block py-2 text-gray-700 dark:text-gray-300">
                                                 {% if sub_item.icon %}<i class="{{ sub_item.icon }} mr-1"></i>{% endif %}
                                                 {{ sub_item.title }}
@@ -210,7 +201,7 @@
                                         {% else %}
                                             <a href="{{ sub_item.url }}" 
                                                {% if sub_item.url|slice:":4" == "http" or sub_item.url|slice:":2" == "//" %}target="_blank"
-                                               {% elif sub_item.target_blank %}target="_blank"{% endif %}
+                                               {% elif sub_item.target_blank %}target="_blank{% endif %}
                                                class="block py-2 text-gray-700 dark:text-gray-300">
                                                 {% if sub_item.icon %}<i class="{{ sub_item.icon }} mr-1"></i>{% endif %}
                                                 {{ sub_item.title }}
@@ -222,7 +213,7 @@
                         {% else %}
                             {% if item.url_name %}
                                 <a href="{% url item.url_name %}" 
-                                   {% if item.target_blank %}target="_blank"{% endif %}
+                                   {% if item.target_blank %}target="_blank{% endif %}
                                    class="block py-2 text-gray-700 dark:text-gray-300">
                                     {% if item.icon %}<i class="{{ item.icon }} mr-1"></i>{% endif %}
                                     {{ item.title }}
@@ -230,7 +221,7 @@
                             {% else %}
                                 <a href="{{ item.url }}" 
                                    {% if item.url|slice:":4" == "http" or item.url|slice:":2" == "//" %}target="_blank"
-                                   {% elif item.target_blank %}target="_blank"{% endif %}
+                                   {% elif item.target_blank %}target="_blank{% endif %}
                                    class="block py-2 text-gray-700 dark:text-gray-300">
                                     {% if item.icon %}<i class="{{ item.icon }} mr-1"></i>{% endif %}
                                     {{ item.title }}
@@ -258,8 +249,8 @@
     <!-- 右侧悬浮栏 -->
     <div class="fixed right-6 bottom-8 flex flex-col gap-3 z-50">
         <!-- 主题切换按钮 -->
-        <button 
-            @click="toggleTheme()"   
+        <button
+            @click="toggleTheme()"
             class="p-3 rounded-full bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 shadow-lg hover:shadow-xl transform hover:scale-110 transition-all duration-300 border border-gray-200 dark:border-gray-700">
             <i class="fas fa-sun" x-show="!isDarkMode"></i>
             <i class="fas fa-moon" x-show="isDarkMode"></i>
@@ -286,7 +277,7 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('theme', {
-                dark: localStorage.theme === 'dark' || 
+                dark: localStorage.theme === 'dark' ||
                      (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches),
                 toggle() {
                     this.dark = !this.dark;
@@ -295,7 +286,7 @@
                 applyTheme() {
                     // 保存到本地存储
                     localStorage.theme = this.dark ? 'dark' : 'light';
-                    
+
                     // 应用类名
                     if (this.dark) {
                         document.documentElement.classList.add('dark');
@@ -308,7 +299,7 @@
                     this.applyTheme();
                 }
             });
-            
+
             Alpine.data('siteControls', () => ({
                 get isDarkMode() {
                     return Alpine.store('theme').dark;
@@ -316,7 +307,7 @@
                 toggleTheme() {
                     Alpine.store('theme').toggle();
                 },
-                
+
                 showBackToTop: false,
                 init() {
                     // 监听滚动事件
@@ -336,16 +327,28 @@
     
     <!-- 页面初始化脚本 -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // 确保在Alpine.js完全初始化后应用主题
-            if (window.Alpine) {
-                setTimeout(() => {
-                    if (Alpine.store('theme')) {
-                        Alpine.store('theme').applyTheme();
-                    }
-                }, 10);
-            }
-        });
+          document.addEventListener('DOMContentLoaded', () => {
+    const themeToggle = document.querySelector('#theme-toggle');
+    const htmlElement = document.documentElement;
+
+    // 初始化主题
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    if (currentTheme === 'dark') {
+      htmlElement.classList.add('dark');
+    }
+
+    // 切换主题
+    themeToggle.addEventListener('click', () => {
+      if (htmlElement.classList.contains('dark')) {
+        htmlElement.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      } else {
+        htmlElement.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      }
+    });
+  });
+
     </script>
     
     <!-- 额外的脚本 -->

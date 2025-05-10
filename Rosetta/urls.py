@@ -41,6 +41,8 @@ urlpatterns = [
     
     # 站点地图
     path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    path("__reload__/", include("django_browser_reload.urls")),
+
 ]
 
 # 静态文件和媒体文件只在开发环境中由Django处理

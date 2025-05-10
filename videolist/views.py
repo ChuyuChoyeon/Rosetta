@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_http_methods
 from .models import VideoSite
@@ -6,11 +6,9 @@ import json
 from datetime import datetime
 from functools import wraps
 from asgiref.sync import sync_to_async
-from django.template.loader import render_to_string
 
 
 def async_view(view_func):
-    """自定义装饰器：将视图转换为异步兼容模式"""
     @wraps(view_func)
     async def wrapper(request, *args, **kwargs):
         return await view_func(request, *args, **kwargs)
@@ -27,12 +25,7 @@ async def index(request):
     context = {'sites': sites}
     
     # 异步版本的render函数
-    html_content = await sync_to_async(render_to_string)(
-        'videolist/index.html', 
-        context=context, 
-        request=request
-    )
-    return HttpResponse(html_content)
+    return await sync_to_async(render)(request, 'videolist/index.html', context)
 
 
 @async_view
@@ -79,23 +72,16 @@ async def sitemap(request):
     }
     
     # 异步版本的render函数
-    html_content = await sync_to_async(render_to_string)(
-        'videolist/sitemap.html', 
-        context=context, 
-        request=request
-    )
-    return HttpResponse(html_content)
+    return await sync_to_async(render)(request, 'videolist/sitemap.html', context)
 
 
-# 将 get_object_or_404 函数转换为异步版本
+
 async def get_object_or_404_async(klass, *args, **kwargs):
     """异步版本的 get_object_or_404"""
-    # 先通过同步方式在同步线程中尝试获取对象
-    result = await sync_to_async(get_object_or_404_sync)(klass, *args, **kwargs)
+    result = await sync_to_async(get_object_or_404)(klass, *args, **kwargs)
     return result
 
 def get_object_or_404_sync(klass, *args, **kwargs):
-    """同步版本的 get_object_or_404，用于在异步函数中通过sync_to_async调用"""
     from django.shortcuts import get_object_or_404
     return get_object_or_404(klass, *args, **kwargs)
 
@@ -118,14 +104,7 @@ async def site_detail(request, site_id):
         'site': site,
         'related_sites': related_sites,
     }
-    
-    # 异步版本的render函数
-    html_content = await sync_to_async(render_to_string)(
-        'videolist/site_detail.html', 
-        context=context, 
-        request=request
-    )
-    return HttpResponse(html_content)
+    return await sync_to_async(render)(request, 'videolist/site_detail.html', context)
 
 
 @require_http_methods(["POST"])
