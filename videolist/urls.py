@@ -9,4 +9,5 @@ urlpatterns = [
     path('sitemap/', views.sitemap, name='sitemap'),
     path('site/<int:site_id>/', views.site_detail, name='site_detail'),
     path('api/import-json/', views.import_json, name='import_json'),
+    path('sites/<int:site_id>/', views.views_count, name='views_count'),
 ]

@@ -1,5 +1,4 @@
 from django.db import models
-from django.utils.text import slugify
 from django.urls import reverse
 
 class VideoSite(models.Model):
@@ -13,6 +12,7 @@ class VideoSite(models.Model):
     description = models.TextField(verbose_name="网站描述", blank=True)
     update_time = models.DateTimeField(auto_now=True, verbose_name="更新时间", db_index=True)
     is_invalid = models.BooleanField(default=False, verbose_name="是否失效", db_index=True)
+    view_count = models.PositiveIntegerField(default=0, verbose_name="浏览次数", db_index=True)
     category = models.CharField(
         max_length=10,
         choices=CATEGORY_CHOICES,
@@ -34,3 +34,15 @@ class VideoSite(models.Model):
     
     def get_absolute_url(self):
         return reverse('videolist:site_detail', args=[self.id])
+
+
+
+        return f"{self.site.name} - {self.view_count} views"
+
+class SiteView(models.Model):
+    view_date = models.DateTimeField(auto_now_add=True, verbose_name="浏览日期")
+    ip_address = models.GenericIPAddressField(verbose_name="IP地址", blank=True, null=True)
+    user_agent = models.CharField(max_length=255, verbose_name="用户代理", blank=True, null=True)
+    class Meta:
+        verbose_name = "网站访问记录"
+    

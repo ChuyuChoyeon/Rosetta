@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
-from django.http import JsonResponse, HttpResponse
+from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
-from .models import VideoSite
+from .models import VideoSite, SiteView
 import json
 from datetime import datetime
 from functools import wraps
@@ -15,17 +15,24 @@ def async_view(view_func):
     return wrapper
 
 
-@async_view
-async def index(request):
+
+def index(request):
     """首页视图，展示所有有效的视频站点"""
     # 使用 sync_to_async 将 ORM 查询转换为异步操作
-    sites = await sync_to_async(list)(VideoSite.objects.filter(is_invalid=False))
+    sites = list(VideoSite.objects.filter(is_invalid=False))
+    visit_count = SiteView.objects.count() 
+    # 使用异步安全的方式渲染模板.
     
-    # 使用异步安全的方式渲染模板
-    context = {'sites': sites}
+    context = {'sites': sites,'visit_count':visit_count}
+    
+    # 记录访问ip和用户代理
+    SiteView.objects.create(
+        ip_address=request.META.get('REMOTE_ADDR'),
+        user_agent=request.META.get('HTTP_USER_AGENT')
+    )
     
     # 异步版本的render函数
-    return await sync_to_async(render)(request, 'videolist/index.html', context)
+    return render(request, 'videolist/index.html', context)
 
 
 @async_view
@@ -48,6 +55,7 @@ async def site_list(request):
         'url': site.url,
         'description': site.description,
         'update_time': site.update_time.strftime('%Y-%m-%d %H:%M:%S'),
+        'view_count' : site.view_count,
         'category': site.get_category_display()
     } for site in sites]
     
@@ -194,3 +202,12 @@ async def import_json(request):
         return JsonResponse({'error': 'JSON格式无效'}, status=400)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
+
+def views_count(request, site_id):
+    """记录视频站点的浏览次数"""
+    video = VideoSite.objects.filter(id=site_id)[0]
+    # 获取或创建浏览记录
+    video.view_count += 1
+    video.save(update_fields=['view_count'])
+    
+    return JsonResponse({'view_count': '站点浏览次数已更新'})

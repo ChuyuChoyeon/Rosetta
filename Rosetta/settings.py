@@ -65,8 +65,6 @@ INSTALLED_APPS = [
     'import_export',
     'navigation.apps.NavigationConfig',  # 添加导航应用
     'videolist.apps.VideolistConfig',
-    'home.apps.HomeConfig',
-    'blog.apps.BlogConfig',
     'taggit',
 ]
 

@@ -19,9 +19,11 @@
     <!-- 公共样式 -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap');
+
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', 'Noto Sans SC', sans-serif;
         }
         
         /* 隐藏滚动条但保持功能 */
@@ -78,7 +80,12 @@
     </style>
     
     <!-- 额外的头部内容 -->
-    {% block extra_head %}{% endblock %}
+    {% block extra_head %}
+        {# 例如，如果使用 Prism.js 或 Highlight.js 进行代码高亮:
+        <link rel="stylesheet" href="path/to/prism.css">
+        <script src="path/to/prism.js" defer></script>
+        #}
+    {% endblock %}
 </head>
 <body  class="{% block body_class %} bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-gray-200 min-h-screen{% endblock %}" x-data="siteControls">
     <!-- 全局导航栏 -->
@@ -139,7 +146,7 @@
                                     <!-- 处理主菜单项的URL，支持URL名称、普通URL和相对路径 -->
                                     {% if item.url_name %}
                                         <a href="{% url item.url_name %}" 
-                                           {% if item.target_blank %}target="_blank"{% endif %}
+                                           {% if item.target_blank %}target="_blank{% endif %}
                                            class="nav-link py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center">
                                             {% if item.icon %}<i class="{{ item.icon }} mr-1"></i>{% endif %}
                                             {{ item.title }}
@@ -147,7 +154,7 @@
                                     {% else %}
                                         <a href="{{ item.url }}" 
                                            {% if item.url|slice:":4" == "http" or item.url|slice:":2" == "//" %}target="_blank"
-                                           {% elif item.target_blank %}target="_blank"{% endif %}
+                                           {% elif item.target_blank %}target="_blank{% endif %}
                                            class="nav-link py-2 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white flex items-center">
                                             {% if item.icon %}<i class="{{ item.icon }} mr-1"></i>{% endif %}
                                             {{ item.title }}
@@ -328,25 +335,31 @@
     <!-- 页面初始化脚本 -->
     <script>
           document.addEventListener('DOMContentLoaded', () => {
-    const themeToggle = document.querySelector('#theme-toggle');
+    // Remove the themeToggle related script if it's fully handled by Alpine.js
+    // const themeToggle = document.querySelector('#theme-toggle'); // This might be redundant
     const htmlElement = document.documentElement;
 
-    // 初始化主题
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    if (currentTheme === 'dark') {
-      htmlElement.classList.add('dark');
+    // Initialize theme based on Alpine store or localStorage
+    // This part might be redundant if Alpine.store('theme').init() handles it
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        htmlElement.classList.add('dark');
+    } else {
+        htmlElement.classList.remove('dark');
     }
 
-    // 切换主题
-    themeToggle.addEventListener('click', () => {
-      if (htmlElement.classList.contains('dark')) {
-        htmlElement.classList.remove('dark');
-        localStorage.setItem('theme', 'light');
-      } else {
-        htmlElement.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-      }
-    });
+    // If themeToggle button exists and is NOT handled by Alpine, keep this:
+    // const themeToggle = document.querySelector('#theme-toggle'); // Ensure this ID exists or remove
+    // if (themeToggle) {
+    //     themeToggle.addEventListener('click', () => {
+    //         if (htmlElement.classList.contains('dark')) {
+    //             htmlElement.classList.remove('dark');
+    //             localStorage.setItem('theme', 'light');
+    //         } else {
+    //             htmlElement.classList.add('dark');
+    //             localStorage.setItem('theme', 'dark');
+    //         }
+    //     });
+    // }
   });
 
     </script>
