@@ -8,6 +8,7 @@ urlpatterns = [
     path('api/sites/', views.site_list, name='site_list'),
     path('sitemap/', views.sitemap, name='sitemap'),
     path('site/<int:site_id>/', views.site_detail, name='site_detail'),
-    path('api/import-json/', views.import_json, name='import_json'),
     path('sites/<int:site_id>/', views.views_count, name='views_count'),
+    path('add/', views.add_video_template, name='add_video_template'),
+    path('add/video/', views.add_video, name='add_video'),
 ]

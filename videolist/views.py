@@ -115,94 +115,6 @@ async def site_detail(request, site_id):
     return await sync_to_async(render)(request, 'videolist/site_detail.html', context)
 
 
-@require_http_methods(["POST"])
-@async_view
-async def import_json(request):
-    """导入JSON数据的视图"""
-    try:
-        # 解析请求体的JSON数据
-        data = json.loads(request.body)
-        
-        if not isinstance(data, list):
-            return JsonResponse({'error': '数据必须是列表格式'}, status=400)
-        
-        result = {
-            'created': 0,
-            'updated': 0,
-            'skipped': 0,
-            'errors': []
-        }
-        
-        # 处理每个站点数据
-        for site_data in data:
-            try:
-                # 确保必要的字段存在
-                if 'name' not in site_data:
-                    result['errors'].append(f"站点缺少名称字段: {site_data}")
-                    result['skipped'] += 1
-                    continue
-                    
-                if 'url' not in site_data:
-                    result['errors'].append(f"站点缺少URL字段: {site_data}")
-                    result['skipped'] += 1
-                    continue
-                
-                # 根据名称查询是否存在
-                name = site_data['name']
-                site = await sync_to_async(
-                    lambda: VideoSite.objects.filter(name=name).first()
-                )()
-                
-                # 处理更新日期
-                update_date = None
-                if 'updateDate' in site_data:
-                    try:
-                        update_date = datetime.strptime(site_data['updateDate'], '%Y/%m/%d')
-                    except ValueError:
-                        # 尝试其他日期格式
-                        try:
-                            update_date = datetime.strptime(site_data['updateDate'], '%Y-%m-%d')
-                        except ValueError:
-                            result['errors'].append(f"无效的日期格式: {site_data['updateDate']}")
-                
-                # 准备站点数据
-                site_values = {
-                    'url': site_data['url'],
-                    'description': site_data.get('description', ''),
-                }
-                
-                # 仅在新建站点时设置分类，更新时保留原有分类
-                if 'category' in site_data and not site:
-                    site_values['category'] = site_data['category']
-                
-                if site:
-                    # 更新现有站点
-                    await sync_to_async(
-                        lambda: VideoSite.objects.filter(id=site.id).update(**site_values)
-                    )()
-                    result['updated'] += 1
-                else:
-                    # 创建新站点
-                    if 'category' not in site_values:
-                        site_values['category'] = 'movie'  # 默认分类
-                        
-                    # 创建站点
-                    await sync_to_async(
-                        lambda: VideoSite.objects.create(name=name, **site_values)
-                    )()
-                    result['created'] += 1
-                    
-            except Exception as e:
-                result['errors'].append(f"处理站点时出错: {str(e)}")
-                result['skipped'] += 1
-        
-        return JsonResponse(result)
-        
-    except json.JSONDecodeError:
-        return JsonResponse({'error': 'JSON格式无效'}, status=400)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
 def views_count(request, site_id):
     """记录视频站点的浏览次数"""
     video = VideoSite.objects.filter(id=site_id)[0]
@@ -211,3 +123,51 @@ def views_count(request, site_id):
     video.save(update_fields=['view_count'])
     
     return JsonResponse({'view_count': '站点浏览次数已更新'})
+
+
+
+
+
+# 增加添加视频 链接功能
+def add_video(request):
+    """添加视频站点的视图"""
+    if request.method == 'POST':
+        data = request.POST
+        print('data:', data)
+        name = data.get('name')
+        url = data.get('url')
+        description = data.get('description', '')
+        category = data.get('category', 'movie')
+        update_time = datetime.now()
+        
+        # 创建新的视频站点
+        new_site = VideoSite.objects.create(
+            name=name,
+            url=url,
+            description=description,
+            category=category,
+            is_invalid=True,
+            update_time=update_time
+        )
+        # 返回新站点的详细信息
+        response_data = {
+            'id': new_site.id,
+            'name': new_site.name,
+            'url': new_site.url,
+            'description': new_site.description,
+            'update_time': new_site.update_time.strftime('%Y-%m-%d %H:%M:%S'),
+            'view_count': new_site.view_count,
+            'category': new_site.get_category_display()
+        }
+        return render(request, 'videolist/add_site.html', {'code': 200, 'info': "添加成功", 'site': response_data})
+    else:
+        # 如果不是 POST 请求，返回错误信息
+        return render(request, 'videolist/add_site.html', {'code' : 400,'info': '添加失败'})
+    
+
+
+#  增加添加视频 链接功能的模板视图
+
+def add_video_template(request):
+    """添加视频站点的模板视图"""
+    return  render(request, 'videolist/add_site.html')

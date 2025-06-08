@@ -1,0 +1,58 @@
+{% extends "videolist/index.html" %}
+{% load static %}
+
+{% block title %}添加视频站点{% endblock %}
+
+<!-- 完成 videolist/templates/videolist/add_site.html -->
+{% block body_class %}bg-gray-50 dark:bg-gray-900 min-h-screen p-6 transition-colors duration-300{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    
+    <a href="{% url 'videolist:index' %}" class="text-blue-500 dark:text-blue-400 hover:underline mb-4 inline-block">
+        返回站点列表
+    </a>
+    <h1 class="text-4xl font-bold text-gray-800 dark:text-white mb-6">添加视频站点</h1>
+
+    <form method="post" Enctype='application/json' action="{% url 'videolist:add_video' %}" class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+        {% csrf_token %}
+        <div class="mb-4">
+            <label for="name" class="block text-gray-700 dark:text-gray-300 mb-2">站点名称</label>
+            <input type="text" id="name" name="name" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">
+        </div>
+        <div class="mb-4">
+            <label for="url" class="block text-gray-700 dark:text-gray-300 mb-2">站点链接</label>
+            <input type="url" id="url" name="url" required class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">
+        </div>
+        <div class="mb-4">
+            <label for="description" class="block text-gray-700 dark:text-gray-300 mb-2">站点描述</label>
+            <textarea id="description" name="description" rows="4" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400"></textarea>
+        </div>
+        <div class="mb-4">
+            <label for="category" class="block text-gray-700 dark:text-gray-300 mb-2">站点分类</label>
+            <select id="category" name="category" class="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400">
+                <option value="movie">影视</option>
+                <option value="anime">动漫</option>
+
+            </select>
+        </div>
+        <button type="submit" class="w-full bg-blue-500 dark:bg-blue-600 text-white font-semibold py-3 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-500 transition-colors duration-300">提交站点</button>
+        <button type="reset" class="w-full mt-4 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-white font-semibold py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors duration-300">重置表单</button>
+
+        
+
+    </form>
+    {% if code == 200 and info == "添加成功" %}
+    <div class="mt-8" >
+        <h2 class="text-xl font-semibold text-green-600 dark:text-green-400 mb-4">提交成功</h2>
+        <p class="text-gray-600 dark:text-gray-400">感谢您的贡献！提交的站点将经过审核后发布。</p>
+        <p class="text-gray-600 dark:text-gray-400">如果您有任何问题或建议，请通过<a href="mailto:choyeon@foxmail.com">choyeon@foxmail.com</a>与我们联系。</p>
+    </div>
+    {% elif code == 400 and info == "添加失败" %}
+    <div class="mt-8">
+        <h2 class="text-xl font-semibold text-red-600 dark:text-red-400 mb-4">提交失败</h2>
+        <p class="text-gray-600 dark:text-gray-400">请检查您的输入是否正确，确保所有必填字段已填写。</p>
+        <p class="text-gray-600 dark:text-gray-400">如果问题仍然存在，请通过<a href="mailto:choyeon@foxmail.com">choyeon@foxmail.com</a>与我们联系。</p>
+    </div>
+    {% endif %}
+{% endblock %}
