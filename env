@@ -3,7 +3,7 @@
 # =========================
 SECRET_KEY=choyeon@choyeon  # Django项目的密钥，生产环境请更换为更安全的值
 DEBUG=True                  # 是否开启调试模式，生产环境应为False
-ALLOWED_HOSTS=localhost,127.0.0.1,example.com  # 允许访问的主机名，多个用逗号分隔
+ALLOWED_HOSTS=v.choyeon.cc,localhost,127.0.0.1,example.com  # 允许访问的主机名，多个用逗号分隔
 
 # =========================
 # 数据库配置

@@ -4,7 +4,7 @@ from import_export.admin import ImportExportModelAdmin
 from unfold.contrib.import_export.forms import ImportForm, ExportForm
 from django.utils.html import format_html
 from import_export import resources
-from .models import VideoSite
+from .models import VideoSite,SiteView
 from .resources import VideoSiteResource
 
 class VideoSiteResource(resources.ModelResource):
@@ -29,7 +29,7 @@ class VideoSiteAdmin(ModelAdmin, ImportExportModelAdmin):
     export_form_class = ExportForm
     
     # 列表页配置
-    list_display = ('name', 'url_link', 'category_badge', 'update_time', 'is_invalid')
+    list_display = ('name', 'url_link','view_count','category_badge', 'update_time', 'is_invalid')
     list_filter = ('category', 'is_invalid', 'update_time')
     search_fields = ('name', 'description', 'url')
     ordering = ('-update_time',)
@@ -40,7 +40,7 @@ class VideoSiteAdmin(ModelAdmin, ImportExportModelAdmin):
     # 详情页配置
     fieldsets = (
         ('基本信息', {
-            'fields': ('name', 'url', 'category')
+            'fields': ('name', 'url', 'category', 'view_count', 'update_time')
         }),
         ('详细描述', {
             'fields': ('description',)
@@ -88,3 +88,12 @@ class VideoSiteAdmin(ModelAdmin, ImportExportModelAdmin):
     def save_model(self, request, obj, form, change):
         """保存模型时记录额外信息"""
         super().save_model(request, obj, form, change)
+
+@admin.register(SiteView)
+class SiteViewAdmin(ModelAdmin):
+    """站点访问记录管理类"""
+    list_display = ('view_date', 'ip_address', 'user_agent')
+    list_filter = ('view_date', 'ip_address')
+    search_fields = ('ip_address',)
+    ordering = ('-view_date',)
+    list_per_page = 25

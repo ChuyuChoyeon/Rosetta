@@ -33,7 +33,11 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-m0r*p^c-h+q@79$xt-k+8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=Csv())
+ALLOWED_HOSTS = [
+    'v.choyeon.cc',
+    'localhost',
+    '127.0.0.1',
+]
 
 # 配置在生产环境中使用HTTPS
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

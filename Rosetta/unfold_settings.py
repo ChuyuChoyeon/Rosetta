@@ -50,6 +50,18 @@ UNFOLD = {
                         "model": "videolist.videosite",
                         "link": reverse_lazy("admin:videolist_videosite_changelist"),
                     },
+                    {
+                        "title": "网站访问记录",
+                        "icon": "history",
+                        "model": "videolist.siteview",
+                        "link": reverse_lazy("admin:videolist_siteview_changelist"),
+                    },
+                    {
+                        "title": "标签管理",
+                        "icon": "label",
+                        "model": "taggit.tag",
+                        "link": reverse_lazy("admin:taggit_tag_changelist"),
+                    }
 
                 ],
             },
