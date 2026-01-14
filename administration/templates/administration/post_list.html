@@ -1,0 +1,211 @@
+{% extends "administration/base.html" %}
+
+{% block title %}文章管理 - Rosetta Dashboard{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li>文章管理</li>
+    </ul>
+</div>
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">文章管理</h1>
+    <div class="flex gap-2">
+        <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
+                <span class="material-symbols-outlined text-lg">more_vert</span>
+                更多
+            </div>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <li>
+                    <a href="{% url 'administration:export_all' 'Post' %}" target="_blank">
+                        <span class="material-symbols-outlined">file_download</span>
+                        导出全部 (JSON)
+                    </a>
+                </li>
+                <li>
+                    <button onclick="import_modal.showModal()">
+                        <span class="material-symbols-outlined">file_upload</span>
+                        导入数据 (JSON)
+                    </button>
+                </li>
+            </ul>
+        </div>
+        <a href="{% url 'administration:post_create' %}" class="btn btn-primary btn-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+            </svg>
+            写文章
+        </a>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<dialog id="import_modal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">导入数据 (JSON)</h3>
+    <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
+    <form action="{% url 'administration:import_json' 'Post' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="json_file" class="file-input file-input-bordered w-full" accept=".json" required />
+        <div class="modal-action">
+            <button type="button" class="btn" onclick="import_modal.close()">取消</button>
+            <button type="submit" class="btn btn-primary">开始导入</button>
+        </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+<div class="card bg-base-100 shadow-sm border border-base-200">
+    <div class="card-body p-0">
+        <!-- Card Title & Search -->
+        <div class="p-4 border-b border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h2 class="card-title text-base whitespace-nowrap">
+                <span class="material-symbols-outlined text-secondary">article</span>
+                文章列表
+            </h2>
+            <div class="flex gap-2 w-full sm:w-auto">
+                <form action="." method="get" class="join w-full sm:w-auto">
+                    {% if request.GET.status %}<input type="hidden" name="status" value="{{ request.GET.status }}">{% endif %}
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索标题..." class="input input-bordered input-sm join-item w-full sm:w-64" />
+                    <button type="submit" class="btn btn-sm btn-ghost join-item border border-base-300">
+                        <span class="material-symbols-outlined">search</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="px-4 py-2 border-b border-base-200 bg-base-100">
+            <div class="tabs tabs-boxed bg-transparent p-0 gap-2">
+                <a href="{% url 'administration:post_list' %}" class="tab tab-sm {% if not request.GET.status %}tab-active bg-primary text-primary-content{% else %}bg-base-200{% endif %} rounded-btn">全部</a>
+                <a href="{% url 'administration:post_list' %}?status=published" class="tab tab-sm {% if request.GET.status == 'published' %}tab-active bg-success text-success-content{% else %}bg-base-200{% endif %} rounded-btn">已发布</a>
+                <a href="{% url 'administration:post_list' %}?status=draft" class="tab tab-sm {% if request.GET.status == 'draft' %}tab-active bg-neutral text-neutral-content{% else %}bg-base-200{% endif %} rounded-btn">草稿</a>
+            </div>
+        </div>
+
+        <!-- Bulk Actions Toolbar -->
+        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
+            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
+            <div class="flex gap-2">
+                <button onclick="submitBulkAction('published')" class="btn btn-xs btn-success text-white">
+                    <span class="material-symbols-outlined text-sm">check_circle</span> 发布
+                </button>
+                <button onclick="submitBulkAction('draft')" class="btn btn-xs btn-warning text-white">
+                    <span class="material-symbols-outlined text-sm">drafts</span> 草稿
+                </button>
+                <button onclick="submitBulkAction('export_json')" class="btn btn-xs btn-info text-white">
+                    <span class="material-symbols-outlined text-sm">download</span> 导出
+                </button>
+                <div class="divider divider-horizontal mx-0 my-1"></div>
+                <button onclick="submitBulkAction('delete')" class="btn btn-xs btn-error">
+                    <span class="material-symbols-outlined text-sm">delete</span> 删除
+                </button>
+            </div>
+        </div>
+
+        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' 'Post' %}">
+            {% csrf_token %}
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <!-- Head -->
+                    <thead class="bg-base-200">
+                        <tr>
+                            <th class="w-10">
+                                <label>
+                                    <input type="checkbox" class="checkbox checkbox-xs" onclick="toggleAll(this)">
+                                </label>
+                            </th>
+                            <th class="w-16">
+                                <a href="?sort=id&order={% if request.GET.sort == 'id' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
+                                    <span class="material-symbols-outlined text-sm">tag</span>
+                                    ID
+                                    {% if request.GET.sort == 'id' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th class="w-16">封面</th>
+                            <th class="w-1/3">
+                                <a href="?sort=title&order={% if request.GET.sort == 'title' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
+                                    <span class="material-symbols-outlined text-sm">title</span>
+                                    标题
+                                    {% if request.GET.sort == 'title' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <div class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">person</span>
+                                    作者
+                                </div>
+                            </th>
+                            <th>
+                                <div class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">category</span>
+                                    分类
+                                </div>
+                            </th>
+                            <th>
+                                <a href="?sort=status&order={% if request.GET.sort == 'status' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
+                                    <span class="material-symbols-outlined text-sm">info</span>
+                                    状态
+                                    {% if request.GET.sort == 'status' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort=created_at&order={% if request.GET.sort == 'created_at' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
+                                    <span class="material-symbols-outlined text-sm">calendar_today</span>
+                                    发布时间
+                                    {% if request.GET.sort == 'created_at' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <div class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-sm">settings</span>
+                                    操作
+                                </div>
+                            </th>
+                        </tr>
+                    </thead>
+                    <!-- Body (HTMX Target) -->
+                    <tbody id="post-list-body">
+                        {% include "administration/partials/post_list_rows.html" %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+        
+        <!-- Pagination -->
+        <div class="p-4 border-t border-base-200 flex justify-center">
+            {% if is_paginated %}
+            <div class="join">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-sm">«</a>
+                {% else %}
+                <button class="join-item btn btn-sm btn-disabled">«</button>
+                {% endif %}
+                
+                <button class="join-item btn btn-sm">第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页</button>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-sm">»</a>
+                {% else %}
+                <button class="join-item btn btn-sm btn-disabled">»</button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

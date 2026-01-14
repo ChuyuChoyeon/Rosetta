@@ -1,0 +1,233 @@
+{% extends "administration/base.html" %}
+
+{% block title %}评论管理 - Rosetta Dashboard{% endblock %}
+
+{% block modal %}
+<!-- Comment Edit Modal -->
+<dialog id="comment_edit_modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4">编辑评论</h3>
+        <form method="post" id="comment_edit_form">
+            {% csrf_token %}
+            <div class="form-control w-full mb-4">
+                <label class="label">
+                    <span class="label-text">内容</span>
+                </label>
+                <textarea name="content" id="comment_content" class="textarea textarea-bordered h-32" required></textarea>
+            </div>
+            
+            <div class="form-control w-full mb-6">
+                <label class="label cursor-pointer justify-start gap-4">
+                    <span class="label-text">是否可见</span> 
+                    <input type="checkbox" name="active" id="comment_active" class="toggle toggle-success" />
+                </label>
+            </div>
+
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn btn-ghost">取消</button>
+                </form>
+                <button type="submit" class="btn btn-primary">保存</button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<script>
+    function openCommentModal(pk, content, active) {
+        const modal = document.getElementById('comment_edit_modal');
+        const form = document.getElementById('comment_edit_form');
+        const contentInput = document.getElementById('comment_content');
+        const activeInput = document.getElementById('comment_active');
+        
+        // Update form action URL dynamically
+        // Note: We need a placeholder URL pattern in Django or construct it here
+        // Assuming the URL pattern is /administration/comments/<pk>/edit/
+        form.action = `/administration/comments/${pk}/edit/`;
+        
+        contentInput.value = content;
+        activeInput.checked = (active === 'true');
+        
+        modal.showModal();
+    }
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li>评论管理</li>
+    </ul>
+</div>
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">评论管理</h1>
+    <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
+            <span class="material-symbols-outlined text-lg">more_vert</span>
+            更多
+        </div>
+        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+            <li>
+                <a href="{% url 'administration:export_all' 'Comment' %}" target="_blank">
+                    <span class="material-symbols-outlined">file_download</span>
+                    导出全部 (JSON)
+                </a>
+            </li>
+            <li>
+                <button onclick="import_modal.showModal()">
+                    <span class="material-symbols-outlined">file_upload</span>
+                    导入数据 (JSON)
+                </button>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<!-- Import Modal -->
+<dialog id="import_modal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">导入数据 (JSON)</h3>
+    <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
+    <form action="{% url 'administration:import_json' 'Comment' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="json_file" class="file-input file-input-bordered w-full" accept=".json" required />
+        <div class="modal-action">
+            <button type="button" class="btn" onclick="import_modal.close()">取消</button>
+            <button type="submit" class="btn btn-primary">开始导入</button>
+        </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+
+<div class="card bg-base-100 shadow-sm border border-base-200">
+    <div class="card-body p-0">
+        <!-- Filter/Search Toolbar -->
+        <div class="p-4 border-b border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <!-- Status Tabs -->
+            <div class="flex gap-2 w-full sm:w-auto">
+                <form action="." method="get" class="join w-full sm:w-auto">
+                    {% if request.GET.status %}<input type="hidden" name="status" value="{{ request.GET.status }}">{% endif %}
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索评论内容/作者..." class="input input-bordered input-sm join-item w-full sm:w-64" />
+                    <button type="submit" class="btn btn-sm btn-ghost join-item border border-base-300">
+                        <span class="material-symbols-outlined">search</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Filter Tabs -->
+        <div class="px-4 py-2 border-b border-base-200 bg-base-100">
+            <div class="tabs tabs-boxed bg-transparent p-0 gap-2">
+                <a href="{% url 'administration:comment_list' %}" class="tab tab-sm {% if not request.GET.status %}tab-active bg-primary text-primary-content{% else %}bg-base-200{% endif %} rounded-btn">全部</a>
+                <a href="{% url 'administration:comment_list' %}?status=pending" class="tab tab-sm {% if request.GET.status == 'pending' %}tab-active bg-warning text-warning-content{% else %}bg-base-200{% endif %} rounded-btn">待审核</a>
+                <a href="{% url 'administration:comment_list' %}?status=active" class="tab tab-sm {% if request.GET.status == 'active' %}tab-active bg-success text-success-content{% else %}bg-base-200{% endif %} rounded-btn">已发布</a>
+            </div>
+        </div>
+
+        <!-- Bulk Actions Toolbar -->
+        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
+            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
+            <div class="flex gap-2">
+                <button onclick="submitBulkAction('active')" class="btn btn-xs btn-success text-white">
+                    <span class="material-symbols-outlined text-sm">check_circle</span> 批准
+                </button>
+                <button onclick="submitBulkAction('inactive')" class="btn btn-xs btn-warning text-white">
+                    <span class="material-symbols-outlined text-sm">pending</span> 待审
+                </button>
+                <button onclick="submitBulkAction('export_json')" class="btn btn-xs btn-info text-white">
+                    <span class="material-symbols-outlined text-sm">download</span> 导出
+                </button>
+                <div class="divider divider-horizontal mx-0 my-1"></div>
+                <button onclick="submitBulkAction('delete')" class="btn btn-xs btn-error">
+                    <span class="material-symbols-outlined text-sm">delete</span> 删除
+                </button>
+            </div>
+        </div>
+
+        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='comment' %}">
+            {% csrf_token %}
+            <div class="overflow-x-auto">
+                <table class="table table-zebra w-full">
+                    <!-- Head -->
+                    <thead class="bg-base-200">
+                        <tr>
+                            <th class="w-10">
+                                <label>
+                                    <input type="checkbox" class="checkbox checkbox-xs" onclick="toggleAll(this)" />
+                                </label>
+                            </th>
+                            <th>
+                                <a href="?sort=user__username&order={% if request.GET.sort == 'user__username' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
+                                    作者
+                                    {% if request.GET.sort == 'user__username' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th class="w-1/2">内容</th>
+                            <th>
+                                <a href="?sort=post__title&order={% if request.GET.sort == 'post__title' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
+                                    文章
+                                    {% if request.GET.sort == 'post__title' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort=created_at&order={% if request.GET.sort == 'created_at' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
+                                    时间
+                                    {% if request.GET.sort == 'created_at' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a href="?sort=active&order={% if request.GET.sort == 'active' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
+                                    状态
+                                    {% if request.GET.sort == 'active' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>操作</th>
+                    </tr>
+                </thead>
+                <!-- Body (HTMX Target) -->
+                <tbody id="comment-list-body">
+                    {% include "administration/partials/comment_list_rows.html" %}
+                </tbody>
+                </table>
+            </div>
+        </form>
+        
+        <!-- Pagination -->
+        <div class="p-4 border-t border-base-200 flex justify-center">
+            {% if is_paginated %}
+            <div class="join">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-sm">«</a>
+                {% else %}
+                <button class="join-item btn btn-sm btn-disabled">«</button>
+                {% endif %}
+                
+                <button class="join-item btn btn-sm">第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页</button>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-sm">»</a>
+                {% else %}
+                <button class="join-item btn btn-sm btn-disabled">»</button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

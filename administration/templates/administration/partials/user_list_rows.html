@@ -1,0 +1,83 @@
+{% for user in users %}
+<tr class="hover">
+    <th>
+        <label>
+            <input type="checkbox" name="selected_ids" value="{{ user.pk }}" class="checkbox checkbox-xs row-checkbox" onchange="updateBulkToolbar()" />
+        </label>
+    </th>
+    <td>
+        <div class="flex items-center gap-3">
+            <div class="avatar">
+                <div class="w-10 h-10 rounded-full">
+                    <img src="{{ user.get_avatar_url }}" alt="{{ user.username }}" />
+                </div>
+            </div>
+            <div>
+                <div class="font-bold">
+                    {{ user.nickname|default:user.username }}
+                    {% if user.nickname %}
+                    <span class="text-xs font-normal opacity-50 block">@{{ user.username }}</span>
+                    {% endif %}
+                </div>
+                <div class="text-sm opacity-50">{{ user.email }}</div>
+            </div>
+        </div>
+    </td>
+    <td>
+        <div class="flex flex-wrap gap-1">
+            {% for label in user.labels.all %}
+                <span class="badge badge-{{ label.color }} badge-xs">{{ label.name }}</span>
+            {% empty %}
+                <span class="opacity-30 text-xs">-</span>
+            {% endfor %}
+        </div>
+    </td>
+    <td>
+        {% if user.is_superuser %}
+            <div class="badge badge-primary badge-sm">超级管理员</div>
+        {% elif user.is_staff %}
+            <div class="badge badge-secondary badge-sm">管理员</div>
+        {% else %}
+            <div class="badge badge-ghost badge-sm">普通用户</div>
+        {% endif %}
+    </td>
+    <td>
+        {% if user.is_active %}
+            <div class="badge badge-success badge-sm gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                正常
+            </div>
+        {% else %}
+            <div class="badge badge-error badge-sm gap-1">禁用</div>
+        {% endif %}
+    </td>
+    <td class="text-sm font-mono opacity-70">{{ user.date_joined|date:"Y-m-d" }}</td>
+    <td class="text-sm font-mono opacity-70">
+        {% if user.last_login %}
+            {{ user.last_login|timesince }}前
+        {% else %}
+            从未登录
+        {% endif %}
+    </td>
+    <td>
+        <div class="join">
+            <a href="{% url 'users:profile' user.username %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip" data-tip="查看主页">
+                <span class="material-symbols-outlined text-base">visibility</span>
+            </a>
+            <a href="{% url 'administration:user_edit' user.pk %}" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+                <span class="material-symbols-outlined text-base">edit</span>
+            </a>
+            <!-- User delete usually requires caution, maybe specific permission check or confirmation -->
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="8" class="text-center py-8 text-base-content/50">
+        <div class="flex flex-col items-center gap-2">
+            <span class="material-symbols-outlined text-4xl opacity-20">group_off</span>
+            <span>暂无用户</span>
+        </div>
+    </td>
+</tr>
+{% endfor %}

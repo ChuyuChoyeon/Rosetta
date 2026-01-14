@@ -1,0 +1,49 @@
+{% for tag in tags %}
+<tr class="hover">
+    <th>
+        <label>
+            <input type="checkbox" name="selected_ids" value="{{ tag.pk }}" class="checkbox checkbox-xs row-checkbox" onchange="updateBulkToolbar()" />
+        </label>
+    </th>
+    <th class="font-mono text-xs opacity-50">{{ tag.id }}</th>
+    <td>
+        <span class="badge badge-{{ tag.color }} badge-outline font-bold">{{ tag.name }}</span>
+    </td>
+    <td class="font-mono text-sm opacity-70">{{ tag.slug }}</td>
+    <td>
+        {% if tag.is_active %}
+            <div class="badge badge-success badge-sm gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                可见
+            </div>
+        {% else %}
+            <div class="badge badge-ghost badge-sm gap-1">隐藏</div>
+        {% endif %}
+    </td>
+    <td>
+        <span class="badge badge-ghost badge-sm">{{ tag.post_count }} 文章</span>
+    </td>
+    <td>
+        <div class="join">
+            <a href="{% url 'tag_detail' tag.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip" data-tip="查看">
+                <span class="material-symbols-outlined text-base">visibility</span>
+            </a>
+            <a href="{% url 'administration:tag_edit' tag.pk %}" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+                <span class="material-symbols-outlined text-base">edit</span>
+            </a>
+            <a href="{% url 'administration:tag_delete' tag.pk %}" class="btn btn-ghost btn-xs join-item text-error tooltip" data-tip="删除">
+                <span class="material-symbols-outlined text-base">delete</span>
+            </a>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="7" class="text-center py-8 text-base-content/50">
+        <div class="flex flex-col items-center gap-2">
+            <span class="material-symbols-outlined text-4xl opacity-20">label</span>
+            <span>暂无标签</span>
+        </div>
+    </td>
+</tr>
+{% endfor %}

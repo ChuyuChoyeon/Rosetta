@@ -1,0 +1,75 @@
+{% for comment in comments %}
+<tr class="hover">
+    <th>
+        <label>
+            <input type="checkbox" name="selected_ids" value="{{ comment.pk }}" class="checkbox checkbox-xs row-checkbox" onchange="updateBulkToolbar()" />
+        </label>
+    </th>
+    <td>
+        <div class="flex items-center space-x-3">
+            <div class="avatar">
+                <div class="w-8 h-8 rounded-full">
+                    <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}" />
+                </div>
+            </div>
+            <a href="{% url 'administration:user_edit' comment.user.pk %}" class="font-bold text-sm hover:link">{{ comment.user.username }}</a>
+        </div>
+    </td>
+    <td>
+        <div class="max-w-xs truncate" title="{{ comment.content }}">
+            <a href="#" onclick="openCommentModal('{{ comment.pk }}', '{{ comment.content|escapejs }}', '{{ comment.active|yesno:'true,false' }}')" class="hover:underline decoration-dashed underline-offset-4 cursor-pointer">
+                {{ comment.content }}
+            </a>
+        </div>
+    </td>
+    <td>
+        <div class="max-w-xs truncate" title="{{ comment.post.title }}">
+            <a href="{% url 'post_detail' comment.post.slug %}" target="_blank" class="link link-hover text-sm">{{ comment.post.title }}</a>
+        </div>
+    </td>
+    <td>
+        {% if comment.active %}
+            <span class="badge badge-success badge-sm gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                已发布
+            </span>
+        {% else %}
+            <span class="badge badge-warning badge-sm gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                待审核
+            </span>
+        {% endif %}
+    </td>
+    <td class="text-sm font-mono opacity-50">{{ comment.created_at|date:"Y-m-d H:i" }}</td>
+    <td>
+        <div class="join">
+            <button type="button" onclick="openCommentModal('{{ comment.pk }}', '{{ comment.content|escapejs }}', '{{ comment.active|yesno:'true,false' }}')" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+                <span class="material-symbols-outlined text-base">edit</span>
+            </button>
+            <form method="post" action="{% url 'administration:comment_edit' comment.pk %}" class="inline">
+                {% csrf_token %}
+                <input type="hidden" name="active" value="{% if comment.active %}False{% else %}True{% endif %}">
+                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip {% if not comment.active %}text-success{% endif %}" data-tip="{% if comment.active %}撤回{% else %}通过{% endif %}">
+                    {% if comment.active %}
+                    <span class="material-symbols-outlined text-base">block</span>
+                    {% else %}
+                    <span class="material-symbols-outlined text-base">check_circle</span>
+                    {% endif %}
+                </button>
+            </form>
+            <a href="{% url 'administration:comment_delete' comment.pk %}" class="btn btn-ghost btn-xs join-item text-error tooltip" data-tip="删除" onclick="confirmDelete('{% url 'administration:comment_delete' comment.pk %}', '确定要删除这条评论吗？'); return false;">
+                <span class="material-symbols-outlined text-base">delete</span>
+            </a>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="7" class="text-center py-8 text-base-content/50">
+        <div class="flex flex-col items-center gap-2">
+            <span class="material-symbols-outlined text-4xl opacity-20">chat_bubble_outline</span>
+            <span>暂无评论</span>
+        </div>
+    </td>
+</tr>
+{% endfor %}

@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div x-data="{ 
+    viewMode: localStorage.getItem('blogViewMode') || 'grid',
+    toggleView(mode) {
+        this.viewMode = mode;
+        localStorage.setItem('blogViewMode', mode);
+    }
+}">
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        {% if tag %}
+        <div class="flex items-center gap-3">
+            <div class="p-3 rounded-xl bg-{{ tag.color|default:'neutral' }}/10 text-{{ tag.color|default:'neutral' }}">
+                <span class="material-symbols-outlined text-3xl">label</span>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold">{{ tag.name }}</h1>
+                <p class="text-base-content/60 text-sm mt-1">共 {{ paginator.count|default:posts.count }} 篇文章</p>
+            </div>
+        </div>
+        {% elif category %}
+        <div class="flex items-center gap-3">
+            <div class="p-3 rounded-xl bg-primary/10 text-primary">
+                <span class="material-symbols-outlined text-3xl">category</span>
+            </div>
+            <div>
+                <h1 class="text-3xl font-bold">{{ category.name }}</h1>
+                <p class="text-base-content/60 text-sm mt-1">{{ category.description|default:"暂无描述" }}</p>
+            </div>
+        </div>
+        {% elif title %}
+        <h1 class="text-3xl font-bold">{{ title }}</h1>
+        {% else %}
+        <h1 class="text-3xl font-bold">最新文章</h1>
+        {% endif %}
+
+        <!-- View Toggle -->
+        <div class="join bg-base-100 shadow-sm border border-base-content/10">
+            <button class="join-item btn btn-sm gap-2" 
+                    :class="viewMode === 'grid' ? 'btn-active btn-primary' : 'btn-ghost'" 
+                    @click="toggleView('grid')"
+                    title="网格视图">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                <span class="hidden sm:inline">网格</span>
+            </button>
+            <button class="join-item btn btn-sm gap-2" 
+                    :class="viewMode === 'list' ? 'btn-active btn-primary' : 'btn-ghost'" 
+                    @click="toggleView('list')"
+                    title="列表视图">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                <span class="hidden sm:inline">列表</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-8">
+        <!-- Main Content -->
+        <div class="flex-1 min-w-0">
+            
+            <!-- Skeleton Loader -->
+            <div id="post-skeleton" 
+                 class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
+                 :class="viewMode === 'list' ? '!grid-cols-1' : ''"
+                 style="display: none;">
+                {% for i in "123456" %}
+                <div class="card bg-base-100 shadow-xl" :class="viewMode === 'list' ? 'card-side' : ''">
+                    <div class="skeleton rounded-t-2xl" :class="viewMode === 'grid' ? 'h-48 w-full' : 'w-48 h-full min-h-[12rem] rounded-l-2xl rounded-tr-none'"></div>
+                    <div class="card-body w-full">
+                        <div class="skeleton h-6 w-3/4 mb-4"></div>
+                        <div class="skeleton h-4 w-1/2 mb-2"></div>
+                        <div class="skeleton h-16 w-full mb-4"></div>
+                        <div class="flex justify-end gap-2">
+                            <div class="skeleton h-5 w-16 rounded-full"></div>
+                            <div class="skeleton h-5 w-16 rounded-full"></div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Post Grid -->
+            <div id="post-grid" 
+                 class="grid gap-6 opacity-0 transition-opacity duration-500"
+                 :class="viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'">
+                {% for post in posts %}
+                <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1 group"
+                     :class="viewMode === 'list' ? 'card-side' : 'h-full'">
+                    {% if post.cover_image %}
+                    <figure class="overflow-hidden transition-all duration-300"
+                            :class="viewMode === 'grid' ? 'h-48 w-full' : 'w-48 h-auto min-h-[12rem] shrink-0'">
+                        <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+                    </figure>
+                    {% else %}
+                    <figure class="bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content transition-all duration-300"
+                            :class="viewMode === 'list' ? 'w-48 h-auto min-h-[12rem] shrink-0' : 'h-48 w-full'">
+                         <!-- Only color block, no text as requested -->
+                    </figure>
+                    {% endif %}
+                    
+                    <div class="card-body">
+                        <h2 class="card-title text-lg font-bold">
+                            <a href="{% url 'post_detail' post.slug %}" class="hover:text-primary transition-colors line-clamp-2">{{ post.title }}</a>
+                            {% if post.created_at|date:"Y-m-d" == now|date:"Y-m-d" %}
+                            <div class="badge badge-secondary">最新</div>
+                            {% endif %}
+                        </h2>
+                        
+                        <!-- Metadata: Author, Date, Views, Comments, Word Count -->
+                        <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60 mb-2">
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">person</span>
+                                <span>{{ post.author.nickname|default:post.author.username }}</span>
+                            </div>
+                            <span>•</span>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                                <span>{{ post.created_at|date:"Y-m-d" }}</span>
+                            </div>
+                            <span>•</span>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">visibility</span>
+                                <span>{{ post.views }}</span>
+                            </div>
+                            <span>•</span>
+                            <div class="flex items-center gap-1">
+                                <span class="material-symbols-outlined text-[16px]">chat_bubble</span>
+                                <span>{{ post.comments.count }}</span>
+                            </div>
+                            <span>•</span>
+                            <div class="flex items-center gap-1" title="字数统计">
+                                <span class="material-symbols-outlined text-[16px]">notes</span>
+                                <span>{{ post.content|length }}字</span>
+                            </div>
+                        </div>
+
+                        <p class="text-sm text-base-content/80 line-clamp-3 mb-4">{{ post.excerpt|default:post.content|striptags|truncatechars:100 }}</p>
+                        
+                        <div class="card-actions justify-end mt-auto">
+                            {% for tag in post.tags.all|slice:":3" %}
+                            <div class="badge badge-{{ tag.color|default:'neutral' }} badge-outline text-xs">{{ tag.name }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                    <h3 class="text-2xl font-bold text-base-content/50">暂无文章</h3>
+                    <p class="text-base-content/40 mt-2">敬请期待更多精彩内容！</p>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if is_paginated %}
+            <div class="join grid grid-cols-2 w-full max-w-xs mx-auto mt-12">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-outline">上一页</a>
+                {% else %}
+                <button class="join-item btn btn-outline btn-disabled">上一页</button>
+                {% endif %}
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-outline">下一页</a>
+                {% else %}
+                <button class="join-item btn btn-outline btn-disabled">下一页</button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar (Visible only in List Mode) -->
+        <div class="hidden lg:block w-80 flex-shrink-0" x-show="viewMode === 'list'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
+            {% include "blog/partials/sidebar.html" %}
+        </div>
+    </div>
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const skeleton = document.getElementById('post-skeleton');
+        const grid = document.getElementById('post-grid');
+        
+        // Show skeleton initially
+        skeleton.style.display = 'grid';
+        
+        // Simulate loading (or wait for images)
+        setTimeout(() => {
+            skeleton.style.display = 'none';
+            grid.classList.remove('opacity-0');
+        }, 300); 
+    });
+</script>
+{% endblock %}

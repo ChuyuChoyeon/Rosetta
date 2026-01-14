@@ -1,0 +1,46 @@
+{% for nav in navigations %}
+<tr class="hover">
+    <th>
+        <label>
+            <input type="checkbox" name="selected_ids" value="{{ nav.pk }}" class="checkbox checkbox-xs row-checkbox" onchange="updateBulkToolbar()" />
+        </label>
+    </th>
+    <td>
+        <div class="font-bold">{{ nav.title }}</div>
+    </td>
+    <td class="font-mono text-sm opacity-70">{{ nav.url }}</td>
+    <td>
+        <span class="badge badge-ghost badge-sm">{{ nav.get_location_display|default:nav.location }}</span>
+    </td>
+    <td>{{ nav.order }}</td>
+    <td>
+        {% if nav.is_active %}
+            <div class="badge badge-success badge-sm gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                可见
+            </div>
+        {% else %}
+            <div class="badge badge-ghost badge-sm gap-1">隐藏</div>
+        {% endif %}
+    </td>
+    <td>
+        <div class="join">
+            <a href="{% url 'administration:navigation_edit' nav.pk %}" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+                <span class="material-symbols-outlined text-base">edit</span>
+            </a>
+            <a href="{% url 'administration:navigation_delete' nav.pk %}" class="btn btn-ghost btn-xs join-item text-error tooltip" data-tip="删除">
+                <span class="material-symbols-outlined text-base">delete</span>
+            </a>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="7" class="text-center py-8 text-base-content/50">
+        <div class="flex flex-col items-center gap-2">
+            <span class="material-symbols-outlined text-4xl opacity-20">menu</span>
+            <span>暂无导航</span>
+        </div>
+    </td>
+</tr>
+{% endfor %}

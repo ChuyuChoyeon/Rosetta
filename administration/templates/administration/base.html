@@ -1,0 +1,426 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="zh-hans">
+<head>
+    <script>
+        // Theme initialization to prevent FOUC
+        (function() {
+            try {
+                var localTheme = localStorage.getItem('theme');
+                var theme = localTheme || 'light';
+                
+                {% if user.is_authenticated and user.preference.theme %}
+                    theme = "{{ user.preference.theme }}";
+                    localStorage.setItem('theme', theme);
+                {% endif %}
+
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (e) {}
+        })();
+    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ config.SITE_HEADER|default:"Rosetta Dashboard" }}{% endblock %}</title>
+    {% tailwind_css %}
+    
+    <!-- Alpine.js -->
+    <script defer src="{% static 'theme/js/alpine.min.js' %}"></script>
+    
+    <!-- HTMX -->
+    <script src="{% static 'theme/js/htmx.min.js' %}"></script>
+    
+    <!-- ApexCharts -->
+    <script src="{% static 'theme/js/apexcharts.min.js' %}"></script>
+
+    {% block extra_head %}{% endblock %}
+    
+    <!-- FontAwesome (Required by EasyMDE) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <!-- Vditor Editor -->
+    <link rel="stylesheet" href="{% static 'theme/css/vditor.css' %}" />
+    <script src="{% static 'theme/js/vditor.min.js' %}"></script>
+
+    <style>
+        /* EasyMDE Dark Mode / Theme Adaption */
+        [data-theme="dark"] .EasyMDEContainer {
+            background-color: hsl(var(--b1));
+            color: hsl(var(--bc));
+        }
+        [data-theme="dark"] .editor-toolbar {
+            background-color: hsl(var(--b2));
+            border-color: hsl(var(--b3));
+        }
+        [data-theme="dark"] .editor-toolbar i {
+            color: hsl(var(--bc));
+        }
+        [data-theme="dark"] .editor-toolbar button:hover, 
+        [data-theme="dark"] .editor-toolbar button.active {
+            background-color: hsl(var(--b3));
+        }
+        [data-theme="dark"] .CodeMirror {
+            background-color: hsl(var(--b1));
+            color: hsl(var(--bc));
+            border-color: hsl(var(--b3));
+        }
+        [data-theme="dark"] .editor-preview {
+            background-color: hsl(var(--b1));
+        }
+        
+        /* Local Material Symbols */
+        @font-face {
+            font-family: 'Material Symbols Outlined';
+            font-style: normal;
+            font-weight: 100 700;
+            src: url("{% static 'theme/fonts/MaterialSymbolsOutlined.woff2' %}") format('woff2');
+        }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+</head>
+<body class="bg-base-200 min-h-screen flex flex-col scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-base-100 {% if debug %}debug-screens{% endif %}" hx-boost="true" hx-ext="class-tools">
+
+    <!-- Navbar -->
+    <div class="navbar bg-base-100 shadow-lg z-10 sticky top-0">
+        <div class="flex-1">
+            <label for="my-drawer-2" class="btn btn-square btn-ghost lg:hidden drawer-button">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </label>
+            <a href="{% url 'administration:index' %}" class="btn btn-ghost normal-case text-xl flex items-center gap-2 justify-start px-2">
+                {{ config.ADMIN_NAVBAR_TITLE|default:"Rosetta 管理后台" }}
+            </a>
+        </div>
+        <div class="flex-none gap-2">
+            <a href="/" target="_blank" class="btn btn-ghost btn-sm" hx-boost="false">
+                查看站点
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+            </a>
+            
+            <!-- Theme Switcher -->
+            <div title="Change Theme" class="dropdown dropdown-end">
+              <div tabindex="0" role="button" class="btn btn-ghost gap-2">
+                <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-5 w-5 stroke-current md:h-6 md:w-6"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+                <span class="hidden md:inline">主题</span>
+                <svg width="12px" height="12px" class="hidden h-2 w-2 fill-current opacity-60 sm:inline-block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2048 2048"><path d="M1799 349l242 241-1017 1017L7 590l242-241 775 775 775-775z"></path></svg>
+              </div>
+              <div tabindex="0" class="dropdown-content z-[1] mt-4 p-2 shadow-2xl bg-base-200 rounded-box max-h-[70vh] overflow-y-auto" style="width: 25rem;">
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem;">
+                  {% for theme in themes %}
+                  <button class="btn btn-sm btn-ghost w-full min-h-0 h-auto py-2" 
+                          data-set-theme="{{ theme.id }}"
+                          onclick="updateTheme('{{ theme.id }}')">
+                    {{ theme.name }}
+                  </button>
+                  {% endfor %}
+                </div>
+              </div>
+            </div>
+
+            <script>
+                function updateTheme(theme) {
+                    // Immediately set theme for responsiveness
+                    document.documentElement.setAttribute('data-theme', theme);
+                    localStorage.setItem('theme', theme);
+                    
+                    {% if user.is_authenticated %}
+                    // Asynchronously save preference
+                    fetch("{% url 'users:update_theme' %}", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "X-CSRFToken": "{{ csrf_token }}"
+                        },
+                        body: JSON.stringify({ theme: theme })
+                    }).catch(console.error);
+                    {% endif %}
+                }
+            </script>
+
+            <!-- User Dropdown -->
+            <div class="dropdown dropdown-end ml-2">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar">
+                    <div class="w-10 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                        <img alt="{{ request.user.nickname|default:request.user.username }}" src="{{ request.user.get_avatar_url }}" />
+                    </div>
+                </div>
+                <ul tabindex="0" class="mt-3 z-[1] p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
+                    <li class="menu-title px-4 py-2 bg-base-200/50 rounded-t-box -mx-2 -mt-2 mb-1 border-b border-base-200">
+                        <div class="flex flex-col gap-0.5">
+                            <span class="text-base-content font-bold text-lg">{{ request.user.nickname|default:request.user.username }}</span>
+                            <span class="text-xs font-normal text-base-content/60">@{{ request.user.username }}</span>
+                        </div>
+                    </li>
+                    <li><a href="{% url 'users:profile' %}" hx-boost="false">个人资料</a></li>
+                    <li><a href="{% url 'users:logout' %}" hx-boost="false">退出登录</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content with Sidebar -->
+    <div class="drawer lg:drawer-open flex-1">
+        <input id="my-drawer-2" type="checkbox" class="drawer-toggle" />
+        <div class="drawer-content flex flex-col p-6 pt-20">
+            <!-- Page Content -->
+            {% if messages %}
+            <div class="toast toast-top toast-end z-50 mt-16">
+                {% for message in messages %}
+                <div class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% else %}alert-info{% endif %}">
+                    <span>{{ message }}</span>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% block content %}{% endblock %}
+        </div> 
+        <div class="drawer-side z-0">
+            <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label> 
+            <ul class="menu p-4 w-80 min-h-full bg-base-100 text-base-content gap-2">
+                <!-- Sidebar content here -->
+                <li>
+                    <a href="{% url 'administration:index' %}" class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">
+                        <span class="material-symbols-outlined text-primary">dashboard</span>
+                        概览
+                    </a>
+                </li>
+                
+                <li class="menu-title">内容管理</li>
+                <li>
+                    <a href="{% url 'administration:post_list' %}" class="{% if 'post' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="material-symbols-outlined text-secondary">article</span>
+                        文章
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'administration:category_list' %}" class="{% if 'category' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="material-symbols-outlined text-secondary">category</span>
+                        分类
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'administration:tag_list' %}" class="{% if 'tag' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="material-symbols-outlined text-secondary">label</span>
+                        标签
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'administration:comment_list' %}" class="{% if 'comment' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="material-symbols-outlined text-secondary">comment</span>
+                        评论
+                        {% if pending_comments > 0 %}
+                        <span class="badge badge-sm badge-error">{{ pending_comments }}</span>
+                        {% endif %}
+                    </a>
+                </li>
+
+                <li class="menu-title">页面管理</li>
+                <li>
+                    <a href="{% url 'administration:page_list' %}" class="{% if 'page' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="material-symbols-outlined text-accent">description</span>
+                        页面
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'administration:navigation_list' %}" class="{% if 'navigation' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="material-symbols-outlined text-accent">menu</span>
+                        导航
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'administration:friendlink_list' %}" class="{% if 'friendlink' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="material-symbols-outlined text-accent">link</span>
+                        友链
+                    </a>
+                </li>
+
+                <li class="menu-title">系统管理</li>
+                <li>
+                    <a href="{% url 'administration:user_list' %}" class="{% if 'user' in request.resolver_match.url_name %}active{% endif %}">
+                        <span class="material-symbols-outlined text-info">group</span>
+                        用户
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'administration:settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                        <span class="material-symbols-outlined text-info">settings</span>
+                        站点设置
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'administration:debug' %}" class="{% if request.resolver_match.url_name == 'debug' %}active{% endif %}">
+                        <span class="material-symbols-outlined text-warning">bug_report</span>
+                        调试工具
+                    </a>
+                </li>
+                
+                <div class="divider"></div>
+                
+                <li>
+                    <a href="{% url 'users:logout' %}" class="text-error">
+                        <span class="material-symbols-outlined">logout</span>
+                        退出登录
+                    </a>
+                </li>
+            </ul>
+        
+        </div>
+    </div>
+
+    {% block modal %}{% endblock %}
+    
+    <!-- Footer -->
+    <footer class="footer footer-center p-4 bg-base-100 text-base-content border-t border-base-200 mt-auto">
+        <div>
+            <p class="text-sm opacity-70">{{ config.FOOTER_TEXT|default:"Copyright © 2026 - All rights reserved" }}</p>
+        </div>
+    </footer>
+
+    <script>
+        document.body.addEventListener('htmx:configRequest', (event) => {
+            event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+        
+        // Auto hide toast after 3 seconds
+        setTimeout(function() {
+            const toasts = document.querySelectorAll('.toast .alert');
+            toasts.forEach(t => t.parentElement.style.display = 'none');
+        }, 3000);
+
+        // Bulk Actions Scripts
+        function toggleAll(source) {
+            const checkboxes = document.querySelectorAll('.row-checkbox');
+            checkboxes.forEach(cb => {
+                cb.checked = source.checked;
+            });
+            updateBulkToolbar();
+        }
+
+        function updateBulkToolbar() {
+            const checkboxes = document.querySelectorAll('.row-checkbox:checked');
+            const toolbar = document.getElementById('bulk-actions');
+            const countSpan = document.getElementById('selected-count');
+            
+            if (toolbar) {
+                if (checkboxes.length > 0) {
+                    toolbar.classList.remove('hidden');
+                    countSpan.innerText = checkboxes.length;
+                } else {
+                    toolbar.classList.add('hidden');
+                }
+            }
+        }
+
+        function submitBulkAction(action) {
+            if (!confirm('确定要执行此批量操作吗？')) return;
+            
+            const form = document.getElementById('bulk-form');
+            const actionInput = document.createElement('input');
+            actionInput.type = 'hidden';
+            actionInput.name = 'action';
+            actionInput.value = action;
+            form.appendChild(actionInput);
+            form.submit();
+        }
+
+        // Initialize Markdown Editor (Vditor adapter)
+        window.initVditor = function(containerId, inputId) {
+            const input = document.getElementById(inputId);
+            if (!input) {
+                console.error("Markdown input not found:", inputId);
+                return;
+            }
+
+            // Unhide the parent if hidden (Rosetta templates wrap input in .hidden)
+            if (input.parentElement.classList.contains('hidden')) {
+                input.parentElement.classList.remove('hidden');
+                input.parentElement.style.display = 'none'; // Keep input hidden but in DOM
+            } else {
+                 input.style.display = 'none';
+            }
+            
+            // Initialize Vditor
+            const vditor = new Vditor(containerId, {
+                height: 600,
+                mode: 'ir', // Instant Rendering mode
+                theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'classic',
+                cache: {
+                    enable: false,
+                },
+                preview: {
+                    theme: {
+                        current: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
+                    }
+                },
+                input: (value) => {
+                    input.value = value;
+                },
+                after: () => {
+                    vditor.setValue(input.value);
+                }
+            });
+            
+            // Sync theme changes
+            const observer = new MutationObserver(() => {
+                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+                vditor.setTheme(isDark ? 'dark' : 'classic', isDark ? 'dark' : 'light');
+            });
+            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+            
+            return vditor;
+        };
+    </script>
+    <!-- Global Delete Confirmation Modal -->
+    <dialog id="delete_confirm_modal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg text-error flex items-center gap-2">
+                <span class="material-symbols-outlined">warning</span>
+                确认删除
+            </h3>
+            <p class="py-4" id="delete_confirm_text">确定要删除此项目吗？此操作无法撤销。</p>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn btn-ghost">取消</button>
+                </form>
+                <form method="post" id="delete_confirm_form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-error">确认删除</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+        </form>
+    </dialog>
+
+    <script>
+        function confirmDelete(url, message) {
+            const modal = document.getElementById('delete_confirm_modal');
+            const form = document.getElementById('delete_confirm_form');
+            const text = document.getElementById('delete_confirm_text');
+            
+            form.action = url;
+            if (message) {
+                text.innerText = message;
+            } else {
+                text.innerText = "确定要删除此项目吗？此操作无法撤销。";
+            }
+            
+            modal.showModal();
+        }
+    </script>
+</body>
+</html>

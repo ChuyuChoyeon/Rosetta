@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto min-h-[60vh]" x-data="{ searchQuery: '' }">
+    <div class="text-center mb-12">
+        <h1 class="text-4xl font-bold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">标签云</h1>
+        <p class="text-base-content/60">探索 {{ tags|length }} 个精彩话题</p>
+    </div>
+    
+    <!-- Search -->
+    <div class="form-control w-full max-w-lg mx-auto mb-12 transform hover:scale-105 transition-transform duration-300">
+        <div class="relative">
+            <input type="text" 
+                   placeholder="搜索感兴趣的标签..." 
+                   class="input input-lg input-bordered w-full pl-12 shadow-lg bg-base-100/50 backdrop-blur-sm focus:input-primary" 
+                   x-model="searchQuery">
+            <span class="material-symbols-outlined absolute left-4 top-4 text-base-content/50">search</span>
+        </div>
+    </div>
+
+    <!-- Tags Cloud -->
+    <div class="flex flex-wrap gap-3 justify-center content-start">
+        {% for tag in tags %}
+        <a href="{% url 'post_by_tag' tag.slug %}" 
+           class="btn btn-sm md:btn-md btn-outline border-base-content/10 hover:border-primary hover:bg-primary hover:text-primary-content gap-2 transition-all duration-300 group rounded-full normal-case font-normal"
+           x-show="!searchQuery || '{{ tag.name }}'.toLowerCase().includes(searchQuery.toLowerCase())"
+           x-transition:enter="transition ease-out duration-300"
+           x-transition:enter-start="opacity-0 scale-90"
+           x-transition:enter-end="opacity-100 scale-100">
+            <span class="material-symbols-outlined text-sm text-{{ tag.color|default:'base-content' }} group-hover:text-current opacity-70">label</span>
+            <span class="text-lg">{{ tag.name }}</span>
+            <div class="badge badge-sm badge-ghost group-hover:bg-white/20 group-hover:text-current border-none">{{ tag.count }}</div>
+        </a>
+        {% empty %}
+        <div class="text-center w-full py-20">
+            <span class="material-symbols-outlined text-6xl text-base-content/20 mb-4">label_off</span>
+            <p class="text-base-content/40">暂无标签</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

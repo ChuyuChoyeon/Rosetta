@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-8">"{{ query }}" 的搜索结果</h1>
+
+{% if posts %}
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for result in posts %}
+        {# Check if it's a Watson search result (has .object) or a regular queryset #}
+        {% with post=result.object|default:result %}
+        <div class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
+            {% if post.cover_image %}
+            <figure class="h-48 overflow-hidden">
+                <img src="{{ post.cover_thumbnail.url }}" alt="{{ post.title }}" class="object-cover w-full h-full" />
+            </figure>
+            {% else %}
+            <figure class="h-48 bg-gradient-to-br from-primary to-secondary flex items-center justify-center text-primary-content">
+                 <span class="text-4xl font-bold">{{ post.title|slice:":1" }}</span>
+            </figure>
+            {% endif %}
+            <div class="card-body">
+                <h2 class="card-title text-lg font-bold">
+                    <a href="{% url 'post_detail' post.slug %}" class="hover:text-primary transition-colors">
+                        {# Use Watson highlighting if available #}
+                        {% if result.title %}
+                            {{ result.title|safe }}
+                        {% else %}
+                            {{ post.title }}
+                        {% endif %}
+                    </a>
+                </h2>
+                <p class="text-sm text-base-content/80 line-clamp-3">
+                    {% if result.description %}
+                        {{ result.description|safe }}
+                    {% else %}
+                        {{ post.excerpt }}
+                    {% endif %}
+                </p>
+                <div class="card-actions justify-end mt-4">
+                    {% for tag in post.tags.all|slice:":3" %}
+                    <div class="badge badge-outline text-xs">{{ tag.name }}</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        {% endwith %}
+    {% endfor %}
+</div>
+{% else %}
+<div class="flex flex-col items-center justify-center py-20 text-center">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+    <h3 class="text-2xl font-bold text-base-content/50">没有找到相关结果</h3>
+    <p class="text-base-content/40 mt-2">请尝试其他关键词。</p>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "administration/base.html" %}
+
+{% block title %}{{ title }} - Rosetta 管理后台{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li><a href="{% url 'administration:post_list' %}">文章管理</a></li>
+        <li>{{ title|default:"编辑文章" }}</li>
+    </ul>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="w-full">
+    {% csrf_token %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main Content (Left Column) -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body">
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text font-bold text-lg">文章标题</span>
+                        </label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
+                        </label>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-control w-full mt-4">
+                        <label class="label flex justify-between items-center">
+                            <span class="label-text font-bold">内容 (Markdown)</span>
+                        </label>
+                        
+                        <!-- Toast UI Editor Container -->
+                        <div id="editor" class="border border-base-300 rounded-lg overflow-hidden bg-base-100"></div>
+
+                        <!-- Hidden Input for Form Submission -->
+                        <div class="hidden">
+                            {{ form.content }}
+                        </div>
+
+                        <script>
+                            document.addEventListener('DOMContentLoaded', function() {
+                                const editor = new toastui.Editor({
+                                    el: document.querySelector('#editor'),
+                                    height: '600px',
+                                    initialEditType: 'markdown',
+                                    previewStyle: 'vertical',
+                                    initialValue: `{{ form.content.value|default:""|escapejs }}`,
+                                    language: 'zh-CN',
+                                    theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
+                                    usageStatistics: false,
+                                    toolbarItems: [
+                                        ['heading', 'bold', 'italic', 'strike'],
+                                        ['hr', 'quote'],
+                                        ['ul', 'ol', 'task', 'indent', 'outdent'],
+                                        ['table', 'image', 'link'],
+                                        ['code', 'codeblock']
+                                    ],
+                                    events: {
+                                        change: function() {
+                                            document.querySelector('#id_content').value = editor.getMarkdown();
+                                        }
+                                    }
+                                });
+
+                                // Sync theme changes
+                                const observer = new MutationObserver(function(mutations) {
+                                    mutations.forEach(function(mutation) {
+                                        if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
+                                            const theme = document.documentElement.getAttribute('data-theme');
+                                            // Toast UI doesn't support dynamic theme switch easily without destroy/recreate, 
+                                            // but we can try to re-init or just reload. 
+                                            // For now, let's just leave it as is or force reload if critical.
+                                            // Actually, the CSS overrides handle most colors.
+                                        }
+                                    });
+                                });
+                                observer.observe(document.documentElement, {
+                                    attributes: true,
+                                    attributeFilter: ["data-theme"]
+                                });
+                            });
+                        </script>
+                        {% if form.content.errors %}
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
+                        </label>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-control w-full mt-4">
+                        <label class="label">
+                            <span class="label-text font-bold">摘要</span>
+                        </label>
+                        {{ form.excerpt }}
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">可选，用于列表页展示</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- SEO / Slug Settings -->
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body">
+                    <h3 class="card-title text-base mb-4">SEO 设置</h3>
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Slug (URL别名)</span>
+                        </label>
+                        {{ form.slug }}
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">留空将自动根据标题生成</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar (Right Column) -->
+        <div class="space-y-6">
+            <!-- Publish Actions -->
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body">
+                    <h3 class="card-title text-base mb-4">发布</h3>
+                    
+                    <div class="form-control w-full">
+                        <label class="label cursor-pointer justify-start gap-4">
+                            <span class="label-text">状态</span> 
+                            {{ form.status }}
+                        </label>
+                    </div>
+
+                    <div class="card-actions justify-end mt-4 flex-col items-stretch gap-2">
+                        <button type="submit" class="btn btn-primary w-full gap-2">
+                            <span class="material-symbols-outlined">save</span>
+                            保存
+                        </button>
+                        <div class="flex gap-2">
+                            <button type="submit" name="_continue" class="btn btn-ghost btn-sm flex-1">保存并继续</button>
+                            <button type="submit" name="_addanother" class="btn btn-ghost btn-sm flex-1">保存并新增</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Categories & Tags -->
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body">
+                    <h3 class="card-title text-base mb-4">分类与标签</h3>
+                    
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">分类</span>
+                        </label>
+                        {{ form.category }}
+                    </div>
+
+                    <div class="form-control w-full mt-4">
+                        <label class="label">
+                            <span class="label-text">标签</span>
+                        </label>
+                        {{ form.tags }}
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">按住 Ctrl 可多选</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Featured Image -->
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body">
+                    <h3 class="card-title text-base mb-4">特色图片</h3>
+                    <div class="form-control w-full">
+                        {{ form.cover_image }}
+                    </div>
+                    {% if object.cover_image %}
+                    <div class="mt-4 rounded-lg overflow-hidden border border-base-200">
+                        <img src="{{ object.cover_image.url }}" class="w-full h-auto" />
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

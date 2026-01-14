@@ -1,0 +1,92 @@
+{% for post in posts %}
+<tr class="hover">
+    <th>
+        <label>
+            <input type="checkbox" name="selected_ids" value="{{ post.pk }}" form="bulk-form" class="checkbox checkbox-sm row-checkbox" onclick="updateBulkToolbar()">
+        </label>
+    </th>
+    <th class="font-mono text-xs opacity-50">{{ post.id }}</th>
+    <td>
+        {% if post.cover_image %}
+        <div class="avatar">
+            <div class="w-12 h-8 rounded">
+                <img src="{{ post.cover_image.url }}" alt="Cover" />
+            </div>
+        </div>
+        {% else %}
+        <div class="w-12 h-8 rounded bg-base-200 flex items-center justify-center text-base-content/20">
+            <span class="material-symbols-outlined text-sm">image</span>
+        </div>
+        {% endif %}
+    </td>
+    <td>
+        <a href="{% url 'administration:post_edit' post.pk %}" class="font-bold hover:underline decoration-dashed underline-offset-4 truncate max-w-xs block" title="{{ post.title }}">
+            {{ post.title }}
+        </a>
+        <div class="text-xs opacity-50 font-mono">{{ post.slug }}</div>
+    </td>
+    <td>
+        <div class="flex items-center space-x-3">
+            <div class="avatar">
+                <div class="w-8 h-8 rounded-full">
+                    <img src="{{ post.author.get_avatar_url }}" alt="{{ post.author.username }}" />
+                </div>
+            </div>
+            <div>
+                <a href="{% url 'administration:user_edit' post.author.pk %}" class="font-bold text-sm hover:link">{{ post.author.username }}</a>
+            </div>
+        </div>
+    </td>
+    <td>
+        {% if post.category %}
+            <span class="badge badge-ghost badge-sm">{{ post.category.name }}</span>
+        {% else %}
+            <span class="text-base-content/30 text-xs">-</span>
+        {% endif %}
+    </td>
+    <td>
+        {% if post.status == 'published' %}
+            <div class="badge badge-success badge-sm gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                已发布
+            </div>
+        {% elif post.status == 'draft' %}
+            <div class="badge badge-warning badge-sm gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                草稿
+            </div>
+        {% else %}
+             <div class="badge badge-outline badge-sm">{{ post.status }}</div>
+        {% endif %}
+    </td>
+    <td class="text-sm font-mono">{{ post.created_at|date:"Y-m-d H:i" }}</td>
+    <td>
+        <div class="join">
+            <a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip" data-tip="查看">
+                <span class="material-symbols-outlined text-base">visibility</span>
+            </a>
+            <a href="{% url 'administration:post_edit' post.pk %}" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+                <span class="material-symbols-outlined text-base">edit</span>
+            </a>
+            <form action="{% url 'administration:post_duplicate' post.pk %}" method="post" class="inline" onsubmit="return confirm('确定要复制这篇文章吗？');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip" data-tip="复制">
+                    <span class="material-symbols-outlined text-base">content_copy</span>
+                </button>
+            </form>
+            <button onclick="confirmDelete('{% url 'administration:post_delete' post.pk %}', '确定要删除文章《{{ post.title|escapejs }}》吗？')" class="btn btn-ghost btn-xs join-item text-error tooltip" data-tip="删除">
+                <span class="material-symbols-outlined text-base">delete</span>
+            </button>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="9" class="text-center py-8 text-base-content/50">
+        <div class="flex flex-col items-center gap-2">
+            <span class="material-symbols-outlined text-4xl opacity-20">article</span>
+            <span>没有找到相关文章</span>
+        </div>
+    </td>
+</tr>
+{% endfor %}

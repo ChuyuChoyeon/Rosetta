@@ -1,0 +1,117 @@
+{% extends "administration/base.html" %}
+
+{% block title %}分类管理 - Rosetta Dashboard{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li>分类管理</li>
+    </ul>
+</div>
+
+<div class="card bg-base-100 shadow-sm border border-base-200">
+    <div class="card-body p-0">
+        <div class="flex justify-between items-center p-4 border-b border-base-200">
+            <h2 class="card-title text-base whitespace-nowrap">
+                <span class="material-symbols-outlined text-secondary">category</span>
+                分类列表
+            </h2>
+            <div class="flex gap-2">
+                <div class="join">
+                    <input type="text" 
+                           name="q" 
+                           placeholder="搜索分类..." 
+                           class="input input-bordered input-sm join-item w-48 transition-all focus:w-64" 
+                           hx-get="{% url 'administration:category_list' %}" 
+                           hx-trigger="keyup changed delay:500ms" 
+                           hx-target="#category-table-body" 
+                           hx-indicator=".htmx-indicator">
+                    <button class="btn btn-sm btn-ghost join-item pointer-events-none">
+                        <span class="material-symbols-outlined text-base-content/50">search</span>
+                    </button>
+                </div>
+                
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
+                        <span class="material-symbols-outlined text-lg">more_vert</span>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+                        <li>
+                            <a href="{% url 'administration:export_all' 'Category' %}" target="_blank">
+                                <span class="material-symbols-outlined">file_download</span>
+                                导出全部 (JSON)
+                            </a>
+                        </li>
+                        <li>
+                            <button onclick="import_modal.showModal()">
+                                <span class="material-symbols-outlined">file_upload</span>
+                                导入数据 (JSON)
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <a href="{% url 'administration:category_create' %}" class="btn btn-primary btn-sm gap-2">
+                    <span class="material-symbols-outlined text-lg">add</span>
+                    新建分类
+                </a>
+            </div>
+        </div>
+
+        <!-- Import Modal -->
+        <dialog id="import_modal" class="modal">
+          <div class="modal-box">
+            <h3 class="font-bold text-lg">导入数据 (JSON)</h3>
+            <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
+            <form action="{% url 'administration:import_json' 'Category' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="json_file" class="file-input file-input-bordered w-full" accept=".json" required />
+                <div class="modal-action">
+                    <button type="button" class="btn" onclick="import_modal.close()">取消</button>
+                    <button type="submit" class="btn btn-primary">开始导入</button>
+                </div>
+            </form>
+          </div>
+          <form method="dialog" class="modal-backdrop">
+            <button>close</button>
+          </form>
+        </dialog>
+        
+        <!-- Bulk Actions Toolbar -->
+        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
+            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
+            <div class="flex gap-2">
+                <button onclick="submitBulkAction('delete')" class="btn btn-xs btn-error">
+                    <span class="material-symbols-outlined text-sm">delete</span> 删除
+                </button>
+            </div>
+        </div>
+
+        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='category' %}">
+            {% csrf_token %}
+            <div class="overflow-x-auto">
+                <table class="table table-zebra">
+                    <thead>
+                        <tr>
+                            <th class="w-10">
+                                <label>
+                                    <input type="checkbox" class="checkbox checkbox-xs" onclick="toggleAll(this)" />
+                                </label>
+                            </th>
+                            <th>ID</th>
+                            <th>名称</th>
+                            <th>Slug</th>
+                            <th>文章数</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="category-table-body">
+                        {% include "administration/partials/category_list_rows.html" %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

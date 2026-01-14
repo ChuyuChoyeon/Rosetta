@@ -1,0 +1,164 @@
+{% extends "administration/base.html" %}
+
+{% block title %}{% if form.instance.pk %}编辑用户{% else %}新建用户{% endif %}{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li><a href="{% url 'administration:user_list' %}">用户管理</a></li>
+        <li>{% if form.instance.pk %}编辑{% else %}新建{% endif %}</li>
+    </ul>
+</div>
+
+<div class="max-w-4xl mx-auto">
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card-body">
+            <h2 class="card-title mb-6">
+                {% if form.instance.pk %}编辑用户: {{ form.instance.username }}{% else %}新建用户{% endif %}
+            </h2>
+            
+            <form method="post" enctype="multipart/form-data" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-error mb-4">
+                    <span class="material-symbols-outlined">error</span>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Basic Info -->
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-lg border-b pb-2">基本信息</h3>
+                        
+                        <!-- Username -->
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">用户名</span>
+                            </label>
+                            <input type="text" name="username" value="{{ form.username.value|default:'' }}" class="input input-bordered w-full {% if form.username.errors %}input-error{% endif %}" required />
+                            {% if form.username.errors %}
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ form.username.errors.0 }}</span>
+                            </label>
+                            {% endif %}
+                        </div>
+
+                        <!-- Nickname -->
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">昵称</span>
+                            </label>
+                            <input type="text" name="nickname" value="{{ form.nickname.value|default:'' }}" class="input input-bordered w-full {% if form.nickname.errors %}input-error{% endif %}" />
+                            {% if form.nickname.errors %}
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ form.nickname.errors.0 }}</span>
+                            </label>
+                            {% endif %}
+                        </div>
+
+                        <!-- Email -->
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">邮箱</span>
+                            </label>
+                            <input type="email" name="email" value="{{ form.email.value|default:'' }}" class="input input-bordered w-full {% if form.email.errors %}input-error{% endif %}" />
+                            {% if form.email.errors %}
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ form.email.errors.0 }}</span>
+                            </label>
+                            {% endif %}
+                        </div>
+
+                         <!-- Avatar -->
+                         <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">头像</span>
+                            </label>
+                            <input type="file" name="avatar" class="file-input file-input-bordered w-full {% if form.avatar.errors %}file-input-error{% endif %}" />
+                            {% if form.instance.avatar %}
+                            <div class="mt-2 avatar">
+                                <div class="w-16 rounded">
+                                    <img src="{{ form.instance.avatar.url }}" />
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if form.avatar.errors %}
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ form.avatar.errors.0 }}</span>
+                            </label>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Permissions & Labels -->
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-lg border-b pb-2">权限与标签</h3>
+
+                        <!-- Labels -->
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">{{ form.labels_str.label }}</span>
+                            </label>
+                            {{ form.labels_str }}
+                            <label class="label">
+                                <span class="label-text-alt">{{ form.labels_str.help_text }}</span>
+                            </label>
+                            {% if form.labels_str.errors %}
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ form.labels_str.errors.0 }}</span>
+                            </label>
+                            {% endif %}
+                        </div>
+
+                        <!-- New Password -->
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">{{ form.new_password.label }}</span>
+                            </label>
+                            {{ form.new_password }}
+                            <label class="label">
+                                <span class="label-text-alt">{{ form.new_password.help_text }}</span>
+                            </label>
+                            {% if form.new_password.errors %}
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ form.new_password.errors.0 }}</span>
+                            </label>
+                            {% endif %}
+                        </div>
+
+                        <!-- Flags -->
+                        <div class="bg-base-200 p-4 rounded-lg space-y-2">
+                            <label class="label cursor-pointer justify-start gap-4">
+                                <input type="checkbox" name="is_active" class="checkbox checkbox-success" {% if form.is_active.value %}checked{% endif %} />
+                                <span class="label-text font-medium">账户启用</span> 
+                            </label>
+                            
+                            <label class="label cursor-pointer justify-start gap-4">
+                                <input type="checkbox" name="is_staff" class="checkbox checkbox-info" {% if form.is_staff.value %}checked{% endif %} />
+                                <span class="label-text font-medium">管理员权限 (可登录后台)</span> 
+                            </label>
+
+                            <label class="label cursor-pointer justify-start gap-4">
+                                <input type="checkbox" name="is_superuser" class="checkbox checkbox-error" {% if form.is_superuser.value %}checked{% endif %} />
+                                <span class="label-text font-medium">超级管理员 (所有权限)</span> 
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-actions justify-end mt-8">
+                    <a href="{% url 'administration:user_list' %}" class="btn btn-ghost">取消</a>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

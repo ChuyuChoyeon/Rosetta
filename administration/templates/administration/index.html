@@ -1,0 +1,568 @@
+{% extends "administration/base.html" %}
+{% load static %}
+
+{% block title %}仪表盘 - Rosetta Dashboard{% endblock %}
+
+{% block extra_head %}
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('dashboardStats', () => ({
+            contentStats: JSON.parse(document.getElementById('content-stats-data').textContent),
+            chartComments: JSON.parse(document.getElementById('chart-comments-data').textContent),
+            chartUsers: JSON.parse(document.getElementById('chart-users-data').textContent),
+            chartTraffic: JSON.parse(document.getElementById('chart-traffic-data').textContent),
+            systemStats: JSON.parse(document.getElementById('system-stats-data').textContent),
+            userStats: JSON.parse(document.getElementById('user-stats-data').textContent),
+            
+            trafficPeriod: '30d', // 7d, 30d
+
+            init() {
+                this.$nextTick(() => {
+                    this.renderCharts();
+                });
+                
+                const observer = new MutationObserver(() => {
+                     this.renderCharts();
+                });
+                observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+            },
+
+            getThemeColors() {
+                // Helper to resolve Tailwind utility class colors to RGB
+                const resolveColor = (className, fallback) => {
+                    const elem = document.createElement('div');
+                    elem.className = className;
+                    elem.style.display = 'none'; // hidden but computed
+                    document.body.appendChild(elem);
+                    const color = window.getComputedStyle(elem).color;
+                    document.body.removeChild(elem);
+                    
+                    // Basic validation
+                    if (!color || color === 'rgba(0, 0, 0, 0)') return fallback;
+                    return color;
+                };
+
+                return {
+                    primary: resolveColor('text-primary', '#4f46e5'),
+                    secondary: resolveColor('text-secondary', '#ec4899'),
+                    accent: resolveColor('text-accent', '#06b6d4'),
+                    neutral: resolveColor('text-neutral', '#3b82f6'),
+                    info: resolveColor('text-info', '#6366f1'),
+                    success: resolveColor('text-success', '#22c55e'),
+                    warning: resolveColor('text-warning', '#f59e0b'),
+                    error: resolveColor('text-error', '#ef4444'),
+                    text: resolveColor('text-base-content', '#1f2937'),
+                    grid: resolveColor('border-base-200', '#e5e7eb')
+                };
+            },
+
+            renderCharts() {
+                const colors = this.getThemeColors();
+                
+                // 1. Content Overview - Posts Status
+                if (this.$refs.postsDonut) {
+                    this.renderDonutChart(this.$refs.postsDonut,
+                        [this.contentStats.posts_published, this.contentStats.posts_draft],
+                        ['已发布', '草稿'],
+                        [colors.success, colors.neutral],
+                        120
+                    );
+                }
+
+                // 2. Comment Analytics
+                if (this.$refs.commentTrendChart) {
+                    this.renderAreaChart(this.$refs.commentTrendChart, 
+                        [{ name: '评论数', data: this.chartComments.trend_data }], 
+                        this.chartComments.trend_labels, 
+                        colors.primary
+                    );
+                }
+                if (this.$refs.commentStatusChart) {
+                    this.renderDonutChart(this.$refs.commentStatusChart, 
+                        this.chartComments.status, 
+                        ['已通过', '待审核'], 
+                        [colors.success, colors.warning]
+                    );
+                }
+                if (this.$refs.topCommentersChart) {
+                    this.renderBarChart(this.$refs.topCommentersChart,
+                        [{ name: '评论数', data: this.chartComments.top_counts }],
+                        this.chartComments.top_users,
+                        colors.secondary
+                    );
+                }
+
+                // 3. User Activity
+                if (this.$refs.userRolesChart) {
+                    this.renderDonutChart(this.$refs.userRolesChart,
+                        this.chartUsers.roles_data,
+                        this.chartUsers.roles_labels,
+                        [colors.primary, colors.secondary, colors.accent, colors.neutral]
+                    );
+                }
+
+                // 4. Traffic Analytics
+                this.updateTrafficChart(); // Initial render
+                
+                if (this.$refs.topArticlesChart) {
+                    this.renderBarChartHorizontal(this.$refs.topArticlesChart,
+                        [{ name: '阅读量', data: this.chartTraffic.top_articles_data }],
+                        this.chartTraffic.top_articles_labels,
+                        colors.accent,
+                        this.chartTraffic.top_articles_urls
+                    );
+                }
+
+                // 5. System Status
+                if (this.$refs.cpuChart && this.systemStats) {
+                    this.renderRadialBar(this.$refs.cpuChart, [this.systemStats.cpu], 'CPU', colors.error);
+                }
+                if (this.$refs.memoryChart && this.systemStats) {
+                    this.renderRadialBar(this.$refs.memoryChart, [this.systemStats.memory_percent], '内存', colors.warning);
+                }
+                if (this.$refs.diskChart && this.systemStats) {
+                    this.renderRadialBar(this.$refs.diskChart, [this.systemStats.disk_percent], '硬盘', colors.success);
+                }
+            },
+
+            updateTrafficChart() {
+                if (!this.$refs.trafficTrendChart) return;
+                
+                const colors = this.getThemeColors();
+                let data = this.chartTraffic.trend_data;
+                let labels = this.chartTraffic.trend_labels;
+
+                if (this.trafficPeriod === '7d') {
+                    data = data.slice(-7);
+                    labels = labels.slice(-7);
+                }
+
+                // Destroy existing chart if needed (ApexCharts usually handles updates, but for full replace: )
+                // Here we just render over it.
+                this.renderLineChart(this.$refs.trafficTrendChart,
+                    [{ name: '访问量', data: data }],
+                    labels,
+                    colors.info
+                );
+            },
+
+            // --- Chart Helper Functions ---
+            
+            commonOptions() {
+                const colors = this.getThemeColors();
+                return {
+                    chart: { 
+                        fontFamily: 'inherit', 
+                        background: 'transparent',
+                        toolbar: { show: false },
+                        animations: { enabled: true }
+                    },
+                    theme: { mode: 'light' },
+                    dataLabels: { enabled: false },
+                    grid: { borderColor: colors.grid, strokeDashArray: 4 },
+                    xaxis: { 
+                        labels: { style: { colors: colors.text } },
+                        axisBorder: { show: false },
+                        axisTicks: { show: false }
+                    },
+                    yaxis: { labels: { style: { colors: colors.text } } },
+                    tooltip: { theme: 'dark' },
+                    legend: { labels: { colors: colors.text } }
+                };
+            },
+
+            renderAreaChart(el, series, categories, color) {
+                const options = {
+                    ...this.commonOptions(),
+                    series: series,
+                    chart: { type: 'area', height: 250, ...this.commonOptions().chart },
+                    colors: [color],
+                    fill: {
+                        type: 'gradient',
+                        gradient: { shadeIntensity: 1, opacityFrom: 0.7, opacityTo: 0.1, stops: [0, 90, 100] }
+                    },
+                    stroke: { curve: 'smooth', width: 2 },
+                    xaxis: { ...this.commonOptions().xaxis, categories: categories }
+                };
+                if(el._chart) el._chart.destroy();
+                el._chart = new ApexCharts(el, options);
+                el._chart.render();
+            },
+
+            renderLineChart(el, series, categories, color) {
+                const options = {
+                    ...this.commonOptions(),
+                    series: series,
+                    chart: { type: 'line', height: 300, ...this.commonOptions().chart },
+                    colors: [color],
+                    stroke: { curve: 'smooth', width: 3 },
+                    xaxis: { ...this.commonOptions().xaxis, categories: categories }
+                };
+                if(el._chart) el._chart.destroy();
+                el._chart = new ApexCharts(el, options);
+                el._chart.render();
+            },
+
+            renderBarChart(el, series, categories, color) {
+                const options = {
+                    ...this.commonOptions(),
+                    series: series,
+                    chart: { type: 'bar', height: 250, ...this.commonOptions().chart },
+                    colors: [color],
+                    plotOptions: { bar: { borderRadius: 4, columnWidth: '50%' } },
+                    xaxis: { ...this.commonOptions().xaxis, categories: categories }
+                };
+                if(el._chart) el._chart.destroy();
+                el._chart = new ApexCharts(el, options);
+                el._chart.render();
+            },
+
+            renderBarChartHorizontal(el, series, categories, color, urls = []) {
+                const options = {
+                    ...this.commonOptions(),
+                    series: series,
+                    chart: { 
+                        type: 'bar', 
+                        height: 250, 
+                        ...this.commonOptions().chart,
+                        events: {
+                            dataPointSelection: (event, chartContext, config) => {
+                                if (urls && urls[config.dataPointIndex]) {
+                                    window.open(urls[config.dataPointIndex], '_blank');
+                                }
+                            }
+                        }
+                    },
+                    colors: [color],
+                    plotOptions: { bar: { horizontal: true, borderRadius: 4, barHeight: '50%' } },
+                    xaxis: { ...this.commonOptions().xaxis, categories: categories },
+                    tooltip: {
+                        ...this.commonOptions().tooltip,
+                        y: {
+                            formatter: function(val) {
+                                return val + " 次阅读 (点击查看)";
+                            }
+                        }
+                    }
+                };
+                if(el._chart) el._chart.destroy();
+                el._chart = new ApexCharts(el, options);
+                el._chart.render();
+            },
+
+            renderDonutChart(el, series, labels, colors, height=250) {
+                const options = {
+                    ...this.commonOptions(),
+                    series: series,
+                    labels: labels,
+                    chart: { type: 'donut', height: height, ...this.commonOptions().chart },
+                    colors: colors,
+                    stroke: { show: false },
+                    plotOptions: {
+                        pie: { donut: { size: '70%', labels: { show: height > 150, total: { show: height > 150, label: '总计', color: this.getThemeColors().text } } } }
+                    },
+                    legend: { show: height > 150 }
+                };
+                if(el._chart) el._chart.destroy();
+                el._chart = new ApexCharts(el, options);
+                el._chart.render();
+            },
+            
+            renderPieChart(el, series, labels, colors) {
+                const options = {
+                    ...this.commonOptions(),
+                    series: series,
+                    labels: labels,
+                    chart: { type: 'pie', height: 250, ...this.commonOptions().chart },
+                    colors: colors,
+                    stroke: { show: false }
+                };
+                if(el._chart) el._chart.destroy();
+                el._chart = new ApexCharts(el, options);
+                el._chart.render();
+            },
+
+            renderRadialBar(el, series, label, color) {
+                const options = {
+                    ...this.commonOptions(),
+                    series: series,
+                    chart: { type: 'radialBar', height: 200, ...this.commonOptions().chart },
+                    colors: [color],
+                    plotOptions: {
+                        radialBar: {
+                            hollow: { size: '60%' },
+                            dataLabels: {
+                                show: true,
+                                name: { show: true, color: this.getThemeColors().text },
+                                value: { show: true, color: this.getThemeColors().text, formatter: (val) => val + '%' }
+                            }
+                        }
+                    },
+                    labels: [label]
+                };
+                if(el._chart) el._chart.destroy();
+                el._chart = new ApexCharts(el, options);
+                el._chart.render();
+            }
+        }));
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Data Injection -->
+{{ content_stats|json_script:"content-stats-data" }}
+{{ chart_comments|json_script:"chart-comments-data" }}
+{{ chart_users|json_script:"chart-users-data" }}
+{{ chart_traffic|json_script:"chart-traffic-data" }}
+{{ user_stats|json_script:"user-stats-data" }}
+{{ system_stats|json_script:"system-stats-data" }}
+
+<div x-data="dashboardStats">
+
+    <!-- Header -->
+    <div class="mb-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+            <h1 class="text-3xl font-bold text-base-content">欢迎回来, {{ user.username }}! 👋</h1>
+            <p class="text-base-content/60 mt-1">{{ config.DASHBOARD_WELCOME_TEXT|default:"这里是您的站点概览，祝您有美好的一天。" }}</p>
+        </div>
+        <div class="flex gap-2">
+            <a href="{% url 'administration:post_create' %}" class="btn btn-primary btn-sm gap-2">
+                <span class="material-symbols-outlined text-lg">edit_square</span>
+                写文章
+            </a>
+            <a href="/" target="_blank" class="btn btn-ghost btn-sm gap-2">
+                <span class="material-symbols-outlined text-lg">open_in_new</span>
+                访问站点
+            </a>
+        </div>
+    </div>
+
+    <!-- 1. Content Overview -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Posts -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body p-5 flex flex-row items-center justify-between">
+                <div>
+                    <div class="stat-title text-sm font-medium text-base-content/70">文章总数</div>
+                    <div class="stat-value text-3xl font-bold text-primary mt-1" x-text="contentStats.posts_total">0</div>
+                    <div class="text-xs text-base-content/60 mt-2 flex flex-col gap-1">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-success"></span> 已发布: <span x-text="contentStats.posts_published">0</span></span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-neutral"></span> 草稿: <span x-text="contentStats.posts_draft">0</span></span>
+                    </div>
+                </div>
+                <div x-ref="postsDonut" class="w-20 h-20"></div>
+            </div>
+        </div>
+        
+        <!-- Pages -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body p-5">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="stat-title text-sm font-medium text-base-content/70">页面总数</div>
+                        <div class="stat-value text-3xl font-bold text-secondary mt-1" x-text="contentStats.pages_total">0</div>
+                    </div>
+                    <span class="material-symbols-outlined text-4xl text-secondary/20">description</span>
+                </div>
+                <div class="mt-4">
+                    <progress class="progress progress-secondary w-full" :value="100" max="100"></progress>
+                </div>
+            </div>
+        </div>
+
+        <!-- Media -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body p-5">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="stat-title text-sm font-medium text-base-content/70">媒体文件</div>
+                        <div class="stat-value text-3xl font-bold text-accent mt-1" x-text="contentStats.media_count">0</div>
+                    </div>
+                    <span class="material-symbols-outlined text-4xl text-accent/20">perm_media</span>
+                </div>
+                <div class="text-sm text-base-content/60 mt-2">
+                    占用空间: <span class="font-bold text-base-content" x-text="contentStats.media_size_mb + ' MB'">0 MB</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Taxonomy -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body p-5">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <div class="stat-title text-sm font-medium text-base-content/70">分类 & 标签</div>
+                        <div class="flex gap-4 mt-1">
+                            <div>
+                                <div class="text-2xl font-bold text-info" x-text="contentStats.categories_total">0</div>
+                                <div class="text-xs text-base-content/60">分类</div>
+                            </div>
+                            <div class="divider divider-horizontal mx-0"></div>
+                            <div>
+                                <div class="text-2xl font-bold text-warning" x-text="contentStats.tags_total">0</div>
+                                <div class="text-xs text-base-content/60">标签</div>
+                            </div>
+                        </div>
+                    </div>
+                    <span class="material-symbols-outlined text-4xl text-info/20">category</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Comment Analytics -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Status Distribution -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">评论状态分布</h3>
+                <div x-ref="commentStatusChart" class="w-full h-64"></div>
+            </div>
+        </div>
+        
+        <!-- Trend -->
+        <div class="card bg-base-100 shadow-sm border border-base-200 lg:col-span-1">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">近30天评论趋势</h3>
+                <div x-ref="commentTrendChart" class="w-full h-64"></div>
+            </div>
+        </div>
+
+        <!-- Top Commenters -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">活跃评论者 TOP5</h3>
+                <div x-ref="topCommentersChart" class="w-full h-64"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. User Activity & Traffic -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- User Activity -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">用户角色分布</h3>
+                <div x-ref="userRolesChart" class="w-full h-48"></div>
+                
+                <div class="divider my-2"></div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="text-center">
+                        <div class="text-xs text-base-content/60">7日活跃用户</div>
+                        <div class="text-2xl font-bold text-primary" x-text="userStats.active_7d">0</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="text-xs text-base-content/60">本周新增</div>
+                        <div class="flex items-center justify-center gap-1 text-2xl font-bold" :class="userStats.direction === 'up' ? 'text-success' : 'text-error'">
+                            <span x-text="userStats.new_this_week">0</span>
+                            <span class="material-symbols-outlined text-lg" x-text="userStats.direction === 'up' ? 'arrow_upward' : 'arrow_downward'"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Traffic Trend -->
+        <div class="card bg-base-100 shadow-sm border border-base-200 lg:col-span-2">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="card-title text-base">访问量趋势</h3>
+                    <div class="join">
+                        <button class="join-item btn btn-xs" :class="trafficPeriod === '7d' ? 'btn-active' : ''" @click="trafficPeriod = '7d'; updateTrafficChart()">7天</button>
+                        <button class="join-item btn btn-xs" :class="trafficPeriod === '30d' ? 'btn-active' : ''" @click="trafficPeriod = '30d'; updateTrafficChart()">30天</button>
+                    </div>
+                </div>
+                <div x-ref="trafficTrendChart" class="w-full h-80"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Top Articles & Latest Comments -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Top Articles -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">热门文章 TOP5 (点击跳转)</h3>
+                <div x-ref="topArticlesChart" class="w-full h-64"></div>
+            </div>
+        </div>
+        
+        <!-- Latest Comments -->
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="card-title text-base">最新评论</h3>
+                    <a href="{% url 'administration:comment_list' %}" class="btn btn-xs btn-ghost">全部</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="table table-sm">
+                        <thead>
+                            <tr>
+                                <th>用户</th>
+                                <th>内容</th>
+                                <th>状态</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for comment in recent_comments %}
+                            <tr>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <div class="avatar">
+                                            <div class="w-6 rounded-full">
+                                                <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}" />
+                                            </div>
+                                        </div>
+                                        <span class="text-xs">{{ comment.user.nickname|default:comment.user.username }}</span>
+                                    </div>
+                                </td>
+                                <td class="max-w-[150px] truncate" title="{{ comment.content }}">{{ comment.content }}</td>
+                                <td>
+                                    {% if comment.active %}
+                                    <span class="badge badge-success badge-xs"></span>
+                                    {% else %}
+                                    <span class="badge badge-warning badge-xs"></span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="3" class="text-center text-base-content/50 text-xs py-4">暂无评论</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. System Status -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body items-center text-center">
+                <h3 class="card-title text-sm">CPU 占用</h3>
+                <div x-ref="cpuChart" class="w-full"></div>
+                <div class="text-xs text-base-content/60" x-text="systemStats ? systemStats.cpu + '%' : 'N/A'"></div>
+            </div>
+        </div>
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body items-center text-center">
+                <h3 class="card-title text-sm">内存使用</h3>
+                <div x-ref="memoryChart" class="w-full"></div>
+                <div class="text-xs text-base-content/60" x-text="systemStats ? systemStats.memory_percent + '%' : 'N/A'"></div>
+            </div>
+        </div>
+        <div class="card bg-base-100 shadow-sm border border-base-200">
+            <div class="card-body items-center text-center">
+                <h3 class="card-title text-sm">硬盘使用</h3>
+                <div x-ref="diskChart" class="w-full"></div>
+                <div class="text-xs text-base-content/60" x-text="systemStats ? systemStats.disk_percent + '%' : 'N/A'"></div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

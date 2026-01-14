@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 class="text-4xl font-bold mb-8 text-center">分类</h1>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% for category in categories %}
+    <a href="{% url 'post_by_category' category.slug %}" class="card bg-base-100 shadow-xl hover:shadow-2xl transition-all hover:-translate-y-1">
+        <div class="card-body items-center text-center">
+            <h2 class="card-title text-2xl">{{ category.name }}</h2>
+            <p>{{ category.description }}</p>
+            <div class="badge badge-primary mt-4">{{ category.posts.count }} 篇文章</div>
+        </div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

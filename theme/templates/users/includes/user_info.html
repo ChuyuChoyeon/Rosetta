@@ -1,0 +1,75 @@
+<div class="space-y-6">
+    <!-- Basic Info -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text font-bold text-base-content/60">昵称</span>
+            </label>
+            <div class="text-lg">{{ profile_user.nickname|default:profile_user.username }}</div>
+        </div>
+
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text font-bold text-base-content/60">邮箱</span>
+            </label>
+            <div class="text-lg">{{ profile_user.email|default:"未设置" }}</div>
+        </div>
+
+        <div class="form-control md:col-span-2">
+            <label class="label">
+                <span class="label-text font-bold text-base-content/60">个人简介</span>
+            </label>
+            <div class="text-lg bg-base-200/50 p-4 rounded-lg min-h-[4rem]">
+                {{ profile_user.bio|default:"这位用户很懒，什么都没写~"|linebreaksbr }}
+            </div>
+        </div>
+
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text font-bold text-base-content/60">个人网站</span>
+            </label>
+            <div class="text-lg">
+                {% if profile_user.website %}
+                <a href="{{ profile_user.website }}" target="_blank" class="link link-primary flex items-center gap-2">
+                    {{ profile_user.website }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+                {% else %}
+                <span class="text-base-content/40">未设置</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text font-bold text-base-content/60">GitHub</span>
+            </label>
+            <div class="text-lg">
+                {% if profile_user.github %}
+                <a href="{{ profile_user.github }}" target="_blank" class="link link-primary flex items-center gap-2">
+                    {{ profile_user.github }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+                </a>
+                {% else %}
+                <span class="text-base-content/40">未设置</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text font-bold text-base-content/60">注册时间</span>
+            </label>
+            <div class="text-lg">{{ profile_user.date_joined|date:"Y年m月d日 H:i" }}</div>
+        </div>
+        
+        <div class="form-control">
+            <label class="label">
+                <span class="label-text font-bold text-base-content/60">最后登录</span>
+            </label>
+            <div class="text-lg">{{ profile_user.last_login|date:"Y年m月d日 H:i"|default:"从未登录" }}</div>
+        </div>
+    </div>
+
+    <!-- Actions removed as they are handled in the parent template -->
+</div>

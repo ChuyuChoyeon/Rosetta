@@ -1,0 +1,127 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static admin_urls %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        .debug-container { padding: 20px; max-width: 1200px; margin: 0 auto; }
+        .debug-card { background: #fff; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 20px; padding: 20px; }
+        .debug-card h2 { margin-top: 0; color: #333; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 18px; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .stat-item { background: #f8f9fa; padding: 15px; border-radius: 4px; text-align: center; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #417690; }
+        .stat-label { color: #666; font-size: 13px; margin-top: 5px; }
+        .action-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
+        .action-form { display: flex; flex-direction: column; gap: 10px; }
+        .form-row { display: flex; align-items: center; gap: 10px; }
+        .form-row label { width: 80px; }
+        .btn-primary { background: #417690; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; }
+        .btn-primary:hover { background: #205067; }
+        .status-ok { color: green; }
+        .status-error { color: red; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 4px; overflow-x: auto; font-size: 12px; }
+    </style>
+{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% translate 'Home' %}</a>
+&rsaquo; 调试工具箱
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="debug-container">
+    <h1>调试工具箱</h1>
+    
+    {% if messages %}
+    <ul class="messagelist">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <div class="debug-card">
+        <h2>系统状态</h2>
+        <div class="stat-grid">
+            <div class="stat-item">
+                <div class="stat-value {% if db_ok %}status-ok{% else %}status-error{% endif %}">
+                    {% if db_ok %}正常{% else %}异常{% endif %}
+                </div>
+                <div class="stat-label">数据库连接</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ counts.users }}</div>
+                <div class="stat-label">用户总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ counts.posts }}</div>
+                <div class="stat-label">文章总数</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value">{{ counts.comments }}</div>
+                <div class="stat-label">评论总数</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-grid">
+        <!-- Mock Data Generator -->
+        <div class="debug-card">
+            <h2>生成 Mock 数据</h2>
+            <form method="post" class="action-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="generate_mock">
+                
+                <div class="form-row">
+                    <label>用户数:</label>
+                    <input type="number" name="users" value="{{ defaults.users }}" min="0">
+                </div>
+                <div class="form-row">
+                    <label>分类数:</label>
+                    <input type="number" name="categories" value="{{ defaults.categories }}" min="0">
+                </div>
+                <div class="form-row">
+                    <label>文章数:</label>
+                    <input type="number" name="posts" value="{{ defaults.posts }}" min="0">
+                </div>
+                <div class="form-row">
+                    <label>评论数:</label>
+                    <input type="number" name="comments" value="{{ defaults.comments }}" min="0">
+                </div>
+                <div class="form-row">
+                    <label>密码:</label>
+                    <input type="text" name="password" value="{{ defaults.password }}">
+                </div>
+                
+                <button type="submit" class="btn-primary" onclick="return confirm('确定要生成大量测试数据吗？')">开始生成</button>
+            </form>
+        </div>
+
+        <!-- System Actions -->
+        <div class="debug-card">
+            <h2>系统操作</h2>
+            <div class="action-form">
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="clear_cache">
+                    <button type="submit" class="btn-primary" style="width: 100%">清理系统缓存</button>
+                </form>
+                
+                <form method="post" style="margin-top: 10px;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="test_email">
+                    <button type="submit" class="btn-primary" style="width: 100%">发送测试邮件</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="debug-card">
+        <h2>已注册 URL 模式 (前20条)</h2>
+        <pre>{% for pattern in url_patterns %}{{ pattern }}
+{% endfor %}</pre>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,103 @@
+{% extends "administration/base.html" %}
+
+{% block title %}{% if form.instance.pk %}编辑标签: {{ form.instance.name }}{% else %}新建标签{% endif %} - Rosetta Dashboard{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li><a href="{% url 'administration:tag_list' %}">标签管理</a></li>
+        <li>{% if form.instance.pk %}编辑{% else %}新建{% endif %}</li>
+    </ul>
+</div>
+
+<div class="max-w-2xl mx-auto">
+    <div class="card bg-base-100 shadow-xl border border-base-200">
+        <div class="card-body">
+            <h2 class="card-title mb-6">
+                {% if form.instance.pk %}编辑标签: {{ form.instance.name }}{% else %}新建标签{% endif %}
+            </h2>
+            
+            <form method="post" novalidate>
+                {% csrf_token %}
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-error mb-4">
+                    <span class="material-symbols-outlined">error</span>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Name -->
+                <div class="form-control w-full mb-4">
+                    <label class="label">
+                        <span class="label-text">名称</span>
+                    </label>
+                    <input type="text" name="name" value="{{ form.name.value|default:'' }}" class="input input-bordered w-full {% if form.name.errors %}input-error{% endif %}" required />
+                    {% if form.name.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+
+                <!-- Slug -->
+                <div class="form-control w-full mb-4">
+                    <label class="label">
+                        <span class="label-text">别名 (Slug)</span>
+                    </label>
+                    <input type="text" name="slug" value="{{ form.slug.value|default:'' }}" class="input input-bordered w-full {% if form.slug.errors %}input-error{% endif %}" placeholder="留空自动生成" />
+                    {% if form.slug.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+
+                <!-- Color -->
+                <div class="form-control w-full mb-4">
+                    <label class="label">
+                        <span class="label-text">颜色</span>
+                    </label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {% for value, label in form.fields.color.choices %}
+                        <label class="cursor-pointer label border border-base-200 rounded-lg hover:bg-base-200 p-2 transition-colors">
+                            <span class="label-text flex items-center gap-2">
+                                <span class="badge badge-{{ value }} badge-md"></span>
+                                {{ label|cut:" ("|cut:")" }}
+                            </span>
+                            <input type="radio" name="color" value="{{ value }}" class="radio radio-sm radio-primary" {% if form.color.value == value %}checked{% endif %} />
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% if form.color.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.color.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+
+                <!-- Active -->
+                <div class="form-control w-full mb-6">
+                    <label class="label cursor-pointer justify-start gap-4">
+                        <span class="label-text">是否可见</span> 
+                        <input type="checkbox" name="is_active" class="checkbox checkbox-primary" {% if form.is_active.value %}checked{% endif %} />
+                    </label>
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">取消勾选后，该标签将在前台隐藏</span>
+                    </label>
+                </div>
+
+                <div class="card-actions justify-end mt-4">
+                    <a href="{% url 'administration:tag_list' %}" class="btn btn-ghost">取消</a>
+                    <button type="submit" class="btn btn-primary">保存</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

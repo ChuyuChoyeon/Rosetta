@@ -1,0 +1,38 @@
+            {% if comments %}
+            <div class="space-y-6">
+                {% for comment in comments %}
+                <div class="card bg-base-100 shadow-lg hover:shadow-xl transition-shadow duration-300">
+                    <div class="card-body">
+                        <h4 class="card-title text-base mb-2">
+                            <span class="font-normal text-base-content/70">评论了文章：</span>
+                            <a href="{% url 'post_detail' comment.post.slug %}" class="link link-primary hover:link-accent">
+                                {{ comment.post.title }}
+                            </a>
+                        </h4>
+                        
+                        <div class="bg-base-200 p-4 rounded-lg my-2 flex gap-4">
+                            <p class="text-base-content/80">{{ comment.content|truncatechars:150 }}</p>
+                        </div>
+                        
+                        <div class="flex justify-between items-center mt-2 text-xs text-base-content/60">
+                            <span>{{ comment.created_at|date:"Y-m-d H:i" }}</span>
+                            <div class="flex items-center gap-2">
+                                {% if user == comment.user %}
+                                <form action="{% url 'delete_comment' comment.id %}" method="post" class="inline" onsubmit="return confirm('确定要删除这条评论吗？');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-ghost btn-xs text-error">删除</button>
+                                </form>
+                                {% endif %}
+                                <a href="{% url 'post_detail' comment.post.slug %}" class="btn btn-ghost btn-xs">查看详情</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="flex flex-col items-center justify-center py-16 bg-base-100 rounded-xl shadow-sm border border-base-200">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" /></svg>
+                <p class="text-base-content/50">该用户暂时没有发表评论</p>
+            </div>
+            {% endif %}

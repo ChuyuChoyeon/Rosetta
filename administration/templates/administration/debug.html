@@ -1,0 +1,185 @@
+{% extends "administration/base.html" %}
+
+{% block title %}调试工具 - Rosetta 管理后台{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto">
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h1 class="text-3xl font-bold mb-2 flex items-center gap-2">
+                <span class="material-symbols-outlined text-warning text-4xl">bug_report</span>
+                调试工具箱
+            </h1>
+            <p class="text-base-content/60">用于开发和维护的系统工具集，请谨慎操作。</p>
+        </div>
+        <div class="text-sm breadcrumbs">
+            <ul>
+                <li><a href="{% url 'administration:index' %}">首页</a></li>
+                <li>调试工具</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="stats shadow bg-base-100 border border-base-200">
+            <div class="stat">
+                <div class="stat-figure text-secondary">
+                    <span class="material-symbols-outlined text-3xl">database</span>
+                </div>
+                <div class="stat-title">数据库连接</div>
+                <div class="stat-value {% if db_ok %}text-success{% else %}text-error{% endif %} text-2xl">
+                    {% if db_ok %}正常{% else %}异常{% endif %}
+                </div>
+                <div class="stat-desc">PostgreSQL / SQLite</div>
+            </div>
+        </div>
+        
+        <div class="stats shadow bg-base-100 border border-base-200">
+            <div class="stat">
+                <div class="stat-figure text-primary">
+                    <span class="material-symbols-outlined text-3xl">group</span>
+                </div>
+                <div class="stat-title">用户总数</div>
+                <div class="stat-value text-2xl">{{ counts.users }}</div>
+                <div class="stat-desc">已注册账户</div>
+            </div>
+        </div>
+        
+        <div class="stats shadow bg-base-100 border border-base-200">
+            <div class="stat">
+                <div class="stat-figure text-accent">
+                    <span class="material-symbols-outlined text-3xl">article</span>
+                </div>
+                <div class="stat-title">文章总数</div>
+                <div class="stat-value text-2xl">{{ counts.posts }}</div>
+                <div class="stat-desc">全站发布内容</div>
+            </div>
+        </div>
+        
+        <div class="stats shadow bg-base-100 border border-base-200">
+            <div class="stat">
+                <div class="stat-figure text-info">
+                    <span class="material-symbols-outlined text-3xl">forum</span>
+                </div>
+                <div class="stat-title">评论总数</div>
+                <div class="stat-value text-2xl">{{ counts.comments }}</div>
+                <div class="stat-desc">用户互动</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Mock Data Generator -->
+        <div class="col-span-1 lg:col-span-2">
+            <div class="card bg-base-100 shadow-sm border border-base-200 h-full">
+                <div class="card-body">
+                    <h2 class="card-title mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">science</span>
+                        生成 Mock 数据
+                    </h2>
+                    <p class="text-sm text-base-content/70 mb-6">快速生成用于测试的随机数据。生成的密码默认为 "password123"。</p>
+                    
+                    <form method="post" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="generate_mock">
+                        
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">用户数</span></label>
+                            <input type="number" name="users" value="{{ defaults.users }}" min="0" class="input input-bordered focus:input-primary">
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">分类数</span></label>
+                            <input type="number" name="categories" value="{{ defaults.categories }}" min="0" class="input input-bordered focus:input-primary">
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">文章数</span></label>
+                            <input type="number" name="posts" value="{{ defaults.posts }}" min="0" class="input input-bordered focus:input-primary">
+                        </div>
+                        
+                        <div class="form-control">
+                            <label class="label"><span class="label-text">评论数</span></label>
+                            <input type="number" name="comments" value="{{ defaults.comments }}" min="0" class="input input-bordered focus:input-primary">
+                        </div>
+                        
+                        <div class="form-control md:col-span-2">
+                            <label class="label"><span class="label-text">默认密码</span></label>
+                            <input type="text" name="password" value="{{ defaults.password }}" class="input input-bordered focus:input-primary font-mono">
+                        </div>
+                        
+                        <div class="md:col-span-2 flex justify-end mt-4">
+                            <button type="submit" class="btn btn-primary w-full md:w-auto gap-2" onclick="return confirm('确定要生成大量测试数据吗？这可能会影响现有数据展示。')">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                                开始生成
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Actions & URLs -->
+        <div class="col-span-1 flex flex-col gap-8">
+            <!-- Quick Actions -->
+            <div class="card bg-base-100 shadow-sm border border-base-200">
+                <div class="card-body">
+                    <h2 class="card-title mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">build</span>
+                        系统操作
+                    </h2>
+                    <div class="flex flex-col gap-4">
+                        <form method="post" class="w-full">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="clear_cache">
+                            <button type="submit" class="btn btn-outline btn-warning w-full justify-between group hover:text-white">
+                                <span class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined">cleaning_services</span>
+                                    清理缓存
+                                </span>
+                                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </button>
+                        </form>
+                        
+                        <form method="post" class="w-full">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="test_email">
+                            <button type="submit" class="btn btn-outline btn-info w-full justify-between group hover:text-white">
+                                <span class="flex items-center gap-2">
+                                    <span class="material-symbols-outlined">mail</span>
+                                    发送测试邮件
+                                </span>
+                                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- URL Patterns -->
+            <div class="card bg-base-100 shadow-sm border border-base-200 flex-grow">
+                <div class="card-body p-0">
+                    <div class="p-6 pb-2 border-b border-base-200">
+                        <h2 class="card-title flex items-center gap-2">
+                            <span class="material-symbols-outlined text-accent">link</span>
+                            路由表 (Top 20)
+                        </h2>
+                    </div>
+                    <div class="overflow-y-auto max-h-[400px] p-2">
+                        <table class="table table-xs font-mono">
+                            <tbody>
+                                {% for pattern in url_patterns %}
+                                <tr class="hover">
+                                    <td class="text-base-content/70">{{ pattern }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

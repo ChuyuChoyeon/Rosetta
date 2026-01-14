@@ -1,0 +1,37 @@
+{% for category in categories %}
+<tr class="hover">
+    <th>
+        <label>
+            <input type="checkbox" name="selected_ids" value="{{ category.pk }}" class="checkbox checkbox-xs row-checkbox" onchange="updateBulkToolbar()" />
+        </label>
+    </th>
+    <th class="font-mono text-xs opacity-50">{{ category.id }}</th>
+    <td class="font-bold">{{ category.name }}</td>
+    <td class="font-mono text-sm opacity-70">{{ category.slug }}</td>
+    <td>
+        <span class="badge badge-ghost badge-sm">{{ category.post_count }} 文章</span>
+    </td>
+    <td>
+        <div class="join">
+            <a href="{% url 'category_detail' category.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip" data-tip="查看">
+                <span class="material-symbols-outlined text-base">visibility</span>
+            </a>
+            <a href="{% url 'administration:category_edit' category.pk %}" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+                <span class="material-symbols-outlined text-base">edit</span>
+            </a>
+            <a href="{% url 'administration:category_delete' category.pk %}" class="btn btn-ghost btn-xs join-item text-error tooltip" data-tip="删除">
+                <span class="material-symbols-outlined text-base">delete</span>
+            </a>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="6" class="text-center py-8 text-base-content/50">
+        <div class="flex flex-col items-center gap-2">
+            <span class="material-symbols-outlined text-4xl opacity-20">category</span>
+            <span>暂无分类</span>
+        </div>
+    </td>
+</tr>
+{% endfor %}

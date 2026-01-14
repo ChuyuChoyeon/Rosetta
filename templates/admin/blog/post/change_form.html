@@ -1,0 +1,32 @@
+{% extends "admin/change_form.html" %}
+
+{% block field_sets %}
+    <div class="flex flex-col lg:flex-row gap-6">
+        <!-- Main Content (Left Column) -->
+        <div class="w-full lg:w-9/12 space-y-6">
+            {% for fieldset in adminform %}
+                {% if fieldset.name == None %}
+                    {% include "admin/includes/fieldset.html" %}
+                {% endif %}
+            {% endfor %}
+            
+            <!-- Inlines (Comments, etc.) -->
+            {% for inline_admin_formset in inline_admin_formsets %}
+                {% include inline_admin_formset.opts.template %}
+            {% endfor %}
+        </div>
+
+        <!-- Sidebar (Right Column) -->
+        <div class="w-full lg:w-3/12 space-y-6">
+            {% for fieldset in adminform %}
+                {% if fieldset.name != None %}
+                    {% include "admin/includes/fieldset.html" %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block inline_field_sets %}
+    <!-- Inlines are handled in field_sets block to place them in left column -->
+{% endblock %}
