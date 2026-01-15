@@ -4,6 +4,9 @@
 {% block title %}仪表盘 - Rosetta Dashboard{% endblock %}
 
 {% block extra_head %}
+{% endblock %}
+
+{% block content %}
 <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('dashboardStats', () => ({
@@ -307,9 +310,6 @@
         }));
     });
 </script>
-{% endblock %}
-
-{% block content %}
 <!-- Data Injection -->
 {{ content_stats|json_script:"content-stats-data" }}
 {{ chart_comments|json_script:"chart-comments-data" }}

@@ -152,7 +152,7 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', function() {
+    (function() {
         // Captcha Refresh
         const captchaImages = document.querySelectorAll('.captcha');
         captchaImages.forEach(function(img) {
@@ -176,6 +176,6 @@
             captchaInput.classList.add('input', 'input-bordered', 'w-full', 'focus:input-primary');
             captchaInput.placeholder = "请输入计算结果或字符";
         }
-    });
+    })();
 </script>
 {% endblock %}

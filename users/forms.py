@@ -41,10 +41,10 @@ class UserProfileForm(forms.ModelForm):
             "email",
         ]
         widgets = {
-            "avatar": forms.ClearableFileInput(
+            "avatar": forms.FileInput(
                 attrs={"class": "file-input file-input-bordered w-full"}
             ),
-            "cover_image": forms.ClearableFileInput(
+            "cover_image": forms.FileInput(
                 attrs={"class": "file-input file-input-bordered w-full"}
             ),
             "bio": forms.Textarea(

@@ -20,7 +20,7 @@
     </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{{ config.SITE_HEADER|default:"Rosetta Dashboard" }}{% endblock %}</title>
+    <title>{% block title %}{{ config.SITE_HEADER.value|default:"Rosetta Dashboard" }}{% endblock %}</title>
     {% tailwind_css %}
     
     <!-- Alpine.js -->
@@ -34,37 +34,41 @@
 
     {% block extra_head %}{% endblock %}
     
-    <!-- FontAwesome (Required by EasyMDE) -->
+    <!-- FontAwesome (Required by Toast UI) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
-    <!-- Vditor Editor -->
-    <link rel="stylesheet" href="{% static 'theme/css/vditor.css' %}" />
-    <script src="{% static 'theme/js/vditor.min.js' %}"></script>
+    <!-- Toast UI Editor -->
+    <link rel="stylesheet" href="{% static 'theme/css/toastui-editor.min.css' %}" />
+    <link rel="stylesheet" href="{% static 'theme/css/toastui-editor-dark.min.css' %}" />
+    <script src="{% static 'theme/js/toastui-editor-all.min.js' %}"></script>
 
     <style>
-        /* EasyMDE Dark Mode / Theme Adaption */
-        [data-theme="dark"] .EasyMDEContainer {
+        /* Toast UI Dark Mode Overrides */
+        [data-theme="dark"] .toastui-editor-defaultUI {
             background-color: hsl(var(--b1));
-            color: hsl(var(--bc));
-        }
-        [data-theme="dark"] .editor-toolbar {
-            background-color: hsl(var(--b2));
             border-color: hsl(var(--b3));
         }
-        [data-theme="dark"] .editor-toolbar i {
+        [data-theme="dark"] .toastui-editor-defaultUI .toastui-editor-md-container,
+        [data-theme="dark"] .toastui-editor-defaultUI .toastui-editor-ww-container {
+            background-color: hsl(var(--b1));
+        }
+        [data-theme="dark"] .toastui-editor-mode-switch {
+            background-color: hsl(var(--b2));
+        }
+        [data-theme="dark"] .toastui-editor-mode-switch .tab-item {
             color: hsl(var(--bc));
         }
-        [data-theme="dark"] .editor-toolbar button:hover, 
-        [data-theme="dark"] .editor-toolbar button.active {
+        [data-theme="dark"] .toastui-editor-mode-switch .tab-item.active {
             background-color: hsl(var(--b3));
         }
-        [data-theme="dark"] .CodeMirror {
-            background-color: hsl(var(--b1));
-            color: hsl(var(--bc));
-            border-color: hsl(var(--b3));
+        [data-theme="dark"] .toastui-editor-defaultUI .toastui-editor-toolbar {
+            background-color: hsl(var(--b2));
         }
-        [data-theme="dark"] .editor-preview {
-            background-color: hsl(var(--b1));
+        [data-theme="dark"] .toastui-editor-toolbar-icons {
+            color: hsl(var(--bc));
+        }
+        [data-theme="dark"] .toastui-editor-defaultUI .ProseMirror {
+            color: hsl(var(--bc));
         }
         
         /* Local Material Symbols */
@@ -100,7 +104,7 @@
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="inline-block w-5 h-5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
             </label>
             <a href="{% url 'administration:index' %}" class="btn btn-ghost normal-case text-xl flex items-center gap-2 justify-start px-2">
-                {{ config.ADMIN_NAVBAR_TITLE|default:"Rosetta 管理后台" }}
+                {{ config.ADMIN_NAVBAR_TITLE.value|default:"Rosetta 管理后台" }}
             </a>
         </div>
         <div class="flex-none gap-2">
@@ -335,53 +339,6 @@
             form.appendChild(actionInput);
             form.submit();
         }
-
-        // Initialize Markdown Editor (Vditor adapter)
-        window.initVditor = function(containerId, inputId) {
-            const input = document.getElementById(inputId);
-            if (!input) {
-                console.error("Markdown input not found:", inputId);
-                return;
-            }
-
-            // Unhide the parent if hidden (Rosetta templates wrap input in .hidden)
-            if (input.parentElement.classList.contains('hidden')) {
-                input.parentElement.classList.remove('hidden');
-                input.parentElement.style.display = 'none'; // Keep input hidden but in DOM
-            } else {
-                 input.style.display = 'none';
-            }
-            
-            // Initialize Vditor
-            const vditor = new Vditor(containerId, {
-                height: 600,
-                mode: 'ir', // Instant Rendering mode
-                theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'classic',
-                cache: {
-                    enable: false,
-                },
-                preview: {
-                    theme: {
-                        current: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
-                    }
-                },
-                input: (value) => {
-                    input.value = value;
-                },
-                after: () => {
-                    vditor.setValue(input.value);
-                }
-            });
-            
-            // Sync theme changes
-            const observer = new MutationObserver(() => {
-                const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-                vditor.setTheme(isDark ? 'dark' : 'classic', isDark ? 'dark' : 'light');
-            });
-            observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-            
-            return vditor;
-        };
     </script>
     <!-- Global Delete Confirmation Modal -->
     <dialog id="delete_confirm_modal" class="modal">

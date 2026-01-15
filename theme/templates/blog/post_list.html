@@ -61,12 +61,11 @@
             
             <!-- Skeleton Loader -->
             <div id="post-skeleton" 
-                 class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3" 
-                 :class="viewMode === 'list' ? '!grid-cols-1' : ''"
-                 style="display: none;">
+                 class="grid gap-6" 
+                 :class="viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'">
                 {% for i in "123456" %}
                 <div class="card bg-base-100 shadow-xl" :class="viewMode === 'list' ? 'card-side' : ''">
-                    <div class="skeleton rounded-t-2xl" :class="viewMode === 'grid' ? 'h-48 w-full' : 'w-48 h-full min-h-[12rem] rounded-l-2xl rounded-tr-none'"></div>
+                    <figure class="skeleton" :class="viewMode === 'grid' ? 'h-48 w-full' : 'w-48 h-auto min-h-[12rem] shrink-0'"></figure>
                     <div class="card-body w-full">
                         <div class="skeleton h-6 w-3/4 mb-4"></div>
                         <div class="skeleton h-4 w-1/2 mb-2"></div>
@@ -100,37 +99,37 @@
                     {% endif %}
                     
                     <div class="card-body">
-                        <h2 class="card-title text-lg font-bold">
+                        <h2 class="card-title text-xl font-bold">
                             <a href="{% url 'post_detail' post.slug %}" class="hover:text-primary transition-colors line-clamp-2">{{ post.title }}</a>
                             {% if post.created_at|date:"Y-m-d" == now|date:"Y-m-d" %}
-                            <div class="badge badge-secondary">最新</div>
+                            <div class="badge badge-secondary badge-sm">最新</div>
                             {% endif %}
                         </h2>
                         
                         <!-- Metadata: Author, Date, Views, Comments, Word Count -->
-                        <div class="flex flex-wrap items-center gap-2 text-xs text-base-content/60 mb-2">
-                            <div class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[16px]">person</span>
-                                <span>{{ post.author.nickname|default:post.author.username }}</span>
+                        <div class="flex flex-wrap items-center gap-y-1 gap-x-2 text-xs text-base-content/70 mb-3">
+                            <div class="flex items-center gap-1" title="作者">
+                                <span class="material-symbols-outlined text-[14px]">person</span>
+                                <span class="font-medium">{{ post.author.nickname|default:post.author.username }}</span>
                             </div>
-                            <span>•</span>
-                            <div class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[16px]">calendar_today</span>
+                            <span class="text-base-content/30">•</span>
+                            <div class="flex items-center gap-1" title="发布日期">
+                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
                                 <span>{{ post.created_at|date:"Y-m-d" }}</span>
                             </div>
-                            <span>•</span>
-                            <div class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[16px]">visibility</span>
+                            <span class="text-base-content/30">•</span>
+                            <div class="flex items-center gap-1" title="阅读量">
+                                <span class="material-symbols-outlined text-[14px]">visibility</span>
                                 <span>{{ post.views }}</span>
                             </div>
-                            <span>•</span>
-                            <div class="flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[16px]">chat_bubble</span>
+                            <span class="text-base-content/30">•</span>
+                            <div class="flex items-center gap-1" title="评论数">
+                                <span class="material-symbols-outlined text-[14px]">chat_bubble</span>
                                 <span>{{ post.comments.count }}</span>
                             </div>
-                            <span>•</span>
+                            <span class="text-base-content/30">•</span>
                             <div class="flex items-center gap-1" title="字数统计">
-                                <span class="material-symbols-outlined text-[16px]">notes</span>
+                                <span class="material-symbols-outlined text-[14px]">notes</span>
                                 <span>{{ post.content|length }}字</span>
                             </div>
                         </div>

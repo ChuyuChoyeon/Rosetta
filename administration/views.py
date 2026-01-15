@@ -79,12 +79,13 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         media_root = settings.MEDIA_ROOT
         media_count = 0
         media_size = 0
-        for dirpath, dirnames, filenames in os.walk(media_root):
-            for f in filenames:
-                fp = os.path.join(dirpath, f)
-                if not os.path.islink(fp):
-                    media_count += 1
-                    media_size += os.path.getsize(fp)
+        if os.path.exists(media_root):
+            for dirpath, dirnames, filenames in os.walk(media_root):
+                for f in filenames:
+                    fp = os.path.join(dirpath, f)
+                    if not os.path.islink(fp):
+                        media_count += 1
+                        media_size += os.path.getsize(fp)
         media_size_mb = round(media_size / (1024 * 1024), 2)
 
         content_stats = {
@@ -713,6 +714,20 @@ class UserListView(BaseListView):
         return qs
 
 
+class UserCreateView(BaseCreateView):
+    """
+    用户创建视图 (新增)
+    允许管理员在后台直接创建用户
+    """
+    model = User
+    form_class = UserForm
+    success_url = reverse_lazy("administration:user_list")
+
+    def form_valid(self, form):
+        # 密码处理在 UserForm.save() 中
+        return super().form_valid(form)
+
+
 class UserUpdateView(BaseUpdateView):
     model = User
     form_class = UserForm
@@ -1103,6 +1118,7 @@ class DebugEmailView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             messages.error(request, f"邮件发送失败: {str(e)}")
         
         return self.get(request, *args, **kwargs)
+
 from constance import config
 from django.conf import settings as django_settings
 

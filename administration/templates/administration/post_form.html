@@ -44,9 +44,16 @@
                         </div>
 
                         <script>
-                            document.addEventListener('DOMContentLoaded', function() {
+                            (function() {
+                                if (typeof toastui === 'undefined') return;
+                                
+                                const editorEl = document.querySelector('#editor');
+                                if (!editorEl) return;
+                                // Avoid re-initialization if already initialized
+                                if (editorEl.innerHTML.trim() !== '') return;
+
                                 const editor = new toastui.Editor({
-                                    el: document.querySelector('#editor'),
+                                    el: editorEl,
                                     height: '600px',
                                     initialEditType: 'markdown',
                                     previewStyle: 'vertical',
@@ -84,7 +91,7 @@
                                     attributes: true,
                                     attributeFilter: ["data-theme"]
                                 });
-                            });
+                            })();
                         </script>
                         {% if form.content.errors %}
                         <label class="label">

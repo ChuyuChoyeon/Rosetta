@@ -3,7 +3,7 @@
 {% block title %}{{ profile_user.nickname|default:profile_user.username }} 的个人主页 - {{ config.SITE_NAME|default:"Rosetta" }}{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8" x-data="{ showAvatarModal: false, avatarUrl: '{{ profile_user.get_avatar_url }}' }">
     <div class="flex flex-col md:flex-row gap-8">
         <!-- Sidebar: User Info -->
         <div class="w-full md:w-1/4">
@@ -25,74 +25,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Avatar Lightbox Modal -->
+    <template x-teleport="body">
+        <div x-show="showAvatarModal" 
+             class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm transition-opacity duration-300"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @keydown.escape.window="showAvatarModal = false"
+             style="display: none;">
+            
+            <!-- Close Button -->
+            <button @click="showAvatarModal = false" class="absolute top-4 right-4 btn btn-circle btn-ghost text-white hover:bg-white/20 z-50">
+                <span class="material-symbols-outlined text-3xl">close</span>
+            </button>
+
+            <!-- Image Container -->
+            <div class="relative w-full h-full flex items-center justify-center p-4" @click.self="showAvatarModal = false">
+                <img :src="avatarUrl" 
+                     alt="Avatar Fullscreen" 
+                     class="max-h-[90vh] max-w-[95vw] object-contain rounded-lg shadow-2xl transition-transform duration-300 scale-100"
+                     @click.stop 
+                />
+            </div>
+        </div>
+    </template>
 </div>
 
 <!-- Edit Profile Modal -->
-{% if user == profile_user or user.is_staff %}
-<dialog id="profile_edit_modal" class="modal">
-  <div class="modal-box w-11/12 max-w-2xl">
-    <form method="dialog">
-      <button class="btn btn-sm btn-circle btn-ghost absolute right-2 top-2">✕</button>
-    </form>
-    <h3 class="font-bold text-lg mb-6">编辑个人资料 {% if user != profile_user %}(管理员模式){% endif %}</h3>
-    
-    <form method="post" enctype="multipart/form-data" action="{% url 'users:user_public_profile' profile_user.username %}?next={{ request.get_full_path }}" class="space-y-4">
-        {% csrf_token %}
-        
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-                <label class="label"><span class="label-text">头像</span></label>
-                <div class="flex items-center gap-4">
-                    <div class="avatar">
-                        <div class="w-12 h-12 rounded-full ring ring-base-200 ring-offset-base-100 ring-offset-2">
-                            <img src="{{ profile_user.get_avatar_url }}" alt="Current Avatar" />
-                        </div>
-                    </div>
-                    {{ form.avatar }}
-                </div>
-            </div>
-            <div class="form-control">
-                <label class="label"><span class="label-text">封面图</span></label>
-                {{ form.cover_image }}
-            </div>
-        </div>
-
-        <div class="form-control">
-            <label class="label"><span class="label-text">昵称</span></label>
-            {{ form.nickname }}
-        </div>
-
-        <div class="form-control">
-            <label class="label"><span class="label-text">邮箱</span></label>
-            {{ form.email }}
-        </div>
-
-        <div class="form-control">
-            <label class="label"><span class="label-text">个人简介</span></label>
-            {{ form.bio }}
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="form-control">
-                <label class="label"><span class="label-text">个人网站</span></label>
-                {{ form.website }}
-            </div>
-            <div class="form-control">
-                <label class="label"><span class="label-text">GitHub</span></label>
-                {{ form.github }}
-            </div>
-        </div>
-
-        <div class="modal-action">
-            <button type="button" class="btn" onclick="profile_edit_modal.close()">取消</button>
-            <button type="submit" class="btn btn-primary">保存更改</button>
-        </div>
-    </form>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
-{% endif %}
+{% include 'users/includes/edit_profile_modal.html' %}
 
 {% endblock %}

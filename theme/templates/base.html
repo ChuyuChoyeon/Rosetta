@@ -2,7 +2,8 @@
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
-    <title>{% block title %}{{ config.SITE_NAME|default:"Rosetta Blog" }}{% endblock %}</title>
+    <title>{% block title %}{{ config.SITE_NAME.value|default:"Rosetta Blog" }}{% endblock %}</title>
+    <link rel="shortcut icon" href="{% static 'core/img/favicon.ico' %}">
     
     <!-- Meta Tags -->
     {% include 'meta/meta.html' %}
@@ -10,6 +11,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <!-- Material Symbols -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
     {% compress css %}
     {% tailwind_css %}

@@ -95,6 +95,24 @@
                             </label>
                             {% endif %}
                         </div>
+
+                         <!-- Cover Image -->
+                         <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">封面图</span>
+                            </label>
+                            <input type="file" name="cover_image" class="file-input file-input-bordered w-full {% if form.cover_image.errors %}file-input-error{% endif %}" />
+                            {% if form.instance.cover_image %}
+                            <div class="mt-2 h-24 w-full rounded-lg overflow-hidden bg-base-200">
+                                <img src="{{ form.instance.cover_image.url }}" class="w-full h-full object-cover" />
+                            </div>
+                            {% endif %}
+                            {% if form.cover_image.errors %}
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ form.cover_image.errors.0 }}</span>
+                            </label>
+                            {% endif %}
+                        </div>
                     </div>
 
                     <!-- Permissions & Labels -->
