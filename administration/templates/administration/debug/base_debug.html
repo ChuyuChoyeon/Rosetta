@@ -1,6 +1,6 @@
 {% extends "administration/base.html" %}
 
-{% block title %}调试工具 - Rosetta 管理后台{% endblock %}
+{% block title %}调试工具{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 <div class="flex flex-col gap-6">

@@ -1,6 +1,6 @@
 from typing import Any, Dict, List
 from django.db.models import QuerySet, Sum
-from django.http import HttpRequest, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.views import View
 from django.views.generic import (
     TemplateView,
@@ -14,7 +14,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from django.contrib import messages
 from blog.models import Post, Comment, Category, Tag, PostViewHistory
-from core.models import Page, Navigation, FriendLink
+from core.models import Page, Navigation, FriendLink, SearchPlaceholder
 from django.conf import settings
 from django import get_version
 import platform
@@ -26,217 +26,131 @@ from .forms import (
     NavigationForm,
     FriendLinkForm,
     UserForm,
+    SearchPlaceholderForm,
+    UserTitleForm,
 )
 
 User = get_user_model()
+from users.models import UserTitle
 
 
 class StaffRequiredMixin(UserPassesTestMixin):
     """
     权限混入类：仅允许管理员（is_staff=True）访问。
+    
+    用于保护管理后台的所有视图，确保只有具备管理员权限的用户才能访问。
     """
     def test_func(self) -> bool:
         return self.request.user.is_staff
 
 
+from django.utils import timezone
+from django.db.models import Count
+from django.db.models.functions import TruncDate
+from datetime import timedelta
+import psutil
+import sys
+import platform
+
 class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     """
-    管理后台首页视图，展示统计数据、近期活动和图表。
+    管理后台首页视图
     """
     template_name: str = "administration/index.html"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context: Dict[str, Any] = super().get_context_data(**kwargs)
-
-        # Stats (统计数据)
-        context["total_posts"] = Post.objects.count()
-        context["total_users"] = User.objects.count()
-        context["total_views"] = (
-            Post.objects.aggregate(total_views=Sum("views"))["total_views"] or 0
-        )
-        context["pending_comments"] = Comment.objects.filter(active=False).count()
-        context["total_comments"] = Comment.objects.count()
-
-        # Recent activity (近期活动)
-        context["recent_posts"] = Post.objects.select_related("author").order_by(
-            "-created_at"
-        )[:5]
-        context["recent_comments"] = Comment.objects.select_related(
-            "user", "post"
-        ).order_by("-created_at")[:5]
-        context["popular_posts"] = Post.objects.order_by("-views")[:5]
-
-        # Chart Data (图表数据)
-        from django.db.models.functions import TruncDay
-        from django.db.models import Count
-        from django.utils import timezone
-        import datetime
-        import json
-        import psutil
-        import os
-
-        # --- 1. Content Overview ---
-        media_root = settings.MEDIA_ROOT
-        media_count = 0
-        media_size = 0
-        if os.path.exists(media_root):
-            for dirpath, dirnames, filenames in os.walk(media_root):
-                for f in filenames:
-                    fp = os.path.join(dirpath, f)
-                    if not os.path.islink(fp):
-                        media_count += 1
-                        media_size += os.path.getsize(fp)
-        media_size_mb = round(media_size / (1024 * 1024), 2)
-
-        content_stats = {
-            "posts_total": Post.objects.count(),
-            "posts_published": Post.objects.filter(status="published").count(),
-            "posts_draft": Post.objects.filter(status="draft").count(),
-            "pages_total": Page.objects.count(),
-            "categories_total": Category.objects.count(),
-            "tags_total": Tag.objects.count(),
-            "media_count": media_count,
-            "media_size_mb": media_size_mb,
-        }
-        context["content_stats"] = content_stats
-
-        # --- 2. Comment Analytics ---
-        # Status Distribution
-        comment_status = {
-            "total": Comment.objects.count(),
-            "pending": Comment.objects.filter(active=False).count(),
-            "approved": Comment.objects.filter(active=True).count(),
-        }
         
-        # Daily Trend (Last 30 Days)
-        last_30_days = timezone.now() - datetime.timedelta(days=30)
-        comments_trend = (
-            Comment.objects.filter(created_at__gte=last_30_days)
-            .annotate(day=TruncDay("created_at"))
-            .values("day")
-            .annotate(count=Count("id"))
-            .order_by("day")
-        )
-        
-        trend_labels = []
-        trend_data = []
-        date_map = {item["day"].strftime("%Y-%m-%d"): item["count"] for item in comments_trend}
-        
-        for i in range(29, -1, -1):
-            date = (timezone.now() - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
-            trend_labels.append(date)
-            trend_data.append(date_map.get(date, 0))
-
-        # Top Commenters
-        top_commenters = (
-            User.objects.annotate(comment_count=Count("comment"))
-            .order_by("-comment_count")[:5]
-            .values("username", "comment_count")
-        )
-
-        context["chart_comments"] = {
-            "status": [comment_status["approved"], comment_status["pending"]],
-            "trend_labels": trend_labels,
-            "trend_data": trend_data,
-            "top_users": [u["username"] for u in top_commenters],
-            "top_counts": [u["comment_count"] for u in top_commenters]
-        }
-
-        # --- 3. User Activity ---
-        # Role Distribution
-        user_roles = {
-            "superuser": User.objects.filter(is_superuser=True).count(),
-            "staff": User.objects.filter(is_staff=True, is_superuser=False).count(),
-            "active": User.objects.filter(is_active=True, is_staff=False).count(),
-            "inactive": User.objects.filter(is_active=False).count(),
-        }
-        
-        # Active Users (Last 7 Days)
-        active_users_7d = User.objects.filter(last_login__gte=timezone.now() - datetime.timedelta(days=7)).count()
-
-        # New Users Trend (This Week vs Last Week)
+        # 1. Key Metrics
         today = timezone.now()
-        start_week = today - datetime.timedelta(days=today.weekday())
-        start_last_week = start_week - datetime.timedelta(days=7)
+        last_month = today - timedelta(days=30)
         
-        new_users_this_week = User.objects.filter(date_joined__gte=start_week).count()
-        new_users_last_week = User.objects.filter(
-            date_joined__gte=start_last_week, 
-            date_joined__lt=start_week
-        ).count()
+        # Posts
+        total_posts = Post.objects.count()
+        posts_last_month = Post.objects.filter(created_at__gte=last_month).count()
         
-        user_trend_diff = new_users_this_week - new_users_last_week
-        user_trend_direction = "up" if user_trend_diff >= 0 else "down"
-
-        context["user_stats"] = {
-            "roles": user_roles,
-            "active_7d": active_users_7d,
-            "new_this_week": new_users_this_week,
-            "diff": abs(user_trend_diff),
-            "direction": user_trend_direction
-        }
+        # Calculate growth of Total Posts (Net Additions / Previous Total)
+        total_prev = total_posts - posts_last_month
+        post_growth = 0
+        if total_prev > 0:
+            post_growth = (posts_last_month / total_prev) * 100
+        elif posts_last_month > 0:
+            post_growth = 100
+            
+        context['total_posts'] = total_posts
+        context['post_growth'] = round(post_growth, 1)
         
-        context["chart_users"] = {
-            "roles_data": [user_roles["superuser"], user_roles["staff"], user_roles["active"], user_roles["inactive"]],
-            "roles_labels": ["超级管理员", "管理员", "活跃用户", "禁用用户"]
-        }
-
-        # --- 4. Traffic Analytics ---
-        # Traffic Trend (Last 30 Days) using PostViewHistory
-        traffic_trend = (
-            PostViewHistory.objects.filter(viewed_at__gte=last_30_days)
-            .annotate(day=TruncDay("viewed_at"))
-            .values("day")
-            .annotate(count=Count("id"))
-            .order_by("day")
+        # Comments
+        total_comments = Comment.objects.count()
+        pending_comments = Comment.objects.filter(active=False).count()
+        context['total_comments'] = total_comments
+        context['pending_comments'] = pending_comments
+        
+        # 2. Charts Data
+        
+        # Comment Status (Pie)
+        active_comments = Comment.objects.filter(active=True).count()
+        inactive_comments = pending_comments
+        context['comment_status_data'] = [active_comments, inactive_comments]
+        
+        # User Roles (Donut)
+        superusers = User.objects.filter(is_superuser=True).count()
+        staff = User.objects.filter(is_staff=True, is_superuser=False).count()
+        normal_users = User.objects.filter(is_staff=False).count()
+        context['user_role_data'] = [superusers, staff, normal_users]
+        
+        # Comment Trend (Line) - Last 30 Days
+        # We need a list of dates and counts.
+        trend_data = (
+            Comment.objects.filter(created_at__gte=last_month)
+            .annotate(date=TruncDate('created_at'))
+            .values('date')
+            .annotate(count=Count('id'))
+            .order_by('date')
         )
-        traffic_map = {item["day"].strftime("%Y-%m-%d"): item["count"] for item in traffic_trend}
-        traffic_data_list = []
-        for i in range(29, -1, -1):
-            date = (timezone.now() - datetime.timedelta(days=i)).strftime("%Y-%m-%d")
-            traffic_data_list.append(traffic_map.get(date, 0))
-
-        # Top Articles
-        top_articles = Post.objects.order_by("-views")[:5]
-        top_articles_data = [
-            {"title": p.title, "views": p.views, "url": p.get_absolute_url()}
-            for p in top_articles
-        ]
         
-        context["chart_traffic"] = {
-            "trend_labels": trend_labels,
-            "trend_data": traffic_data_list,
-            "top_articles_labels": [p["title"] for p in top_articles_data],
-            "top_articles_data": [p["views"] for p in top_articles_data],
-            "top_articles_urls": [p["url"] for p in top_articles_data],
-        }
-
-        # --- 5. System Status ---
+        # Fill in missing dates
+        date_map = {item['date']: item['count'] for item in trend_data}
+        dates = []
+        counts = []
+        for i in range(30):
+            d = (last_month + timedelta(days=i)).date()
+            dates.append(d.strftime('%m-%d'))
+            counts.append(date_map.get(d, 0))
+            
+        context['trend_dates'] = dates
+        context['trend_counts'] = counts
+        
+        # Top 5 Popular Articles (Bar)
+        top_posts = Post.objects.order_by('-views')[:5]
+        context['top_posts'] = top_posts  # Pass full objects for template links
+        context['top_posts_labels'] = [p.title[:10] + '...' if len(p.title) > 10 else p.title for p in top_posts]
+        
+        # System Health (Real Data)
         try:
-            cpu_usage = psutil.cpu_percent(interval=None)
+            cpu_usage = psutil.cpu_percent(interval=0.1)
             memory = psutil.virtual_memory()
             disk = psutil.disk_usage('/')
             
-            system_stats_dict = {
-                "cpu": cpu_usage,
-                "memory_percent": memory.percent,
-                "memory_used": round(memory.used / (1024**3), 2),
-                "memory_total": round(memory.total / (1024**3), 2),
-                "disk_percent": disk.percent,
-                "disk_used": round(disk.used / (1024**3), 2),
-                "disk_total": round(disk.total / (1024**3), 2),
-                "media_size_mb": media_size_mb,
+            context['system_info'] = {
+                'cpu_percent': cpu_usage,
+                'memory_percent': memory.percent,
+                'disk_percent': disk.percent,
+                'python_version': platform.python_version(),
+                'platform_system': platform.system(),
+                'platform_release': platform.release(),
+                'server_time': timezone.now(),
             }
-            context["system_stats"] = system_stats_dict
-            context["system_stats_obj"] = system_stats_dict # For HTML rendering
+            # Simplified health score (inverse of average load)
+            health_score = 100 - max(cpu_usage, memory.percent, disk.percent)
+            context['system_health'] = int(max(0, health_score))
         except Exception:
-            context["system_stats"] = None
-            context["system_stats_obj"] = None
-
-        # System Info
-        context["python_version"] = platform.python_version()
-        context["django_version"] = get_version()
-
+            context['system_info'] = {}
+            context['system_health'] = 85 # Fallback
+        
+        # Recent Activity (for feed)
+        context['recent_comments'] = Comment.objects.select_related('user', 'post').order_by('-created_at')[:5]
+        
         return context
 
 
@@ -244,7 +158,13 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 class BaseListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
     """
     基础列表视图混入类
-    提供通用的列表展示功能，支持 HTMX 局部刷新。
+    
+    提供通用的列表展示功能，集成了 HTMX 支持。
+    
+    特性：
+    1. 默认分页大小为 20。
+    2. 支持动态排序 (GET sort/order 参数)。
+    3. 支持 HTMX 局部刷新：检测 HX-Request 头，返回局部模板或完整页面。
     """
     paginate_by = 20
     template_name_suffix = "_list"
@@ -273,7 +193,13 @@ class BaseListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
 class BaseCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
     """
     基础创建视图混入类
-    提供通用的对象创建功能，成功后显示提示信息。
+    
+    提供通用的对象创建功能。
+    
+    特性：
+    1. 自动查找模板 ({model}_form.html 或 generic_form.html)。
+    2. 处理保存后的跳转逻辑 (保存并继续编辑、保存并新增另一个)。
+    3. 集成消息提示 (创建成功)。
     """
     template_name_suffix = "_form"
 
@@ -301,7 +227,9 @@ class BaseCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
 class BaseUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
     """
     基础更新视图混入类
-    提供通用的对象更新功能，成功后显示提示信息。
+    
+    提供通用的对象更新功能。
+    逻辑与 BaseCreateView 类似，但用于编辑现有对象。
     """
     template_name_suffix = "_form"
 
@@ -329,7 +257,9 @@ class BaseUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
 class BaseDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
     """
     基础删除视图混入类
-    提供通用的对象删除功能，成功后显示提示信息。
+    
+    提供通用的对象删除确认功能。
+    删除成功后显示消息提示。
     """
     template_name = "administration/generic_confirm_delete.html"
 
@@ -346,7 +276,12 @@ import uuid
 class PostListView(BaseListView):
     """
     文章列表视图
-    展示文章列表，支持搜索和状态过滤。
+    
+    展示博客文章列表。
+    支持：
+    - 关键词搜索 (标题)
+    - 状态过滤 (草稿/发布)
+    - 关联查询优化 (author, category)
     """
     model = Post
     template_name = "dashboard/post_list.html"
@@ -355,6 +290,8 @@ class PostListView(BaseListView):
 
     def get_queryset(self) -> QuerySet[Post]:
         qs = super().get_queryset()
+        qs = qs.select_related("author", "category").prefetch_related("tags")
+        
         query = self.request.GET.get("q")
         status = self.request.GET.get("status")
 
@@ -363,8 +300,8 @@ class PostListView(BaseListView):
 
         if status:
             qs = qs.filter(status=status)
-
-        return qs.select_related('author', 'category')
+            
+        return qs
 
     def get_template_names(self) -> List[str]:
         # Support HTMX partials
@@ -381,7 +318,9 @@ class PostListView(BaseListView):
 class PostCreateView(BaseCreateView):
     """
     文章创建视图
-    创建新文章，自动关联当前登录用户为作者。
+    
+    创建新文章。
+    自动将当前登录用户设置为文章作者。
     """
     model = Post
     form_class = PostForm
@@ -395,7 +334,8 @@ class PostCreateView(BaseCreateView):
 class PostUpdateView(BaseUpdateView):
     """
     文章更新视图
-    编辑现有文章内容。
+    
+    编辑现有文章的内容、状态、分类等。
     """
     model = Post
     form_class = PostForm
@@ -405,7 +345,8 @@ class PostUpdateView(BaseUpdateView):
 class PostDeleteView(BaseDeleteView):
     """
     文章删除视图
-    删除指定文章。
+    
+    物理删除文章记录。
     """
     model = Post
     success_url = reverse_lazy("administration:post_list")
@@ -414,6 +355,9 @@ class PostDeleteView(BaseDeleteView):
 class PostDuplicateView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     文章复制视图
+    
+    快速复制一篇文章及其标签，用于创建相似内容的草稿。
+    新文章状态默认为"草稿"，标题追加"(副本)"后缀。
     """
     def post(self, request, pk):
         try:
@@ -442,7 +386,9 @@ class PostDuplicateView(LoginRequiredMixin, StaffRequiredMixin, View):
 class CategoryListView(BaseListView):
     """
     分类列表视图
-    展示分类列表，支持搜索。
+    
+    展示文章分类。
+    支持按名称搜索，并统计每个分类下的文章数量。
     """
     model = Category
     context_object_name = "categories"
@@ -486,6 +432,9 @@ class CategoryDeleteView(BaseDeleteView):
 class TagListView(BaseListView):
     """
     标签列表视图
+    
+    展示文章标签。
+    支持按名称搜索，并统计每个标签下的文章数量。
     """
     model = Tag
     context_object_name = "tags"
@@ -525,11 +474,31 @@ class TagDeleteView(BaseDeleteView):
     success_url = reverse_lazy("administration:tag_list")
 
 
+class TagAutocompleteView(LoginRequiredMixin, StaffRequiredMixin, View):
+    """
+    标签自动补全视图
+    
+    返回 JSON 格式的标签建议列表
+    """
+    def get(self, request):
+        query = request.GET.get('q', '')
+        if len(query) < 1:
+            return JsonResponse({'results': []})
+        
+        tags = Tag.objects.filter(name__icontains=query).values_list('name', flat=True)[:10]
+        return JsonResponse({'results': list(tags)})
+
+
 # --- Comment Views ---
 class CommentListView(BaseListView):
     """
     评论列表视图
-    展示评论列表，支持内容搜索和状态过滤。
+    
+    展示所有评论。
+    支持：
+    - 内容搜索
+    - 状态过滤 (已审核/待审核)
+    - 关联查询优化 (post, user)
     """
     model = Comment
     context_object_name = "comments"
@@ -554,7 +523,8 @@ class CommentListView(BaseListView):
 class CommentUpdateView(BaseUpdateView):
     """
     评论更新视图
-    支持修改评论内容和审核状态。
+    
+    支持修改评论内容和审核状态 (active)。
     """
     model = Comment
     fields = ["content", "active"]
@@ -573,6 +543,9 @@ class CommentDeleteView(BaseDeleteView):
 class PageListView(BaseListView):
     """
     单页面列表视图
+    
+    展示独立页面（如关于我们、联系我们）。
+    支持按标题搜索和状态过滤。
     """
     model = Page
     context_object_name = "pages"
@@ -621,6 +594,8 @@ class PageDeleteView(BaseDeleteView):
 class PageDuplicateView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     单页面复制视图
+    
+    快速复制一个页面，新页面标题追加"(副本)"后缀，状态为草稿。
     """
     def post(self, request, pk):
         try:
@@ -640,6 +615,12 @@ class PageDuplicateView(LoginRequiredMixin, StaffRequiredMixin, View):
 
 # --- Navigation Views ---
 class NavigationListView(BaseListView):
+    """
+    导航菜单列表视图
+    
+    展示前台导航栏菜单项。
+    支持按标题搜索，默认按 order 字段排序。
+    """
     model = Navigation
     context_object_name = "navigations"
     ordering = ["order"]
@@ -653,24 +634,39 @@ class NavigationListView(BaseListView):
 
 
 class NavigationCreateView(BaseCreateView):
+    """
+    导航菜单创建视图
+    """
     model = Navigation
     form_class = NavigationForm
     success_url = reverse_lazy("administration:navigation_list")
 
 
 class NavigationUpdateView(BaseUpdateView):
+    """
+    导航菜单更新视图
+    """
     model = Navigation
     form_class = NavigationForm
     success_url = reverse_lazy("administration:navigation_list")
 
 
 class NavigationDeleteView(BaseDeleteView):
+    """
+    导航菜单删除视图
+    """
     model = Navigation
     success_url = reverse_lazy("administration:navigation_list")
 
 
 # --- FriendLink Views ---
 class FriendLinkListView(BaseListView):
+    """
+    友情链接列表视图
+    
+    展示友情链接。
+    支持按名称搜索，默认按 order 字段排序。
+    """
     model = FriendLink
     context_object_name = "friendlinks"
     ordering = ["order"]
@@ -684,24 +680,72 @@ class FriendLinkListView(BaseListView):
 
 
 class FriendLinkCreateView(BaseCreateView):
+    """
+    友情链接创建视图
+    """
     model = FriendLink
     form_class = FriendLinkForm
     success_url = reverse_lazy("administration:friendlink_list")
 
 
 class FriendLinkUpdateView(BaseUpdateView):
+    """
+    友情链接更新视图
+    """
     model = FriendLink
     form_class = FriendLinkForm
     success_url = reverse_lazy("administration:friendlink_list")
 
 
 class FriendLinkDeleteView(BaseDeleteView):
+    """
+    友情链接删除视图
+    """
     model = FriendLink
     success_url = reverse_lazy("administration:friendlink_list")
 
 
+# --- Search Placeholder Management ---
+
+class SearchPlaceholderListView(BaseListView):
+    model = SearchPlaceholder
+    template_name = "administration/searchplaceholder_list.html"
+    context_object_name = "placeholders"
+    ordering = ["order", "-created_at"]
+
+    def get_queryset(self):
+        qs = super().get_queryset()
+        query = self.request.GET.get("q")
+        if query:
+            qs = qs.filter(text__icontains=query)
+        return qs
+
+
+class SearchPlaceholderCreateView(BaseCreateView):
+    model = SearchPlaceholder
+    form_class = SearchPlaceholderForm
+    success_url = reverse_lazy("administration:searchplaceholder_list")
+
+
+class SearchPlaceholderUpdateView(BaseUpdateView):
+    model = SearchPlaceholder
+    form_class = SearchPlaceholderForm
+    success_url = reverse_lazy("administration:searchplaceholder_list")
+
+
+class SearchPlaceholderDeleteView(BaseDeleteView):
+    model = SearchPlaceholder
+    success_url = reverse_lazy("administration:searchplaceholder_list")
+
+
 # --- User Views ---
 class UserListView(BaseListView):
+    """
+    用户列表视图
+    
+    展示注册用户列表。
+    支持按用户名搜索。
+    """
     model = User
     context_object_name = "users"
     ordering = ["-date_joined"]
@@ -716,8 +760,10 @@ class UserListView(BaseListView):
 
 class UserCreateView(BaseCreateView):
     """
-    用户创建视图 (新增)
-    允许管理员在后台直接创建用户
+    用户创建视图
+    
+    允许管理员在后台直接创建用户。
+    包含密码设置逻辑（在 UserForm 中处理）。
     """
     model = User
     form_class = UserForm
@@ -729,9 +775,37 @@ class UserCreateView(BaseCreateView):
 
 
 class UserUpdateView(BaseUpdateView):
+    """
+    用户更新视图
+    
+    编辑用户信息（如权限、状态、基本资料）。
+    """
     model = User
     form_class = UserForm
     success_url = reverse_lazy("administration:user_list")
+
+
+# --- User Title Views ---
+class UserTitleListView(BaseListView):
+    model = UserTitle
+    context_object_name = "titles"
+
+
+class UserTitleCreateView(BaseCreateView):
+    model = UserTitle
+    form_class = UserTitleForm
+    success_url = reverse_lazy("administration:usertitle_list")
+
+
+class UserTitleUpdateView(BaseUpdateView):
+    model = UserTitle
+    form_class = UserTitleForm
+    success_url = reverse_lazy("administration:usertitle_list")
+
+
+class UserTitleDeleteView(BaseDeleteView):
+    model = UserTitle
+    success_url = reverse_lazy("administration:usertitle_list")
 
 
 # --- Bulk Action View ---
@@ -740,6 +814,23 @@ from django.apps import apps
 class BulkActionView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     批量操作视图
+    
+    处理列表页面的批量操作请求。
+    
+    支持的操作 (action):
+    - delete: 删除
+    - published: 发布 (Post)
+    - draft: 转为草稿 (Post)
+    - active: 启用 (Comment/User/FriendLink/Tag)
+    - inactive: 禁用 (Comment/User/FriendLink/Tag)
+    - export_json: 导出选中项为 JSON
+    - set_staff: 设为管理员 (User)
+    - remove_staff: 移除管理员权限 (User)
+    
+    逻辑:
+    1. 根据 model 参数动态查找模型类。
+    2. 根据 action 参数执行相应的批量更新或删除操作。
+    3. 返回操作结果消息。
     """
     def post(self, request, model):
         action = request.POST.get("action")
@@ -821,6 +912,8 @@ class BulkActionView(LoginRequiredMixin, StaffRequiredMixin, View):
 class ExportAllView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     导出全部数据视图
+    
+    将指定模型的所有数据导出为 JSON 文件。
     """
     def get(self, request, model):
         try:
@@ -857,6 +950,9 @@ class ExportAllView(LoginRequiredMixin, StaffRequiredMixin, View):
 class ImportJsonView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     导入 JSON 数据视图
+    
+    从 JSON 文件导入数据到指定模型。
+    支持更新现有记录 (基于 ID) 或创建新记录。
     """
     def post(self, request, model):
         if 'json_file' not in request.FILES:
@@ -919,6 +1015,14 @@ except ImportError:
     Faker = None
 
 class DebugDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+    """
+    调试仪表盘视图
+    
+    展示系统调试信息，包括：
+    - 数据库连接状态
+    - 关键对象数量统计
+    - 系统所有 URL 模式列表 (前 50 条)
+    """
     template_name = "administration/debug/dashboard.html"
 
     def get_context_data(self, **kwargs):
@@ -964,107 +1068,58 @@ class DebugDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         return context
 
 
+from core.services import generate_mock_data
+
 class DebugMockView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+    """
+    Mock 数据生成视图
+    
+    用于生成测试数据 (User, Post, Comment)。
+    依赖 Faker 库。
+    """
     template_name = "administration/debug/mock.html"
 
     def post(self, request, *args, **kwargs):
-        if not Faker:
-            messages.error(request, "Faker 库未安装，无法生成数据。请运行 'pip install faker'")
-            return self.get(request, *args, **kwargs)
-
-        fake = Faker("zh_CN")
-        section = request.POST.get("mock_section")
-        
         try:
-            if section == "on" or request.POST.get("users_count"): # Users
-                count = int(request.POST.get("users_count", 10))
-                with_avatar = request.POST.get("users_avatar") == "on"
+            # Extract counts from form
+            users_count = int(request.POST.get("users_count", 0))
+            categories_count = int(request.POST.get("categories_count", 0))
+            tags_count = int(request.POST.get("tags_count", 0))
+            posts_count = int(request.POST.get("posts_count", 0))
+            comments_count = int(request.POST.get("comments_count", 0))
+            password = request.POST.get("password", "password123")
+            generate_extras = request.POST.get("generate_extras") == "on"
+            
+            # If "Generate All" or specific section, we can handle logic here.
+            # But simpler to just pass all non-zero values to the service.
+            # The UI might send 0 for hidden sections or we might need to check which section is active.
+            # Let's assume the new UI will submit all relevant fields.
+            
+            results = generate_mock_data(
+                users_count=users_count,
+                categories_count=categories_count,
+                tags_count=tags_count,
+                posts_count=posts_count,
+                comments_count=comments_count,
+                password=password,
+                generate_extras=generate_extras,
+            )
+            
+            msg_parts = []
+            if results['users']: msg_parts.append(f"{results['users']} 用户")
+            if results['categories']: msg_parts.append(f"{results['categories']} 分类")
+            if results['tags']: msg_parts.append(f"{results['tags']} 标签")
+            if results['posts']: msg_parts.append(f"{results['posts']} 文章")
+            if results['comments']: msg_parts.append(f"{results['comments']} 评论")
+            
+            if msg_parts:
+                messages.success(request, f"成功生成: {', '.join(msg_parts)}")
+            else:
+                messages.warning(request, "没有生成任何数据 (数量均为 0)")
                 
-                for _ in range(count):
-                    username = fake.user_name()
-                    email = fake.email()
-                    if not User.objects.filter(username=username).exists():
-                        user = User.objects.create_user(
-                            username=username,
-                            email=email,
-                            password="password123",
-                            nickname=fake.name(),
-                            bio=fake.text(max_nb_chars=100)
-                        )
-                        if with_avatar:
-                            # Using UI Avatars for consistent mock images without external dependency issues
-                            # In a real scenario, we might download images, but that's slow.
-                            pass 
-                messages.success(request, f"成功生成 {count} 个用户")
-
-            elif request.POST.get("posts_count"): # Content
-                cat_count = int(request.POST.get("categories_count", 5))
-                tag_count = int(request.POST.get("tags_count", 10))
-                post_count = int(request.POST.get("posts_count", 20))
-                
-                # Categories
-                cats = []
-                for _ in range(cat_count):
-                    name = fake.word() + "分类"
-                    cat, _ = Category.objects.get_or_create(name=name)
-                    cats.append(cat)
-                
-                # Tags
-                tags = []
-                for _ in range(tag_count):
-                    name = fake.word()
-                    tag, _ = Tag.objects.get_or_create(name=name)
-                    tags.append(tag)
-                
-                # Posts
-                users = list(User.objects.all())
-                if not users:
-                    messages.error(request, "没有用户，无法生成文章")
-                    return self.get(request, *args, **kwargs)
-                
-                import random
-                for _ in range(post_count):
-                    title = fake.sentence(nb_words=6)
-                    author = random.choice(users)
-                    category = random.choice(cats) if cats else None
-                    post = Post.objects.create(
-                        title=title,
-                        author=author,
-                        category=category,
-                        content=fake.text(max_nb_chars=2000),
-                        excerpt=fake.text(max_nb_chars=100),
-                        status="published"
-                    )
-                    if tags:
-                        post.tags.set(random.sample(tags, k=min(len(tags), 3)))
-                
-                messages.success(request, f"成功生成 {post_count} 篇文章, {cat_count} 个分类, {tag_count} 个标签")
-
-            elif request.POST.get("comments_per_post"): # Interaction
-                max_comments = int(request.POST.get("comments_per_post", 5))
-                posts = Post.objects.all()
-                users = list(User.objects.all())
-                
-                if not posts or not users:
-                    messages.error(request, "缺少文章或用户，无法生成评论")
-                    return self.get(request, *args, **kwargs)
-                
-                import random
-                count = 0
-                for post in posts:
-                    for _ in range(random.randint(0, max_comments)):
-                        Comment.objects.create(
-                            post=post,
-                            user=random.choice(users),
-                            content=fake.sentence(),
-                            active=True
-                        )
-                        count += 1
-                messages.success(request, f"成功生成 {count} 条评论")
-
         except Exception as e:
             messages.error(request, f"生成失败: {str(e)}")
-
+            
         return self.get(request, *args, **kwargs)
 
 
@@ -1090,10 +1145,10 @@ class DebugEmailView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["email_host"] = getattr(settings, "EMAIL_HOST", "Unknown")
-        context["email_port"] = getattr(settings, "EMAIL_PORT", "Unknown")
-        context["email_host_user"] = getattr(settings, "EMAIL_HOST_USER", "Unknown")
-        context["email_use_tls"] = getattr(settings, "EMAIL_USE_TLS", "Unknown")
+        context["email_host"] = getattr(config, "SMTP_HOST", "Unknown")
+        context["email_port"] = getattr(config, "SMTP_PORT", "Unknown")
+        context["email_host_user"] = getattr(config, "SMTP_USER", "Unknown")
+        context["email_use_tls"] = getattr(config, "SMTP_USE_TLS", "Unknown")
         return context
 
     def post(self, request, *args, **kwargs):
@@ -1104,12 +1159,14 @@ class DebugEmailView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         if not recipient or not subject or not message:
             messages.error(request, "请填写完整信息")
             return self.get(request, *args, **kwargs)
+            
+        from_email = getattr(config, "SMTP_FROM_EMAIL", None) or settings.DEFAULT_FROM_EMAIL
 
         try:
             send_mail(
                 subject,
                 message,
-                settings.DEFAULT_FROM_EMAIL,
+                from_email,
                 [recipient],
                 fail_silently=False,
             )
@@ -1132,18 +1189,77 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Manually construct config dict based on CONSTANCE_CONFIG
-        config_data = {}
-        if hasattr(django_settings, "CONSTANCE_CONFIG"):
-            for key, options in django_settings.CONSTANCE_CONFIG.items():
-                value = getattr(config, key)
-                help_text = options[1] if len(options) > 1 else ""
-                config_data[key] = {
-                    "value": value,
-                    "help_text": help_text,
-                    "type": type(value).__name__,
-                }
-        context["config"] = config_data
+        
+        # Helper to get item data
+        def get_item_data(key):
+            if not hasattr(django_settings, "CONSTANCE_CONFIG") or key not in django_settings.CONSTANCE_CONFIG:
+                return None
+            
+            options = django_settings.CONSTANCE_CONFIG[key]
+            value = getattr(config, key)
+            help_text = options[1] if len(options) > 1 else ""
+            
+            return {
+                "key": key,
+                "value": value,
+                "help_text": help_text,
+                "type": type(value).__name__,
+            }
+
+        fieldsets = []
+        if hasattr(django_settings, "CONSTANCE_CONFIG_FIELDSETS"):
+            for title, keys in django_settings.CONSTANCE_CONFIG_FIELDSETS.items():
+                items = []
+                for key in keys:
+                    item_data = get_item_data(key)
+                    if item_data:
+                        items.append(item_data)
+                
+                # Map titles to icons/slugs for UI
+                icon = "settings"
+                slug = "general"
+                
+                if "基本设置" in title or "General" in title:
+                    icon = "tune"
+                    slug = "general"
+                elif "后台界面" in title or "Admin" in title:
+                    icon = "admin_panel_settings"
+                    slug = "admin"
+                elif "社交与联系" in title or "Social" in title:
+                    icon = "share"
+                    slug = "social"
+                elif "邮件服务" in title or "Email" in title:
+                    icon = "mail"
+                    slug = "email"
+                elif "功能开关" in title or "Feature" in title:
+                    icon = "toggle_on"
+                    slug = "features"
+                elif "自定义代码" in title or "Code" in title:
+                    icon = "code"
+                    slug = "code"
+
+                fieldsets.append({
+                    "title": title,
+                    "slug": slug,
+                    "icon": icon,
+                    "items": items
+                })
+        else:
+            # Fallback if no fieldsets defined
+            items = []
+            if hasattr(django_settings, "CONSTANCE_CONFIG"):
+                for key in django_settings.CONSTANCE_CONFIG.keys():
+                    item_data = get_item_data(key)
+                    if item_data:
+                        items.append(item_data)
+            fieldsets.append({
+                "title": "General",
+                "slug": "general",
+                "icon": "tune",
+                "items": items
+            })
+
+        context["fieldsets"] = fieldsets
         return context
 
     def post(self, request, *args, **kwargs):

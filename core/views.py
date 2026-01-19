@@ -25,6 +25,10 @@ from core.services import generate_mock_data
 
 
 class PageView(DetailView):
+    """
+    单页面视图
+    用于展示关于页、联系页等静态内容页面。
+    """
     model = Page
     template_name = "core/page.html"
     context_object_name = "page"
@@ -34,6 +38,10 @@ class PageView(DetailView):
 
 
 def health_check(request):
+    """
+    健康检查接口
+    用于监控系统状态，检查数据库连接是否正常。
+    """
     try:
         connection.ensure_connection()
         db_ok = True
@@ -53,7 +61,8 @@ def health_check(request):
 @user_passes_test(lambda u: u.is_staff, login_url="users:login")
 def admin_debug(request):
     """
-    调试工具视图，提供 Mock 数据生成、缓存清理和邮件测试功能。
+    调试工具视图
+    提供 Mock 数据生成、缓存清理和邮件测试功能。
     仅限管理员访问。
     """
     User = get_user_model()
@@ -65,6 +74,7 @@ def admin_debug(request):
             try:
                 users_count = max(0, int(request.POST.get("users") or 0))
                 categories_count = max(0, int(request.POST.get("categories") or 0))
+                tags_count = max(0, int(request.POST.get("tags") or 0))
                 posts_count = max(0, int(request.POST.get("posts") or 0))
                 comments_count = max(0, int(request.POST.get("comments") or 0))
                 password = str(request.POST.get("password") or "password123")
@@ -75,6 +85,7 @@ def admin_debug(request):
             created = generate_mock_data(
                 users_count=users_count,
                 categories_count=categories_count,
+                tags_count=tags_count,
                 posts_count=posts_count,
                 comments_count=comments_count,
                 password=password,
@@ -82,7 +93,7 @@ def admin_debug(request):
 
             messages.success(
                 request,
-                f"已生成 mock 数据：用户 {created['users']}、分类 {created['categories']}、文章 {created['posts']}、评论 {created['comments']}",
+                f"已生成 mock 数据：用户 {created['users']}、分类 {created['categories']}、标签 {created['tags']}、文章 {created['posts']}、评论 {created['comments']}",
             )
             return redirect(reverse("administration:debug"))
 
@@ -152,7 +163,8 @@ def admin_debug(request):
 @user_passes_test(lambda u: u.is_staff, login_url="users:login")
 def debug_api_stats(request):
     """
-    调试 API：返回系统统计数据（用户、分类、文章、评论数量）和数据库状态。
+    调试 API：返回系统统计数据
+    包括用户、分类、文章、评论数量和数据库连接状态。
     """
     User = get_user_model()
     try:
@@ -177,7 +189,8 @@ def debug_api_stats(request):
 @user_passes_test(lambda u: u.is_staff, login_url="users:login")
 def debug_api_system(request):
     """
-    调试 API：返回系统环境信息，包括 Python/Django 版本、已安装应用、中间件以及资源使用情况（CPU、内存、磁盘）。
+    调试 API：返回系统环境信息
+    包括 Python/Django 版本、已安装应用、中间件以及资源使用情况（CPU、内存、磁盘）。
     """
     installed_apps = list(getattr(settings, "INSTALLED_APPS", []))
     third_party = [

@@ -3,6 +3,10 @@ from .models import Comment, Subscriber
 
 
 class SubscriberForm(forms.ModelForm):
+    """
+    订阅表单
+    用于用户提交邮箱进行订阅。
+    """
     class Meta:
         model = Subscriber
         fields = ["email"]
@@ -18,6 +22,10 @@ class SubscriberForm(forms.ModelForm):
 
 
 class CommentForm(forms.ModelForm):
+    """
+    评论表单
+    用于用户提交评论内容。
+    """
     class Meta:
         model = Comment
         fields = ["content"]

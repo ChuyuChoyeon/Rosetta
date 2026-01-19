@@ -14,14 +14,19 @@
     </td>
     <td>{{ nav.order }}</td>
     <td>
-        {% if nav.is_active %}
-            <div class="badge badge-success badge-sm gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
-                可见
-            </div>
-        {% else %}
-            <div class="badge badge-ghost badge-sm gap-1">隐藏</div>
-        {% endif %}
+        <div class="flex flex-col gap-1">
+            {% if nav.is_active %}
+                <div class="badge badge-success badge-sm gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                    可见
+                </div>
+            {% else %}
+                <div class="badge badge-ghost badge-sm gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-base-300"></span>
+                    隐藏
+                </div>
+            {% endif %}
+        </div>
     </td>
     <td>
         <div class="join">

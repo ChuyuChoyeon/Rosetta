@@ -1,0 +1,229 @@
+{% load static tailwind_tags compress meta %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <title>{% block title %}{{ config.SITE_NAME.value|default:"Rosetta Blog" }}{% endblock %}</title>
+    <link rel="shortcut icon" href="{{ config.SITE_FAVICON|default:'/static/core/img/favicon.ico' }}">
+    
+    <!-- Google Fonts: Poppins & Open Sans (Local) -->
+    <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">
+    
+    <!-- Meta Tags -->
+    {% include 'meta/meta.html' %}
+    
+    {% if config.SITE_KEYWORDS %}
+    <meta name="keywords" content="{{ config.SITE_KEYWORDS }}">
+    {% endif %}
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    
+    <!-- Material Symbols -->
+    <style>
+        @font-face {
+            font-family: 'Material Symbols Outlined';
+            font-style: normal;
+            font-weight: 100 700;
+            font-display: swap; /* Performance optimization */
+            src: url("{% static 'theme/fonts/MaterialSymbolsOutlined.woff2' %}") format('woff2');
+        }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+    
+    {% compress css %}
+    {% tailwind_css %}
+    <link href="{% static 'theme/css/cropper.min.css' %}" rel="stylesheet">
+    {% endcompress %}
+
+    {% if config.EXTRA_HEAD_CODE %}
+    {{ config.EXTRA_HEAD_CODE|safe }}
+    {% endif %}
+
+    <!-- NProgress Loading Bar (Must be after Tailwind for variables) -->
+    <script src="{% static 'theme/js/nprogress.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'theme/css/nprogress.css' %}" />
+    
+    <script>
+        // Initialize NProgress
+        NProgress.configure({ 
+            showSpinner: false, 
+            minimum: 0.2,
+            easing: 'ease',
+            speed: 500
+        });
+        
+        // Robust Loading Logic
+        const PageLoader = {
+            start: function() {
+                NProgress.start();
+                document.body.classList.add('loading-state');
+            },
+            done: function() {
+                NProgress.done();
+                document.body.classList.remove('loading-state');
+            }
+        };
+
+        // Connect to HTMX events
+        document.addEventListener("htmx:beforeRequest", () => PageLoader.start());
+        document.addEventListener("htmx:afterRequest", () => PageLoader.done());
+        document.addEventListener("htmx:historyRestore", () => PageLoader.done());
+        
+        // Connect to regular page loads
+        window.addEventListener('beforeunload', () => PageLoader.start());
+        document.addEventListener('DOMContentLoaded', () => PageLoader.done());
+        
+        // Handle Back/Forward Cache
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) {
+                PageLoader.done();
+            }
+        });
+    </script>
+
+    {% compress js %}
+    <!-- Replaced Unfold static with CDN -->
+    <script src="{% static 'theme/js/htmx.min.js' %}"></script>
+    <script defer src="{% static 'theme/js/alpine.min.js' %}"></script>
+    <script src="{% static 'theme/js/cropper.min.js' %}"></script>
+    <script src="{% static 'theme/js/theme.js' %}"></script>
+    <script src="{% static 'theme/js/ui.js' %}"></script>
+    {% endcompress %}
+
+    <script>
+        // Prevent FOUC (Flash of Unstyled Content) by setting theme immediately
+        (function() {
+            try {
+                var localTheme = localStorage.getItem('theme');
+                var theme = localTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                
+                // Server-side user preference override
+                {% if user.is_authenticated and user.preference.theme and user.preference.theme != 'auto' %}
+                    theme = "{{ user.preference.theme }}";
+                    localStorage.setItem('theme', theme);
+                {% endif %}
+
+                // Use ThemeManager if loaded, otherwise fallback to simple attribute setting
+                if (window.ThemeManager) {
+                    window.ThemeManager.applyTheme(theme);
+                } else {
+                    document.documentElement.setAttribute('data-theme', theme);
+                    if (['dark', 'synthwave', 'halloween', 'forest', 'aqua', 'black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'].includes(theme)) {
+                        document.documentElement.classList.add('dark');
+                    }
+                }
+            } catch (e) {
+                console.error('Theme initialization error:', e);
+            }
+        })();
+    </script>
+    
+    <style>
+        body { font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", Arial, sans-serif; }
+        
+        /* Smooth Scrolling */
+        html { scroll-behavior: smooth; }
+
+        /* Reading Progress Bar */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+        }
+        
+        .progress-bar {
+            height: 4px;
+            background: oklch(var(--p));
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        /* Glassmorphism Utilities */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        html[data-theme='dark'] .glass-panel {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col font-sans text-base-content selection:bg-primary selection:text-primary-content scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-base-100 {% if debug %}debug-screens{% endif %}" x-data="{ showScrollTop: false }" @scroll.window="showScrollTop = (window.pageYOffset > 300)">
+
+    <!-- Inspira UI: Neural Background -->
+    {% include 'components/inspira/neural_background.html' %}
+
+    <!-- Reading Progress Bar -->
+    <div class="progress-container">
+        <div class="progress-bar" id="readingProgress"></div>
+    </div>
+
+    <!-- Wrap content -->
+    <div id="main-wrapper" class="flex flex-col min-h-screen">
+        {% include 'partials/navbar.html' %}
+
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <!-- Toast Notifications -->
+            {% include 'components/toast.html' %}
+            
+            {% block content %}{% endblock %}
+        </main>
+        
+        <!-- Global Confirm Modal -->
+        {% include 'components/confirm_modal.html' %}
+
+        {% include 'partials/footer.html' %}
+    </div>
+
+    <!-- Scroll to Top Button -->
+    <button 
+        x-show="showScrollTop" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 translate-y-10"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-300"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-10"
+        @click="window.scrollTo({top: 0, behavior: 'smooth'})"
+        class="fixed bottom-8 right-8 btn btn-circle btn-primary shadow-xl z-40 glass-panel border-none text-primary-content hover:scale-110 transition-transform duration-200"
+        aria-label="Scroll to top"
+    >
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+    </button>
+
+    <script>
+        // Reading Progress Bar Logic
+        window.onscroll = function() {
+            let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            let scrolled = (winScroll / height) * 100;
+            document.getElementById("readingProgress").style.width = scrolled + "%";
+        };
+    </script>
+</body>
+</html>

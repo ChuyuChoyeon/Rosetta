@@ -14,7 +14,7 @@ class GenerateMockDataTest(TestCase):
             "generate_mock_data", users=2, categories=2, posts=2, comments=2, stdout=out
         )
 
-        self.assertIn("mock 数据已生成", out.getvalue())
+        self.assertIn("成功生成", out.getvalue())
 
         # Exclude AnonymousUser if present (from guardian)
         user_count = User.objects.exclude(username="AnonymousUser").count()

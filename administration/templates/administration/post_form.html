@@ -1,6 +1,50 @@
 {% extends "administration/base.html" %}
+{% load capture_tags %}
 
-{% block title %}{{ title }} - Rosetta 管理后台{% endblock %}
+{% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Fix Toast UI Editor Theme Visibility */
+    .toastui-editor-defaultUI {
+        border: none !important;
+        background-color: transparent !important;
+    }
+    .toastui-editor-toolbar {
+        background-color: hsl(var(--b2)) !important;
+        border-bottom: 1px solid hsl(var(--b3)) !important;
+    }
+    .toastui-editor-md-container, .toastui-editor-ww-container {
+        background-color: hsl(var(--b1)) !important;
+    }
+    .toastui-editor-contents {
+        font-family: inherit !important;
+    }
+    [data-theme='dark'] .toastui-editor-contents p, 
+    [data-theme='dark'] .toastui-editor-contents h1, 
+    [data-theme='dark'] .toastui-editor-contents h2, 
+    [data-theme='dark'] .toastui-editor-contents h3, 
+    [data-theme='dark'] .toastui-editor-contents h4, 
+    [data-theme='dark'] .toastui-editor-contents h5, 
+    [data-theme='dark'] .toastui-editor-contents h6,
+    [data-theme='dark'] .toastui-editor-contents li,
+    [data-theme='dark'] .toastui-editor-contents span {
+        color: #e5e7eb !important; /* gray-200 */
+    }
+    /* Hide the status bar if not needed or fix its color */
+    .toastui-editor-mode-switch {
+        background-color: hsl(var(--b2)) !important;
+        border-top: 1px solid hsl(var(--b3)) !important;
+    }
+    .toastui-editor-mode-switch .tab-item {
+        color: hsl(var(--bc)) !important;
+    }
+    .toastui-editor-mode-switch .tab-item.active {
+        background-color: hsl(var(--b1)) !important;
+        color: hsl(var(--p)) !important;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="text-sm breadcrumbs mb-4">
@@ -13,187 +57,318 @@
 
 <form method="post" enctype="multipart/form-data" class="w-full">
     {% csrf_token %}
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Content (Left Column) -->
-        <div class="lg:col-span-2 space-y-6">
-            <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body">
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text font-bold text-lg">文章标题</span>
-                        </label>
-                        {{ form.title }}
-                        {% if form.title.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+        <!-- Main Content (Left Column - 75%) -->
+        <div class="lg:col-span-3 space-y-6">
+            {% captureas main_card %}
+            <div class="p-6 relative z-20">
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-bold text-lg">文章标题</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+                
+                <div class="form-control w-full mt-4">
+                    <label class="label flex justify-between items-center">
+                        <span class="label-text font-bold">内容 (Markdown)</span>
+                    </label>
                     
-                    <div class="form-control w-full mt-4">
-                        <label class="label flex justify-between items-center">
-                            <span class="label-text font-bold">内容 (Markdown)</span>
-                        </label>
-                        
-                        <!-- Toast UI Editor Container -->
-                        <div id="editor" class="border border-base-300 rounded-lg overflow-hidden bg-base-100"></div>
+                    <!-- Toast UI Editor Container -->
+                    <div id="editor" class="border border-base-300 rounded-lg overflow-hidden bg-base-100 shadow-inner"></div>
 
-                        <!-- Hidden Input for Form Submission -->
-                        <div class="hidden">
-                            {{ form.content }}
-                        </div>
+                    <!-- Hidden Input for Form Submission -->
+                    <div class="hidden">
+                        {{ form.content }}
+                    </div>
 
-                        <script>
-                            (function() {
-                                if (typeof toastui === 'undefined') return;
-                                
-                                const editorEl = document.querySelector('#editor');
-                                if (!editorEl) return;
-                                // Avoid re-initialization if already initialized
-                                if (editorEl.innerHTML.trim() !== '') return;
+                    <script>
+                        (function() {
+                            if (typeof toastui === 'undefined') return;
+                            
+                            const editorEl = document.querySelector('#editor');
+                            if (!editorEl) return;
+                            if (editorEl.innerHTML.trim() !== '') return;
 
-                                const editor = new toastui.Editor({
-                                    el: editorEl,
-                                    height: '600px',
-                                    initialEditType: 'markdown',
-                                    previewStyle: 'vertical',
-                                    initialValue: `{{ form.content.value|default:""|escapejs }}`,
-                                    language: 'zh-CN',
-                                    theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
-                                    usageStatistics: false,
-                                    toolbarItems: [
-                                        ['heading', 'bold', 'italic', 'strike'],
-                                        ['hr', 'quote'],
-                                        ['ul', 'ol', 'task', 'indent', 'outdent'],
-                                        ['table', 'image', 'link'],
-                                        ['code', 'codeblock']
-                                    ],
-                                    events: {
-                                        change: function() {
-                                            document.querySelector('#id_content').value = editor.getMarkdown();
-                                        }
+                            const editor = new toastui.Editor({
+                                el: editorEl,
+                                height: '700px',
+                                initialEditType: 'markdown',
+                                previewStyle: 'vertical',
+                                initialValue: `{{ form.content.value|default:""|escapejs }}`,
+                                language: 'zh-CN',
+                                theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
+                                usageStatistics: false,
+                                toolbarItems: [
+                                    ['heading', 'bold', 'italic', 'strike'],
+                                    ['hr', 'quote'],
+                                    ['ul', 'ol', 'task', 'indent', 'outdent'],
+                                    ['table', 'image', 'link'],
+                                    ['code', 'codeblock']
+                                ],
+                                events: {
+                                    change: function() {
+                                        document.querySelector('#id_content').value = editor.getMarkdown();
+                                    }
+                                }
+                            });
+
+                            // Sync theme changes
+                            const observer = new MutationObserver(function(mutations) {
+                                mutations.forEach(function(mutation) {
+                                    if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
+                                        // Force reload or re-apply styles if needed
+                                        // For now, CSS overrides handle most colors
                                     }
                                 });
+                            });
+                            observer.observe(document.documentElement, {
+                                attributes: true,
+                                attributeFilter: ["data-theme"]
+                            });
+                        })();
+                    </script>
+                    {% if form.content.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
 
-                                // Sync theme changes
-                                const observer = new MutationObserver(function(mutations) {
-                                    mutations.forEach(function(mutation) {
-                                        if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
-                                            const theme = document.documentElement.getAttribute('data-theme');
-                                            // Toast UI doesn't support dynamic theme switch easily without destroy/recreate, 
-                                            // but we can try to re-init or just reload. 
-                                            // For now, let's just leave it as is or force reload if critical.
-                                            // Actually, the CSS overrides handle most colors.
-                                        }
-                                    });
-                                });
-                                observer.observe(document.documentElement, {
-                                    attributes: true,
-                                    attributeFilter: ["data-theme"]
-                                });
-                            })();
-                        </script>
-                        {% if form.content.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-control w-full mt-4">
-                        <label class="label">
-                            <span class="label-text font-bold">摘要</span>
-                        </label>
-                        {{ form.excerpt }}
-                        <label class="label">
-                            <span class="label-text-alt opacity-60">可选，用于列表页展示</span>
-                        </label>
-                    </div>
+                <div class="form-control w-full mt-4">
+                    <label class="label">
+                        <span class="label-text font-bold">摘要</span>
+                    </label>
+                    {{ form.excerpt }}
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">可选，用于列表页展示</span>
+                    </label>
                 </div>
             </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=main_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
             
             <!-- SEO / Slug Settings -->
-            <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body">
-                    <h3 class="card-title text-base mb-4">SEO 设置</h3>
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">Slug (URL别名)</span>
-                        </label>
-                        {{ form.slug }}
-                        <label class="label">
-                            <span class="label-text-alt opacity-60">留空将自动根据标题生成</span>
-                        </label>
-                    </div>
+            {% captureas seo_card %}
+            <div class="p-6 relative z-20">
+                <h3 class="card-title text-base mb-4">SEO 设置</h3>
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">Slug (URL别名)</span>
+                    </label>
+                    {{ form.slug }}
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">留空将自动根据标题生成</span>
+                    </label>
                 </div>
             </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=seo_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
         </div>
 
-        <!-- Sidebar (Right Column) -->
-        <div class="space-y-6">
+        <!-- Sidebar (Right Column - 25% - Sticky) -->
+        <div class="lg:col-span-1 space-y-6 sticky top-24">
             <!-- Publish Actions -->
-            <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body">
-                    <h3 class="card-title text-base mb-4">发布</h3>
-                    
+            {% captureas publish_card %}
+            <div class="p-6 relative z-20">
+                <h3 class="card-title text-base mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">publish</span>
+                    发布
+                </h3>
+                
+                <div class="space-y-4">
                     <div class="form-control w-full">
-                        <label class="label cursor-pointer justify-start gap-4">
+                        <label class="label cursor-pointer justify-between">
                             <span class="label-text">状态</span> 
                             {{ form.status }}
                         </label>
                     </div>
 
-                    <div class="card-actions justify-end mt-4 flex-col items-stretch gap-2">
-                        <button type="submit" class="btn btn-primary w-full gap-2">
-                            <span class="material-symbols-outlined">save</span>
-                            保存
-                        </button>
-                        <div class="flex gap-2">
-                            <button type="submit" name="_continue" class="btn btn-ghost btn-sm flex-1">保存并继续</button>
-                            <button type="submit" name="_addanother" class="btn btn-ghost btn-sm flex-1">保存并新增</button>
-                        </div>
+                    <div class="form-control w-full">
+                        <label class="label cursor-pointer justify-between">
+                            <span class="label-text">是否置顶</span>
+                            {{ form.is_pinned }}
+                        </label>
+                    </div>
+
+                    <div class="form-control w-full">
+                        <label class="label cursor-pointer justify-between">
+                            <span class="label-text">允许评论</span>
+                            {{ form.allow_comments }}
+                        </label>
+                    </div>
+                </div>
+
+                <div class="divider my-2"></div>
+
+                <div class="card-actions justify-end flex-col items-stretch gap-2">
+                    {% if object.slug %}
+                    <a href="{% url 'post_detail' object.slug %}" target="_blank" class="btn btn-outline btn-sm w-full gap-2">
+                        <span class="material-symbols-outlined text-sm">open_in_new</span>
+                        预览/查看
+                    </a>
+                    {% endif %}
+                    {% with slot_content='<span class="material-symbols-outlined">save</span> 保存更改' extra_classes='w-full gap-2 font-bold' type='submit' %}
+                        {% include 'components/inspira/shimmer_button.html' %}
+                    {% endwith %}
+                    <div class="flex gap-2">
+                        <button type="submit" name="_continue" class="btn btn-ghost btn-xs flex-1">保存并继续</button>
+                        <button type="submit" name="_addanother" class="btn btn-ghost btn-xs flex-1">保存并新增</button>
                     </div>
                 </div>
             </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=publish_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
 
             <!-- Categories & Tags -->
-            <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body">
-                    <h3 class="card-title text-base mb-4">分类与标签</h3>
-                    
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">分类</span>
-                        </label>
-                        {{ form.category }}
-                    </div>
+            {% captureas taxonomy_card %}
+            <div class="p-6 relative z-20">
+                <h3 class="card-title text-base mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">category</span>
+                    分类与标签
+                </h3>
+                
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">分类</span>
+                    </label>
+                    {{ form.category }}
+                </div>
 
-                    <div class="form-control w-full mt-4">
-                        <label class="label">
-                            <span class="label-text">标签</span>
-                        </label>
-                        {{ form.tags }}
-                        <label class="label">
-                            <span class="label-text-alt opacity-60">按住 Ctrl 可多选</span>
-                        </label>
+                <div class="form-control w-full mt-4" 
+                     x-data="{ 
+                        tags: [], 
+                        newTag: '',
+                        suggestions: [],
+                        showSuggestions: false,
+                        activeSuggestion: -1,
+                        init() {
+                            const initialTags = '{{ form.tags_str.value|default:''|escapejs }}';
+                            if (initialTags) {
+                                this.tags = initialTags.split(',').map(t => t.trim()).filter(t => t);
+                            }
+                        },
+                        async fetchSuggestions() {
+                            if (this.newTag.length < 1) {
+                                this.suggestions = [];
+                                this.showSuggestions = false;
+                                return;
+                            }
+                            try {
+                                const response = await fetch(`{% url 'administration:tag_autocomplete' %}?q=${this.newTag}`);
+                                const data = await response.json();
+                                this.suggestions = data.results.filter(t => !this.tags.includes(t));
+                                this.showSuggestions = this.suggestions.length > 0;
+                                this.activeSuggestion = -1;
+                            } catch (e) {
+                                console.error('Error fetching tags:', e);
+                            }
+                        },
+                        addTag(tagToAdd = null) {
+                            const tag = tagToAdd || this.newTag.trim();
+                            if (tag && !this.tags.includes(tag)) {
+                                this.tags.push(tag);
+                            }
+                            this.newTag = '';
+                            this.suggestions = [];
+                            this.showSuggestions = false;
+                        },
+                        removeTag(index) {
+                            this.tags.splice(index, 1);
+                        },
+                        selectSuggestion(index) {
+                            if (index >= 0 && index < this.suggestions.length) {
+                                this.addTag(this.suggestions[index]);
+                            }
+                        },
+                        get tagsValue() {
+                            return this.tags.join(',');
+                        }
+                     }"
+                     @click.away="showSuggestions = false">
+                    <label class="label">
+                        <span class="label-text">标签</span>
+                    </label>
+                    
+                    <!-- Hidden input for form submission -->
+                    <input type="hidden" name="tags_str" :value="tagsValue">
+                    
+                    <div class="relative">
+                        <div class="flex flex-wrap gap-2 mb-2 p-2 border border-base-300 rounded-lg bg-base-100 min-h-[3rem] items-center">
+                            <template x-for="(tag, index) in tags" :key="index">
+                                <div class="badge badge-primary gap-1 py-3 pl-3 pr-2">
+                                    <span x-text="tag"></span>
+                                    <button type="button" @click="removeTag(index)" class="btn btn-ghost btn-xs btn-circle h-5 w-5 min-h-0 text-primary-content/70 hover:text-white hover:bg-white/20">
+                                        <span class="material-symbols-outlined text-[14px]">close</span>
+                                    </button>
+                                </div>
+                            </template>
+                            
+                            <input type="text" 
+                                   x-model="newTag" 
+                                   @input.debounce.300ms="fetchSuggestions()"
+                                   @keydown.enter.prevent="showSuggestions && activeSuggestion >= 0 ? selectSuggestion(activeSuggestion) : addTag()" 
+                                   @keydown.comma.prevent="addTag()"
+                                   @keydown.arrow-down.prevent="activeSuggestion = Math.min(activeSuggestion + 1, suggestions.length - 1)"
+                                   @keydown.arrow-up.prevent="activeSuggestion = Math.max(activeSuggestion - 1, -1)"
+                                   @keydown.escape="showSuggestions = false"
+                                   @blur="setTimeout(() => addTag(), 200)"
+                                   class="input input-ghost input-sm focus:bg-transparent focus:outline-none flex-grow min-w-[150px] px-1 h-8" 
+                                   placeholder="输入标签按回车添加..." />
+                        </div>
+                        
+                        <!-- Suggestions Dropdown -->
+                        <div x-show="showSuggestions" 
+                             x-transition
+                             class="absolute z-50 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
+                            <ul class="menu menu-compact p-1">
+                                <template x-for="(suggestion, index) in suggestions" :key="index">
+                                    <li>
+                                        <a @mousedown.prevent="addTag(suggestion)"
+                                           :class="{ 'active': index === activeSuggestion }"
+                                           @mouseenter="activeSuggestion = index">
+                                            <span x-text="suggestion"></span>
+                                        </a>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
                     </div>
+                    
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">输入标签名称后按回车键添加，保存时将自动创建新标签。</span>
+                    </label>
                 </div>
             </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=taxonomy_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
 
             <!-- Featured Image -->
-            <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body">
-                    <h3 class="card-title text-base mb-4">特色图片</h3>
-                    <div class="form-control w-full">
-                        {{ form.cover_image }}
-                    </div>
-                    {% if object.cover_image %}
-                    <div class="mt-4 rounded-lg overflow-hidden border border-base-200">
-                        <img src="{{ object.cover_image.url }}" class="w-full h-auto" />
-                    </div>
-                    {% endif %}
+            {% captureas image_card %}
+            <div class="p-6 relative z-20">
+                <h3 class="card-title text-base mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-accent">image</span>
+                    特色图片
+                </h3>
+                <div class="form-control w-full">
+                    {{ form.cover_image }}
                 </div>
+                {% if object.cover_image %}
+                <div class="mt-4 rounded-lg overflow-hidden border border-base-200 relative group">
+                    <img src="{{ object.cover_image.url }}" class="w-full h-auto" />
+                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs">
+                        当前封面
+                    </div>
+                </div>
+                {% endif %}
             </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=image_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
         </div>
     </div>
 </form>

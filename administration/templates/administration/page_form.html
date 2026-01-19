@@ -1,6 +1,7 @@
 {% extends "administration/base.html" %}
+{% load capture_tags %}
 
-{% block title %}{{ title }} - Rosetta 管理后台{% endblock %}
+{% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 <div class="text-sm breadcrumbs mb-4">
@@ -16,129 +17,132 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Content (Left Column) -->
         <div class="lg:col-span-2 space-y-6">
-            <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body">
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text font-bold text-lg">页面标题</span>
-                        </label>
-                        {{ form.title }}
-                        {% if form.title.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
+            {% captureas main_card %}
+            <div class="p-6">
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-bold text-lg">页面标题</span>
+                    </label>
+                    {{ form.title }}
+                    {% if form.title.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+                
+                <div class="form-control w-full mt-4">
+                    <label class="label flex justify-between items-center">
+                        <span class="label-text font-bold">内容 (Markdown)</span>
+                    </label>
                     
-                    <div class="form-control w-full mt-4">
-                        <label class="label flex justify-between items-center">
-                            <span class="label-text font-bold">内容 (Markdown)</span>
-                        </label>
-                        
-                        <!-- Toast UI Editor Container -->
-                        <div id="editor" class="border border-base-300 rounded-lg overflow-hidden bg-base-100"></div>
+                    <!-- Toast UI Editor Container -->
+                    <div id="editor" class="border border-base-300 rounded-lg overflow-hidden bg-base-100"></div>
 
-                        <!-- Hidden Input for Form Submission -->
-                        <div class="hidden">
-                            {{ form.content }}
-                        </div>
+                    <!-- Hidden Input for Form Submission -->
+                    <div class="hidden">
+                        {{ form.content }}
+                    </div>
 
-                        <script>
-                            (function() {
-                                if (typeof toastui === 'undefined') return;
-                                
-                                const editorEl = document.querySelector('#editor');
-                                if (!editorEl) return;
-                                if (editorEl.innerHTML.trim() !== '') return;
+                    <script>
+                        (function() {
+                            if (typeof toastui === 'undefined') return;
+                            
+                            const editorEl = document.querySelector('#editor');
+                            if (!editorEl) return;
+                            if (editorEl.innerHTML.trim() !== '') return;
 
-                                const editor = new toastui.Editor({
-                                    el: editorEl,
-                                    height: '600px',
-                                    initialEditType: 'markdown',
-                                    previewStyle: 'vertical',
-                                    initialValue: `{{ form.content.value|default:""|escapejs }}`,
-                                    language: 'zh-CN',
-                                    theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
-                                    usageStatistics: false,
-                                    toolbarItems: [
-                                        ['heading', 'bold', 'italic', 'strike'],
-                                        ['hr', 'quote'],
-                                        ['ul', 'ol', 'task', 'indent', 'outdent'],
-                                        ['table', 'image', 'link'],
-                                        ['code', 'codeblock']
-                                    ],
-                                    events: {
-                                        change: function() {
-                                            document.querySelector('#id_content').value = editor.getMarkdown();
-                                        }
+                            const editor = new toastui.Editor({
+                                el: editorEl,
+                                height: '600px',
+                                initialEditType: 'markdown',
+                                previewStyle: 'vertical',
+                                initialValue: `{{ form.content.value|default:""|escapejs }}`,
+                                language: 'zh-CN',
+                                theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
+                                usageStatistics: false,
+                                toolbarItems: [
+                                    ['heading', 'bold', 'italic', 'strike'],
+                                    ['hr', 'quote'],
+                                    ['ul', 'ol', 'task', 'indent', 'outdent'],
+                                    ['table', 'image', 'link'],
+                                    ['code', 'codeblock']
+                                ],
+                                events: {
+                                    change: function() {
+                                        document.querySelector('#id_content').value = editor.getMarkdown();
+                                    }
+                                }
+                            });
+
+                            // Sync theme changes
+                            const observer = new MutationObserver(function(mutations) {
+                                mutations.forEach(function(mutation) {
+                                    if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
+                                        const theme = document.documentElement.getAttribute('data-theme');
                                     }
                                 });
-
-                                // Sync theme changes
-                                const observer = new MutationObserver(function(mutations) {
-                                    mutations.forEach(function(mutation) {
-                                        if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
-                                            const theme = document.documentElement.getAttribute('data-theme');
-                                        }
-                                    });
-                                });
-                                observer.observe(document.documentElement, {
-                                    attributes: true,
-                                    attributeFilter: ["data-theme"]
-                                });
-                            })();
-                        </script>
-                        {% if form.content.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
+                            });
+                            observer.observe(document.documentElement, {
+                                attributes: true,
+                                attributeFilter: ["data-theme"]
+                            });
+                        })();
+                    </script>
+                    {% if form.content.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
+                    </label>
+                    {% endif %}
                 </div>
             </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=main_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
             
             <!-- SEO / Slug Settings -->
-            <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body">
-                    <h3 class="card-title text-base mb-4">SEO 设置</h3>
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">Slug (URL别名)</span>
-                        </label>
-                        {{ form.slug }}
-                        <label class="label">
-                            <span class="label-text-alt opacity-60">留空将自动根据标题生成</span>
-                        </label>
-                    </div>
+            {% captureas seo_card %}
+            <div class="p-6">
+                <h3 class="card-title text-base mb-4">SEO 设置</h3>
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">Slug (URL别名)</span>
+                    </label>
+                    {{ form.slug }}
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">留空将自动根据标题生成</span>
+                    </label>
                 </div>
             </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=seo_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
         </div>
 
         <!-- Sidebar (Right Column) -->
         <div class="space-y-6">
             <!-- Publish Actions -->
-            <div class="card bg-base-100 shadow-sm border border-base-200">
-                <div class="card-body">
-                    <h3 class="card-title text-base mb-4">发布</h3>
-                    <div class="form-control w-full">
-                        <label class="label cursor-pointer justify-start gap-4">
-                            <span class="label-text">状态</span> 
-                            {{ form.status }}
-                        </label>
-                    </div>
-                    
-                    <div class="card-actions justify-end mt-4 flex-col items-stretch gap-2">
-                        <button type="submit" class="btn btn-primary w-full gap-2">
-                            <span class="material-symbols-outlined">save</span>
-                            保存
-                        </button>
-                        <div class="flex gap-2">
-                            <button type="submit" name="_continue" class="btn btn-ghost btn-sm flex-1">保存并继续</button>
-                            <button type="submit" name="_addanother" class="btn btn-ghost btn-sm flex-1">保存并新增</button>
-                        </div>
+            {% captureas publish_card %}
+            <div class="p-6">
+                <h3 class="card-title text-base mb-4">发布</h3>
+                <div class="form-control w-full">
+                    <label class="label cursor-pointer justify-start gap-4">
+                        <span class="label-text">状态</span> 
+                        {{ form.status }}
+                    </label>
+                </div>
+                
+                <div class="card-actions justify-end mt-4 flex-col items-stretch gap-2">
+                    <button type="submit" class="btn btn-primary w-full gap-2">
+                        <span class="material-symbols-outlined">save</span>
+                        保存
+                    </button>
+                    <div class="flex gap-2">
+                        <button type="submit" name="_continue" class="btn btn-ghost btn-sm flex-1">保存并继续</button>
+                        <button type="submit" name="_addanother" class="btn btn-ghost btn-sm flex-1">保存并新增</button>
                     </div>
                 </div>
             </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=publish_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
         </div>
     </div>
 </form>

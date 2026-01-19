@@ -1,0 +1,14 @@
+<!-- Inspira UI: Halo Search Input -->
+<form action="{% url 'search' %}" method="get" class="relative w-full max-w-md mx-auto group">
+    <div class="relative overflow-hidden rounded-full p-[1px]">
+        <!-- Halo Effect -->
+        <span class="absolute inset-[-1000%] animate-[spin_2s_linear_infinite] bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)] opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+        
+        <div class="relative flex items-center bg-base-100 rounded-full">
+            <input type="text" name="q" placeholder="搜索文章、标签..." class="input input-ghost w-full rounded-full pl-6 pr-12 focus:bg-transparent focus:text-base-content placeholder:text-base-content/40 focus:outline-none" />
+            <button type="submit" class="absolute right-2 btn btn-circle btn-ghost btn-sm text-base-content/60 hover:text-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+            </button>
+        </div>
+    </div>
+</form>

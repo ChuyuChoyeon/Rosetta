@@ -1,86 +1,90 @@
 {% extends "administration/debug/base_debug.html" %}
+{% load capture_tags %}
 
 {% block debug_title %}概览{% endblock %}
 
 {% block debug_content %}
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
     <!-- System Status -->
-    <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body">
-            <h2 class="card-title text-base mb-4">
-                <span class="material-symbols-outlined text-info">dns</span>
-                系统状态
-            </h2>
-            <div class="stats stats-vertical shadow w-full">
-                <div class="stat">
-                    <div class="stat-title">数据库连接</div>
-                    <div class="stat-value text-lg {% if db_ok %}text-success{% else %}text-error{% endif %}">
-                        {% if db_ok %}正常{% else %}异常{% endif %}
-                    </div>
-                    <div class="stat-desc">Default Database</div>
+    {% captureas system_status_card %}
+    <div class="p-6">
+        <h2 class="card-title text-base mb-4">
+            <span class="material-symbols-outlined text-info">dns</span>
+            系统状态
+        </h2>
+        <div class="stats stats-vertical shadow w-full">
+            <div class="stat">
+                <div class="stat-title">数据库连接</div>
+                <div class="stat-value text-lg {% if db_ok %}text-success{% else %}text-error{% endif %}">
+                    {% if db_ok %}正常{% else %}异常{% endif %}
                 </div>
-                <div class="stat">
-                    <div class="stat-title">Debug 模式</div>
-                    <div class="stat-value text-lg {% if debug_mode %}text-warning{% else %}text-success{% endif %}">
-                        {{ debug_mode|yesno:"开启,关闭" }}
-                    </div>
+                <div class="stat-desc">Default Database</div>
+            </div>
+            <div class="stat">
+                <div class="stat-title">Debug 模式</div>
+                <div class="stat-value text-lg {% if debug_mode %}text-warning{% else %}text-success{% endif %}">
+                    {{ debug_mode|yesno:"开启,关闭" }}
                 </div>
             </div>
         </div>
     </div>
+    {% endcaptureas %}
+    {% include 'components/inspira/card_spotlight.html' with slot_content=system_status_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
 
     <!-- Data Counts -->
-    <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body">
-            <h2 class="card-title text-base mb-4">
-                <span class="material-symbols-outlined text-success">dataset</span>
-                数据统计
-            </h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div class="flex flex-col p-3 bg-base-200 rounded-lg">
-                    <span class="text-xs opacity-70">用户</span>
-                    <span class="text-xl font-bold">{{ counts.users }}</span>
-                </div>
-                <div class="flex flex-col p-3 bg-base-200 rounded-lg">
-                    <span class="text-xs opacity-70">文章</span>
-                    <span class="text-xl font-bold">{{ counts.posts }}</span>
-                </div>
-                <div class="flex flex-col p-3 bg-base-200 rounded-lg">
-                    <span class="text-xs opacity-70">评论</span>
-                    <span class="text-xl font-bold">{{ counts.comments }}</span>
-                </div>
+    {% captureas data_counts_card %}
+    <div class="p-6">
+        <h2 class="card-title text-base mb-4">
+            <span class="material-symbols-outlined text-success">dataset</span>
+            数据统计
+        </h2>
+        <div class="grid grid-cols-2 gap-4">
+            <div class="flex flex-col p-3 bg-base-200 rounded-lg">
+                <span class="text-xs opacity-70">用户</span>
+                <span class="text-xl font-bold">{{ counts.users }}</span>
+            </div>
+            <div class="flex flex-col p-3 bg-base-200 rounded-lg">
+                <span class="text-xs opacity-70">文章</span>
+                <span class="text-xl font-bold">{{ counts.posts }}</span>
+            </div>
+            <div class="flex flex-col p-3 bg-base-200 rounded-lg">
+                <span class="text-xs opacity-70">评论</span>
+                <span class="text-xl font-bold">{{ counts.comments }}</span>
             </div>
         </div>
     </div>
+    {% endcaptureas %}
+    {% include 'components/inspira/card_spotlight.html' with slot_content=data_counts_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
 
     <!-- URL Patterns -->
-    <div class="card bg-base-100 shadow-sm border border-base-200 md:col-span-2">
-        <div class="card-body">
-            <h2 class="card-title text-base mb-4">
-                <span class="material-symbols-outlined text-primary">link</span>
-                路由列表 (Top 50)
-            </h2>
-            <div class="overflow-x-auto h-96">
-                <table class="table table-xs table-pin-rows">
-                    <thead>
-                        <tr>
-                            <th>Pattern</th>
-                            <th>Name</th>
-                            <th>Lookup</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for url in url_patterns %}
-                        <tr>
-                            <td class="font-mono">{{ url.pattern }}</td>
-                            <td class="font-mono text-primary">{{ url.name }}</td>
-                            <td class="font-mono opacity-50">{{ url.lookup_str }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+    {% captureas url_patterns_card %}
+    <div class="p-6">
+        <h2 class="card-title text-base mb-4">
+            <span class="material-symbols-outlined text-primary">link</span>
+            路由列表 (Top 50)
+        </h2>
+        <div class="overflow-x-auto h-96">
+            <table class="table table-xs table-pin-rows">
+                <thead>
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Name</th>
+                        <th>Lookup</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for url in url_patterns %}
+                    <tr>
+                        <td class="font-mono">{{ url.pattern }}</td>
+                        <td class="font-mono text-primary">{{ url.name }}</td>
+                        <td class="font-mono opacity-50">{{ url.lookup_str }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
+    {% endcaptureas %}
+    {% include 'components/inspira/card_spotlight.html' with slot_content=url_patterns_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5 md:col-span-2" %}
 </div>
 {% endblock %}

@@ -1,6 +1,7 @@
 {% extends "administration/base.html" %}
+{% load capture_tags %}
 
-{% block title %}用户管理 - Rosetta Dashboard{% endblock %}
+{% block title %}用户管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 <div class="text-sm breadcrumbs mb-4">
@@ -12,25 +13,31 @@
 
 <div class="flex justify-between items-center mb-6">
     <h1 class="text-2xl font-bold">用户管理</h1>
-    <div class="dropdown dropdown-end">
-        <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
-            <span class="material-symbols-outlined text-lg">more_vert</span>
-            更多
+    <div class="flex gap-2">
+        <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
+                <span class="material-symbols-outlined text-lg">more_vert</span>
+                更多
+            </div>
+            <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow bg-base-100 rounded-box w-52">
+                <li>
+                    <a href="{% url 'administration:export_all' 'User' %}" target="_blank">
+                        <span class="material-symbols-outlined">file_download</span>
+                        导出全部 (JSON)
+                    </a>
+                </li>
+                <li>
+                    <button onclick="import_modal.showModal()">
+                        <span class="material-symbols-outlined">file_upload</span>
+                        导入数据 (JSON)
+                    </button>
+                </li>
+            </ul>
         </div>
-        <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
-            <li>
-                <a href="{% url 'administration:export_all' 'User' %}" target="_blank">
-                    <span class="material-symbols-outlined">file_download</span>
-                    导出全部 (JSON)
-                </a>
-            </li>
-            <li>
-                <button onclick="import_modal.showModal()">
-                    <span class="material-symbols-outlined">file_upload</span>
-                    导入数据 (JSON)
-                </button>
-            </li>
-        </ul>
+        {% url 'administration:user_create' as create_url %}
+        {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建用户' extra_classes='px-4 !h-8 text-xs' href=create_url %}
+            {% include 'components/inspira/rainbow_button.html' %}
+        {% endwith %}
     </div>
 </div>
 
@@ -53,8 +60,8 @@
   </form>
 </dialog>
 
-<div class="card bg-base-100 shadow-sm border border-base-200">
-    <div class="card-body p-0">
+{% captureas card_content %}
+    <div class="p-0">
         <div class="p-4 border-b border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4">
             <h2 class="card-title text-base whitespace-nowrap">
                 <span class="material-symbols-outlined text-info">group</span>
@@ -75,41 +82,41 @@
         <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
             <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
             <div class="flex gap-2">
-                <button onclick="submitBulkAction('active')" class="btn btn-xs btn-success text-white">
-                    <span class="material-symbols-outlined text-sm">person_check</span> 启用
+                <button onclick="submitBulkAction('active')" class="btn btn-sm btn-success gap-2 text-white">
+                    <span class="material-symbols-outlined text-[18px]">person_check</span> 启用
                 </button>
-                <button onclick="submitBulkAction('inactive')" class="btn btn-xs btn-warning text-white">
-                    <span class="material-symbols-outlined text-sm">person_off</span> 禁用
+                <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-warning gap-2">
+                    <span class="material-symbols-outlined text-[18px]">person_off</span> 禁用
                 </button>
-                <button onclick="submitBulkAction('set_staff')" class="btn btn-xs btn-warning text-white">
-                    <span class="material-symbols-outlined text-sm">admin_panel_settings</span> 设为管理
+                <button onclick="submitBulkAction('set_staff')" class="btn btn-sm btn-info gap-2 text-white">
+                    <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span> 设为管理
                 </button>
-                <button onclick="submitBulkAction('remove_staff')" class="btn btn-xs btn-outline">
-                    <span class="material-symbols-outlined text-sm">person</span> 取消管理
+                <button onclick="submitBulkAction('remove_staff')" class="btn btn-sm btn-ghost gap-2 hover:bg-base-content/10">
+                    <span class="material-symbols-outlined text-[18px]">person</span> 取消管理
                 </button>
-                <button onclick="submitBulkAction('export_json')" class="btn btn-xs btn-info text-white">
-                    <span class="material-symbols-outlined text-sm">download</span> 导出
+                <button onclick="submitBulkAction('export_json')" class="btn btn-sm btn-ghost gap-2 hover:bg-base-content/10">
+                    <span class="material-symbols-outlined text-[18px]">download</span> 导出
                 </button>
                 <div class="divider divider-horizontal mx-0 my-1"></div>
-                <button onclick="submitBulkAction('delete')" class="btn btn-xs btn-error">
-                    <span class="material-symbols-outlined text-sm">delete</span> 删除
+                <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-ghost text-error hover:bg-error/10 gap-2">
+                    <span class="material-symbols-outlined text-[18px]">delete</span> 删除
                 </button>
             </div>
         </div>
 
         <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='user' %}">
             {% csrf_token %}
-            <div class="overflow-x-auto">
-                <table class="table table-zebra w-full">
+            <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
+                <table class="table table-zebra table-pin-rows w-full">
                     <!-- Head -->
-                    <thead class="bg-base-200">
+                    <thead class="bg-base-200 text-base-content sticky top-0 z-10">
                         <tr>
-                            <th class="w-10">
+                            <th class="w-10 bg-base-200">
                                 <label>
                                     <input type="checkbox" class="checkbox checkbox-xs" onclick="toggleAll(this)" />
                                 </label>
                             </th>
-                            <th>
+                            <th class="w-[200px] bg-base-200">
                                 <a href="?sort=username&order={% if request.GET.sort == 'username' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
                                     用户
                                     {% if request.GET.sort == 'username' %}
@@ -117,26 +124,18 @@
                                     {% endif %}
                                 </a>
                             </th>
-                            <th>标签</th>
-                            <th>角色</th>
-                            <th>状态</th>
-                            <th>
+                            <th class="w-28 bg-base-200">称号</th>
+                            <th class="w-28 bg-base-200">角色</th>
+                            <th class="bg-base-200">状态</th>
+                            <th class="w-32 bg-base-200">
                                 <a href="?sort=date_joined&order={% if request.GET.sort == 'date_joined' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    注册时间
+                                    加入时间
                                     {% if request.GET.sort == 'date_joined' %}
                                         <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
                                     {% endif %}
                                 </a>
                             </th>
-                            <th>
-                                <a href="?sort=last_login&order={% if request.GET.sort == 'last_login' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    最后登录
-                                    {% if request.GET.sort == 'last_login' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th>操作</th>
+                            <th class="w-24 bg-base-200">操作</th>
                         </tr>
                     </thead>
                     <!-- Body (HTMX Target) -->
@@ -168,5 +167,6 @@
             {% endif %}
         </div>
     </div>
-</div>
+{% endcaptureas %}
+{% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
 {% endblock %}

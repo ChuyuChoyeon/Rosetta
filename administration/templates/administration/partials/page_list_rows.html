@@ -10,11 +10,19 @@
     </td>
     <td class="font-mono text-sm opacity-70">{{ page.slug }}</td>
     <td>
-        {% if page.status == 'published' %}
-        <div class="badge badge-success badge-sm gap-1">已发布</div>
-        {% else %}
-        <div class="badge badge-ghost badge-sm gap-1">草稿</div>
-        {% endif %}
+        <div class="flex flex-col gap-1">
+            {% if page.status == 'published' %}
+            <div class="badge badge-success badge-sm gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                已发布
+            </div>
+            {% else %}
+            <div class="badge badge-warning badge-sm gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                草稿
+            </div>
+            {% endif %}
+        </div>
     </td>
     <td class="text-sm opacity-70">{{ page.created_at|date:"Y-m-d" }}</td>
     <td>

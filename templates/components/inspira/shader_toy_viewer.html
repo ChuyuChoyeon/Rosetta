@@ -1,0 +1,112 @@
+<!-- Inspira UI: Shader Toy Viewer -->
+<div class="relative w-full h-full overflow-hidden {{ extra_classes }}" x-data="shaderToy()">
+    <canvas x-ref="canvas" class="w-full h-full block"></canvas>
+    <div class="absolute inset-0 bg-black/20"></div>
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('shaderToy', () => ({
+        gl: null,
+        program: null,
+        startTime: 0,
+        
+        init() {
+            this.startTime = Date.now();
+            const canvas = this.$refs.canvas;
+            this.gl = canvas.getContext('webgl');
+            
+            if (!this.gl) return;
+            
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+            
+            // Simple colorful shader
+            const fsSource = `
+                precision mediump float;
+                uniform float iTime;
+                uniform vec2 iResolution;
+
+                void mainImage( out vec4 fragColor, in vec2 fragCoord )
+                {
+                    vec2 uv = fragCoord/iResolution.xy;
+                    vec3 col = 0.5 + 0.5*cos(iTime+uv.xyx+vec3(0,2,4));
+                    fragColor = vec4(col,1.0);
+                }
+
+                void main() {
+                    mainImage(gl_FragColor, gl_FragCoord.xy);
+                }
+            `;
+            
+            const vsSource = `
+                attribute vec4 aVertexPosition;
+                void main() {
+                    gl_Position = aVertexPosition;
+                }
+            `;
+            
+            this.initShaderProgram(vsSource, fsSource);
+            this.initBuffers();
+            this.render();
+        },
+        
+        resize() {
+            const canvas = this.$refs.canvas;
+            const parent = canvas.parentElement;
+            canvas.width = parent.offsetWidth;
+            canvas.height = parent.offsetHeight;
+            this.gl.viewport(0, 0, canvas.width, canvas.height);
+        },
+        
+        initShaderProgram(vsSource, fsSource) {
+            const vertexShader = this.loadShader(this.gl.VERTEX_SHADER, vsSource);
+            const fragmentShader = this.loadShader(this.gl.FRAGMENT_SHADER, fsSource);
+            
+            this.program = this.gl.createProgram();
+            this.gl.attachShader(this.program, vertexShader);
+            this.gl.attachShader(this.program, fragmentShader);
+            this.gl.linkProgram(this.program);
+        },
+        
+        loadShader(type, source) {
+            const shader = this.gl.createShader(type);
+            this.gl.shaderSource(shader, source);
+            this.gl.compileShader(shader);
+            return shader;
+        },
+        
+        initBuffers() {
+            const positionBuffer = this.gl.createBuffer();
+            this.gl.bindBuffer(this.gl.ARRAY_BUFFER, positionBuffer);
+            const positions = [
+                -1.0,  1.0,
+                 1.0,  1.0,
+                -1.0, -1.0,
+                 1.0, -1.0,
+            ];
+            this.gl.bufferData(this.gl.ARRAY_BUFFER, new Float32Array(positions), this.gl.STATIC_DRAW);
+        },
+        
+        render() {
+            const time = (Date.now() - this.startTime) * 0.001;
+            
+            this.gl.useProgram(this.program);
+            
+            const resolutionLocation = this.gl.getUniformLocation(this.program, "iResolution");
+            const timeLocation = this.gl.getUniformLocation(this.program, "iTime");
+            
+            this.gl.uniform2f(resolutionLocation, this.$refs.canvas.width, this.$refs.canvas.height);
+            this.gl.uniform1f(timeLocation, time);
+            
+            const vertexPosition = this.gl.getAttribLocation(this.program, 'aVertexPosition');
+            this.gl.enableVertexAttribArray(vertexPosition);
+            this.gl.vertexAttribPointer(vertexPosition, 2, this.gl.FLOAT, false, 0, 0);
+            
+            this.gl.drawArrays(this.gl.TRIANGLE_STRIP, 0, 4);
+            
+            requestAnimationFrame(() => this.render());
+        }
+    }));
+});
+</script>

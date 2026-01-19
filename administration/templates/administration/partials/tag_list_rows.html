@@ -7,18 +7,27 @@
     </th>
     <th class="font-mono text-xs opacity-50">{{ tag.id }}</th>
     <td>
+        {% if tag.color|first == '#' %}
+        <span class="badge badge-outline font-bold" style="border-color: {{ tag.color }}; color: {{ tag.color }}">{{ tag.name }}</span>
+        {% else %}
         <span class="badge badge-{{ tag.color }} badge-outline font-bold">{{ tag.name }}</span>
+        {% endif %}
     </td>
     <td class="font-mono text-sm opacity-70">{{ tag.slug }}</td>
     <td>
-        {% if tag.is_active %}
-            <div class="badge badge-success badge-sm gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
-                可见
-            </div>
-        {% else %}
-            <div class="badge badge-ghost badge-sm gap-1">隐藏</div>
-        {% endif %}
+        <div class="flex flex-col gap-1">
+            {% if tag.is_active %}
+                <div class="badge badge-success badge-sm gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
+                    可见
+                </div>
+            {% else %}
+                <div class="badge badge-ghost badge-sm gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-base-300"></span>
+                    隐藏
+                </div>
+            {% endif %}
+        </div>
     </td>
     <td>
         <span class="badge badge-ghost badge-sm">{{ tag.post_count }} 文章</span>

@@ -3,24 +3,27 @@ from django.conf import settings
 from django.utils.text import slugify
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
+from core.validators import validate_image_file
 
 
 class Category(models.Model):
     """
     文章分类模型
-    用于组织和归档文章，支持slug作为URL友好的标识符。
+    用于组织和归档文章，支持 slug 作为 URL 友好的标识符。
     """
 
     name = models.CharField("名称", max_length=100)
     slug = models.SlugField("别名", unique=True, blank=True)
     description = models.TextField("描述", blank=True)
+    icon = models.CharField("图标", max_length=50, blank=True, help_text="Material Symbols 图标代码")
+    color = models.CharField("颜色", max_length=20, default="primary", help_text="Tailwind 颜色类名 (如 primary, secondary)")
 
     class Meta:
         verbose_name = "分类"
         verbose_name_plural = verbose_name
 
     def save(self, *args, **kwargs):
-        """保存时自动生成slug（如果未提供）"""
+        """保存时自动生成 slug（如果未提供）"""
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
@@ -33,21 +36,22 @@ class Tag(models.Model):
     """
     文章标签模型
     用于对文章进行灵活标记和分类。
+    包含颜色配置，用于前端展示。
     """
     COLOR_CHOICES = (
-        ("primary", "Primary (Indigo)"),
-        ("secondary", "Secondary (Pink)"),
-        ("accent", "Accent (Cyan)"),
-        ("neutral", "Neutral (Grey)"),
-        ("info", "Info (Blue)"),
-        ("success", "Success (Green)"),
-        ("warning", "Warning (Yellow)"),
-        ("error", "Error (Red)"),
+        ("primary", "主色 (Indigo)"),
+        ("secondary", "次色 (Pink)"),
+        ("accent", "强调色 (Cyan)"),
+        ("neutral", "中性色 (Grey)"),
+        ("info", "信息 (Blue)"),
+        ("success", "成功 (Green)"),
+        ("warning", "警告 (Yellow)"),
+        ("error", "错误 (Red)"),
     )
 
     name = models.CharField("名称", max_length=100)
     slug = models.SlugField("别名", unique=True, blank=True)
-    color = models.CharField("颜色", max_length=20, choices=COLOR_CHOICES, default="neutral")
+    color = models.CharField("颜色", max_length=20, default="neutral")
     is_active = models.BooleanField("是否可见", default=True)
 
     class Meta:
@@ -55,7 +59,7 @@ class Tag(models.Model):
         verbose_name_plural = verbose_name
 
     def save(self, *args, **kwargs):
-        """保存时自动生成slug（如果未提供）"""
+        """保存时自动生成 slug（如果未提供）"""
         if not self.slug:
             self.slug = slugify(self.name)
         super().save(*args, **kwargs)
@@ -86,9 +90,15 @@ class Post(models.Model):
     )
     content = models.TextField("内容")
     excerpt = models.TextField("摘要", blank=True, max_length=500)
-    cover_image = models.ImageField("封面图", upload_to="posts/", blank=True, null=True)
+    cover_image = models.ImageField(
+        "封面图", 
+        upload_to="posts/", 
+        blank=True, 
+        null=True,
+        validators=[validate_image_file]
+    )
 
-    # ImageKit Thumbnails
+    # ImageKit Thumbnails (自动生成缩略图)
     cover_thumbnail = ImageSpecField(
         source="cover_image",
         processors=[ResizeToFill(400, 250)],
@@ -106,6 +116,12 @@ class Post(models.Model):
     tags = models.ManyToManyField(
         Tag, blank=True, related_name="posts", verbose_name="标签"
     )
+    likes = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name="liked_posts",
+        blank=True,
+        verbose_name="点赞",
+    )
     status = models.CharField(
         "状态", max_length=10, choices=STATUS_CHOICES, default="draft", db_index=True
     )
@@ -119,14 +135,19 @@ class Post(models.Model):
     created_at = models.DateTimeField("创建时间", auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField("更新时间", auto_now=True)
     notification_sent = models.BooleanField("已发送通知", default=False, editable=False)
+    is_pinned = models.BooleanField("置顶", default=False)
+    allow_comments = models.BooleanField("允许评论", default=True)
 
     class Meta:
         ordering = ["-created_at"]
         verbose_name = "文章"
         verbose_name_plural = verbose_name
+        indexes = [
+            models.Index(fields=['status', 'created_at']),
+        ]
 
     def save(self, *args, **kwargs):
-        """保存时自动生成slug（如果未提供）"""
+        """保存时自动生成 slug（如果未提供）"""
         if not self.slug:
             self.slug = slugify(self.title)
         super().save(*args, **kwargs)
@@ -135,6 +156,7 @@ class Post(models.Model):
         return self.title
 
     def get_absolute_url(self):
+        """获取文章详情页的绝对 URL"""
         from django.urls import reverse
         return reverse("post_detail", kwargs={"slug": self.slug})
 
@@ -142,7 +164,7 @@ class Post(models.Model):
 class Comment(models.Model):
     """
     文章评论模型
-    支持多级回复（通过parent字段）。
+    支持多级回复（通过 parent 字段）。
     """
 
     post = models.ForeignKey(

@@ -1,6 +1,7 @@
 {% extends "administration/base.html" %}
+{% load capture_tags %}
 
-{% block title %}标签管理 - Rosetta Dashboard{% endblock %}
+{% block title %}标签管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 <div class="text-sm breadcrumbs mb-4">
@@ -18,7 +19,7 @@
                 <span class="material-symbols-outlined text-lg">more_vert</span>
                 更多
             </div>
-            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52">
+            <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow bg-base-100 rounded-box w-52">
                 <li>
                     <a href="{% url 'administration:export_all' 'Tag' %}" target="_blank">
                         <span class="material-symbols-outlined">file_download</span>
@@ -33,12 +34,10 @@
                 </li>
             </ul>
         </div>
-        <a href="{% url 'administration:tag_create' %}" class="btn btn-primary btn-sm">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor">
-                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
-            </svg>
-            新建标签
-        </a>
+        {% url 'administration:tag_create' as create_url %}
+        {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建标签' extra_classes='px-4 !h-8 text-xs' href=create_url %}
+            {% include 'components/inspira/rainbow_button.html' %}
+        {% endwith %}
     </div>
 </div>
 
@@ -61,8 +60,8 @@
   </form>
 </dialog>
 
-<div class="card bg-base-100 shadow-sm border border-base-200">
-    <div class="card-body p-0">
+{% captureas card_content %}
+    <div class="p-0">
         <div class="p-4 border-b border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4">
             <h2 class="card-title text-base whitespace-nowrap">
                 <span class="material-symbols-outlined text-secondary">label</span>
@@ -93,41 +92,41 @@
         <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
             <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
             <div class="flex gap-2">
-                <button onclick="submitBulkAction('active')" class="btn btn-xs btn-success text-white">
-                    <span class="material-symbols-outlined text-sm">visibility</span> 可见
+                <button onclick="submitBulkAction('active')" class="btn btn-sm btn-primary gap-2">
+                    <span class="material-symbols-outlined text-[18px]">visibility</span> 可见
                 </button>
-                <button onclick="submitBulkAction('inactive')" class="btn btn-xs btn-neutral">
-                    <span class="material-symbols-outlined text-sm">visibility_off</span> 隐藏
+                <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-neutral gap-2">
+                    <span class="material-symbols-outlined text-[18px]">visibility_off</span> 隐藏
                 </button>
                 <div class="divider divider-horizontal mx-0 my-1"></div>
-                <button onclick="submitBulkAction('delete')" class="btn btn-xs btn-error">
-                    <span class="material-symbols-outlined text-sm">delete</span> 删除
+                <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-ghost text-error hover:bg-error/10 gap-2">
+                    <span class="material-symbols-outlined text-[18px]">delete</span> 删除
                 </button>
             </div>
         </div>
 
         <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='tag' %}">
             {% csrf_token %}
-            <div class="overflow-x-auto">
-                <table class="table table-zebra w-full">
+            <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
+                <table class="table table-zebra table-pin-rows">
                     <!-- Head -->
-                    <thead class="bg-base-200">
+                    <thead class="bg-base-200 text-base-content sticky top-0 z-10">
                         <tr>
-                            <th class="w-10">
+                            <th class="w-10 bg-base-200">
                                 <label>
                                     <input type="checkbox" class="checkbox checkbox-xs" onclick="toggleAll(this)" />
                                 </label>
                             </th>
-                            <th>ID</th>
-                            <th>名称</th>
-                            <th>Slug</th>
-                            <th>状态</th>
-                            <th>文章数</th>
-                            <th>操作</th>
+                            <th class="bg-base-200">ID</th>
+                            <th class="bg-base-200">名称</th>
+                            <th class="bg-base-200">Slug</th>
+                            <th class="bg-base-200">状态</th>
+                            <th class="bg-base-200">文章数</th>
+                            <th class="bg-base-200">操作</th>
                         </tr>
                     </thead>
                     <!-- Body (HTMX Target) -->
-                    <tbody id="tag-list-body">
+                    <tbody id="tag-table-body">
                         {% include "administration/partials/tag_list_rows.html" %}
                     </tbody>
                 </table>
@@ -155,5 +154,6 @@
             {% endif %}
         </div>
     </div>
-</div>
+{% endcaptureas %}
+{% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
 {% endblock %}

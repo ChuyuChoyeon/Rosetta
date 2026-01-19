@@ -1,0 +1,81 @@
+{% extends "administration/base.html" %}
+{% load capture_tags %}
+
+{% block title %}用户称号管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li>用户称号管理</li>
+    </ul>
+</div>
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">用户称号管理</h1>
+    <div class="flex gap-2">
+        {% url 'administration:usertitle_create' as create_url %}
+        {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建称号' extra_classes='px-4 !h-8 text-xs' href=create_url %}
+            {% include 'components/inspira/rainbow_button.html' %}
+        {% endwith %}
+    </div>
+</div>
+
+{% captureas card_content %}
+    <div class="p-0">
+        <div class="p-4 border-b border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h2 class="card-title text-base whitespace-nowrap">
+                <span class="material-symbols-outlined text-info">badge</span>
+                称号列表
+            </h2>
+        </div>
+
+        <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
+            <table class="table table-zebra table-pin-rows w-full">
+                <!-- Head -->
+                <thead class="bg-base-200 text-base-content sticky top-0 z-10">
+                    <tr>
+                        <th class="w-10 bg-base-200">
+                            <label>
+                                <input type="checkbox" class="checkbox checkbox-xs" disabled />
+                            </label>
+                        </th>
+                        <th class="w-48 bg-base-200">预览</th>
+                        <th class="bg-base-200">名称</th>
+                        <th class="bg-base-200">颜色风格</th>
+                        <th class="bg-base-200">说明</th>
+                        <th class="w-24 bg-base-200">用户数</th>
+                        <th class="w-32 bg-base-200">操作</th>
+                    </tr>
+                </thead>
+                <!-- Body -->
+                <tbody>
+                    {% include "administration/partials/usertitle_list_rows.html" %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        <div class="p-4 border-t border-base-200 flex justify-center">
+            {% if is_paginated %}
+            <div class="join">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-sm">«</a>
+                {% else %}
+                <button class="join-item btn btn-sm btn-disabled">«</button>
+                {% endif %}
+                
+                <button class="join-item btn btn-sm">第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页</button>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-sm">»</a>
+                {% else %}
+                <button class="join-item btn btn-sm btn-disabled">»</button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endcaptureas %}
+{% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+{% endblock %}

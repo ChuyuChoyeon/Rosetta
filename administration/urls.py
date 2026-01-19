@@ -4,17 +4,19 @@ from . import views
 app_name = "administration"
 
 urlpatterns = [
-    # 首页
+    # --- Dashboard Home ---
+    # 管理后台首页
     path("", views.IndexView.as_view(), name="index"),
     
-    # 文章管理
+    # --- Content Management (内容管理) ---
+    # 文章管理 (Posts)
     path("posts/", views.PostListView.as_view(), name="post_list"),
     path("posts/create/", views.PostCreateView.as_view(), name="post_create"),
     path("posts/<int:pk>/edit/", views.PostUpdateView.as_view(), name="post_edit"),
     path("posts/<int:pk>/delete/", views.PostDeleteView.as_view(), name="post_delete"),
     path("posts/<int:pk>/duplicate/", views.PostDuplicateView.as_view(), name="post_duplicate"),
     
-    # 分类管理
+    # 分类管理 (Categories)
     path("categories/", views.CategoryListView.as_view(), name="category_list"),
     path(
         "categories/create/", views.CategoryCreateView.as_view(), name="category_create"
@@ -30,13 +32,14 @@ urlpatterns = [
         name="category_delete",
     ),
     
-    # 标签管理
+    # 标签管理 (Tags)
     path("tags/", views.TagListView.as_view(), name="tag_list"),
     path("tags/create/", views.TagCreateView.as_view(), name="tag_create"),
     path("tags/<int:pk>/edit/", views.TagUpdateView.as_view(), name="tag_edit"),
     path("tags/<int:pk>/delete/", views.TagDeleteView.as_view(), name="tag_delete"),
+    path("tags/autocomplete/", views.TagAutocompleteView.as_view(), name="tag_autocomplete"),
     
-    # 评论管理
+    # 评论管理 (Comments)
     path("comments/", views.CommentListView.as_view(), name="comment_list"),
     path(
         "comments/<int:pk>/edit/",
@@ -49,14 +52,15 @@ urlpatterns = [
         name="comment_delete",
     ),
     
-    # 单页面管理
+    # 单页面管理 (Pages)
     path("pages/", views.PageListView.as_view(), name="page_list"),
     path("pages/create/", views.PageCreateView.as_view(), name="page_create"),
     path("pages/<int:pk>/edit/", views.PageUpdateView.as_view(), name="page_edit"),
     path("pages/<int:pk>/delete/", views.PageDeleteView.as_view(), name="page_delete"),
     path("pages/<int:pk>/duplicate/", views.PageDuplicateView.as_view(), name="page_duplicate"),
     
-    # 导航管理
+    # --- Appearance & Settings (外观与设置) ---
+    # 导航菜单管理 (Navigation)
     path("navigation/", views.NavigationListView.as_view(), name="navigation_list"),
     path(
         "navigation/create/",
@@ -74,7 +78,7 @@ urlpatterns = [
         name="navigation_delete",
     ),
     
-    # 友链管理
+    # 友情链接管理 (FriendLinks)
     path("friendlinks/", views.FriendLinkListView.as_view(), name="friendlink_list"),
     path(
         "friendlinks/create/",
@@ -91,25 +95,50 @@ urlpatterns = [
         views.FriendLinkDeleteView.as_view(),
         name="friendlink_delete",
     ),
+
+    # 搜索占位符管理 (Search Placeholders)
+    path("placeholders/", views.SearchPlaceholderListView.as_view(), name="searchplaceholder_list"),
+    path(
+        "placeholders/create/",
+        views.SearchPlaceholderCreateView.as_view(),
+        name="searchplaceholder_create",
+    ),
+    path(
+        "placeholders/<int:pk>/edit/",
+        views.SearchPlaceholderUpdateView.as_view(),
+        name="searchplaceholder_edit",
+    ),
+    path(
+        "placeholders/<int:pk>/delete/",
+        views.SearchPlaceholderDeleteView.as_view(),
+        name="searchplaceholder_delete",
+    ),
     
-    # 用户管理
+    # --- User Management (用户管理) ---
     path("users/", views.UserListView.as_view(), name="user_list"),
     path("users/create/", views.UserCreateView.as_view(), name="user_create"),
     path("users/<int:pk>/edit/", views.UserUpdateView.as_view(), name="user_edit"),
     
-    # 系统设置
+    # 用户称号管理 (User Titles)
+    path("titles/", views.UserTitleListView.as_view(), name="usertitle_list"),
+    path("titles/create/", views.UserTitleCreateView.as_view(), name="usertitle_create"),
+    path("titles/<int:pk>/edit/", views.UserTitleUpdateView.as_view(), name="usertitle_edit"),
+    path("titles/<int:pk>/delete/", views.UserTitleDeleteView.as_view(), name="usertitle_delete"),
+    
+    # --- System Tools (系统工具) ---
+    # 系统设置 (Settings - Placeholder)
     path("settings/", views.SettingsView.as_view(), name="settings"),
     
-    # 调试工具
+    # 调试工具 (Debug)
     path("debug/", views.DebugDashboardView.as_view(), name="debug"),
     path("debug/mock/", views.DebugMockView.as_view(), name="debug_mock"),
     path("debug/cache/", views.DebugCacheView.as_view(), name="debug_cache"),
     path("debug/email/", views.DebugEmailView.as_view(), name="debug_email"),
     
-    # 批量操作
+    # 批量操作 (Bulk Actions)
     path("bulk-action/<str:model>/", views.BulkActionView.as_view(), name="bulk_action"),
     
-    # 导入导出
+    # 数据导入导出 (Import/Export)
     path("export-all/<str:model>/", views.ExportAllView.as_view(), name="export_all"),
     path("import-json/<str:model>/", views.ImportJsonView.as_view(), name="import_json"),
 ]

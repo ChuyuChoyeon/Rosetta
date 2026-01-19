@@ -1,70 +1,80 @@
 {% for user in users %}
-<tr class="hover">
-    <th>
+<tr class="hover group">
+    <th class="rounded-l-2xl">
         <label>
             <input type="checkbox" name="selected_ids" value="{{ user.pk }}" class="checkbox checkbox-xs row-checkbox" onchange="updateBulkToolbar()" />
         </label>
     </th>
     <td>
-        <div class="flex items-center gap-3">
-            <div class="avatar">
-                <div class="w-10 h-10 rounded-full">
+        <div class="flex items-center gap-3 w-[200px]">
+            <div class="avatar shrink-0">
+                <div class="w-10 h-10 rounded-full ring ring-base-200 ring-offset-1 group-hover:ring-primary/20 transition-all">
                     <img src="{{ user.get_avatar_url }}" alt="{{ user.username }}" />
                 </div>
             </div>
-            <div>
-                <div class="font-bold">
+            <div class="min-w-0 flex-1">
+                <div class="font-bold truncate tooltip tooltip-bottom group-hover:text-primary transition-colors" data-tip="{{ user.nickname|default:user.username }} {% if user.nickname %}(@{{ user.username }}){% endif %}">
                     {{ user.nickname|default:user.username }}
-                    {% if user.nickname %}
-                    <span class="text-xs font-normal opacity-50 block">@{{ user.username }}</span>
-                    {% endif %}
                 </div>
-                <div class="text-sm opacity-50">{{ user.email }}</div>
+                {% if user.nickname %}
+                <div class="text-xs font-normal opacity-50 truncate">@{{ user.username }}</div>
+                {% endif %}
+                <div class="text-sm opacity-50 truncate" title="{{ user.email }}">{{ user.email }}</div>
             </div>
         </div>
     </td>
     <td>
-        <div class="flex flex-wrap gap-1">
-            {% for label in user.labels.all %}
-                <span class="badge badge-{{ label.color }} badge-xs">{{ label.name }}</span>
-            {% empty %}
-                <span class="opacity-30 text-xs">-</span>
-            {% endfor %}
-        </div>
+        {% if user.title %}
+            <span class="badge badge-{{ user.title.color }} badge-sm gap-1 hover:opacity-80 transition-opacity cursor-default" title="{{ user.title.description }}">
+                {% if user.title.icon %}
+                    <span class="w-3 h-3 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
+                        {{ user.title.icon|safe }}
+                    </span>
+                {% endif %}
+                {{ user.title.name }}
+            </span>
+        {% else %}
+            <span class="opacity-30 text-xs">-</span>
+        {% endif %}
     </td>
     <td>
         {% if user.is_superuser %}
-            <div class="badge badge-primary badge-sm">超级管理员</div>
+            <div class="badge badge-primary badge-sm badge-outline bg-primary/10">超级管理员</div>
         {% elif user.is_staff %}
-            <div class="badge badge-secondary badge-sm">管理员</div>
+            <div class="badge badge-secondary badge-sm badge-outline bg-secondary/10">管理员</div>
         {% else %}
-            <div class="badge badge-ghost badge-sm">普通用户</div>
+            <div class="badge badge-ghost badge-sm badge-outline">普通用户</div>
         {% endif %}
     </td>
     <td>
-        {% if user.is_active %}
-            <div class="badge badge-success badge-sm gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
-                正常
-            </div>
-        {% else %}
-            <div class="badge badge-error badge-sm gap-1">禁用</div>
-        {% endif %}
+        <div class="flex flex-col gap-1">
+            {% if user.is_active %}
+                <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/10">
+                    <span class="w-1.5 h-1.5 rounded-full bg-success animate-[pulse_2s_infinite]"></span>
+                    正常
+                </div>
+            {% else %}
+                <div class="badge badge-error badge-sm gap-1 badge-outline bg-error/10">
+                    <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                    禁用
+                </div>
+            {% endif %}
+        </div>
     </td>
-    <td class="text-sm font-mono opacity-70">{{ user.date_joined|date:"Y-m-d" }}</td>
-    <td class="text-sm font-mono opacity-70">
+    <td class="text-sm font-mono opacity-70 group-hover:opacity-100 transition-opacity">{{ user.date_joined|date:"Y-m-d" }}</td>
+    <td class="text-sm font-mono opacity-70 group-hover:opacity-100 transition-opacity">
         {% if user.last_login %}
             {{ user.last_login|timesince }}前
         {% else %}
             从未登录
         {% endif %}
     </td>
-    <td>
-        <div class="join">
-            <a href="{% url 'users:user_public_profile' user.username %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip" data-tip="查看主页">
+    <td class="rounded-r-2xl">
+        <div class="join opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <a href="{% url 'users:user_public_profile' user.username %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="查看主页">
                 <span class="material-symbols-outlined text-base">visibility</span>
             </a>
-            <a href="{% url 'administration:user_edit' user.pk %}" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+            <a href="{% url 'administration:user_edit' user.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
                 <span class="material-symbols-outlined text-base">edit</span>
             </a>
             <!-- User delete usually requires caution, maybe specific permission check or confirmation -->
@@ -73,10 +83,15 @@
 </tr>
 {% empty %}
 <tr>
-    <td colspan="8" class="text-center py-8 text-base-content/50">
-        <div class="flex flex-col items-center gap-2">
-            <span class="material-symbols-outlined text-4xl opacity-20">group_off</span>
-            <span>暂无用户</span>
+    <td colspan="8" class="text-center py-16 text-base-content/50">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl opacity-40">group_off</span>
+            </div>
+            <div class="text-center">
+                <h3 class="font-bold text-lg">暂无用户</h3>
+                <p class="text-sm opacity-60 mt-1">系统中还没有注册用户</p>
+            </div>
         </div>
     </td>
 </tr>

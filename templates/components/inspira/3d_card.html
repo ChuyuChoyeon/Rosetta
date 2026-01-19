@@ -1,0 +1,39 @@
+<!-- Inspira UI: 3D Card Effect -->
+<div class="group/card relative w-full h-auto rounded-xl border border-black/[0.1] bg-base-100 dark:bg-base-100 dark:border-white/[0.2] shadow-sm p-6 transition-all duration-200 hover:shadow-2xl hover:shadow-emerald-500/[0.1] dark:hover:shadow-emerald-500/[0.1]"
+     style="transform-style: preserve-3d;"
+     x-data="{
+         width: 0,
+         height: 0,
+         mouseX: 0,
+         mouseY: 0,
+         mouseLeaveDelay: null,
+         init() {
+             this.width = this.$el.offsetWidth;
+             this.height = this.$el.offsetHeight;
+         },
+         handleMouseMove(e) {
+             const rect = this.$el.getBoundingClientRect();
+             this.mouseX = e.clientX - rect.left;
+             this.mouseY = e.clientY - rect.top;
+             const xPct = this.mouseX / this.width - 0.5;
+             const yPct = this.mouseY / this.height - 0.5;
+             
+             this.$el.style.transform = `rotateY(${xPct * 20}deg) rotateX(${yPct * -20}deg)`;
+         },
+         handleMouseEnter() {
+             this.mouseLeaveDelay = clearTimeout(this.mouseLeaveDelay);
+         },
+         handleMouseLeave() {
+             this.mouseLeaveDelay = setTimeout(() => {
+                 this.$el.style.transform = `rotateY(0deg) rotateX(0deg)`;
+             }, 100);
+         }
+     }"
+     @mousemove="handleMouseMove"
+     @mouseenter="handleMouseEnter"
+     @mouseleave="handleMouseLeave">
+     
+    <div style="transform: translateZ(50px); transform-style: preserve-3d;">
+        {{ slot_content|safe }}
+    </div>
+</div>

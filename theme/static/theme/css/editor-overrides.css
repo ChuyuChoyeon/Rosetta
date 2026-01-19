@@ -1,0 +1,104 @@
+/* Toast UI Editor Overrides for DaisyUI */
+
+/* General overrides using DaisyUI variables */
+.toastui-editor-defaultUI {
+    background-color: hsl(var(--b1)) !important;
+    border-color: hsl(var(--b3)) !important;
+    color: hsl(var(--bc)) !important;
+}
+
+/* Editor Area */
+.toastui-editor-defaultUI .toastui-editor-md-container,
+.toastui-editor-defaultUI .toastui-editor-ww-container {
+    background-color: hsl(var(--b1)) !important;
+    color: hsl(var(--bc)) !important;
+}
+
+/* Toolbar */
+.toastui-editor-defaultUI .toastui-editor-toolbar {
+    background-color: hsl(var(--b2)) !important;
+    border-color: hsl(var(--b3)) !important;
+}
+
+.toastui-editor-toolbar-icons {
+    color: hsl(var(--bc)) !important;
+    border-color: transparent !important;
+}
+
+.toastui-editor-toolbar-icons:hover {
+    background-color: hsl(var(--b3)) !important;
+    color: hsl(var(--p)) !important;
+}
+
+/* Mode Switch */
+.toastui-editor-mode-switch {
+    background-color: hsl(var(--b2)) !important;
+    border-top-color: hsl(var(--b3)) !important;
+}
+
+.toastui-editor-mode-switch .tab-item {
+    color: hsl(var(--bc)) !important;
+    background-color: transparent !important;
+    border-left-color: hsl(var(--b3)) !important;
+}
+
+.toastui-editor-mode-switch .tab-item.active {
+    background-color: hsl(var(--b1)) !important;
+    color: hsl(var(--p)) !important;
+}
+
+/* ProseMirror (WYSIWYG) */
+.toastui-editor-defaultUI .ProseMirror {
+    color: hsl(var(--bc)) !important;
+}
+
+/* Markdown Preview / Editor Text */
+.toastui-editor-contents, 
+.toastui-editor-md-preview,
+.toastui-editor-defaultUI .ProseMirror {
+    font-family: inherit !important;
+    color: hsl(var(--bc)) !important;
+}
+
+.toastui-editor-contents p,
+.toastui-editor-contents h1,
+.toastui-editor-contents h2,
+.toastui-editor-contents h3,
+.toastui-editor-contents h4,
+.toastui-editor-contents h5,
+.toastui-editor-contents h6,
+.toastui-editor-contents li,
+.toastui-editor-contents span {
+    color: hsl(var(--bc)) !important;
+}
+
+/* Code Blocks */
+.toastui-editor-contents pre {
+    background-color: hsl(var(--n)) !important;
+    color: hsl(var(--nc)) !important;
+}
+
+.toastui-editor-contents code {
+    background-color: hsl(var(--b3)) !important;
+    color: hsl(var(--bc)) !important;
+}
+
+/* Popup/Dropdowns */
+.toastui-editor-popup {
+    background-color: hsl(var(--b1)) !important;
+    border-color: hsl(var(--b3)) !important;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+}
+
+.toastui-editor-popup-body {
+    background-color: hsl(var(--b1)) !important;
+}
+
+/* Headings in Dropdown */
+.toastui-editor-popup-body .drop-down-item {
+    color: hsl(var(--bc)) !important;
+}
+
+.toastui-editor-popup-body .drop-down-item:hover {
+    background-color: hsl(var(--b2)) !important;
+}

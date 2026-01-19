@@ -5,6 +5,15 @@ from .models import User, UserPreference
 
 
 class RegisterForm(UserCreationForm):
+    """
+    用户注册表单
+    
+    继承自 UserCreationForm，添加了以下字段：
+    - nickname: 昵称
+    - email: 邮箱 (具有唯一性验证)
+    - avatar: 头像
+    - captcha: 验证码 (防止机器人注册)
+    """
     captcha = CaptchaField(label="验证码")
 
     class Meta(UserCreationForm.Meta):
@@ -12,6 +21,10 @@ class RegisterForm(UserCreationForm):
         fields = UserCreationForm.Meta.fields + ("nickname", "email", "avatar")
 
     def clean_email(self):
+        """
+        验证邮箱唯一性
+        如果邮箱已被注册，抛出 ValidationError。
+        """
         email = self.cleaned_data.get("email")
         if email and User.objects.filter(email=email).exists():
             raise forms.ValidationError("该邮箱已被注册")
@@ -19,6 +32,14 @@ class RegisterForm(UserCreationForm):
 
 
 class UserPreferenceForm(forms.ModelForm):
+    """
+    用户偏好设置表单
+    
+    用于更新 UserPreference 模型。
+    字段:
+    - public_profile: 是否公开个人资料
+    - theme: 界面主题选择
+    """
     class Meta:
         model = UserPreference
         fields = ["public_profile", "theme"]
@@ -29,6 +50,14 @@ class UserPreferenceForm(forms.ModelForm):
 
 
 class UserProfileForm(forms.ModelForm):
+    """
+    用户个人资料表单
+    
+    用于更新 User 模型的基本信息。
+    字段包括: 头像、封面、昵称、简介、个人网站、GitHub、邮箱。
+    
+    使用了 DaisyUI 样式的 Widget。
+    """
     class Meta:
         model = User
         fields = [

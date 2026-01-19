@@ -1,0 +1,88 @@
+<!-- Toast Notification Component -->
+<div 
+    x-data="{ 
+        toasts: [],
+        add(message, type = 'info') {
+            const id = Date.now();
+            this.toasts.push({ id, message, type, show: true });
+            setTimeout(() => this.remove(id), 5000);
+        },
+        remove(id) {
+            const index = this.toasts.findIndex(t => t.id === id);
+            if (index > -1) {
+                this.toasts[index].show = false;
+                setTimeout(() => {
+                    this.toasts = this.toasts.filter(t => t.id !== id);
+                }, 300); // Wait for transition
+            }
+        }
+    }"
+    @notify.window="add($event.detail.message, $event.detail.type)"
+    class="toast toast-end z-[100] fixed pointer-events-none p-4 top-24"
+>
+    <!-- Server-side Messages -->
+    {% if messages %}
+        {% for message in messages %}
+        <div 
+            x-data="{ show: true, id: {{ forloop.counter }} }" 
+            x-show="show"
+            x-init="setTimeout(() => show = false, 5000)"
+            x-transition:enter="transform ease-out duration-300 transition"
+            x-transition:enter-start="translate-x-8 opacity-0"
+            x-transition:enter-end="translate-x-0 opacity-100"
+            x-transition:leave="transform ease-in duration-300 transition"
+            x-transition:leave-start="translate-x-0 opacity-100"
+            x-transition:leave-end="translate-x-8 opacity-0"
+            class="alert {% if message.tags == 'error' %}alert-error{% elif message.tags == 'success' %}alert-success{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %} shadow-lg mb-2 pointer-events-auto min-w-[300px]"
+        >
+            <div class="flex items-center gap-2">
+                {% if message.tags == 'success' %}
+                    <span class="material-symbols-outlined">check_circle</span>
+                {% elif message.tags == 'error' %}
+                    <span class="material-symbols-outlined">error</span>
+                {% elif message.tags == 'warning' %}
+                    <span class="material-symbols-outlined">warning</span>
+                {% else %}
+                    <span class="material-symbols-outlined">info</span>
+                {% endif %}
+                <span>{{ message }}</span>
+            </div>
+            <button class="btn btn-xs btn-ghost btn-circle" @click="show = false">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Client-side Toasts -->
+    <template x-for="toast in toasts" :key="toast.id">
+        <div 
+            x-show="toast.show"
+            x-transition:enter="transform ease-out duration-300 transition"
+            x-transition:enter-start="translate-x-8 opacity-0"
+            x-transition:enter-end="translate-x-0 opacity-100"
+            x-transition:leave="transform ease-in duration-300 transition"
+            x-transition:leave-start="translate-x-0 opacity-100"
+            x-transition:leave-end="translate-x-8 opacity-0"
+            :class="{
+                'alert-info': toast.type === 'info',
+                'alert-success': toast.type === 'success',
+                'alert-warning': toast.type === 'warning',
+                'alert-error': toast.type === 'error'
+            }"
+            class="alert shadow-lg mb-2 pointer-events-auto min-w-[300px]"
+        >
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined" x-text="
+                    toast.type === 'success' ? 'check_circle' : 
+                    (toast.type === 'error' ? 'error' : 
+                    (toast.type === 'warning' ? 'warning' : 'info'))
+                "></span>
+                <span x-text="toast.message"></span>
+            </div>
+            <button class="btn btn-xs btn-ghost btn-circle" @click="remove(toast.id)">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+    </template>
+</div>

@@ -23,7 +23,33 @@ module.exports = {
     debugScreens: {
       position: ['bottom', 'left'],
     },
-    extend: {},
+    extend: {
+      colors: {
+        primary: "#3B82F6",
+        secondary: "#60A5FA",
+        cta: "#F97316",
+        background: "#F8FAFC",
+        text: "#1E293B",
+      },
+      fontFamily: {
+        sans: ['"Open Sans"', 'sans-serif'],
+        heading: ['"Poppins"', 'sans-serif'],
+      },
+      animation: {
+        "rainbow": "rainbow var(--speed, 2s) infinite linear",
+        "shimmer-spin": "spin 2s linear infinite",
+        "border-beam": "border-beam calc(var(--duration)*1s) infinite linear",
+      },
+      keyframes: {
+        "rainbow": {
+          "0%": { "background-position": "0%" },
+          "100%": { "background-position": "200%" },
+        },
+        "border-beam": {
+          "100%": { "offset-distance": "100%" },
+        },
+      },
+    },
   },
   daisyui: {
     themes: [

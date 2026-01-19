@@ -1,29 +1,31 @@
 {% extends "administration/base.html" %}
+{% load capture_tags %}
 
-{% block title %}确认删除 - Rosetta Dashboard{% endblock %}
+{% block title %}确认删除{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 <div class="max-w-lg mx-auto mt-10">
-    <div class="card bg-base-100 shadow-sm border border-base-200">
-        <div class="card-body items-center text-center">
-            <div class="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center mb-4">
-                <span class="material-symbols-outlined text-error text-3xl">warning</span>
-            </div>
-            
-            <h2 class="card-title text-2xl mb-2">确认删除?</h2>
-            <p class="text-base-content/70">您确定要删除 <span class="font-bold text-base-content">"{{ object }}"</span> 吗？<br>此操作无法撤销。</p>
-            
-            <form method="post" class="mt-8 w-full">
-                {% csrf_token %}
-                <div class="flex gap-3 justify-center">
-                    <a href="javascript:history.back()" class="btn btn-ghost">取消</a>
-                    <button type="submit" class="btn btn-error gap-2">
-                        <span class="material-symbols-outlined">delete</span>
-                        确认删除
-                    </button>
-                </div>
-            </form>
+    {% captureas card_content %}
+    <div class="p-6 flex flex-col items-center text-center">
+        <div class="w-16 h-16 rounded-full bg-error/10 flex items-center justify-center mb-4">
+            <span class="material-symbols-outlined text-error text-3xl">warning</span>
         </div>
+        
+        <h2 class="card-title text-2xl mb-2">确认删除?</h2>
+        <p class="text-base-content/70">您确定要删除 <span class="font-bold text-base-content">"{{ object }}"</span> 吗？<br>此操作无法撤销。</p>
+        
+        <form method="post" class="mt-8 w-full">
+            {% csrf_token %}
+            <div class="flex gap-3 justify-center">
+                <a href="javascript:history.back()" class="btn btn-ghost">取消</a>
+                <button type="submit" class="btn btn-error gap-2">
+                    <span class="material-symbols-outlined">delete</span>
+                    确认删除
+                </button>
+            </div>
+        </form>
     </div>
+    {% endcaptureas %}
+    {% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
 </div>
 {% endblock %}

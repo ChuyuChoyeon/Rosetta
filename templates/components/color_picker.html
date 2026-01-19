@@ -1,0 +1,356 @@
+<!-- Inspira UI: Color Picker (Alpine.js Port) -->
+<div x-data="colorPicker({ 
+        initialColor: '{{ value|default:"#000000" }}', 
+        name: '{{ name }}' 
+     })" 
+     class="w-full max-w-xs flex flex-col gap-4 p-4 bg-base-100 rounded-xl border border-base-200 shadow-sm select-none"
+     x-cloak>
+
+    <!-- Hidden Input -->
+    <input type="hidden" :name="name" :value="hexColor">
+
+    <!-- Saturation/Brightness Area -->
+    <div x-ref="satArea"
+         @mousedown.prevent="startDragSat"
+         @touchstart.prevent="startDragSat"
+         class="relative w-full h-40 rounded-lg cursor-crosshair overflow-hidden"
+         :style="`background-color: hsl(${hue}, 100%, 50%)`">
+        
+        <!-- White Gradient (Left to Right) -->
+        <div class="absolute inset-0 bg-gradient-to-r from-white to-transparent"></div>
+        <!-- Black Gradient (Top to Bottom) -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
+
+        <!-- Thumb -->
+        <div class="absolute w-4 h-4 rounded-full border-2 border-white shadow-sm -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+             :style="`left: ${satX}%; top: ${satY}%; background-color: ${hexColor}`">
+        </div>
+    </div>
+
+    <!-- Controls Row -->
+    <div class="flex items-center gap-3">
+        <!-- Current Color Preview -->
+        <div class="w-10 h-10 rounded-full border border-base-200 shadow-sm shrink-0"
+             :style="`background-color: ${hexColor}`"></div>
+
+        <!-- Sliders Column -->
+        <div class="flex-1 flex flex-col gap-3">
+            <!-- Hue Slider -->
+            <div x-ref="hueSlider"
+                 @mousedown.prevent="startDragHue"
+                 @touchstart.prevent="startDragHue"
+                 class="relative w-full h-3 rounded-full cursor-pointer shadow-inner"
+                 style="background: linear-gradient(to right, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%)">
+                <!-- Hue Thumb -->
+                <div class="absolute w-4 h-4 bg-white rounded-full border border-base-300 shadow-sm -translate-x-1/2 top-1/2 -translate-y-1/2 pointer-events-none"
+                     :style="`left: ${huePercentage}%`"></div>
+            </div>
+            
+            <!-- Alpha Slider -->
+            <div x-ref="alphaSlider"
+                 @mousedown.prevent="startDragAlpha"
+                 @touchstart.prevent="startDragAlpha"
+                 class="relative w-full h-3 rounded-full cursor-pointer shadow-inner"
+                 style="background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px;">
+                <!-- Gradient Overlay -->
+                <div class="absolute inset-0 rounded-full" 
+                     :style="`background: linear-gradient(to right, transparent, ${hexColor})`"></div>
+                <!-- Alpha Thumb -->
+                <div class="absolute w-4 h-4 bg-white rounded-full border border-base-300 shadow-sm -translate-x-1/2 top-1/2 -translate-y-1/2 pointer-events-none"
+                     :style="`left: ${alpha * 100}%`"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Inputs Row -->
+    <div class="flex gap-2">
+        <div class="flex-1 form-control">
+            <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">HEX</label>
+            <input type="text" 
+                   x-model.debounce.500ms="hexInput"
+                   @blur="updateFromHexInput"
+                   class="input input-sm input-bordered w-full font-mono uppercase text-center" 
+                   maxlength="9">
+        </div>
+        <div class="w-16 form-control">
+             <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">R</label>
+             <input type="number" x-model="rgb.r" class="input input-sm input-bordered w-full text-center px-1" readonly>
+        </div>
+        <div class="w-16 form-control">
+             <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">G</label>
+             <input type="number" x-model="rgb.g" class="input input-sm input-bordered w-full text-center px-1" readonly>
+        </div>
+        <div class="w-16 form-control">
+             <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">B</label>
+             <input type="number" x-model="rgb.b" class="input input-sm input-bordered w-full text-center px-1" readonly>
+        </div>
+        <div class="w-16 form-control">
+             <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">A</label>
+             <input type="text" :value="Math.round(alpha * 100) + '%'" class="input input-sm input-bordered w-full text-center px-1" readonly>
+        </div>
+    </div>
+    
+    <!-- Recommended Swatches -->
+    <div>
+        <label class="label text-xs font-bold text-base-content/50 pb-2 pt-0">RECOMMENDED</label>
+        <div class="flex flex-wrap gap-2">
+            <template x-for="color in swatches" :key="color">
+                <button type="button" 
+                        class="w-6 h-6 rounded-full border border-base-200 shadow-sm transition-transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
+                        :style="`background-color: ${color}`"
+                        @click="setColor(color)"></button>
+            </template>
+        </div>
+    </div>
+
+</div>
+
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('colorPicker', ({ initialColor, name }) => ({
+        name: name,
+        // HSV State
+        hue: 0,        // 0-360
+        sat: 0,        // 0-100
+        val: 100,      // 0-100
+        alpha: 1,      // 0-1
+        
+        // Dragging State
+        isDraggingSat: false,
+        isDraggingHue: false,
+        isDraggingAlpha: false,
+
+        // Computed/Derived
+        hexColor: '#000000', // This will now potentially be Hex8
+        hexInput: '#000000',
+        rgb: { r: 0, g: 0, b: 0 },
+        
+        // Recommended Swatches
+        swatches: [
+            '#000000', '#ffffff', '#ef4444', '#f97316', '#f59e0b', '#84cc16', 
+            '#22c55e', '#10b981', '#06b6d4', '#0ea5e9', '#3b82f6', '#6366f1', 
+            '#8b5cf6', '#d946ef', '#ec4899', '#f43f5e'
+        ],
+
+        init() {
+            this.setColor(initialColor);
+            
+            // Global mouse events
+            window.addEventListener('mousemove', (e) => this.handleDrag(e));
+            window.addEventListener('mouseup', () => this.stopDrag());
+            window.addEventListener('touchmove', (e) => this.handleDrag(e));
+            window.addEventListener('touchend', () => this.stopDrag());
+        },
+
+        get huePercentage() {
+            return (this.hue / 360) * 100;
+        },
+
+        get satX() {
+            return this.sat;
+        },
+
+        get satY() {
+            return 100 - this.val;
+        },
+
+        setColor(color) {
+            // Legacy Tailwind Color Mapping
+            const legacyColors = {
+                'primary': '#4f46e5',
+                'secondary': '#ec4899',
+                'accent': '#06b6d4',
+                'neutral': '#3b82f6',
+                'info': '#6366f1',
+                'success': '#22c55e',
+                'warning': '#f59e0b',
+                'error': '#ef4444'
+            };
+
+            if (!color) color = '#000000';
+            
+            // Handle legacy class names
+            if (legacyColors[color]) {
+                color = legacyColors[color];
+            }
+
+            if (color.startsWith('rgb')) {
+                // Parse RGB/RGBA
+                const parts = color.match(/[\d.]+/g);
+                if (parts && parts.length >= 3) {
+                    const r = parseInt(parts[0]);
+                    const g = parseInt(parts[1]);
+                    const b = parseInt(parts[2]);
+                    const a = parts.length > 3 ? parseFloat(parts[3]) : 1;
+                    color = this.rgbaToHex(r, g, b, a);
+                }
+            }
+            
+            if (!color.startsWith('#')) {
+                 const ctx = document.createElement('canvas').getContext('2d');
+                 ctx.fillStyle = color;
+                 if (ctx.fillStyle !== '#000000' || color === 'black') {
+                     color = ctx.fillStyle;
+                 }
+            }
+            
+            this.hexInput = color;
+            this.updateFromHexInput();
+        },
+
+        updateFromHexInput() {
+            let hex = this.hexInput;
+            if (!hex.startsWith('#')) hex = '#' + hex;
+            
+            // Validate Hex6 or Hex8
+            if (/^#[0-9A-F]{6}([0-9A-F]{2})?$/i.test(hex)) {
+                // Extract Alpha if present
+                if (hex.length === 9) {
+                    this.alpha = parseInt(hex.slice(7, 9), 16) / 255;
+                    this.hexColor = hex.slice(0, 7); // Base color for preview calculations
+                } else {
+                    this.alpha = 1;
+                    this.hexColor = hex;
+                }
+                
+                this.rgb = this.hexToRgb(this.hexColor);
+                const hsv = this.rgbToHsv(this.rgb.r, this.rgb.g, this.rgb.b);
+                this.hue = hsv.h;
+                this.sat = hsv.s;
+                this.val = hsv.v;
+                
+                // Final full hex update
+                this.updateFinalHex();
+            }
+        },
+
+        updateColorFromHsv() {
+            const rgb = this.hsvToRgb(this.hue, this.sat, this.val);
+            this.rgb = rgb;
+            this.hexColor = this.rgbToHex(rgb.r, rgb.g, rgb.b);
+            this.updateFinalHex();
+        },
+        
+        updateFinalHex() {
+            if (this.alpha < 1) {
+                const alphaHex = Math.round(this.alpha * 255).toString(16).padStart(2, '0').toUpperCase();
+                this.hexInput = this.hexColor + alphaHex;
+            } else {
+                this.hexInput = this.hexColor;
+            }
+        },
+
+        // Drag Handlers
+        startDragSat(e) {
+            this.isDraggingSat = true;
+            this.handleSatDrag(e);
+        },
+
+        startDragHue(e) {
+            this.isDraggingHue = true;
+            this.handleHueDrag(e);
+        },
+        
+        startDragAlpha(e) {
+            this.isDraggingAlpha = true;
+            this.handleAlphaDrag(e);
+        },
+
+        stopDrag() {
+            this.isDraggingSat = false;
+            this.isDraggingHue = false;
+            this.isDraggingAlpha = false;
+        },
+
+        handleDrag(e) {
+            if (this.isDraggingSat) this.handleSatDrag(e);
+            if (this.isDraggingHue) this.handleHueDrag(e);
+            if (this.isDraggingAlpha) this.handleAlphaDrag(e);
+        },
+
+        handleSatDrag(e) {
+            const rect = this.$refs.satArea.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            let x = (clientX - rect.left) / rect.width;
+            let y = (clientY - rect.top) / rect.height;
+
+            x = Math.max(0, Math.min(1, x));
+            y = Math.max(0, Math.min(1, y));
+
+            this.sat = x * 100;
+            this.val = 100 - (y * 100);
+            this.updateColorFromHsv();
+        },
+
+        handleHueDrag(e) {
+            const rect = this.$refs.hueSlider.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            
+            let x = (clientX - rect.left) / rect.width;
+            x = Math.max(0, Math.min(1, x));
+
+            this.hue = x * 360;
+            this.updateColorFromHsv();
+        },
+        
+        handleAlphaDrag(e) {
+            const rect = this.$refs.alphaSlider.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            
+            let x = (clientX - rect.left) / rect.width;
+            x = Math.max(0, Math.min(1, x));
+            
+            this.alpha = x;
+            this.updateFinalHex();
+        },
+
+        // Utilities
+        hexToRgb(hex) {
+            const bigint = parseInt(hex.slice(1), 16);
+            return {
+                r: (bigint >> 16) & 255,
+                g: (bigint >> 8) & 255,
+                b: bigint & 255
+            };
+        },
+
+        rgbToHex(r, g, b) {
+            return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1).toUpperCase();
+        },
+        
+        rgbaToHex(r, g, b, a) {
+            const hex = this.rgbToHex(r, g, b);
+            if (a < 1) {
+                const alpha = Math.round(a * 255).toString(16).padStart(2, '0').toUpperCase();
+                return hex + alpha;
+            }
+            return hex;
+        },
+
+        hsvToRgb(h, s, v) {
+            s /= 100;
+            v /= 100;
+            const k = (n) => (n + h / 60) % 6;
+            const f = (n) => v * (1 - s * Math.max(0, Math.min(k(n), 4 - k(n), 1)));
+            return {
+                r: Math.round(f(5) * 255),
+                g: Math.round(f(3) * 255),
+                b: Math.round(f(1) * 255)
+            };
+        },
+
+        rgbToHsv(r, g, b) {
+            r /= 255; g /= 255; b /= 255;
+            const v = Math.max(r, g, b), c = v - Math.min(r, g, b);
+            const h = c && ((v === r) ? (g - b) / c : ((v === g) ? 2 + (b - r) / c : 4 + (r - g) / c));
+            return {
+                h: 60 * (h < 0 ? h + 6 : h),
+                s: v && c / v * 100,
+                v: v * 100
+            };
+        }
+    }));
+});
+</script>

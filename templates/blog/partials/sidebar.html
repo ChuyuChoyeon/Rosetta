@@ -1,0 +1,146 @@
+<div class="space-y-8">
+    <!-- Search Widget -->
+    {% load capture_tags %}
+    {% captureas search_card %}
+        <div class="p-5">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">search</span>
+                搜索
+            </h3>
+            {% url 'search' as search_url %}
+            {% include 'components/inspira/placeholders_and_vanish_input.html' with action=search_url placeholders=search_placeholders|default:"['搜索文章...', '搜索 Django...', '搜索 Python...', '搜索 Tailwind...']" %}
+        </div>
+    {% endcaptureas %}
+    {% include 'components/inspira/card_spotlight.html' with slot_content=search_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+
+    <!-- Popular Posts -->
+    {% if sidebar_popular_posts %}
+    {% captureas popular_card %}
+        <div class="p-5">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary">trending_up</span>
+                热门文章
+            </h3>
+            <div class="flex flex-col gap-4">
+                {% for post in sidebar_popular_posts %}
+                <div class="flex gap-3 relative z-20">
+                    <a href="{% url 'post_detail' post.slug %}" class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-base-200 block group">
+                        {% if post.cover_image %}
+                        <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
+                        {% else %}
+                        <div class="w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center text-primary font-bold">
+                            {{ post.title|slice:":1" }}
+                        </div>
+                        {% endif %}
+                    </a>
+                    <div class="flex flex-col justify-center">
+                        <a href="{% url 'post_detail' post.slug %}" class="font-medium text-sm line-clamp-2 hover:text-primary transition-colors">{{ post.title }}</a>
+                        <span class="text-xs text-base-content/50 mt-1 flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[12px]">visibility</span>
+                            {{ post.views }}
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endcaptureas %}
+    {% include 'components/inspira/card_spotlight.html' with slot_content=popular_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    {% endif %}
+
+    <!-- Tag Cloud -->
+    {% if sidebar_tags %}
+    {% captureas tags_card %}
+        <div class="p-5">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-accent">label</span>
+                标签云
+            </h3>
+            <div class="flex flex-wrap gap-3 relative z-20">
+                {% for tag in sidebar_tags %}
+                {% if tag.color|first == '#' %}
+                <a href="{% url 'post_by_tag' tag.slug %}" 
+                   class="badge badge-outline transition-colors py-4 px-4 gap-1 hover:opacity-80"
+                   style="border-color: {{ tag.color }}; color: {{ tag.color }};">
+                    {{ tag.name }}
+                    <span class="opacity-50 text-xs">({{ tag.count }})</span>
+                </a>
+                {% else %}
+                <a href="{% url 'post_by_tag' tag.slug %}" class="badge badge-outline badge-{{ tag.color }} hover:badge-{{ tag.color }} transition-colors py-4 px-4 gap-1">
+                    {{ tag.name }}
+                    <span class="opacity-50 text-xs">({{ tag.count }})</span>
+                </a>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endcaptureas %}
+    {% include 'components/inspira/card_spotlight.html' with slot_content=tags_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    {% endif %}
+
+    <!-- Recent Comments -->
+    {% if sidebar_comments %}
+    {% captureas comments_card %}
+        <div class="p-5">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-info">forum</span>
+                最新评论
+            </h3>
+            <div class="flex flex-col gap-4">
+                {% for comment in sidebar_comments %}
+                <div class="flex gap-3 relative z-20 group">
+                    <div class="avatar placeholder shrink-0">
+                        <div class="bg-neutral text-neutral-content rounded-full w-10 h-10 ring-1 ring-base-content/5">
+                            <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}">
+                        </div>
+                    </div>
+                    <div class="flex flex-col justify-center flex-1 min-w-0">
+                        <div class="flex justify-between items-center w-full">
+                            <span class="font-bold text-sm truncate">{{ comment.user.nickname|default:comment.user.username }}</span>
+                            <span class="text-[10px] text-base-content/40 whitespace-nowrap ml-2">{{ comment.created_at|timesince }}前</span>
+                        </div>
+                        <a href="{% url 'post_detail' comment.post.slug %}#comment-{{ comment.id }}" class="text-xs text-base-content/60 line-clamp-1 hover:text-primary transition-colors mt-0.5">
+                            {{ comment.content|striptags }}
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endcaptureas %}
+    {% include 'components/inspira/card_spotlight.html' with slot_content=comments_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    {% endif %}
+
+    <!-- Friend Links -->
+    {% if friend_links %}
+    {% captureas links_card %}
+        <div class="p-5">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-success">link</span>
+                友情链接
+            </h3>
+            <div class="grid grid-cols-2 gap-2 relative z-20">
+                {% load capture_tags %}
+                {% for link in friend_links %}
+                {% captureas link_content %}
+                    <div class="flex items-center gap-2 w-full text-left">
+                        {% if link.logo %}
+                        <img src="{{ link.logo.url }}" class="w-4 h-4 rounded-full object-cover shrink-0">
+                        {% else %}
+                        <span class="material-symbols-outlined text-sm shrink-0">public</span>
+                        {% endif %}
+                        <span class="truncate text-xs">{{ link.name }}</span>
+                    </div>
+                {% endcaptureas %}
+                {% if link.logo %}
+                    {% include 'components/inspira/link_preview.html' with url=link.url slot_content=link_content extra_classes="btn btn-ghost btn-sm btn-block justify-start gap-2 font-normal h-auto py-2 px-2" image=link.logo.url target="_blank" %}
+                {% else %}
+                    {% include 'components/inspira/link_preview.html' with url=link.url slot_content=link_content extra_classes="btn btn-ghost btn-sm btn-block justify-start gap-2 font-normal h-auto py-2 px-2" target="_blank" %}
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endcaptureas %}
+    {% include 'components/inspira/card_spotlight.html' with slot_content=links_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    {% endif %}
+</div>

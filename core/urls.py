@@ -10,17 +10,26 @@ from .views import (
 )
 
 urlpatterns = [
+    # 健康检查
     path("health/", health_check, name="health_check"),
+    
+    # 调试 API
     path("debug/api/stats/", debug_api_stats, name="debug_api_stats"),
     path("debug/api/system/", debug_api_system, name="debug_api_system"),
     path("debug/api/migrations/", debug_api_migrations, name="debug_api_migrations"),
     path("debug/api/execute/", debug_execute_command, name="debug_execute_command"),
+    
+    # 静态页面
     path("about/", PageView.as_view(), {"slug": "about"}, name="about"),
     path("contact/", PageView.as_view(), {"slug": "contact"}, name="contact"),
+    
+    # Rosetta 介绍页
     path(
         "rosetta/",
         TemplateView.as_view(template_name="rosetta_intro.html"),
         name="rosetta_intro",
     ),
+    
+    # 通用单页面路由 (放在最后)
     path("p/<slug:slug>/", PageView.as_view(), name="page_detail"),
 ]

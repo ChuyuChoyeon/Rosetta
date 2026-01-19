@@ -1,0 +1,109 @@
+{% extends "administration/base.html" %}
+{% load capture_tags %}
+
+{% block title %}搜索占位符{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li>搜索占位符</li>
+    </ul>
+</div>
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold">搜索占位符</h1>
+    <div class="flex gap-2">
+        {% url 'administration:searchplaceholder_create' as create_url %}
+        {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>添加占位符' extra_classes='px-4 !h-8 text-xs' href=create_url %}
+            {% include 'components/inspira/rainbow_button.html' %}
+        {% endwith %}
+    </div>
+</div>
+
+{% captureas card_content %}
+    <div class="p-0">
+        <div class="p-4 border-b border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h2 class="card-title text-base whitespace-nowrap">
+                <span class="material-symbols-outlined text-secondary">search</span>
+                占位符列表
+            </h2>
+            
+            <div class="flex gap-2 w-full sm:w-auto">
+                <form action="." method="get" class="join w-full sm:w-auto">
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索文本..." class="input input-bordered input-sm join-item w-full sm:w-64" />
+                    <button type="submit" class="btn btn-sm btn-ghost join-item border border-base-300">
+                        <span class="material-symbols-outlined">search</span>
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Bulk Actions Toolbar -->
+        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
+            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
+            <div class="flex gap-2">
+                <button onclick="submitBulkAction('active')" class="btn btn-sm btn-primary gap-2">
+                    <span class="material-symbols-outlined text-[18px]">visibility</span> 启用
+                </button>
+                <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-neutral gap-2">
+                    <span class="material-symbols-outlined text-[18px]">visibility_off</span> 禁用
+                </button>
+                <div class="divider divider-horizontal mx-0 my-1"></div>
+                <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-ghost text-error hover:bg-error/10 gap-2">
+                    <span class="material-symbols-outlined text-[18px]">delete</span> 删除
+                </button>
+            </div>
+        </div>
+
+        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='searchplaceholder' %}">
+            {% csrf_token %}
+            <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
+                <table class="table table-zebra w-full">
+                    <!-- Head -->
+                    <thead class="bg-base-200 text-base-content sticky top-0 z-10">
+                        <tr>
+                            <th class="w-10 bg-base-200">
+                                <label>
+                                    <input type="checkbox" class="checkbox checkbox-xs" onclick="toggleAll(this)" />
+                                </label>
+                            </th>
+                            <th class="bg-base-200">文本</th>
+                            <th class="bg-base-200">排序</th>
+                            <th class="bg-base-200">状态</th>
+                            <th class="bg-base-200">创建时间</th>
+                            <th class="bg-base-200">操作</th>
+                        </tr>
+                    </thead>
+                    <!-- Body (HTMX Target) -->
+                    <tbody id="searchplaceholder-list-body">
+                        {% include "administration/partials/searchplaceholder_list_rows.html" %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+        
+        <!-- Pagination -->
+        <div class="p-4 border-t border-base-200 flex justify-center">
+            {% if is_paginated %}
+            <div class="join">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-sm">«</a>
+                {% else %}
+                <button class="join-item btn btn-sm btn-disabled">«</button>
+                {% endif %}
+                
+                <button class="join-item btn btn-sm">第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页</button>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-sm">»</a>
+                {% else %}
+                <button class="join-item btn btn-sm btn-disabled">»</button>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endcaptureas %}
+{% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+{% endblock %}

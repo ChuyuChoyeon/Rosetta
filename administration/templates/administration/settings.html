@@ -1,10 +1,11 @@
 {% extends "administration/base.html" %}
+{% load capture_tags %}
 
-{% block title %}站点设置 - Rosetta 管理后台{% endblock %}
+{% block title %}站点设置{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto" x-data="{ activeTab: 'general' }">
-    <div class="mb-8 flex items-center justify-between">
+<div class="w-full" x-data="{ activeTab: 'general' }">
+    <div class="mb-6 flex items-center justify-between">
         <div>
             <h1 class="text-3xl font-bold mb-2">站点设置</h1>
             <p class="text-base-content/60">管理网站的全局配置参数</p>
@@ -17,64 +18,134 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <!-- Settings Navigation -->
-        <div class="col-span-1">
-            <ul class="menu bg-base-100 rounded-box w-full shadow-sm border border-base-200 sticky top-24">
-                <li class="menu-title">设置分类</li>
-                <li>
-                    <a @click="activeTab = 'general'" :class="{ 'active': activeTab === 'general' }">
-                        <span class="material-symbols-outlined">tune</span> 常规设置
-                    </a>
-                </li>
-                <!-- Future tabs can be enabled here -->
-                <li><a class="disabled opacity-50"><span class="material-symbols-outlined">palette</span> 外观定制 (Coming Soon)</a></li>
-                <li><a class="disabled opacity-50"><span class="material-symbols-outlined">security</span> 安全隐私 (Coming Soon)</a></li>
-            </ul>
-        </div>
+    <!-- Tabs Navigation -->
+    <div role="tablist" class="tabs tabs-lifted tabs-lg">
+        {% for group in fieldsets %}
+        <a role="tab" 
+           class="tab h-12" 
+           :class="{ 'tab-active [--tab-bg:theme(colors.base-100)] font-bold text-primary': activeTab === '{{ group.slug }}' }"
+           @click="activeTab = '{{ group.slug }}'">
+            <span class="material-symbols-outlined text-lg mr-2" :class="{ 'text-primary': activeTab === '{{ group.slug }}' }">{{ group.icon }}</span> 
+            {{ group.title }}
+        </a>
+        {% endfor %}
+        <!-- Filler tab to extend the border -->
+        <a role="tab" class="tab flex-1 cursor-default"></a>
+    </div>
 
-        <!-- Settings Form -->
-        <div class="col-span-1 lg:col-span-2">
-            <div class="card bg-base-100 shadow-sm border border-base-200" x-show="activeTab === 'general'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-x-4" x-transition:enter-end="opacity-100 translate-x-0">
-                <div class="card-body">
-                    <form method="post" class="space-y-6">
-                        {% csrf_token %}
-                        
-                        {% for key, item in config.items %}
-                        <div class="form-control w-full group">
-                            <label class="label">
-                                <span class="label-text font-bold text-lg">{{ item.help_text|default:key }}</span>
-                            </label>
-                            
-                            {% if item.type == 'bool' %}
-                                <input type="checkbox" name="{{ key }}" class="toggle toggle-primary toggle-lg" {% if item.value %}checked{% endif %}>
-                            {% elif item.type == 'int' %}
-                                <input type="number" name="{{ key }}" value="{{ item.value }}" class="input input-bordered w-full focus:input-primary transition-all">
-                            {% else %}
-                                {% if 'TEXT' in key or 'DESCRIPTION' in key %}
-                                    <textarea name="{{ key }}" class="textarea textarea-bordered w-full h-32 focus:textarea-primary transition-all text-base leading-relaxed" rows="4">{{ item.value }}</textarea>
-                                {% else %}
-                                    <input type="text" name="{{ key }}" value="{{ item.value }}" class="input input-bordered w-full focus:input-primary transition-all">
+    <!-- Settings Content -->
+    <div class="bg-base-100 border-base-300 rounded-b-box rounded-tr-box border p-0 -mt-px min-h-[600px] shadow-sm">
+        <form method="post" class="p-8 max-w-5xl mx-auto">
+            {% csrf_token %}
+            
+            {% for group in fieldsets %}
+            <div x-show="activeTab === '{{ group.slug }}'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-4" 
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="space-y-8 py-4">
+                
+                <div class="mb-8 pb-4 border-b border-base-200">
+                    <h2 class="text-2xl font-bold flex items-center gap-3">
+                        <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                            <span class="material-symbols-outlined text-2xl">{{ group.icon }}</span>
+                        </div>
+                        {{ group.title }}
+                    </h2>
+                    <p class="text-base-content/60 mt-2 text-sm ml-1">配置 {{ group.title }} 相关的系统参数</p>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    {% for item in group.items %}
+                    <div class="form-control w-full group p-4 rounded-xl hover:bg-base-200/30 transition-colors border border-transparent hover:border-base-200">
+                        <div class="flex flex-col gap-2">
+                            <label class="label p-0 justify-start gap-2 mb-1">
+                                <span class="label-text font-bold text-lg">{{ item.help_text|default:item.key }}</span>
+                                {% if item.type == 'bool' %}
+                                    <span class="badge badge-sm badge-ghost font-mono text-xs opacity-50">Boolean</span>
                                 {% endif %}
-                            {% endif %}
+                            </label>
                             
-                            <label class="label">
-                                <span class="label-text-alt text-base-content/40 font-mono text-xs group-hover:text-primary/60 transition-colors">Key: {{ key }}</span>
+                            <div class="mt-1">
+                                {% if item.type == 'bool' %}
+                                    <label class="cursor-pointer label justify-start gap-4 p-0">
+                                        <input type="checkbox" name="{{ item.key }}" class="toggle toggle-primary toggle-lg" {% if item.value %}checked{% endif %}>
+                                        <span class="label-text text-base-content/60" x-text="{{ item.key }} ? '已启用' : '已禁用'"></span>
+                                    </label>
+                                {% elif item.type == 'int' %}
+                                    <input type="number" name="{{ item.key }}" value="{{ item.value }}" class="input input-bordered w-full max-w-md focus:input-primary transition-all">
+                                {% else %}
+                                    {% if 'WORDS' in item.key %}
+                                        <!-- Flip Words Editor -->
+                                        <div x-data="{ 
+                                            words: {{ item.value|default:'[]' }},
+                                            newWord: ''
+                                        }">
+                                            <input type="hidden" name="{{ item.key }}" :value="JSON.stringify(words).replace(/&quot;/g, '\'').replace(/\"/g, '\'')">
+                                            
+                                            <div class="flex flex-wrap gap-2 mb-2">
+                                                <template x-for="(word, index) in words" :key="index">
+                                                    <div class="badge badge-lg badge-primary gap-2 p-3">
+                                                        <span x-text="word"></span>
+                                                        <button type="button" @click="words.splice(index, 1)" class="btn btn-ghost btn-xs btn-circle text-primary-content/70 hover:text-white min-h-0 h-5 w-5">
+                                                            <span class="material-symbols-outlined text-sm">close</span>
+                                                        </button>
+                                                    </div>
+                                                </template>
+                                            </div>
+                                            
+                                            <div class="join w-full max-w-md">
+                                                <input type="text" x-model="newWord" @keydown.enter.prevent="if(newWord.trim()) { words.push(newWord.trim()); newWord = ''; }" class="input input-bordered join-item w-full focus:input-primary" placeholder="输入欢迎词后按回车添加...">
+                                                <button type="button" @click="if(newWord.trim()) { words.push(newWord.trim()); newWord = ''; }" class="btn btn-primary join-item">
+                                                    <span class="material-symbols-outlined">add</span>
+                                                </button>
+                                            </div>
+                                            <label class="label">
+                                                <span class="label-text-alt text-base-content/60">输入单词或短语，按回车或点击加号添加</span>
+                                            </label>
+                                        </div>
+                                    {% elif 'URL' in item.key %}
+                                        <div class="relative">
+                                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-base-content/40">
+                                                {% if 'GITHUB' in item.key %}
+                                                    <i class="fab fa-github"></i>
+                                                {% elif 'X' in item.key %}
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M389.2 48h70.6L305.6 224.2 487 464H345L233.7 318.6 106.5 464H35.8L200.7 275.5 26.8 48H172.4L272.9 180.9 389.2 48zM364.4 421.8h39.1L151.1 88h-42L364.4 421.8z"/></svg>
+                                                {% elif 'BILIBILI' in item.key %}
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="currentColor" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path d="M488.6 104.1c16.7 18.1 24.4 39.7 23.3 65.7v202.4c-.4 26.4-9.2 48.1-26.5 65.1-17.2 17-39.1 25.9-65.5 26.7H92.02c-26.45-.8-48.21-9.8-65.28-27.2C9.682 419.4.767 397.5 0 371.8V169.8c.767-26 9.682-47.6 26.74-64.8C43.81 87.75 65.57 78.77 92.02 78h29.38L96.05 52.19c-5.75-5.73-8.63-13-8.63-21.79 0-8.8 2.88-16.06 8.63-21.797C101.8 2.868 109.1 0 117.9 0s16.1 2.868 21.9 8.603L213.1 78h88l74.5-69.397C381.7 2.868 389.2 0 398 0c8.8 0 16.1 2.868 21.9 8.603 5.7 5.737 8.6 12.997 8.6 21.797 0 8.79-2.9 16.06-8.6 21.79L394.6 78h29.3c26.4.77 48 9.75 64.7 26.1zm-38.8 69.7c-.4-9.6-3.7-17.4-10.7-23.5-5.2-6.1-14-9.4-22.7-9.8H96.05c-9.59.4-17.45 3.7-23.58 9.8-6.14 6.1-9.4 13.9-9.78 23.5v194.4c0 9.2 3.26 17 9.78 23.5s14.38 9.8 23.58 9.8H416.4c9.2 0 17-3.3 23.3-9.8 6.3-6.5 9.7-14.3 10.1-23.5V173.8zm-264.3 42.7c6.3 6.3 9.7 14.1 10.1 23.2V273c-.4 9.2-3.7 16.9-10.1 23.2-6.3 6.3-13.2 9.6-24.2 10-10.9-.4-17.8-3.7-24.1-10-6.3-6.3-9.7-14.1-10.1-23.2v-33.3c.4-9.1 3.8-16.9 10.1-23.2 6.3-6.3 13.2-9.6 24.1-10 11 .4 17.9 3.7 24.2 10zm181.9 0c6.3 6.3 9.7 14.1 10.1 23.2V273c-.4 9.2-3.7 16.9-10.1 23.2-6.3 6.3-13.2 9.6-24.2 10-10.9-.4-17.8-3.7-24.1-10-6.3-6.3-9.7-14.1-10.1-23.2v-33.3c.4-9.1 3.8-16.9 10.1-23.2 6.3-6.3 13.2-9.6 24.1-10 11 .4 17.9 3.7 24.2 10z"/></svg>
+                                                {% endif %}
+                                            </span>
+                                            <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="input input-bordered w-full pl-10 focus:input-primary transition-all">
+                                        </div>
+                                    {% elif 'TEXT' in item.key or 'DESCRIPTION' in item.key or 'CODE' in item.key %}
+                                        <textarea name="{{ item.key }}" class="textarea textarea-bordered w-full h-48 focus:textarea-primary transition-all text-base leading-relaxed {% if 'CODE' in item.key %}font-mono text-sm bg-base-200/50{% endif %}" placeholder="请输入内容...">{{ item.value }}</textarea>
+                                    {% elif 'URL' not in item.key %}
+                                        <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="input input-bordered w-full focus:input-primary transition-all">
+                                    {% endif %}
+                                {% endif %}
+                            </div>
+
+                            <label class="label p-0 mt-2">
+                                <span class="label-text-alt text-base-content/40 font-mono text-xs select-all">KEY: {{ item.key }}</span>
                             </label>
                         </div>
-                        <div class="divider my-2"></div>
-                        {% endfor %}
-                        
-                        <div class="card-actions justify-end mt-8 pt-4">
-                            <button type="submit" class="btn btn-primary btn-wide gap-2 shadow-lg hover:shadow-primary/30 transition-all">
-                                <span class="material-symbols-outlined">save</span>
-                                保存更改
-                            </button>
-                        </div>
-                    </form>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
-        </div>
+            {% endfor %}
+            
+            <div class="divider my-8"></div>
+            
+            <div class="sticky bottom-6 flex justify-end">
+                <div class="bg-base-100/80 backdrop-blur-md p-2 rounded-xl shadow-lg border border-base-200">
+                    <button type="submit" class="btn btn-primary btn-wide gap-2">
+                        <span class="material-symbols-outlined">save</span>
+                        保存更改
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 {% endblock %}

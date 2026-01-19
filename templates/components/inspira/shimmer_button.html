@@ -1,0 +1,20 @@
+<!-- Inspira UI: Shimmer Button (Tailwind CSS Port) -->
+{% if href %}
+<a href="{{ href }}"
+   class="relative inline-flex h-10 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 {{ extra_classes }}"
+   {% if target %}target="{{ target }}"{% endif %}
+>
+{% else %}
+<button 
+    class="relative inline-flex h-10 overflow-hidden rounded-full p-[1px] focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 {{ extra_classes }}"
+    {% if hx_get %}hx-get="{{ hx_get }}"{% endif %}
+    {% if hx_target %}hx-target="{{ hx_target }}"{% endif %}
+    {% if onclick %}onclick="{{ onclick }}"{% endif %}
+    {% if type %}type="{{ type }}"{% endif %}
+>
+{% endif %}
+    <span class="absolute inset-[-1000%] animate-shimmer-spin bg-[conic-gradient(from_90deg_at_50%_50%,#E2CBFF_0%,#393BB2_50%,#E2CBFF_100%)]"></span>
+    <span class="inline-flex h-full w-full cursor-pointer items-center justify-center rounded-full bg-slate-950 px-3 py-1 text-sm font-medium text-white backdrop-blur-3xl">
+        {{ slot_content|safe }}
+    </span>
+{% if href %}</a>{% else %}</button>{% endif %}

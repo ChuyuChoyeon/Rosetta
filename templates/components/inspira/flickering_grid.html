@@ -1,0 +1,68 @@
+<!-- Inspira UI: Flickering Grid -->
+<div 
+    x-data="{
+        gridSize: 20,
+        flickerChance: 0.1,
+        cols: 0,
+        rows: 0,
+        squares: [],
+        init() {
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+            this.animate();
+        },
+        resize() {
+            const width = this.$el.clientWidth;
+            const height = this.$el.clientHeight;
+            this.cols = Math.ceil(width / this.gridSize);
+            this.rows = Math.ceil(height / this.gridSize);
+            this.squares = new Float32Array(this.cols * this.rows);
+        },
+        animate() {
+            // Update random squares
+            for (let i = 0; i < this.squares.length; i++) {
+                if (Math.random() < this.flickerChance * 0.05) {
+                    this.squares[i] = Math.random() * 0.5; // Max opacity 0.5
+                } else {
+                    this.squares[i] *= 0.95; // Decay
+                }
+            }
+            
+            this.draw();
+            requestAnimationFrame(() => this.animate());
+        },
+        draw() {
+            const canvas = this.$refs.canvas;
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = this.$el.clientWidth;
+            canvas.height = this.$el.clientHeight;
+            
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            const color = getComputedStyle(document.body).getPropertyValue('--p') || '79, 70, 229';
+            // We need RGB values. For now assume theme provides usable color or we default
+            // In a real implementation, we'd parse the OKLCH or HSL from DaisyUI
+            
+            for (let r = 0; r < this.rows; r++) {
+                for (let c = 0; c < this.cols; c++) {
+                    const idx = r * this.cols + c;
+                    const opacity = this.squares[idx];
+                    
+                    if (opacity > 0.01) {
+                        ctx.fillStyle = `rgba(100, 100, 255, ${opacity})`; 
+                        ctx.fillRect(c * this.gridSize, r * this.gridSize, this.gridSize, this.gridSize);
+                    }
+                }
+            }
+        }
+    }"
+    class="absolute inset-0 -z-10 overflow-hidden bg-base-100"
+>
+    <canvas x-ref="canvas" class="w-full h-full opacity-30"></canvas>
+    <!-- Grid Lines Overlay -->
+    <div class="absolute inset-0 pointer-events-none" 
+         style="background-image: linear-gradient(to right, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(0,0,0,0.05) 1px, transparent 1px); background-size: 20px 20px;">
+    </div>
+</div>

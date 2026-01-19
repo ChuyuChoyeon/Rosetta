@@ -1,6 +1,6 @@
 {% for post in posts %}
-<tr class="hover">
-    <th>
+<tr class="hover group">
+    <th class="rounded-l-2xl">
         <label>
             <input type="checkbox" name="selected_ids" value="{{ post.pk }}" form="bulk-form" class="checkbox checkbox-sm row-checkbox" onclick="updateBulkToolbar()">
         </label>
@@ -9,72 +9,101 @@
     <td>
         {% if post.cover_image %}
         <div class="avatar">
-            <div class="w-12 h-8 rounded">
-                <img src="{{ post.cover_image.url }}" alt="Cover" />
+            <div class="w-12 h-8 rounded-lg ring-1 ring-base-content/10 shadow-sm overflow-hidden group-hover:ring-primary/50 transition-all duration-300">
+                <img src="{{ post.cover_image.url }}" alt="Cover" class="object-cover transition-transform duration-500 group-hover:scale-110" />
             </div>
         </div>
         {% else %}
-        <div class="w-12 h-8 rounded bg-base-200 flex items-center justify-center text-base-content/20">
+        <div class="w-12 h-8 rounded-lg bg-base-200 flex items-center justify-center text-base-content/20 ring-1 ring-base-content/5 group-hover:bg-base-300 transition-colors">
             <span class="material-symbols-outlined text-sm">image</span>
         </div>
         {% endif %}
     </td>
     <td>
-        <a href="{% url 'administration:post_edit' post.pk %}" class="font-bold hover:underline decoration-dashed underline-offset-4 truncate max-w-xs block" title="{{ post.title }}">
-            {{ post.title }}
-        </a>
-        <div class="text-xs opacity-50 font-mono">{{ post.slug }}</div>
+        <div class="flex items-start gap-1">
+            {% if post.is_pinned %}
+                <span class="material-symbols-outlined text-info text-sm mt-0.5 shrink-0 animate-pulse" title="置顶">push_pin</span>
+            {% endif %}
+            <div>
+                <a href="{% url 'administration:post_edit' post.pk %}" class="font-bold hover:text-primary hover:underline decoration-dashed underline-offset-4 truncate max-w-[160px] block transition-colors" title="{{ post.title }}">
+                    {{ post.title }}
+                </a>
+                <div class="text-xs opacity-50 font-mono">{{ post.slug }}</div>
+            </div>
+        </div>
     </td>
     <td>
         <div class="flex items-center space-x-3">
             <div class="avatar">
-                <div class="w-8 h-8 rounded-full">
+                <div class="w-8 h-8 rounded-full ring ring-base-200 ring-offset-1 group-hover:ring-primary/20 transition-all">
                     <img src="{{ post.author.get_avatar_url }}" alt="{{ post.author.username }}" />
                 </div>
             </div>
             <div>
-                <a href="{% url 'administration:user_edit' post.author.pk %}" class="font-bold text-sm hover:link">{{ post.author.username }}</a>
+                <a href="{% url 'administration:user_edit' post.author.pk %}" class="font-bold text-sm hover:text-primary transition-colors">{{ post.author.username }}</a>
             </div>
         </div>
     </td>
     <td>
         {% if post.category %}
-            <span class="badge badge-ghost badge-sm">{{ post.category.name }}</span>
+            <span class="badge badge-ghost badge-sm hover:badge-neutral transition-colors cursor-default">{{ post.category.name }}</span>
         {% else %}
             <span class="text-base-content/30 text-xs">-</span>
         {% endif %}
     </td>
     <td>
-        {% if post.status == 'published' %}
-            <div class="badge badge-success badge-sm gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
-                已发布
-            </div>
-        {% elif post.status == 'draft' %}
-            <div class="badge badge-warning badge-sm gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
-                草稿
-            </div>
-        {% else %}
-             <div class="badge badge-outline badge-sm">{{ post.status }}</div>
-        {% endif %}
+        <div class="flex flex-wrap gap-1 max-w-[250px]">
+            {% for tag in post.tags.all|slice:":3" %}
+                <span class="badge badge-xs badge-{{ tag.color }} badge-outline hover:opacity-80 transition-opacity cursor-default">{{ tag.name }}</span>
+            {% empty %}
+                <span class="text-base-content/30 text-xs">-</span>
+            {% endfor %}
+            {% if post.tags.count > 3 %}
+                <span class="badge badge-xs badge-ghost text-[10px]">+{{ post.tags.count|add:"-3" }}</span>
+            {% endif %}
+        </div>
     </td>
-    <td class="text-sm font-mono">{{ post.created_at|date:"Y-m-d H:i" }}</td>
     <td>
-        <div class="join">
-            <a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip" data-tip="查看">
+        <div class="flex flex-col gap-1">
+            {% if post.status == 'published' %}
+                <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/10">
+                    <span class="w-1.5 h-1.5 rounded-full bg-success animate-[pulse_2s_infinite]"></span>
+                    已发布
+                </div>
+            {% elif post.status == 'draft' %}
+                <div class="badge badge-warning badge-sm gap-1 badge-outline bg-warning/10">
+                    <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+                    草稿
+                </div>
+            {% else %}
+                 <div class="badge badge-outline badge-sm">{{ post.status }}</div>
+            {% endif %}
+            
+            {% if not post.allow_comments %}
+                <div class="badge badge-ghost badge-outline badge-xs gap-1 opacity-60">
+                    <span class="material-symbols-outlined text-[10px]">comments_disabled</span>
+                    禁评
+                </div>
+            {% endif %}
+        </div>
+    </td>
+    <td class="text-sm font-mono opacity-70 group-hover:opacity-100 transition-opacity">{{ post.created_at|date:"Y-m-d" }}</td>
+    <td class="text-sm font-mono opacity-70 group-hover:opacity-100 transition-opacity">{{ post.views }}</td>
+    <td class="rounded-r-2xl">
+        <div class="join opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="查看">
                 <span class="material-symbols-outlined text-base">visibility</span>
             </a>
-            <a href="{% url 'administration:post_edit' post.pk %}" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+            <a href="{% url 'administration:post_edit' post.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
                 <span class="material-symbols-outlined text-base">edit</span>
             </a>
             <form action="{% url 'administration:post_duplicate' post.pk %}" method="post" class="inline" onsubmit="return confirm('确定要复制这篇文章吗？');">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip" data-tip="复制">
+                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="复制">
                     <span class="material-symbols-outlined text-base">content_copy</span>
                 </button>
             </form>
-            <button onclick="confirmDelete('{% url 'administration:post_delete' post.pk %}', '确定要删除文章《{{ post.title|escapejs }}》吗？')" class="btn btn-ghost btn-xs join-item text-error tooltip" data-tip="删除">
+            <button onclick="confirmDelete('{% url 'administration:post_delete' post.pk %}', '确定要删除文章《{{ post.title|escapejs }}》吗？')" class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" data-tip="删除">
                 <span class="material-symbols-outlined text-base">delete</span>
             </button>
         </div>
@@ -82,10 +111,15 @@
 </tr>
 {% empty %}
 <tr>
-    <td colspan="9" class="text-center py-8 text-base-content/50">
-        <div class="flex flex-col items-center gap-2">
-            <span class="material-symbols-outlined text-4xl opacity-20">article</span>
-            <span>没有找到相关文章</span>
+    <td colspan="9" class="text-center py-16 text-base-content/50">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl opacity-40">article</span>
+            </div>
+            <div class="text-center">
+                <h3 class="font-bold text-lg">没有找到文章</h3>
+                <p class="text-sm opacity-60 mt-1">尝试调整搜索条件或创建新文章</p>
+            </div>
         </div>
     </td>
 </tr>

@@ -8,17 +8,21 @@ from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
 from .forms import RegisterForm, UserPreferenceForm, UserProfileForm
 from .models import User, UserPreference, Notification
-from blog.models import PostViewHistory, Comment
+from blog.models import PostViewHistory, Comment, Post
 
 
 class RegisterView(CreateView):
     """
     用户注册视图
     
-    功能:
-    1. 处理新用户注册请求
-    2. 验证注册表单
-    3. 注册成功后重定向至登录页
+    处理新用户的注册流程。
+    继承自 CreateView，使用自定义的 RegisterForm。
+    
+    流程:
+    1. 展示包含验证码的注册表单。
+    2. 验证用户提交的信息（用户名、密码、邮箱、验证码）。
+    3. 创建新用户。
+    4. 注册成功后重定向到登录页面，并显示成功消息。
     """
     model = User
     form_class = RegisterForm
@@ -34,9 +38,11 @@ class CustomLoginView(LoginView):
     """
     自定义登录视图
     
-    功能:
-    1. 使用自定义登录模板
-    2. 若用户已登录，自动重定向至首页或 Next URL
+    继承自 Django 内置 LoginView。
+    
+    特性:
+    - 使用自定义模板 users/login.html。
+    - 若用户已登录，访问此页面会自动重定向到首页 (redirect_authenticated_user=True)。
     """
     template_name = "users/login.html"
     redirect_authenticated_user = True
@@ -46,9 +52,16 @@ class UpdateThemeView(LoginRequiredMixin, View):
     """
     更新主题视图 (AJAX)
     
+    处理前端通过 Fetch API 发送的主题切换请求。
+    
+    请求方式: POST
+    数据格式: JSON {"theme": "theme_name"}
+    
     功能:
-    1. 接收前端发送的主题切换请求
-    2. 更新用户偏好设置中的主题字段
+    1. 解析请求体中的 JSON 数据。
+    2. 获取或创建当前用户的 UserPreference 对象。
+    3. 更新 theme 字段并保存。
+    4. 返回 JSON 响应表示成功或失败。
     """
     def post(self, request):
         try:
@@ -72,16 +85,31 @@ class UnifiedProfileView(View):
     """
     统一用户个人资料视图
     
-    功能:
-    1. 展示用户公开资料（文章、评论等）
-    2. 展示用户私有资料（浏览历史、通知、设置），仅限本人查看
-    3. 处理个人资料更新和偏好设置保存
-    4. 支持 Tab 切换查看不同内容
+    这是一个功能丰富的复合视图，用于处理用户个人主页的所有交互。
+    支持查看他人资料和管理自己的资料。
+    
+    功能模块:
+    1. **资料展示**: 显示用户头像、封面、简介、统计数据等。
+    2. **Tab 切换**:
+       - `posts`: 展示用户发布的文章和评论（公开）。
+       - `history`: 展示用户的浏览历史（仅限本人）。
+       - `notifications`: 展示用户的通知消息（仅限本人）。
+       - `settings`: 展示偏好设置表单（仅限本人）。
+       - `info`: 展示基本资料编辑表单（仅限本人）。
+    3. **数据更新**: 处理资料修改、密码修改、偏好设置保存等 POST 请求。
+    4. **HTMX 支持**: 针对 HTMX 请求仅返回部分 HTML 片段，实现无刷新切换 Tab。
     """
     template_name = "users/public_profile.html"
 
     def get_object(self, username=None):
-        """获取目标用户对象"""
+        """
+        获取目标用户对象
+        
+        策略:
+        - 如果 URL 中提供了 username，则查找对应用户（查看他人）。
+        - 如果未提供 username 且当前用户已登录，则返回当前用户（查看自己）。
+        - 否则返回 None。
+        """
         if username:
             return get_object_or_404(User, username=username)
         # 如果未提供 username 且用户已登录，则默认为当前用户
@@ -96,27 +124,41 @@ class UnifiedProfileView(View):
         if not profile_user:
             return redirect("users:login")
 
-        active_tab = request.GET.get("tab", "posts")
+        active_tab = request.GET.get("tab", "articles")
         context = {
             "profile_user": profile_user,
             "active_tab": active_tab,
         }
 
-        # --- 公共数据 ---
+        # --- 公共数据 (所有人都可见) ---
         # 侧边栏评论总数
         context["comments_count"] = Comment.objects.filter(
             user=profile_user, active=True
         ).count()
 
-        # 文章/评论列表 (默认 Tab)
-        if active_tab == "posts":
+        # Tab Data Loading
+        if active_tab == "articles":
+            context["posts"] = (
+                Post.objects.filter(author=profile_user, status="published")
+                .select_related("category")
+                .prefetch_related("tags")
+                .order_by("-created_at")[:20]
+            )
+        elif active_tab == "comments":
             context["comments"] = (
                 Comment.objects.filter(user=profile_user, active=True)
                 .select_related("post")
                 .order_by("-created_at")[:20]
             )
+        elif active_tab == "likes":
+            context["liked_posts"] = (
+                profile_user.liked_posts.filter(status="published")
+                .select_related("author", "category")
+                .prefetch_related("tags")
+                .order_by("-id")[:20]
+            )
 
-        # --- 私有数据 (仅限本人) ---
+        # --- 私有数据 (仅限本人查看) ---
         if request.user.is_authenticated and request.user == profile_user:
             # 个人资料编辑表单
             context["form"] = UserProfileForm(instance=profile_user)
@@ -134,7 +176,7 @@ class UnifiedProfileView(View):
                 )
 
             elif active_tab == "settings":
-                # 确保 UserPreference 存在
+                # 确保 UserPreference 存在，若不存在则创建
                 if not hasattr(request.user, "preference"):
                     UserPreference.objects.create(user=request.user)
                     request.user.refresh_from_db()
@@ -143,7 +185,7 @@ class UnifiedProfileView(View):
                     instance=request.user.preference
                 )
 
-        # HTMX 请求支持 (局部刷新)
+        # HTMX 请求支持 (局部刷新内容区域)
         if request.headers.get("HX-Request"):
             return render(request, "users/includes/profile_content.html", context)
 
@@ -195,6 +237,9 @@ class UnifiedProfileView(View):
 class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     """
     自定义密码修改视图
+    
+    继承自 PasswordChangeView。
+    修改成功后重定向到个人资料页。
     """
     template_name = "users/password_change.html"
     success_url = reverse_lazy("users:profile")
@@ -207,7 +252,9 @@ class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
 class MarkNotificationReadView(LoginRequiredMixin, View):
     """
     标记通知为已读
-    支持 POST 和 GET 请求
+    
+    支持 POST 和 GET 请求（为了方便某些场景下的直接链接访问，但建议使用 POST）。
+    HTMX 支持：如果请求来自 HTMX，则返回空响应以支持前端移除元素或更新状态。
     """
     def action(self, request, pk):
         notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
@@ -233,7 +280,9 @@ class MarkNotificationReadView(LoginRequiredMixin, View):
 class DeleteNotificationView(LoginRequiredMixin, View):
     """
     删除通知
-    支持 DELETE 和 POST 请求
+    
+    物理删除 Notification 对象。
+    支持 DELETE (RESTful) 和 POST (表单) 请求。
     """
     def action(self, request, pk):
         notification = get_object_or_404(Notification, pk=pk, recipient=request.user)

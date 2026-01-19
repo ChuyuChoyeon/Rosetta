@@ -12,6 +12,68 @@
 
 html {
     overflow-y: scroll;
+    /* Compatibility & Accessibility */
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    
+    /* Scrollbar styling (Firefox support) */
+    scrollbar-color: oklch(var(--p)) oklch(var(--b1));
+}
+
+/* Custom NProgress Colors to match theme */
+#nprogress { pointer-events: none; }
+#nprogress .bar { 
+    background: oklch(var(--p, 0.4 0.1 260)) !important; /* Fallback to a blue-ish color if var missing */
+    height: 4px !important; 
+    z-index: 99999 !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    box-shadow: 0 0 10px oklch(var(--p, 0.4 0.1 260));
+}
+#nprogress .peg { box-shadow: 0 0 10px oklch(var(--p, 0.4 0.1 260)), 0 0 5px oklch(var(--p, 0.4 0.1 260)) !important; }
+#nprogress .spinner-icon { border-top-color: oklch(var(--p, 0.4 0.1 260)) !important; border-left-color: oklch(var(--p, 0.4 0.1 260)) !important; }
+
+/* Global Ripple/Diffusion Hover Effect */
+.hover-ripple, .btn, .card, .menu li > a, .link {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate; /* Create stacking context */
+}
+.hover-ripple::after, .btn::after, .card::after, .menu li > a::after, .link::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 70%);
+    transform: translate(-50%, -50%) scale(0);
+    border-radius: 50%;
+    opacity: 0;
+    transition: transform 0.6s ease-out, opacity 0.6s ease-out;
+    pointer-events: none;
+    z-index: 10;
+}
+.hover-ripple:hover::after, .btn:hover::after, .card:hover::after, .menu li > a:hover::after, .link:hover::after {
+    transform: translate(-50%, -50%) scale(2.5);
+    opacity: 1;
+    transition: 0s; /* Instant reset for repeat effect, or keep transition */
+}
+/* Active state for better feedback */
+.hover-ripple:active::after, .btn:active::after, .menu li > a:active::after {
+    background: radial-gradient(circle, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%);
+    transition: 0s;
+}
+
+/* Page Transition */
+main {
+    animation: fadeIn 0.5s ease-out;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /**

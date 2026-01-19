@@ -1,0 +1,79 @@
+<!-- Inspira UI: Link Preview -->
+<div class="relative inline-block"
+     x-data="{
+         previewId: Math.random().toString(36).substr(2, 9),
+         isVisible: false,
+         url: '{{ url|escapejs }}',
+         width: 300,
+         height: 180,
+         top: 0,
+         left: 0,
+         hoverTimer: null,
+         handleMouseEnter() {
+             const rect = $el.getBoundingClientRect();
+             // Calculate position: center above the element
+             this.left = rect.left + window.scrollX + (rect.width / 2) - (this.width / 2);
+             this.top = rect.top + window.scrollY - this.height - 12; // 12px gap
+             
+             // Boundary check
+             if (this.left < 10) this.left = 10;
+             if (this.left + this.width > window.innerWidth - 10) this.left = window.innerWidth - this.width - 10;
+             
+             // If top is too high (offscreen), show below
+             if (this.top < window.scrollY + 10) {
+                this.top = rect.bottom + window.scrollY + 12;
+             }
+
+             this.hoverTimer = setTimeout(() => {
+                 window.dispatchEvent(new CustomEvent('close-other-link-previews', { detail: this.previewId }));
+                 this.isVisible = true;
+             }, 300);
+         },
+         handleMouseLeave() {
+             clearTimeout(this.hoverTimer);
+             this.isVisible = false;
+         }
+     }"
+     @close-other-link-previews.window="if ($event.detail !== previewId) { isVisible = false; clearTimeout(hoverTimer); }"
+     @mouseenter="handleMouseEnter"
+     @mouseleave="handleMouseLeave">
+     
+    <a href="{{ url }}" {% if target %}target="{{ target }}"{% endif %} class="{{ extra_classes }} group transition-colors duration-300 block">
+        {{ slot_content|safe }}
+    </a>
+
+    <template x-teleport="body">
+        <div x-show="isVisible"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 translate-y-2 scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0 scale-100"
+             x-transition:leave-end="opacity-0 translate-y-2 scale-95"
+             class="absolute z-[9999] bg-base-100 rounded-2xl shadow-2xl border border-base-content/10 overflow-hidden pointer-events-none"
+             :style="`width: ${width}px; height: ${height}px; top: ${top}px; left: ${left}px;`">
+             
+            <div class="w-full h-full bg-base-200 flex flex-col items-center justify-center p-0 relative">
+                <!-- Preview Content -->
+                <div class="w-full h-full bg-base-300 flex items-center justify-center overflow-hidden relative">
+                    {% if image %}
+                        <img src="{{ image }}" class="w-full h-full object-cover" alt="Preview">
+                        <div class="absolute bottom-0 left-0 w-full p-2 bg-gradient-to-t from-black/50 to-transparent text-white text-xs font-bold truncate">
+                             <span x-text="url"></span>
+                        </div>
+                    {% else %}
+                        <!-- Iframe Preview -->
+                        <div class="w-full h-full bg-white relative">
+                             <iframe :src="isVisible ? url : ''" class="w-[1000px] h-[600px] transform scale-[0.3] origin-top-left absolute top-0 left-0 border-none" scrolling="no" loading="lazy" sandbox="allow-scripts allow-same-origin"></iframe>
+                        </div>
+                        <!-- Fallback overlay/info -->
+                        <div class="absolute bottom-0 left-0 w-full p-2 bg-base-100/90 backdrop-blur-sm border-t border-base-content/10 flex items-center gap-2">
+                             <span class="w-2 h-2 rounded-full bg-success"></span>
+                             <span class="text-xs font-mono opacity-70 truncate flex-1" x-text="url"></span>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </template>
+</div>

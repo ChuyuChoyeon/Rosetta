@@ -11,12 +11,18 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 import re
 from meta.views import Meta
+from .services import create_comment
+from .schemas import CommentCreateSchema
 
 
 class SidebarContextMixin:
     """
-    Mixin to provide sidebar data to context.
-    Includes: Tag Cloud, Recent Comments, Popular Posts, Popular Categories, Friend Links.
+    侧边栏数据混入类 (Mixin)
+    为视图提供侧边栏所需的上下文数据，包括：
+    - 标签云 (Top 30)
+    - 最新评论 (Top 5)
+    - 热门文章 (Top 5)
+    - 热门分类 (Top 10)
     """
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -25,7 +31,6 @@ class SidebarContextMixin:
         context["sidebar_comments"] = Comment.objects.filter(active=True).select_related('user', 'post').order_by('-created_at')[:5]
         context["sidebar_popular_posts"] = Post.objects.filter(status='published').order_by('-views')[:5]
         context["sidebar_categories"] = Category.objects.annotate(count=Count('posts')).order_by('-count')[:10]
-        # FriendLinks are already in context_processor, but we can add specific logic if needed.
         return context
 
 
@@ -57,12 +62,19 @@ class PostDetailView(DetailView):
     context_object_name = "post"
 
     def get_context_data(self, **kwargs):
-        """添加评论、评论表单和Meta信息到上下文"""
+        """添加评论、评论表单和 Meta 信息到上下文"""
         context = super().get_context_data(**kwargs)
         # 只获取顶级评论，回复通过 template 中的 comment.replies.all 访问
+        # Prefetch replies to avoid N+1 problem in template
+        from django.db.models import Prefetch
+        replies_prefetch = Prefetch(
+            'replies',
+            queryset=Comment.objects.filter(active=True).select_related('user'),
+        )
         context["comments"] = self.object.comments.filter(
             active=True, parent__isnull=True
-        ).select_related("user")
+        ).select_related("user").prefetch_related(replies_prefetch)
+        
         context["comment_form"] = CommentForm()
 
         # Meta 数据
@@ -149,49 +161,24 @@ class PostDetailView(DetailView):
         if form.is_valid():
             if not request.user.is_authenticated:
                 return redirect("users:login")
-            comment = form.save(commit=False)
-            comment.post = self.object
-            comment.user = request.user
+            
+            try:
+                comment_data = CommentCreateSchema(
+                    content=form.cleaned_data['content'],
+                    parent_id=int(request.POST.get("parent_id")) if request.POST.get("parent_id") else None
+                )
+                
+                create_comment(
+                    post=self.object,
+                    user=request.user,
+                    data=comment_data
+                )
 
-            # 先保存评论以生成 ID
-            comment.save()
-
-            # 处理父评论（回复）
-            parent_id = request.POST.get("parent_id")
-            if parent_id:
-                try:
-                    parent_comment = Comment.objects.get(id=parent_id, post=self.object)
-                    comment.parent = parent_comment
-                    comment.save()  # 更新父评论关联
-
-                    # 通知被回复的用户
-                    if parent_comment.user != request.user:
-                        Notification.objects.create(
-                            recipient=parent_comment.user,
-                            actor=request.user,
-                            verb="回复了你的评论",
-                            target=comment,
-                        )
-                except Comment.DoesNotExist:
-                    pass
-
-            # 处理 @提及
-            mentions = re.findall(r"@(\w+)", comment.content)
-            for username in set(mentions):  # 去重
-                try:
-                    target_user = User.objects.get(username=username)
-                    if target_user != request.user:  # 不通知自己
-                        Notification.objects.create(
-                            recipient=target_user,
-                            actor=request.user,
-                            verb="在评论中提到了你",
-                            target=comment,
-                        )
-                except User.DoesNotExist:
-                    pass
-
-            messages.success(request, "您的评论已发布！")
-            return redirect("post_detail", slug=self.object.slug)
+                messages.success(request, "您的评论已发布！")
+                return redirect("post_detail", slug=self.object.slug)
+            except ValueError as e:
+                messages.error(request, f"评论创建失败: {str(e)}")
+                return redirect("post_detail", slug=self.object.slug)
         else:
             context = self.get_context_data()
             context["comment_form"] = form
@@ -316,7 +303,7 @@ class SearchView(SidebarContextMixin, ListView):
 
 class PostList(SidebarContextMixin, ListView):
     """
-    文章列表视图
+    文章列表视图 (别名)
     展示所有已发布的文章，支持分页。
     """
     model = Post

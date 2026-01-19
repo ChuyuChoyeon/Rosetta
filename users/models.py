@@ -5,30 +5,31 @@ from django.dispatch import receiver
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.templatetags.static import static
+from core.validators import validate_image_file
 
 
-class UserLabel(models.Model):
+class UserTitle(models.Model):
     """
-    用户标签模型
-    用于给用户打上自定义标签，如"VIP"、"作者"等。
+    用户称号模型
+    
+    用于给用户设置专属称号，如"VIP"、"贡献者"、"管理员"等。
+    包含名称、颜色样式、图标和描述。
     """
     COLOR_CHOICES = (
-        ("primary", "Primary (Indigo)"),
-        ("secondary", "Secondary (Pink)"),
-        ("accent", "Accent (Cyan)"),
-        ("neutral", "Neutral (Grey)"),
-        ("info", "Info (Blue)"),
-        ("success", "Success (Green)"),
-        ("warning", "Warning (Yellow)"),
-        ("error", "Error (Red)"),
+        ("primary", "蓝色"),
+        ("secondary", "紫色"),
+        ("success", "绿色"),
+        ("warning", "金色"),
+        ("error", "红色"),
     )
 
-    name = models.CharField("名称", max_length=50)
-    color = models.CharField("颜色", max_length=20, choices=COLOR_CHOICES, default="neutral")
-    description = models.CharField("描述", max_length=200, blank=True)
+    name = models.CharField("称号名称", max_length=50)
+    color = models.CharField("颜色风格", max_length=20, choices=COLOR_CHOICES, default="primary")
+    icon = models.TextField("图标SVG", blank=True, help_text="SVG图标代码")
+    description = models.CharField("称号说明", max_length=200, blank=True)
 
     class Meta:
-        verbose_name = "用户标签"
+        verbose_name = "用户称号"
         verbose_name_plural = verbose_name
 
     def __str__(self):
@@ -38,24 +39,43 @@ class UserLabel(models.Model):
 class User(AbstractUser):
     """
     自定义用户模型
-    扩展了Django默认的AbstractUser，添加了头像、封面图、昵称等个人资料字段。
+    
+    扩展了Django默认的AbstractUser，添加了以下增强字段：
+    - 头像 (avatar)
+    - 封面图 (cover_image)
+    - 昵称 (nickname)
+    - 个人简介 (bio)
+    - 社交链接 (website, github)
+    - 用户称号 (title)
     """
 
-    avatar = models.ImageField("头像", upload_to="avatars/", blank=True, null=True)
+    avatar = models.ImageField(
+        "头像", 
+        upload_to="avatars/", 
+        blank=True, 
+        null=True,
+        validators=[validate_image_file]
+    )
     cover_image = models.ImageField(
         "封面图",
         upload_to="covers/",
         blank=True,
         null=True,
         help_text="建议尺寸 800x200 像素",
+        validators=[validate_image_file]
     )
     nickname = models.CharField("昵称", max_length=50, blank=True)
     bio = models.TextField("个人简介", blank=True, max_length=500)
     website = models.URLField("个人网站", blank=True)
     github = models.URLField("GitHub", blank=True)
     
-    labels = models.ManyToManyField(
-        UserLabel, blank=True, related_name="users", verbose_name="标签"
+    title = models.ForeignKey(
+        UserTitle, 
+        on_delete=models.SET_NULL, 
+        blank=True, 
+        null=True, 
+        related_name="users", 
+        verbose_name="称号"
     )
 
     class Meta:
@@ -67,22 +87,41 @@ class User(AbstractUser):
 
     @property
     def get_avatar_url(self):
-        """获取用户头像URL，如果未设置则返回默认头像"""
+        """
+        获取用户头像URL
+        
+        如果用户未上传头像，则返回默认的 SVG 头像。
+        """
         if self.avatar and hasattr(self.avatar, "url"):
             return self.avatar.url
         return static("core/img/avatar-default.svg")
 
     @property
     def unread_notification_count(self):
-        """获取用户未读通知的数量"""
+        """
+        获取用户未读通知的数量
+        
+        用于在导航栏或其他位置显示未读消息红点。
+        """
         return self.user_notifications.filter(is_read=False).count()
+
+    @property
+    def total_views(self):
+        """
+        获取用户所有文章的总阅读量
+        """
+        from django.db.models import Sum
+        return self.posts.aggregate(total=Sum("views"))["total"] or 0
 
 
 class UserPreference(models.Model):
     """
     用户偏好设置模型
-    存储用户特定的设置，如界面主题、隐私选项等。
-    与User模型通过OneToOneField关联。
+    
+    存储用户特定的界面和隐私设置，与 User 模型一对一关联。
+    包含：
+    - 公开资料设置
+    - 界面主题选择 (支持 DaisyUI 的多种主题)
     """
 
     THEME_CHOICES = (
@@ -141,8 +180,15 @@ class UserPreference(models.Model):
 class Notification(models.Model):
     """
     系统通知模型
+    
     用于存储用户收到的各种通知消息。
-    使用GenericForeignKey来支持关联任意类型的目标对象（如文章、评论等）。
+    使用 GenericForeignKey 实现多态关联，可以关联到任意模型对象（如文章、评论、点赞等）。
+    
+    字段说明:
+    - recipient: 接收通知的用户
+    - actor: 触发通知的用户
+    - verb: 动作描述 (如 "评论了", "点赞了")
+    - target: 动作的目标对象 (通过 content_type 和 object_id 关联)
     """
 
     recipient = models.ForeignKey(

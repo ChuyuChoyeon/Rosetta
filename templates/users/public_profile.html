@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ profile_user.nickname|default:profile_user.username }} 的个人主页 - {{ config.SITE_NAME|default:"Rosetta" }}{% endblock %}
+
+{% block content %}
+{% load capture_tags %}
+<div class="container mx-auto px-4 py-8" x-data="{ showAvatarModal: false, avatarUrl: '{{ profile_user.get_avatar_url }}' }">
+    <div class="flex flex-col md:flex-row gap-8 items-start">
+        <!-- Sidebar: User Info -->
+        <div class="w-full md:w-80 flex-shrink-0 md:sticky md:top-24">
+            {% include 'users/includes/profile_card.html' with profile_user=profile_user comments=comments %}
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 min-w-0">
+            {% captureas card_content %}
+            <div id="profile-container" class="p-6 min-h-[500px]">
+                {% include 'users/includes/profile_content.html' %}
+            </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="bg-base-100 shadow-xl border border-base-content/5 rounded-2xl" %}
+        </div>
+    </div>
+
+    <!-- Avatar Lightbox Modal -->
+    <template x-teleport="body">
+        <div x-show="showAvatarModal" 
+             class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm transition-opacity duration-300"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @keydown.escape.window="showAvatarModal = false"
+             style="display: none;">
+            
+            <!-- Close Button -->
+            <button @click="showAvatarModal = false" class="absolute top-4 right-4 btn btn-circle btn-ghost text-white hover:bg-white/20 z-50">
+                <span class="material-symbols-outlined text-3xl">close</span>
+            </button>
+
+            <!-- Image Container -->
+            <div class="relative w-full h-full flex items-center justify-center p-4" @click.self="showAvatarModal = false">
+                <img :src="avatarUrl" 
+                     alt="Avatar Fullscreen" 
+                     class="max-h-[90vh] max-w-[95vw] object-contain rounded-lg shadow-2xl transition-transform duration-300 scale-100"
+                     @click.stop 
+                />
+            </div>
+        </div>
+    </template>
+</div>
+
+<!-- Edit Profile Modal -->
+{% include 'users/includes/edit_profile_modal.html' %}
+
+{% endblock %}

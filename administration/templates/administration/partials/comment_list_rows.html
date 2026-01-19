@@ -1,55 +1,58 @@
 {% for comment in comments %}
-<tr class="hover">
-    <th>
+<tr class="hover group">
+    <th class="rounded-l-2xl">
         <label>
             <input type="checkbox" name="selected_ids" value="{{ comment.pk }}" class="checkbox checkbox-xs row-checkbox" onchange="updateBulkToolbar()" />
         </label>
     </th>
+    <th class="font-mono text-xs opacity-50">{{ comment.id }}</th>
     <td>
         <div class="flex items-center space-x-3">
             <div class="avatar">
-                <div class="w-8 h-8 rounded-full">
+                <div class="w-8 h-8 rounded-full ring ring-base-200 ring-offset-1 group-hover:ring-primary/20 transition-all">
                     <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}" />
                 </div>
             </div>
-            <a href="{% url 'administration:user_edit' comment.user.pk %}" class="font-bold text-sm hover:link">{{ comment.user.username }}</a>
+            <a href="{% url 'administration:user_edit' comment.user.pk %}" class="font-bold text-sm hover:text-primary transition-colors">{{ comment.user.username }}</a>
         </div>
     </td>
     <td>
-        <div class="max-w-xs truncate" title="{{ comment.content }}">
-            <a href="#" onclick="openCommentModal('{{ comment.pk }}', '{{ comment.content|escapejs }}', '{{ comment.active|yesno:'true,false' }}')" class="hover:underline decoration-dashed underline-offset-4 cursor-pointer">
+        <div class="max-w-[200px] truncate" title="{{ comment.content }}">
+            <a href="#" onclick="openCommentModal('{{ comment.pk }}', '{{ comment.content|escapejs }}', '{{ comment.active|yesno:'true,false' }}')" class="hover:text-primary hover:underline decoration-dashed underline-offset-4 cursor-pointer transition-colors">
                 {{ comment.content }}
             </a>
         </div>
     </td>
     <td>
-        <div class="max-w-xs truncate" title="{{ comment.post.title }}">
-            <a href="{% url 'post_detail' comment.post.slug %}" target="_blank" class="link link-hover text-sm">{{ comment.post.title }}</a>
+        <div class="max-w-[200px] truncate" title="{{ comment.post.title }}">
+            <a href="{% url 'post_detail' comment.post.slug %}" target="_blank" class="link link-hover text-sm opacity-70 hover:opacity-100 hover:text-primary transition-all">{{ comment.post.title }}</a>
         </div>
     </td>
     <td>
-        {% if comment.active %}
-            <span class="badge badge-success badge-sm gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
-                已发布
-            </span>
-        {% else %}
-            <span class="badge badge-warning badge-sm gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-base-100"></span>
-                待审核
-            </span>
-        {% endif %}
+        <div class="flex flex-col gap-1">
+            {% if comment.active %}
+                <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/10">
+                    <span class="w-1.5 h-1.5 rounded-full bg-success animate-[pulse_2s_infinite]"></span>
+                    已发布
+                </div>
+            {% else %}
+                <div class="badge badge-warning badge-sm gap-1 badge-outline bg-warning/10">
+                    <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+                    待审核
+                </div>
+            {% endif %}
+        </div>
     </td>
-    <td class="text-sm font-mono opacity-50">{{ comment.created_at|date:"Y-m-d H:i" }}</td>
-    <td>
-        <div class="join">
-            <button type="button" onclick="openCommentModal('{{ comment.pk }}', '{{ comment.content|escapejs }}', '{{ comment.active|yesno:'true,false' }}')" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+    <td class="text-sm font-mono opacity-50 group-hover:opacity-100 transition-opacity">{{ comment.created_at|date:"Y-m-d H:i" }}</td>
+    <td class="rounded-r-2xl">
+        <div class="join opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <button type="button" onclick="openCommentModal('{{ comment.pk }}', '{{ comment.content|escapejs }}', '{{ comment.active|yesno:'true,false' }}')" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
                 <span class="material-symbols-outlined text-base">edit</span>
             </button>
             <form method="post" action="{% url 'administration:comment_edit' comment.pk %}" class="inline">
                 {% csrf_token %}
                 <input type="hidden" name="active" value="{% if comment.active %}False{% else %}True{% endif %}">
-                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip {% if not comment.active %}text-success{% endif %}" data-tip="{% if comment.active %}撤回{% else %}通过{% endif %}">
+                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip tooltip-left {% if not comment.active %}text-success{% endif %}" data-tip="{% if comment.active %}撤回{% else %}通过{% endif %}">
                     {% if comment.active %}
                     <span class="material-symbols-outlined text-base">block</span>
                     {% else %}
@@ -57,7 +60,7 @@
                     {% endif %}
                 </button>
             </form>
-            <a href="{% url 'administration:comment_delete' comment.pk %}" class="btn btn-ghost btn-xs join-item text-error tooltip" data-tip="删除" onclick="confirmDelete('{% url 'administration:comment_delete' comment.pk %}', '确定要删除这条评论吗？'); return false;">
+            <a href="{% url 'administration:comment_delete' comment.pk %}" class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" data-tip="删除" onclick="confirmDelete('{% url 'administration:comment_delete' comment.pk %}', '确定要删除这条评论吗？'); return false;">
                 <span class="material-symbols-outlined text-base">delete</span>
             </a>
         </div>
@@ -65,10 +68,15 @@
 </tr>
 {% empty %}
 <tr>
-    <td colspan="7" class="text-center py-8 text-base-content/50">
-        <div class="flex flex-col items-center gap-2">
-            <span class="material-symbols-outlined text-4xl opacity-20">chat_bubble_outline</span>
-            <span>暂无评论</span>
+    <td colspan="7" class="text-center py-16 text-base-content/50">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center">
+                <span class="material-symbols-outlined text-4xl opacity-40">chat_bubble_outline</span>
+            </div>
+            <div class="text-center">
+                <h3 class="font-bold text-lg">暂无评论</h3>
+                <p class="text-sm opacity-60 mt-1">还没有收到任何评论</p>
+            </div>
         </div>
     </td>
 </tr>

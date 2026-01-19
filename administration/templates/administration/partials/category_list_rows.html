@@ -6,7 +6,14 @@
         </label>
     </th>
     <th class="font-mono text-xs opacity-50">{{ category.id }}</th>
-    <td class="font-bold">{{ category.name }}</td>
+    <td>
+        <div class="flex items-center gap-2">
+            {% if category.icon %}
+                <span class="material-symbols-outlined text-{{ category.color|default:'base-content' }}">{{ category.icon }}</span>
+            {% endif %}
+            <span class="font-bold text-{{ category.color|default:'base-content' }}">{{ category.name }}</span>
+        </div>
+    </td>
     <td class="font-mono text-sm opacity-70">{{ category.slug }}</td>
     <td>
         <span class="badge badge-ghost badge-sm">{{ category.post_count }} 文章</span>

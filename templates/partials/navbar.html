@@ -1,0 +1,201 @@
+{% load static %}
+<div class="navbar bg-background/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 border-b border-base-content/5 supports-[backdrop-filter]:bg-background/60" x-data="{ scrolled: false }" @scroll.window="scrolled = (window.pageYOffset > 20)" :class="{ 'shadow-md': scrolled, 'shadow-sm': !scrolled }">
+  <div class="container mx-auto px-4 flex w-full">
+    <div class="navbar-start flex-nowrap">
+      <div class="dropdown">
+        <div tabindex="0" role="button" class="btn btn-ghost lg:hidden">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
+        </div>
+        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+          <li><a href="{% url 'home' %}">首页</a></li>
+          <li><a href="{% url 'category_list' %}">分类</a></li>
+          <li><a href="{% url 'tag_list' %}">标签</a></li>
+          {% for nav in navigations %}
+          <li><a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %}>{{ nav.title }}</a></li>
+          {% endfor %}
+        </ul>
+      </div>
+      <a href="{% url 'home' %}" class="text-2xl font-heading font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent flex items-center gap-2 px-0 hover:scale-105 transition-transform duration-200 whitespace-nowrap">
+          {% if config.SHOW_SITE_LOGO and config.SITE_LOGO %}
+          <img src="{{ config.SITE_LOGO }}" alt="Logo" class="h-8 w-auto object-contain">
+          {% endif %}
+          <span>{{ config.SITE_NAME|default:"Rosetta" }}</span>
+      </a>
+    </div>
+    <div class="navbar-center hidden lg:flex">
+      <ul class="menu menu-horizontal px-1 font-medium text-base gap-1">
+          <li>
+              <a href="{% url 'home' %}" class="hover:text-primary hover:bg-primary/10 transition-colors rounded-lg px-4 py-2">首页</a>
+          </li>
+          <li>
+              <a href="{% url 'category_list' %}" class="hover:text-primary hover:bg-primary/10 transition-colors rounded-lg px-4 py-2">分类</a>
+          </li>
+          {% for nav in navigations %}
+          <li>
+              <a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %} class="hover:text-primary hover:bg-primary/10 transition-colors rounded-lg px-4 py-2">{{ nav.title }}</a>
+          </li>
+          {% endfor %}
+      </ul>
+    </div>
+    <div class="navbar-end gap-2">
+      <!-- Search -->
+      <button class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors" onclick="search_modal.showModal()">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+      </button>
+      
+      <!-- Theme Switcher -->
+      <div title="Change Theme" class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors">
+          <svg width="20" height="20" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="h-5 w-5 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path></svg>
+        </div>
+        <div tabindex="0" class="dropdown-content z-[1] mt-4 p-2 shadow-2xl bg-base-100 rounded-box max-h-[70vh] overflow-y-auto w-40 border border-base-200">
+            <ul class="menu menu-sm gap-1">
+                {% for theme in themes %}
+                <li>
+                    <button class="justify-between" 
+                            data-set-theme="{{ theme.id }}"
+                            onclick="updateTheme('{{ theme.id }}')">
+                    {{ theme.name }}
+                    </button>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+      </div>
+
+      <script>
+          function updateTheme(theme) {
+              // Apply theme locally first (existing behavior handles data-set-theme)
+              
+              // Sync with backend if user is logged in
+              {% if user.is_authenticated %}
+              fetch("{% url 'users:update_theme' %}", {
+                  method: "POST",
+                  headers: {
+                      "Content-Type": "application/json",
+                      "X-CSRFToken": "{{ csrf_token }}"
+                  },
+                  body: JSON.stringify({ theme: theme })
+              }).catch(console.error);
+              {% endif %}
+          }
+      </script>
+
+      {% if user.is_authenticated %}
+      <div class="dropdown dropdown-end ml-2">
+        <div tabindex="0" role="button" class="btn btn-ghost btn-circle avatar ring-2 ring-primary ring-offset-2 ring-offset-base-100 transition-all hover:scale-105">
+          <div class="w-10 rounded-full">
+              <img alt="{{ user.nickname|default:user.username }}" src="{{ user.get_avatar_url }}" />
+          </div>
+          {% if user.unread_notification_count > 0 %}
+              <span class="absolute top-0 right-0 flex h-3 w-3">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-error opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-3 w-3 bg-error border-2 border-base-100"></span>
+              </span>
+          {% endif %}
+        </div>
+        <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-2xl bg-base-100 rounded-xl w-64 border border-base-200 gap-1">
+          <li class="menu-title px-4 py-3 bg-base-200/50 rounded-lg mb-2">
+              <div class="flex flex-col gap-1">
+                  <span class="text-base-content font-bold text-base">{{ user.nickname|default:user.username }}</span>
+                  <span class="text-xs font-normal text-base-content/60">@{{ user.username }}</span>
+              </div>
+          </li>
+          
+          <li>
+              <a href="{% url 'users:profile' %}?tab=notifications" class="py-2.5 flex justify-between active:bg-primary">
+                  <span class="flex items-center gap-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                      通知中心
+                  </span>
+                  {% if user.unread_notification_count > 0 %}
+                  <span class="badge badge-error badge-xs font-bold animate-pulse">{{ user.unread_notification_count }}</span>
+                  {% endif %}
+              </a>
+          </li>
+
+          <li>
+              <a href="{% url 'users:profile' %}?tab=history" class="py-2.5 active:bg-primary">
+                  <span class="flex items-center gap-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      浏览历史
+                  </span>
+              </a>
+          </li>
+
+          <li>
+              <a href="{% url 'users:profile' %}?tab=settings" class="py-2.5 active:bg-primary">
+                  <span class="flex items-center gap-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                      偏好设置
+                  </span>
+              </a>
+          </li>
+
+          <div class="h-px bg-base-content/10 my-1"></div>
+
+          <li>
+              <a href="{% url 'users:user_public_profile' user.username %}" class="py-2.5 active:bg-primary">
+                  <span class="flex items-center gap-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                      个人主页
+                  </span>
+              </a>
+          </li>
+          
+          {% if user.is_staff %}
+          <li>
+              <a href="{% url 'administration:index' %}" class="py-2.5 text-warning active:bg-warning/20">
+                  <span class="flex items-center gap-3">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                      后台管理
+                  </span>
+              </a>
+          </li>
+          {% endif %}
+
+          <div class="h-px bg-base-content/10 my-1"></div>
+
+          <li>
+              <form action="{% url 'users:logout' %}" method="post" class="p-0">
+                  {% csrf_token %}
+                  <button type="submit" class="w-full text-left py-2.5 flex items-center gap-3 text-error hover:bg-error/10 rounded-lg">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                      注销登录
+                  </button>
+              </form>
+          </li>
+        </ul>
+      </div>
+      {% else %}
+          <a href="{% url 'users:login' %}" class="btn btn-primary btn-sm px-6 rounded-full font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all">登录</a>
+          <a href="{% url 'users:register' %}" class="btn btn-ghost btn-sm">注册</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<dialog id="search_modal" class="modal">
+  <div class="modal-box bg-base-100/90 backdrop-blur-md shadow-2xl border border-base-content/5 relative overflow-hidden">
+    <!-- Background Effect -->
+    <div class="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <h3 class="font-bold text-lg mb-6 flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">search</span>
+        全站搜索
+    </h3>
+    <div class="py-4">
+        {% url 'search' as search_url %}
+        {% include 'components/inspira/placeholders_and_vanish_input.html' with action=search_url placeholders=search_placeholders|default:"['搜索文章...', '搜索标签...', 'Python', 'Django']" extra_classes="w-full" %}
+    </div>
+    <div class="modal-action">
+      <form method="dialog">
+        <button class="btn btn-ghost hover:bg-base-200">关闭</button>
+      </form>
+    </div>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
