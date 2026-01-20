@@ -99,10 +99,10 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt", # JWT 认证支持
     "imagekit",               # 图片处理 (缩略图、调整大小)
     "watson",                 # 数据库全文搜索
-    "compressor",             # 静态资源压缩与合并
     "meta",                   # SEO Meta 标签生成
     "constance",              # 动态配置系统 (支持数据库或 Redis)
-    "constance.backends.database",
+    # "constance.backends.database",
+
     
     # --- 核心业务模块 ---
     "blog.apps.BlogConfig",   # 博客内容管理
@@ -117,7 +117,7 @@ INSTALLED_APPS = [
 # 注意：中间件的顺序至关重要，请求从上往下处理，响应从下往上返回。
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",        # 静态文件服务 (生产环境)
+    # "whitenoise.middleware.WhiteNoiseMiddleware",        # 静态文件服务 (生产环境)
     "core.logging.RequestIDMiddleware",                  # 请求 ID 追踪 (新增)
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -233,21 +233,31 @@ STATIC_URL = "static/"
 # 收集静态文件的目录 (执行 python manage.py collectstatic 后生成)
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# 静态文件查找策略
-STATICFILES_FINDERS = (
-    "django.contrib.staticfiles.finders.FileSystemFinder", # 查找 STATICFILES_DIRS
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder", # 查找各 App 下的 static 目录
-    "compressor.finders.CompressorFinder", # 查找压缩后的缓存文件
-)
-
-# 静态文件存储引擎 (集成 WhiteNoise)
-# 支持静态文件压缩和长期缓存 (Cache Busting)
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
-
 # 用户上传文件 URL 前缀
 MEDIA_URL = "/media/"
 # 用户上传文件存储路径
 MEDIA_ROOT = BASE_DIR / "media"
+
+# settings.py
+STATIC_URL = '/static/'
+STATIC_ROOT = '/opt/www/sites/choyeon.cc/index/static'  # 直接输出到挂载目录
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = '/opt/www/sites/choyeon.cc/index/media'
+
+
+# 静态文件查找策略
+STATICFILES_FINDERS = (
+    "django.contrib.staticfiles.finders.FileSystemFinder", # 查找 STATICFILES_DIRS
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder", # 查找各 App 下的 static 目录
+)
+
+# 静态文件存储引擎 (集成 WhiteNoise)
+# 支持静态文件压缩和长期缓存 (Cache Busting)
+# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+
+
 
 
 # ------------------------------------------------------------------------------
@@ -256,9 +266,9 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 # --- Tailwind CSS ---
 TAILWIND_APP_NAME = "theme"
-# NPM 路径 (Windows 环境下通常指向 npm.cmd)
+# NPM_BIN_PATH = "C:\\Program Files\\nodejs\\npm.cmd"
 # 请确保此路径与本地开发环境一致，或通过环境变量配置
-NPM_BIN_PATH = "C:\\Program Files\\nodejs\\npm.cmd"
+NPM_BIN_PATH = os.environ.get("NPM_BIN_PATH", "C:\\Program Files\\nodejs\\npm.cmd")
 
 # --- Django Sites Framework ---
 # 当前站点 ID，多站点部署时需修改
@@ -280,11 +290,6 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": True,
 }
-
-# --- Django Compressor (静态资源压缩) ---
-# 开发环境关闭压缩，避免频繁修改导致的缓存问题；生产环境开启。
-COMPRESS_ENABLED = not DEBUG
-COMPRESS_OFFLINE = False
 
 # --- Django Meta (SEO 配置) ---
 META_SITE_PROTOCOL = "http"

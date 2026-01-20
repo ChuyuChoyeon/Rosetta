@@ -1,4 +1,4 @@
-{% load static tailwind_tags compress meta %}
+{% load static tailwind_tags meta %}
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
@@ -45,10 +45,8 @@
         }
     </style>
     
-    {% compress css %}
     {% tailwind_css %}
     <link href="{% static 'theme/css/cropper.min.css' %}" rel="stylesheet">
-    {% endcompress %}
 
     {% block extra_css %}{% endblock %}
 
@@ -102,15 +100,11 @@
             }
         });
     </script>
-
-    {% compress js %}
-    <!-- Replaced Unfold static with CDN -->
     <script src="{% static 'theme/js/htmx.min.js' %}"></script>
     <script defer src="{% static 'theme/js/alpine.min.js' %}"></script>
     <script src="{% static 'theme/js/cropper.min.js' %}"></script>
     <script src="{% static 'theme/js/theme.js' %}"></script>
     <script src="{% static 'theme/js/ui.js' %}"></script>
-    {% endcompress %}
 
     <script>
         // --- 主题初始化 (Theme Initialization) ---

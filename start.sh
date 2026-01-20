@@ -1,39 +1,38 @@
 #!/bin/bash
 set -e
 
-# 设置环境变量
+# 环境变量设置
 export PYTHONDONTWRITEBYTECODE=1
 export PYTHONUNBUFFERED=1
 
-echo "Starting deployment script..."
-
-# 检查是否安装了 python
-if ! command -v python3 &> /dev/null; then
-    echo "Python3 could not be found, please install it first."
-    exit 1
-fi
+echo "🚀 正在启动部署脚本..."
 
 # 安装依赖
-echo "Installing dependencies..."
 if [ -f "requirements.txt" ]; then
-    pip install --no-cache-dir -r requirements.txt
+    echo "📦 正在安装依赖 (requirements.txt)..."
+    pip install --break-system-packages --no-cache-dir -r requirements.txt
 else
-    echo "requirements.txt not found. Attempting to install from pyproject.toml..."
-    pip install --no-cache-dir .
+    echo "⚠️ 未找到 requirements.txt，跳过依赖安装。"
 fi
 
 # 收集静态文件
-echo "Collecting static files..."
-python3 manage.py collectstatic --noinput
+echo "🎨 正在收集静态文件..."
+python manage.py collectstatic --noinput
 
 # 应用数据库迁移
-echo "Applying database migrations..."
-python3 manage.py migrate
+echo "🗄️ 正在应用数据库迁移..."
+python manage.py migrate
 
-# 启动 uvicorn
-echo "Starting Uvicorn server..."
-# 使用 uvicorn 启动 ASGI 应用
-# --host 0.0.0.0: 允许外部访问
-# --port 8000: 监听 8000 端口
-# --workers 4: 启动 4 个工作进程 (根据 CPU 核心数调整)
-exec uvicorn Rosetta.asgi:application --host 0.0.0.0 --port 8000 --workers 4 --proxy-headers
+# 构建搜索索引 (django-watson)
+echo "🔍 正在构建搜索索引..."
+python manage.py buildwatson
+
+# 启动服务器
+echo "🔥 正在启动 Uvicorn 服务器..."
+# 使用 exec 替换当前 shell 进程为 uvicorn
+exec uvicorn Rosetta.asgi:application \
+    --host 0.0.0.0 \
+    --port 8000 \
+    --workers 4 \
+    --proxy-headers \
+    --log-level info
