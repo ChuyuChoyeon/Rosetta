@@ -1,6 +1,7 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
+from core.utils import generate_unique_slug
 
 
 class Page(models.Model):
@@ -29,7 +30,7 @@ class Page(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.title)
+            self.slug = generate_unique_slug(Page, self.title)
         super().save(*args, **kwargs)
 
     def __str__(self):

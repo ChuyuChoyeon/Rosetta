@@ -3,6 +3,7 @@
 
 <div id="profile-content-inner" class="fade-in">
 {% if active_tab == 'articles' %}
+    <!-- --- 文章 Tab (Articles Tab) --- -->
     <h2 class="card-title mb-6">发布文章</h2>
     {% if posts %}
         <div class="flex flex-col gap-6">
@@ -39,10 +40,12 @@
     {% endif %}
 
 {% elif active_tab == 'comments' %}
+    <!-- --- 评论 Tab (Comments Tab) --- -->
     <h2 class="card-title mb-6">评论记录</h2>
     {% include 'users/includes/comments_list.html' with comments=comments %}
 
 {% elif active_tab == 'likes' %}
+    <!-- --- 喜欢/点赞 Tab (Likes Tab) --- -->
     <h2 class="card-title mb-6">喜欢的文章</h2>
     {% if liked_posts %}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -79,6 +82,7 @@
     {% endif %}
 
 {% elif active_tab == 'info' and user == profile_user %}
+    <!-- --- 个人资料 Tab (Personal Info Tab - Private) --- -->
     <div class="flex justify-between items-center mb-6">
         <h2 class="card-title">个人信息</h2>
         <button class="btn btn-sm btn-outline btn-primary" onclick="profile_edit_modal.showModal()">
@@ -89,6 +93,7 @@
     {% include 'users/includes/user_info.html' %}
 
 {% elif active_tab == 'history' and user == profile_user %}
+    <!-- --- 浏览历史 Tab (History Tab - Private) --- -->
     <div class="flex justify-between items-center mb-6">
         <h2 class="card-title">浏览历史</h2>
         <span class="text-xs text-base-content/50">仅显示最近20条记录</span>
@@ -128,6 +133,7 @@
     {% endif %}
 
 {% elif active_tab == 'notifications' and user == profile_user %}
+    <!-- --- 通知消息 Tab (Notifications Tab - Private) --- -->
     <div class="flex justify-between items-center mb-6">
         <h2 class="card-title">消息通知</h2>
     </div>
@@ -159,10 +165,12 @@
                     </div>
                     <div class="flex flex-col gap-2">
                         {% if not notification.is_read %}
+                        <!-- HTMX Action: Mark Read -->
                         <button hx-post="{% url 'users:mark_notification_read' notification.pk %}" hx-swap="outerHTML" class="btn btn-xs btn-ghost text-primary">
                             标为已读
                         </button>
                         {% endif %}
+                        <!-- HTMX Action: Delete -->
                         <button hx-delete="{% url 'users:delete_notification' notification.pk %}" hx-target="closest .card" hx-swap="outerHTML" class="btn btn-xs btn-ghost text-error">
                             删除
                         </button>
@@ -180,6 +188,7 @@
     {% endif %}
 
 {% elif active_tab == 'settings' and user == profile_user %}
+    <!-- --- 偏好设置 Tab (Settings Tab - Private) --- -->
     <h2 class="card-title mb-6">偏好设置</h2>
     <form action="{% url 'users:user_public_profile' user.username %}" method="post">
         {% csrf_token %}

@@ -11,53 +11,70 @@ from core.models import FriendLink, Navigation, SearchPlaceholder
 
 class MockDataGenerator:
     """
-    Richer Mock Data Generator for Rosetta Blog System
+    Rosetta 博客系统 Mock 数据生成器
+    
+    用于生成丰富的测试数据，包括用户、文章、评论、标签等。
     """
     def __init__(self, locale="zh_CN"):
         self.fake = Faker(locale)
         self.User = get_user_model()
         
     def _rand_text(self, length: int = 8) -> str:
-        """Generate random string"""
+        """生成随机字符串"""
         suffix = "".join(random.choices(string.ascii_lowercase + string.digits, k=length))
         return suffix
 
     def _generate_markdown_content(self) -> str:
-        """Generate rich and long Markdown content for blog posts"""
+        """
+        生成丰富的 Markdown 格式文章内容
+        
+        包含：
+        1. 介绍段落
+        2. 核心概念 (H2)
+        3. 引用块
+        4. 详细分析 (H2)
+        5. 列表项
+        6. 代码块 (Python)
+        7. 对比表格 (H2)
+        8. 进阶用法 (H2)
+        9. 嵌套列表
+        10. 代码块 (JSON)
+        11. 总结 (H2)
+        """
         sections = []
         
-        # Title/Intro is handled by the post title and excerpt, so we start with body content.
+        # 标题/简介由文章标题和摘要处理，这里从正文开始。
         
-        # 1. Introduction Paragraphs
+        # 1. 介绍段落
         sections.append(self.fake.paragraph(nb_sentences=6))
         sections.append(self.fake.paragraph(nb_sentences=4))
         
-        # 2. Key Concepts (H2)
+        # 2. 核心概念 (H2)
         sections.append(f"## {self.fake.sentence(nb_words=4).rstrip('.')}")
         sections.append(self.fake.paragraph(nb_sentences=8))
         
-        # Quote
+        # 引用
         sections.append(f"> {self.fake.paragraph(nb_sentences=3)}")
         
-        # 3. Detailed Analysis (H2)
+        # 3. 详细分析 (H2)
         sections.append(f"## {self.fake.sentence(nb_words=5).rstrip('.')}")
         sections.append(self.fake.paragraph(nb_sentences=6))
         
-        # List of items
+        # 列表项
         sections.append(f"### {self.fake.sentence(nb_words=3).rstrip('.')}")
         items = "\n".join([f"- **{self.fake.word()}**: {self.fake.sentence()}" for _ in range(6)])
         sections.append(items)
         
-        # Code Block (Python)
+        # 代码块 (Python)
         code_snippet_py = "```python\nimport random\n\ndef generate_magic():\n    magic_number = random.randint(1, 100)\n    return f'Magic: {magic_number}'\n\nclass Wizard:\n    def __init__(self, name):\n        self.name = name\n        self.power = 100\n\n    def cast(self):\n        return generate_magic()\n```"
         sections.append(code_snippet_py)
         
         sections.append(self.fake.paragraph(nb_sentences=5))
 
-        # 4. Comparison (H2)
+        # 4. 对比 (H2)
         sections.append(f"## {self.fake.sentence(nb_words=4).rstrip('.')}")
         
-        # Table
+        # 表格
         table = "| 特性 | 方案 A | 方案 B | 方案 C |\n| :--- | :---: | :---: | :---: |\n"
         for _ in range(4):
             table += f"| {self.fake.word()} | {random.randint(1, 100)}ms | {random.randint(1, 100)}ms | {random.randint(1, 100)}ms |\n"
@@ -65,10 +82,10 @@ class MockDataGenerator:
         
         sections.append(self.fake.paragraph(nb_sentences=4))
 
-        # 5. Advanced Usage (H2)
+        # 5. 进阶用法 (H2)
         sections.append(f"## {self.fake.sentence(nb_words=5).rstrip('.')}")
         
-        # Nested List
+        # 嵌套列表
         nested_list = (
             f"1. {self.fake.sentence()}\n"
             f"    1. {self.fake.sentence()}\n"
@@ -78,11 +95,11 @@ class MockDataGenerator:
         )
         sections.append(nested_list)
 
-        # Code Block (JavaScript/JSON)
+        # 代码块 (JavaScript/JSON)
         code_snippet_js = "```json\n{\n  \"status\": \"success\",\n  \"data\": {\n    \"id\": 101,\n    \"title\": \"Hello World\",\n    \"tags\": [\"test\", \"mock\"]\n  }\n}\n```"
         sections.append(code_snippet_js)
 
-        # 6. Conclusion (H2)
+        # 6. 总结 (H2)
         sections.append(f"## 总结")
         sections.append(self.fake.paragraph(nb_sentences=5))
         sections.append(f"**{self.fake.sentence()}**")
@@ -90,11 +107,11 @@ class MockDataGenerator:
         return "\n\n".join(sections)
 
     def create_users(self, count=5, password="password123"):
-        """Generate users with rich profiles"""
+        """生成拥有丰富资料的用户数据"""
         created_users = []
         titles = list(UserTitle.objects.all())
         
-        print(f"Generating {count} users...")
+        print(f"正在生成 {count} 个用户...")
         for _ in range(count):
             username = self.fake.user_name()
             while self.User.objects.filter(username=username).exists():
@@ -125,7 +142,7 @@ class MockDataGenerator:
         return created_users
 
     def create_categories(self, count=5):
-        """Generate categories"""
+        """生成分类数据"""
         created_categories = []
         existing_names = set(Category.objects.values_list('name', flat=True))
         
@@ -141,7 +158,7 @@ class MockDataGenerator:
         while len(potential_names) < count:
             potential_names.append(self.fake.word().capitalize() + " Tech")
             
-        print(f"Generating {count} categories...")
+        print(f"正在生成 {count} 个分类...")
         for name in potential_names[:count]:
             slug = self.fake.unique.slug()
             while Category.objects.filter(slug=slug).exists():
@@ -158,9 +175,9 @@ class MockDataGenerator:
         return created_categories
 
     def create_tags(self, count=10):
-        """Generate tags"""
+        """生成标签数据"""
         created_tags = []
-        print(f"Generating {count} tags...")
+        print(f"正在生成 {count} 个标签...")
         for _ in range(count):
             name = self.fake.word()
             slug = self.fake.unique.slug()
@@ -176,7 +193,7 @@ class MockDataGenerator:
         return created_tags
 
     def create_posts(self, count=20, users=None, categories=None, tags=None):
-        """Generate rich posts"""
+        """生成丰富的文章数据"""
         if not users:
             users = list(self.User.objects.all())
         if not categories:
@@ -185,7 +202,7 @@ class MockDataGenerator:
             tags = list(Tag.objects.all())
             
         created_posts = []
-        print(f"Generating {count} posts...")
+        print(f"正在生成 {count} 篇文章...")
         
         for _ in range(count):
             author = random.choice(users) if users else None
@@ -226,14 +243,14 @@ class MockDataGenerator:
         return created_posts
 
     def create_comments(self, count=50, users=None, posts=None):
-        """Generate comments with threading"""
+        """生成评论数据 (支持嵌套回复)"""
         if not users:
             users = list(self.User.objects.all())
         if not posts:
             posts = list(Post.objects.all())
             
         created_comments = []
-        print(f"Generating {count} comments...")
+        print(f"正在生成 {count} 条评论...")
         
         for _ in range(count):
             user = random.choice(users)
@@ -277,9 +294,9 @@ class MockDataGenerator:
         return created_comments
 
     def create_friend_links(self, count=5):
-        """Generate friend links"""
+        """生成友情链接数据"""
         created_links = []
-        print(f"Generating {count} friend links...")
+        print(f"正在生成 {count} 个友情链接...")
         
         tech_sites = [
             ("Django Official", "https://www.djangoproject.com/"),
@@ -310,8 +327,8 @@ class MockDataGenerator:
         return created_links
 
     def create_navigations(self):
-        """Generate default navigation items"""
-        print("Generating navigation items...")
+        """生成默认导航菜单"""
+        print("正在生成导航菜单...")
         navs = [
             {"title": "首页", "url": "/", "order": 1, "location": "header"},
             {"title": "文章", "url": "/posts/", "order": 2, "location": "header"},
@@ -327,8 +344,8 @@ class MockDataGenerator:
         return created_navs
 
     def create_search_placeholders(self):
-        """Generate search placeholders"""
-        print("Generating search placeholders...")
+        """生成搜索占位符数据"""
+        print("正在生成搜索占位符...")
         texts = [
             "搜索 Python...", "搜索 Django...", "搜索 Tailwind...", 
             "如何部署...", "REST API...", "Docker 教程..."
@@ -350,7 +367,10 @@ def generate_mock_data(
     generate_extras=True,
 ):
     """
-    Facade function to generate mock data using MockDataGenerator
+    Mock 数据生成器入口函数
+    
+    协调 MockDataGenerator 生成各类测试数据。
+    使用事务保证数据一致性。
     """
     generator = MockDataGenerator()
     

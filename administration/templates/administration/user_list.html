@@ -11,46 +11,175 @@
     </ul>
 </div>
 
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">用户管理</h1>
-    <div class="flex gap-2">
-        <div class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
-                <span class="material-symbols-outlined text-lg">more_vert</span>
-                更多
+{% captureas card_content %}
+    <div class="p-0">
+        <!-- Toolbar -->
+        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-10">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-info/10 rounded-lg">
+                    <span class="material-symbols-outlined text-info">group</span>
+                </div>
+                <div>
+                    <h2 class="font-bold text-base">用户列表</h2>
+                    <p class="text-xs text-base-content/60">管理系统所有注册用户</p>
+                </div>
             </div>
-            <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow bg-base-100 rounded-box w-52">
-                <li>
-                    <a href="{% url 'administration:export_all' 'User' %}" target="_blank">
-                        <span class="material-symbols-outlined">file_download</span>
-                        导出全部 (JSON)
-                    </a>
-                </li>
-                <li>
-                    <button onclick="import_modal.showModal()">
-                        <span class="material-symbols-outlined">file_upload</span>
-                        导入数据 (JSON)
-                    </button>
-                </li>
-            </ul>
+            
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+                <!-- Search -->
+                <form action="." method="get" class="relative w-full sm:w-64">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm">search</span>
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索用户..." class="input input-sm input-bordered pl-9 w-full focus:input-primary transition-all" />
+                </form>
+
+                <!-- Actions Dropdown -->
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal">
+                        更多
+                        <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200">
+                        <li>
+                            <a href="{% url 'administration:export_all' 'User' %}" target="_blank" class="gap-3">
+                                <span class="material-symbols-outlined text-base-content/70">file_download</span>
+                                导出全部 (JSON)
+                            </a>
+                        </li>
+                        <li>
+                            <button onclick="import_modal.showModal()" class="gap-3">
+                                <span class="material-symbols-outlined text-base-content/70">file_upload</span>
+                                导入数据 (JSON)
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Add Button -->
+                {% url 'administration:user_create' as create_url %}
+                <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-1 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-lg">add</span>
+                    新建用户
+                </a>
+            </div>
         </div>
-        {% url 'administration:user_create' as create_url %}
-        {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建用户' extra_classes='px-4 !h-8 text-xs' href=create_url %}
-            {% include 'components/inspira/rainbow_button.html' %}
-        {% endwith %}
+
+        <!-- Bulk Actions Toolbar -->
+        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
+            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
+            <div class="flex gap-2">
+                <button onclick="submitBulkAction('active')" class="btn btn-xs btn-success gap-1 text-white">
+                    <span class="material-symbols-outlined text-[16px]">person_check</span> 启用
+                </button>
+                <button onclick="submitBulkAction('inactive')" class="btn btn-xs btn-warning gap-1">
+                    <span class="material-symbols-outlined text-[16px]">person_off</span> 禁用
+                </button>
+                <div class="divider divider-horizontal mx-0 my-1"></div>
+                <button onclick="submitBulkAction('set_staff')" class="btn btn-xs btn-info gap-1 text-white">
+                    <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span> 设为管理
+                </button>
+                <button onclick="submitBulkAction('remove_staff')" class="btn btn-xs btn-ghost gap-1 hover:bg-base-content/10">
+                    <span class="material-symbols-outlined text-[16px]">person</span> 取消管理
+                </button>
+                <div class="divider divider-horizontal mx-0 my-1"></div>
+                <button onclick="submitBulkAction('delete')" class="btn btn-xs btn-ghost text-error hover:bg-error/10 gap-1">
+                    <span class="material-symbols-outlined text-[16px]">delete</span> 删除
+                </button>
+            </div>
+        </div>
+
+        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='user' %}">
+            {% csrf_token %}
+            <div class="overflow-x-auto min-h-[400px]">
+                <table class="table table-sm w-full">
+                    <!-- Head -->
+                    <thead class="bg-base-200/50 text-base-content/60 font-medium">
+                        <tr>
+                            <th class="w-10">
+                                <label>
+                                    <input type="checkbox" class="checkbox checkbox-xs rounded-sm" onclick="toggleAll(this)" />
+                                </label>
+                            </th>
+                            <th class="w-[200px]">
+                                <a href="?sort=username&order={% if request.GET.sort == 'username' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
+                                    用户
+                                    {% if request.GET.sort == 'username' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th>邮箱</th>
+                            <th class="w-28">称号</th>
+                            <th class="w-28">角色</th>
+                            <th>状态</th>
+                            <th class="w-32">
+                                <a href="?sort=date_joined&order={% if request.GET.sort == 'date_joined' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
+                                    加入时间
+                                    {% if request.GET.sort == 'date_joined' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th class="w-32">
+                                <a href="?sort=last_login&order={% if request.GET.sort == 'last_login' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
+                                    最近登录
+                                    {% if request.GET.sort == 'last_login' %}
+                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
+                                    {% endif %}
+                                </a>
+                            </th>
+                            <th class="w-24 text-center">操作</th>
+                        </tr>
+                    </thead>
+                    <!-- Body (HTMX Target) -->
+                    <tbody id="user-list-body" class="divide-y divide-base-200/50">
+                        {% include "administration/partials/user_list_rows.html" %}
+                    </tbody>
+                </table>
+            </div>
+        </form>
+        
+        <!-- Pagination -->
+        <div class="p-4 border-t border-base-200 flex justify-between items-center bg-base-100/30">
+            {% if is_paginated %}
+            <div class="text-xs text-base-content/50">
+                显示第 {{ page_obj.start_index }} 到 {{ page_obj.end_index }} 条，共 {{ page_obj.paginator.count }} 条
+            </div>
+            <div class="join">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-xs btn-outline">«</a>
+                {% else %}
+                <button class="join-item btn btn-xs btn-outline btn-disabled">«</button>
+                {% endif %}
+                
+                <button class="join-item btn btn-xs btn-outline no-animation bg-base-200 border-base-300 text-base-content/70">第 {{ page_obj.number }} 页</button>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-xs btn-outline">»</a>
+                {% else %}
+                <button class="join-item btn btn-xs btn-outline btn-disabled">»</button>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="text-xs text-base-content/50">共 {{ users|length }} 条记录</div>
+            {% endif %}
+        </div>
     </div>
-</div>
+{% endcaptureas %}
+{% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
 
 <!-- Import Modal -->
 <dialog id="import_modal" class="modal">
   <div class="modal-box">
-    <h3 class="font-bold text-lg">导入数据 (JSON)</h3>
+    <h3 class="font-bold text-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">file_upload</span>
+        导入数据 (JSON)
+    </h3>
     <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
     <form action="{% url 'administration:import_json' 'User' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <input type="file" name="json_file" class="file-input file-input-bordered w-full" accept=".json" required />
+        <input type="file" name="json_file" class="file-input file-input-bordered w-full mb-6" accept=".json" required />
         <div class="modal-action">
-            <button type="button" class="btn" onclick="import_modal.close()">取消</button>
+            <button type="button" class="btn btn-ghost" onclick="import_modal.close()">取消</button>
             <button type="submit" class="btn btn-primary">开始导入</button>
         </div>
     </form>
@@ -59,114 +188,4 @@
     <button>close</button>
   </form>
 </dialog>
-
-{% captureas card_content %}
-    <div class="p-0">
-        <div class="p-4 border-b border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 class="card-title text-base whitespace-nowrap">
-                <span class="material-symbols-outlined text-info">group</span>
-                用户列表
-            </h2>
-            
-            <div class="flex gap-2 w-full sm:w-auto">
-                <form action="." method="get" class="join w-full sm:w-auto">
-                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索用户..." class="input input-bordered input-sm join-item w-full sm:w-64" />
-                    <button type="submit" class="btn btn-sm btn-ghost join-item border border-base-300">
-                        <span class="material-symbols-outlined">search</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Bulk Actions Toolbar -->
-        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
-            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
-            <div class="flex gap-2">
-                <button onclick="submitBulkAction('active')" class="btn btn-sm btn-success gap-2 text-white">
-                    <span class="material-symbols-outlined text-[18px]">person_check</span> 启用
-                </button>
-                <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-warning gap-2">
-                    <span class="material-symbols-outlined text-[18px]">person_off</span> 禁用
-                </button>
-                <button onclick="submitBulkAction('set_staff')" class="btn btn-sm btn-info gap-2 text-white">
-                    <span class="material-symbols-outlined text-[18px]">admin_panel_settings</span> 设为管理
-                </button>
-                <button onclick="submitBulkAction('remove_staff')" class="btn btn-sm btn-ghost gap-2 hover:bg-base-content/10">
-                    <span class="material-symbols-outlined text-[18px]">person</span> 取消管理
-                </button>
-                <button onclick="submitBulkAction('export_json')" class="btn btn-sm btn-ghost gap-2 hover:bg-base-content/10">
-                    <span class="material-symbols-outlined text-[18px]">download</span> 导出
-                </button>
-                <div class="divider divider-horizontal mx-0 my-1"></div>
-                <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-ghost text-error hover:bg-error/10 gap-2">
-                    <span class="material-symbols-outlined text-[18px]">delete</span> 删除
-                </button>
-            </div>
-        </div>
-
-        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='user' %}">
-            {% csrf_token %}
-            <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
-                <table class="table table-zebra table-pin-rows w-full">
-                    <!-- Head -->
-                    <thead class="bg-base-200 text-base-content sticky top-0 z-10">
-                        <tr>
-                            <th class="w-10 bg-base-200">
-                                <label>
-                                    <input type="checkbox" class="checkbox checkbox-xs" onclick="toggleAll(this)" />
-                                </label>
-                            </th>
-                            <th class="w-[200px] bg-base-200">
-                                <a href="?sort=username&order={% if request.GET.sort == 'username' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    用户
-                                    {% if request.GET.sort == 'username' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="w-28 bg-base-200">称号</th>
-                            <th class="w-28 bg-base-200">角色</th>
-                            <th class="bg-base-200">状态</th>
-                            <th class="w-32 bg-base-200">
-                                <a href="?sort=date_joined&order={% if request.GET.sort == 'date_joined' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    加入时间
-                                    {% if request.GET.sort == 'date_joined' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="w-24 bg-base-200">操作</th>
-                        </tr>
-                    </thead>
-                    <!-- Body (HTMX Target) -->
-                    <tbody id="user-list-body">
-                        {% include "administration/partials/user_list_rows.html" %}
-                    </tbody>
-                </table>
-            </div>
-        </form>
-        
-        <!-- Pagination -->
-        <div class="p-4 border-t border-base-200 flex justify-center">
-            {% if is_paginated %}
-            <div class="join">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-sm">«</a>
-                {% else %}
-                <button class="join-item btn btn-sm btn-disabled">«</button>
-                {% endif %}
-                
-                <button class="join-item btn btn-sm">第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页</button>
-                
-                {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-sm">»</a>
-                {% else %}
-                <button class="join-item btn btn-sm btn-disabled">»</button>
-                {% endif %}
-            </div>
-            {% endif %}
-        </div>
-    </div>
-{% endcaptureas %}
-{% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
 {% endblock %}

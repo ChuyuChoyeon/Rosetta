@@ -12,6 +12,7 @@ document.addEventListener('alpine:init', () => {
         particles: [],
         
         init() {
+            if (!this.$refs.canvas) return;
             this.ctx = this.$refs.canvas.getContext('2d');
             this.resize();
             window.addEventListener('resize', () => this.resize());
@@ -32,6 +33,7 @@ document.addEventListener('alpine:init', () => {
         },
         
         resize() {
+            if (!this.$refs.canvas) return;
             this.width = window.innerWidth;
             this.height = window.innerHeight;
             this.$refs.canvas.width = this.width;
@@ -39,6 +41,7 @@ document.addEventListener('alpine:init', () => {
         },
         
         animate() {
+            if (!this.ctx || !this.$refs.canvas) return;
             this.ctx.clearRect(0, 0, this.width, this.height);
             
             // Get primary color from CSS variable or default to indigo

@@ -1,0 +1,40 @@
+{% extends "administration/base.html" %}
+{% load capture_tags %}
+
+{% block title %}查看日志: {{ filename }}{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li>日志与审计</li>
+        <li><a href="{% url 'administration:logfile_list' %}">系统日志</a></li>
+        <li>{{ filename }}</li>
+    </ul>
+</div>
+
+<div class="flex justify-between items-center mb-6">
+    <h1 class="text-2xl font-bold flex items-center gap-2">
+        <span class="material-symbols-outlined">description</span>
+        {{ filename }}
+    </h1>
+    <div class="flex gap-2">
+        <a href="{% url 'administration:logfile_download' filename %}" class="btn btn-sm btn-outline gap-2">
+            <span class="material-symbols-outlined">download</span> 下载
+        </a>
+        <a href="{% url 'administration:logfile_list' %}" class="btn btn-sm btn-ghost">返回列表</a>
+    </div>
+</div>
+
+<div class="mockup-code bg-[#1e1e1e] text-gray-300 w-full overflow-x-auto">
+    <pre class="px-4 py-2 text-xs leading-5 font-mono"><code>{{ content }}</code></pre>
+</div>
+
+<script>
+    // 自动滚动到底部
+    window.onload = function() {
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+</script>
+
+{% endblock %}

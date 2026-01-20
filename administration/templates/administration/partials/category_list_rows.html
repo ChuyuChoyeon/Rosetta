@@ -1,43 +1,52 @@
 {% for category in categories %}
-<tr class="hover">
-    <th>
+<tr class="hover:bg-base-200/50 transition-colors duration-200 group">
+    <th class="pl-4">
         <label>
-            <input type="checkbox" name="selected_ids" value="{{ category.pk }}" class="checkbox checkbox-xs row-checkbox" onchange="updateBulkToolbar()" />
+            <input type="checkbox" name="selected_ids" value="{{ category.pk }}" class="checkbox checkbox-xs rounded-sm row-checkbox" onchange="updateBulkToolbar()" />
         </label>
     </th>
     <th class="font-mono text-xs opacity-50">{{ category.id }}</th>
     <td>
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
             {% if category.icon %}
-                <span class="material-symbols-outlined text-{{ category.color|default:'base-content' }}">{{ category.icon }}</span>
+                <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center text-{{ category.color|default:'base-content' }}">
+                    <span class="material-symbols-outlined text-lg">{{ category.icon }}</span>
+                </div>
+            {% else %}
+                <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center text-base-content/20">
+                    <span class="material-symbols-outlined text-lg">category</span>
+                </div>
             {% endif %}
-            <span class="font-bold text-{{ category.color|default:'base-content' }}">{{ category.name }}</span>
+            <span class="font-bold text-{{ category.color|default:'base-content' }} group-hover:text-primary transition-colors">{{ category.name }}</span>
         </div>
     </td>
-    <td class="font-mono text-sm opacity-70">{{ category.slug }}</td>
-    <td>
-        <span class="badge badge-ghost badge-sm">{{ category.post_count }} 文章</span>
+    <td class="font-mono text-xs text-base-content/60">{{ category.slug }}</td>
+    <td class="text-center">
+        <span class="badge badge-sm badge-outline bg-base-100 font-mono">{{ category.post_count }}</span>
     </td>
-    <td>
+    <td class="text-center">
         <div class="join">
-            <a href="{% url 'post_by_category' category.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip" data-tip="查看">
+            <a href="{% url 'post_by_category' category.slug %}" target="_blank" class="btn btn-ghost btn-xs btn-square join-item text-base-content/60 hover:text-primary hover:bg-primary/10" title="查看">
                 <span class="material-symbols-outlined text-base">visibility</span>
             </a>
-            <a href="{% url 'administration:category_edit' category.pk %}" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+            <a href="{% url 'administration:category_edit' category.pk %}" class="btn btn-ghost btn-xs btn-square join-item text-base-content/60 hover:text-primary hover:bg-primary/10" title="编辑">
                 <span class="material-symbols-outlined text-base">edit</span>
             </a>
-            <a href="{% url 'administration:category_delete' category.pk %}" class="btn btn-ghost btn-xs join-item text-error tooltip" data-tip="删除">
+            <button onclick="confirmDelete('{% url 'administration:category_delete' category.pk %}', '确定要删除分类《{{ category.name|escapejs }}》吗？')" class="btn btn-ghost btn-xs btn-square join-item text-error hover:bg-error/10" title="删除">
                 <span class="material-symbols-outlined text-base">delete</span>
-            </a>
+            </button>
         </div>
     </td>
 </tr>
 {% empty %}
 <tr>
-    <td colspan="6" class="text-center py-8 text-base-content/50">
-        <div class="flex flex-col items-center gap-2">
-            <span class="material-symbols-outlined text-4xl opacity-20">category</span>
-            <span>暂无分类</span>
+    <td colspan="6">
+        <div class="flex flex-col items-center justify-center py-12 text-base-content/40">
+            <div class="w-16 h-16 rounded-full bg-base-200/50 flex items-center justify-center mb-4">
+                <span class="material-symbols-outlined text-3xl opacity-50">category</span>
+            </div>
+            <h3 class="font-bold text-lg text-base-content/70">暂无分类</h3>
+            <p class="text-sm opacity-50 mt-1">请添加一个新的文章分类</p>
         </div>
     </td>
 </tr>

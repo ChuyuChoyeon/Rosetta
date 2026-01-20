@@ -45,7 +45,7 @@
     </td>
     <td class="text-sm font-mono opacity-50 group-hover:opacity-100 transition-opacity">{{ comment.created_at|date:"Y-m-d H:i" }}</td>
     <td class="rounded-r-2xl">
-        <div class="join opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="join">
             <button type="button" onclick="openCommentModal('{{ comment.pk }}', '{{ comment.content|escapejs }}', '{{ comment.active|yesno:'true,false' }}')" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
                 <span class="material-symbols-outlined text-base">edit</span>
             </button>

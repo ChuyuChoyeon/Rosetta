@@ -7,6 +7,11 @@ from .models import Post, Subscriber
 
 @receiver(post_save, sender=Post)
 def send_notification_to_subscribers(sender, instance, created, **kwargs):
+    """
+    发送新文章通知给订阅者
+    
+    当文章发布 (status='published') 且尚未发送过通知时触发。
+    """
     if instance.status == "published" and not instance.notification_sent:
         subscribers = Subscriber.objects.filter(is_active=True)
         if not subscribers.exists():
@@ -14,7 +19,7 @@ def send_notification_to_subscribers(sender, instance, created, **kwargs):
 
         subject = f"【Rosetta Blog】新文章发布: {instance.title}"
 
-        # Build absolute URL
+        # 构建绝对 URL (Build absolute URL)
         protocol = getattr(settings, "META_SITE_PROTOCOL", "http")
         domain = getattr(settings, "META_SITE_DOMAIN", "localhost:8000")
         post_url = f"{protocol}://{domain}/post/{instance.slug}/"
@@ -52,6 +57,6 @@ Rosetta Blog Team
             except Exception as e:
                 print(f"Failed to send email to {s.email}: {e}")
 
-        # Mark as sent
+        # 标记为已发送 (Mark as sent)
         instance.notification_sent = True
         instance.save(update_fields=["notification_sent"])

@@ -77,6 +77,12 @@ class User(AbstractUser):
         related_name="users", 
         verbose_name="称号"
     )
+    
+    is_banned = models.BooleanField(
+        "是否封禁",
+        default=False,
+        help_text="封禁用户将禁止其登录系统",
+    )
 
     class Meta:
         verbose_name = "用户"

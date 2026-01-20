@@ -90,7 +90,7 @@
     <td class="text-sm font-mono opacity-70 group-hover:opacity-100 transition-opacity">{{ post.created_at|date:"Y-m-d" }}</td>
     <td class="text-sm font-mono opacity-70 group-hover:opacity-100 transition-opacity">{{ post.views }}</td>
     <td class="rounded-r-2xl">
-        <div class="join opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div class="join">
             <a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="查看">
                 <span class="material-symbols-outlined text-base">visibility</span>
             </a>

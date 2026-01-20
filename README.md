@@ -30,11 +30,12 @@ Rosetta 是基于 **Django 6.0**、**Tailwind CSS** 和 **Alpine.js** 开发的�
 *   **数据库**: SQLite (默认) / PostgreSQL
 *   **API**: Django REST Framework (DRF)
 *   **异步**: Celery (可选)
+*   **包管理**: uv (推荐)
 
 ## 快速开始
 
 ### 1. 环境准备
-需安装 Python 3.10+ 和 Node.js。
+需安装 Python 3.10+ 和 Node.js。推荐使用 `uv` 进行包管理。
 
 ### 2. 克隆项目
 ```bash
@@ -42,17 +43,26 @@ git clone https://github.com/chuyuchoyeon/rosetta.git
 cd rosetta
 ```
 
-### 3. 安装依赖
+### 3. 安装依赖 (使用 uv)
+
+我们推荐使用 [uv](https://github.com/astral-sh/uv) 来管理 Python 依赖，速度极快。
+
 ```bash
-# 创建虚拟环境
-python -m venv .venv
-# Windows: .venv\Scripts\activate
-# Linux/macOS: source .venv/bin/activate
+# 安装 uv (如果尚未安装)
+pip install uv
 
-# 安装 Python 依赖
-pip install -r requirements.txt
+# 创建虚拟环境并安装依赖
+uv sync
 
-# 安装前端依赖
+# 或者手动方式:
+# uv venv
+# source .venv/bin/activate  # Linux/macOS
+# .venv\Scripts\activate     # Windows
+# uv pip install -r requirements.txt
+```
+
+**前端依赖:**
+```bash
 python manage.py tailwind install
 ```
 
@@ -82,28 +92,15 @@ python manage.py runserver
 python manage.py tailwind start
 ```
 
-访问: `http://127.0.0.1:8000/`
+访问: http://127.0.0.1:8000/
 
 ## 部署指南
-
-### 生产环境
-1.  **配置**: 复制 `.env.example` 为 `.env`，设置 `DEBUG=False` 及 `SECRET_KEY`。
-2.  **静态资源**: `python manage.py collectstatic`。
-3.  **服务**: 使用 Gunicorn/Daphne 配合 Nginx 反向代理。
-
-### Docker
-```bash
-docker-compose up -d --build
-```
+生产环境配置请参考 `.env.example`，设置 `DEBUG=False` 及 `SECRET_KEY`。
 
 ## 测试
-
 ```bash
 # 运行全部测试
 python -m pytest
-
-# 生成覆盖率报告
-python -m pytest --cov=.
 ```
 
 ## 许可证

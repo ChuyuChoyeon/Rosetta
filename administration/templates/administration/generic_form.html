@@ -13,25 +13,44 @@
     </div>
 
     {% captureas card_content %}
-    <div class="p-6">
-        <h2 class="card-title mb-6 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">edit_note</span>
-            {{ title|default:"编辑内容" }}
-        </h2>
+    <div class="p-0">
+        <div class="p-6 border-b border-base-200 bg-base-100/50 backdrop-blur-sm">
+            <h2 class="card-title text-xl font-bold flex items-center gap-2">
+                <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                    <span class="material-symbols-outlined">edit_note</span>
+                </div>
+                {{ title|default:"编辑内容" }}
+            </h2>
+        </div>
         
-        <form method="post" class="space-y-4" enctype="multipart/form-data">
+        <form method="post" class="p-6 space-y-6" enctype="multipart/form-data">
             {% csrf_token %}
             
+            {% if form.non_field_errors %}
+            <div class="alert alert-error mb-4 shadow-sm">
+                <span class="material-symbols-outlined">error</span>
+                <div class="flex flex-col">
+                    <span class="font-bold">表单错误</span>
+                    {% for error in form.non_field_errors %}
+                    <span class="text-sm">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
             {% for field in form %}
-            <div class="form-control w-full">
+            <div class="form-control w-full group">
                 {% if field.field.widget.input_type == 'checkbox' %}
-                <label class="label cursor-pointer justify-start gap-3">
-                    <span class="label-text font-medium">{{ field.label }}</span>
+                <label class="label cursor-pointer justify-start gap-3 p-3 border border-base-200 rounded-lg hover:border-primary/50 hover:bg-base-200/50 transition-all">
                     {{ field }}
+                    <span class="label-text font-medium">{{ field.label }}</span>
                 </label>
                 {% else %}
                 <label class="label">
-                    <span class="label-text font-medium">{{ field.label }}</span>
+                    <span class="label-text font-medium flex items-center gap-1">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="text-error">*</span>{% endif %}
+                    </span>
                 </label>
                 {{ field }}
                 {% endif %}
@@ -52,11 +71,11 @@
             </div>
             {% endfor %}
             
-            <div class="card-actions justify-end mt-8 pt-4 border-t border-base-200">
-                <a href="javascript:history.back()" class="btn btn-ghost">取消</a>
-                <button type="submit" name="_addanother" class="btn btn-ghost">保存并新增</button>
-                <button type="submit" name="_continue" class="btn btn-ghost">保存并继续编辑</button>
-                <button type="submit" class="btn btn-primary gap-2">
+            <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-base-200">
+                <a href="javascript:history.back()" class="btn btn-ghost hover:bg-base-200">取消</a>
+                <button type="submit" name="_addanother" class="btn btn-ghost hover:bg-base-200">保存并新增</button>
+                <button type="submit" name="_continue" class="btn btn-ghost hover:bg-base-200">保存并继续编辑</button>
+                <button type="submit" class="btn btn-primary gap-2 shadow-lg shadow-primary/20">
                     <span class="material-symbols-outlined">save</span>
                     保存
                 </button>

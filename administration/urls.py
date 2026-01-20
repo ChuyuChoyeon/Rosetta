@@ -124,6 +124,24 @@ urlpatterns = [
     path("titles/create/", views.UserTitleCreateView.as_view(), name="usertitle_create"),
     path("titles/<int:pk>/edit/", views.UserTitleUpdateView.as_view(), name="usertitle_edit"),
     path("titles/<int:pk>/delete/", views.UserTitleDeleteView.as_view(), name="usertitle_delete"),
+
+    # 用户组管理 (Groups)
+    path("groups/", views.GroupListView.as_view(), name="group_list"),
+    path("groups/create/", views.GroupCreateView.as_view(), name="group_create"),
+    path("groups/<int:pk>/edit/", views.GroupUpdateView.as_view(), name="group_edit"),
+    path("groups/<int:pk>/delete/", views.GroupDeleteView.as_view(), name="group_delete"),
+
+    # --- Logs & Audit (日志与审计) ---
+    # 操作日志 (Admin LogEntry)
+    path("logs/audit/", views.LogEntryListView.as_view(), name="logentry_list"),
+    path("logs/audit/<int:pk>/delete/", views.LogEntryDeleteView.as_view(), name="logentry_delete"),
+    path("logs/audit/export/", views.LogEntryExportView.as_view(), name="logentry_export"),
+    
+    # 系统日志 (File Logs)
+    path("logs/system/", views.LogFileListView.as_view(), name="logfile_list"),
+    path("logs/system/<str:filename>/", views.LogFileView.as_view(), name="logfile_detail"),
+    path("logs/system/<str:filename>/download/", views.LogFileDownloadView.as_view(), name="logfile_download"),
+    path("logs/system/<str:filename>/delete/", views.LogFileDeleteView.as_view(), name="logfile_delete"),
     
     # --- System Tools (系统工具) ---
     # 系统设置 (Settings - Placeholder)

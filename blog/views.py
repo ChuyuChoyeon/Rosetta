@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.views.generic import ListView, DetailView
 from django.db.models import Q, Count
 from django.contrib import messages
+from django.http import HttpResponse
 from .models import Post, Category, Tag, Comment, PostViewHistory, Subscriber
 from core.models import Page
 from .forms import CommentForm, SubscriberForm
@@ -18,15 +19,16 @@ from .schemas import CommentCreateSchema
 class SidebarContextMixin:
     """
     侧边栏数据混入类 (Mixin)
+    
     为视图提供侧边栏所需的上下文数据，包括：
-    - 标签云 (Top 30)
+    - 热门标签 (Top 30)
     - 最新评论 (Top 5)
     - 热门文章 (Top 5)
     - 热门分类 (Top 10)
     """
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Sidebar Data
+        # 获取侧边栏数据
         context["sidebar_tags"] = Tag.objects.filter(is_active=True).annotate(count=Count('posts')).order_by('-count')[:30]
         context["sidebar_comments"] = Comment.objects.filter(active=True).select_related('user', 'post').order_by('-created_at')[:5]
         context["sidebar_popular_posts"] = Post.objects.filter(status='published').order_by('-views')[:5]
@@ -37,6 +39,7 @@ class SidebarContextMixin:
 class HomeView(SidebarContextMixin, ListView):
     """
     博客首页视图
+    
     展示最新发布的文章列表，支持分页。
     """
 
@@ -51,9 +54,23 @@ class HomeView(SidebarContextMixin, ListView):
     )
 
 
+class ArchiveView(SidebarContextMixin, ListView):
+    """
+    文章归档视图
+    
+    按时间轴展示所有已发布文章。
+    """
+    model = Post
+    template_name = "blog/archive.html"
+    context_object_name = "posts"
+    queryset = Post.objects.filter(status="published").order_by("-created_at")
+    paginate_by = 100  # 归档页显示更多文章，便于快速浏览
+
+
 class PostDetailView(DetailView):
     """
     文章详情视图
+    
     展示文章完整内容、评论区，并处理密码保护、阅读计数和评论提交。
     """
 
@@ -64,12 +81,14 @@ class PostDetailView(DetailView):
     def get_context_data(self, **kwargs):
         """添加评论、评论表单和 Meta 信息到上下文"""
         context = super().get_context_data(**kwargs)
-        # 只获取顶级评论，回复通过 template 中的 comment.replies.all 访问
-        # Prefetch replies to avoid N+1 problem in template
-        from django.db.models import Prefetch
+        
+        # 预加载回复以避免模板中的 N+1 查询问题
+        # 注意：只获取顶级评论，子回复通过 prefetch_related 加载
+        from django.db.models import Prefetch# 预加载回复
         replies_prefetch = Prefetch(
             'replies',
             queryset=Comment.objects.filter(active=True).select_related('user'),
+            to_attr='active_replies_list'
         )
         context["comments"] = self.object.comments.filter(
             active=True, parent__isnull=True
@@ -77,7 +96,7 @@ class PostDetailView(DetailView):
         
         context["comment_form"] = CommentForm()
 
-        # Meta 数据
+        # 生成 SEO Meta 数据
         context["meta"] = self.get_meta_data()
 
         return context
@@ -99,10 +118,11 @@ class PostDetailView(DetailView):
 
     def get(self, request, *args, **kwargs):
         """处理 GET 请求：文章展示、密码验证逻辑、阅读计数"""
+        from django.db.models import F
         self.object = self.get_object()
 
         # 密码保护检查
-        # 作者和超级用户可直接查看
+        # 作者和超级用户可直接查看，其他用户需验证密码
         if self.object.password:
             is_author = request.user == self.object.author
             is_superuser = request.user.is_superuser
@@ -113,9 +133,10 @@ class PostDetailView(DetailView):
                         request, "blog/password_required.html", {"post": self.object}
                     )
 
-        # 增加阅读量
-        self.object.views += 1
-        self.object.save()
+        # 增加阅读量 (使用原子更新，避免竞态条件)
+        # update_fields 避免副作用（如更新 updated_at）
+        Post.objects.filter(pk=self.object.pk).update(views=F('views') + 1)
+        self.object.refresh_from_db(fields=['views'])
 
         # 记录已登录用户的阅读历史
         if request.user.is_authenticated:
@@ -135,7 +156,7 @@ class PostDetailView(DetailView):
         # 处理密码提交
         if "post_password" in request.POST:
             password = request.POST.get("post_password")
-            if password == self.object.password:
+            if self.object.check_password(password):
                 request.session[f"post_unlocked_{self.object.pk}"] = True
                 messages.success(request, "密码验证通过")
                 return redirect("post_detail", slug=self.object.slug)
@@ -188,6 +209,7 @@ class PostDetailView(DetailView):
 class CategoryListView(ListView):
     """
     分类列表视图
+    
     展示所有文章分类。
     """
 
@@ -200,6 +222,7 @@ class CategoryListView(ListView):
 class TagListView(ListView):
     """
     标签列表视图
+    
     展示所有标签，支持按首字母分组或标签云展示。
     """
     model = Tag
@@ -213,6 +236,7 @@ class TagListView(ListView):
 class PostByCategoryView(SidebarContextMixin, ListView):
     """
     分类文章列表视图
+    
     展示特定分类下的所有已发布文章。
     """
 
@@ -241,6 +265,7 @@ class PostByCategoryView(SidebarContextMixin, ListView):
 class PostByTagView(SidebarContextMixin, ListView):
     """
     标签文章列表视图
+    
     展示特定标签下的所有已发布文章。
     """
     model = Post
@@ -266,6 +291,7 @@ class PostByTagView(SidebarContextMixin, ListView):
 class SearchView(SidebarContextMixin, ListView):
     """
     搜索结果视图
+    
     支持全文搜索（如果安装了 django-watson）或简单的标题/内容匹配。
     """
 
@@ -283,7 +309,7 @@ class SearchView(SidebarContextMixin, ListView):
 
                 return watson.filter(Post.objects.filter(status="published"), query)
             except ImportError:
-                # 降级方案：如果未安装/配置 Watson
+                # 降级方案：如果未安装/配置 Watson，则使用基础的包含查询
                 return (
                     Post.objects.filter(
                         Q(title__icontains=query) | Q(content__icontains=query),
@@ -295,22 +321,9 @@ class SearchView(SidebarContextMixin, ListView):
         return Post.objects.none()
 
     def get_context_data(self, **kwargs):
-        """添加查询关键词到上下文"""
         context = super().get_context_data(**kwargs)
         context["query"] = self.request.GET.get("q")
         return context
-
-
-class PostList(SidebarContextMixin, ListView):
-    """
-    文章列表视图 (别名)
-    展示所有已发布的文章，支持分页。
-    """
-    model = Post
-    template_name = "blog/post_list.html"
-    context_object_name = "posts"
-    paginate_by = 9
-    queryset = Post.objects.filter(status="published")
 
 
 @login_required
@@ -318,54 +331,57 @@ class PostList(SidebarContextMixin, ListView):
 def delete_comment(request, pk):
     """
     删除评论视图
-    仅允许评论作者或管理员删除评论。
+    
+    仅限评论作者或管理员删除评论。
+    支持 HTMX 请求，删除后在前端移除评论元素。
     """
     comment = get_object_or_404(Comment, pk=pk)
-    if request.user == comment.user or request.user.is_staff:
-        post_slug = comment.post.slug
-        comment.delete()
-        messages.success(request, "评论已删除")
-
-        # Redirect back to where the request came from if possible
-        referer = request.META.get("HTTP_REFERER")
-        if referer and "profile" in referer:
-            return redirect("users:profile")
-        return redirect("post_detail", slug=post_slug)
-    else:
+    
+    # 权限检查
+    if request.user != comment.user and not request.user.is_staff:
         messages.error(request, "您没有权限删除此评论")
-        return redirect("post_detail", slug=comment.post.slug)
+        return redirect(comment.post.get_absolute_url())
+
+    post_url = comment.post.get_absolute_url()
+    comment.delete()
+    
+    # HTMX 支持：返回空响应或触发前端事件
+    if request.headers.get("HX-Request"):
+        return HttpResponse("")
+        
+    messages.success(request, "评论已删除")
+    return redirect(post_url)
 
 
-@require_POST
 def subscribe_view(request):
     """
     邮件订阅视图
-    处理订阅表单提交，支持 HTMX 异步请求。
+    
+    处理侧边栏或底部的邮件订阅请求。
     """
-    form = SubscriberForm(request.POST)
-    if form.is_valid():
-        form.save()
-        if request.headers.get("HX-Request"):
-            return render(request, "blog/partials/subscribe_success.html")
-        messages.success(request, "订阅成功！")
-        return redirect(request.META.get("HTTP_REFERER", "/"))
-
-    if request.headers.get("HX-Request"):
-        return render(
-            request, "blog/partials/subscribe_form.html", {"subscribe_form": form}
-        )
-
-    messages.error(request, "订阅失败，请检查邮箱格式或是否已订阅。")
+    if request.method == "POST":
+        form = SubscriberForm(request.POST)
+        if form.is_valid():
+            subscriber = form.save(commit=False)
+            # 检查是否已存在
+            if not Subscriber.objects.filter(email=subscriber.email).exists():
+                subscriber.save()
+                messages.success(request, "订阅成功！感谢您的关注。")
+            else:
+                messages.info(request, "您已经订阅过了。")
+        else:
+            messages.error(request, "订阅失败，请输入有效的邮箱地址。")
+            
     return redirect(request.META.get("HTTP_REFERER", "/"))
 
 
 def unsubscribe_view(request, token):
     """
-    退订视图
-    通过 UUID token 验证并取消订阅。
+    取消订阅视图
+    
+    通过邮件中的 token 链接取消订阅。
     """
     subscriber = get_object_or_404(Subscriber, token=token)
-    subscriber.is_active = False
-    subscriber.save()
-    messages.success(request, "退订成功")
+    subscriber.delete()
+    messages.success(request, "您已成功取消订阅。")
     return redirect("home")

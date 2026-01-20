@@ -129,11 +129,17 @@
             <!-- Comment Status -->
             <div class="rounded-2xl bg-base-100 border border-base-content/5 p-6 flex-1 relative overflow-hidden">
                 <h3 class="font-bold text-sm mb-2 opacity-70">评论分布</h3>
-                <div class="flex items-center">
-                    <div id="commentDonut" class="flex-1"></div>
-                    <div class="flex flex-col gap-2 text-xs">
-                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-success"></div> 已发布</div>
-                        <div class="flex items-center gap-1"><div class="w-2 h-2 rounded-full bg-warning"></div> 待审核</div>
+                <div class="flex items-center justify-between">
+                    <div id="commentDonut" class="flex-1 min-w-0"></div>
+                    <div class="flex flex-col gap-2 text-xs shrink-0 whitespace-nowrap pl-2">
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-2 h-2 rounded-full bg-success"></div>
+                            <span>已发布</span>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <div class="w-2 h-2 rounded-full bg-warning"></div>
+                            <span>待审核</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -254,6 +260,10 @@
                     <div class="flex justify-between items-center">
                         <span class="opacity-70">Server Time</span>
                         <span class="font-mono">{{ system_info.server_time|date:"Y-m-d H:i:s" }}</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="opacity-70">Running Time</span>
+                        <span class="font-mono text-success">{{ system_info.uptime }}</span>
                     </div>
                 </div>
             </div>

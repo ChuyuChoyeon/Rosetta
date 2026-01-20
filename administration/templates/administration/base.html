@@ -220,7 +220,7 @@
                 <li>
                     <a href="{% url 'administration:friendlink_list' %}" class="{% if 'friendlink' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
                         <span class="material-symbols-outlined {% if 'friendlink' in request.resolver_match.url_name %}text-primary-content{% else %}text-accent{% endif %}">link</span>
-                        友链
+                        友情链接
                     </a>
                 </li>
                 <li>
@@ -243,6 +243,27 @@
                         称号
                     </a>
                 </li>
+                <li>
+                    <a href="{% url 'administration:group_list' %}" class="{% if 'group' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
+                        <span class="material-symbols-outlined {% if 'group' in request.resolver_match.url_name %}text-primary-content{% else %}text-info{% endif %}">groups</span>
+                        用户组
+                    </a>
+                </li>
+
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4">日志与审计</li>
+                <li>
+                    <a href="{% url 'administration:logentry_list' %}" class="{% if 'logentry' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
+                        <span class="material-symbols-outlined {% if 'logentry' in request.resolver_match.url_name %}text-primary-content{% else %}text-warning{% endif %}">history</span>
+                        操作日志
+                    </a>
+                </li>
+                <li>
+                    <a href="{% url 'administration:logfile_list' %}" class="{% if 'logfile' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
+                        <span class="material-symbols-outlined {% if 'logfile' in request.resolver_match.url_name %}text-primary-content{% else %}text-warning{% endif %}">description</span>
+                        系统日志
+                    </a>
+                </li>
+
                 <li>
                     <a href="{% url 'administration:settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
                         <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'settings' %}text-primary-content{% else %}text-info{% endif %}">settings</span>

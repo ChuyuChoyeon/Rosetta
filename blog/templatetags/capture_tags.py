@@ -4,6 +4,16 @@ register = template.Library()
 
 @register.tag(name="captureas")
 def do_captureas(parser, token):
+    """
+    捕获模板块内容并赋值给变量
+    
+    用法:
+    {% captureas my_var %}
+        Some content...
+    {% endcaptureas %}
+    
+    后续可使用 {{ my_var }} 输出捕获的内容。
+    """
     try:
         tag_name, args = token.contents.split(None, 1)
     except ValueError:

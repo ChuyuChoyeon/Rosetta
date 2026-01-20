@@ -7,6 +7,7 @@ from .views import (
     PostByCategoryView,
     PostByTagView,
     SearchView,
+    ArchiveView,
     delete_comment,
     subscribe_view,
     unsubscribe_view,
@@ -30,8 +31,14 @@ urlpatterns = [
     # 搜索
     path("search/", SearchView.as_view(), name="search"),
     
-    # 文章列表别名
-    path("articles/", HomeView.as_view(), name="post_list"),
+    # 归档
+    path("archives/", ArchiveView.as_view(), name="archive"),
+
+    # 全部文章
+    path("posts/", HomeView.as_view(template_name="blog/all_posts.html", paginate_by=12), name="post_list"),
+
+    # 文章列表别名 (Keep for backward compatibility)
+    path("articles/", HomeView.as_view(), name="article_list_alias"),
     
     # 评论删除
     path("comment/<int:pk>/delete/", delete_comment, name="delete_comment"),

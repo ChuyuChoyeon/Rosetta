@@ -1,21 +1,56 @@
 {% extends 'base.html' %}
-{% load markdown_extras capture_tags %}
+{% load markdown_extras capture_tags static %}
+
+{% block extra_css %}
+<!-- 代码高亮样式 (Code Highlighting Styles) -->
+<!-- 动态加载选定的 Pygments 风格 (Dynamically load selected Pygments style) -->
+<link href="{% static 'theme/css/pygments/' %}{{ config.CODE_HIGHLIGHT_STYLE|default:'default' }}.css" rel="stylesheet">
+<style>
+    /* 优化代码块样式 (Enhance Code Block Styles) */
+    .codehilite {
+        /* background: #f8f8f8;  移除硬编码背景，使用主题自带背景 */
+        border-radius: 0.75rem; /* rounded-xl */
+        margin-bottom: 1.5rem;
+        overflow-x: auto;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.875rem; /* text-sm */
+        line-height: 1.5;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    /* 强制重置 pre 的背景，防止与 Pygments 冲突 */
+    .codehilite pre {
+        margin: 0;
+        padding: 1.25rem;
+        background: transparent !important; 
+    }
+    
+    /* 深色模式适配 (Dark Mode Adaptation) - 仅当未选择深色主题时微调 */
+    /* 由于现在支持动态主题，这里不再强制覆盖背景，而是让 CSS 文件决定 */
+    [data-theme='dark'] .codehilite {
+        border-color: rgba(255, 255, 255, 0.1);
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-        <!-- Main Content -->
+        <!-- 主要内容区域 (Main Content) -->
         <article class="lg:col-span-8 prose prose-lg prose-slate max-w-none">
-            <!-- Header -->
+            <!-- 文章头部 (Article Header) -->
             <header class="not-prose mb-12 text-center">
                 {% if post.category %}
+                <!-- 分类标签 (Category Tag) -->
                 <a href="{% url 'post_by_category' post.category.slug %}" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20 transition-colors mb-6 no-underline">
                     {{ post.category.name }}
                 </a>
                 {% endif %}
                 
+                <!-- 文章标题 (Article Title) -->
                 <h1 class="text-4xl md:text-5xl font-bold font-heading mb-6 leading-tight text-base-content">{{ post.title }}</h1>
                 
+                <!-- 文章元数据 (Article Metadata: Author, Date, Views) -->
                 <div class="flex flex-wrap items-center justify-center gap-6 text-sm text-base-content/60">
                     <div class="flex items-center gap-2">
                         <div class="avatar">
@@ -35,6 +70,7 @@
                     </div>
                     
                     {% if user.is_staff or user == post.author %}
+                    <!-- 编辑按钮 (Edit Button - Only for Staff/Author) -->
                     <a href="{% url 'administration:post_edit' post.pk %}" class="flex items-center gap-1 text-primary hover:text-primary-focus transition-colors">
                         <span class="material-symbols-outlined text-[18px]">edit</span>
                         编辑
@@ -43,14 +79,14 @@
                 </div>
             </header>
 
-            <!-- Cover Image -->
+            <!-- 封面图 (Cover Image) -->
             {% if post.cover_image %}
             <div class="not-prose mb-12 relative group cursor-zoom-in rounded-3xl overflow-hidden shadow-2xl shadow-primary/5" onclick="lightbox.showModal()">
                 <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-auto object-cover max-h-[600px] transition-transform duration-700 group-hover:scale-105" />
                 <div class="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             </div>
             
-            <!-- Lightbox Modal -->
+            <!-- 灯箱模态框 (Lightbox Modal) -->
             <dialog id="lightbox" class="modal bg-black/90 backdrop-blur-md p-0">
                 <div class="modal-box max-w-screen-2xl max-h-screen bg-transparent shadow-none p-4 relative flex items-center justify-center h-full w-full">
                     <form method="dialog">
@@ -66,13 +102,13 @@
             </dialog>
             {% endif %}
             
-            <!-- Content -->
+            <!-- 正文内容 (Content Body) -->
             <div class="bg-base-100 p-8 md:p-12 rounded-3xl shadow-sm border border-base-content/5 relative group/article overflow-hidden">
                 {% include 'components/inspira/border_beam.html' with duration='12' rx='24px' %}
                 {{ post.content|markdown|safe }}
             </div>
             
-            <!-- Tags & Share -->
+            <!-- 标签与分享 (Tags & Share) -->
             <div class="not-prose mt-12 flex flex-col md:flex-row justify-between items-center gap-6 border-t border-base-content/10 pt-8">
                 <div class="flex flex-wrap gap-2">
                     {% for tag in post.tags.all %}
@@ -99,14 +135,14 @@
                 </div>
             </div>
 
-            <!-- Comments Section -->
+            <!-- 评论区 (Comments Section) -->
             <div class="not-prose mt-16" id="comments">
                 <div class="flex items-center gap-4 mb-8">
                     <h3 class="text-2xl font-bold font-heading">评论</h3>
                     <div class="badge badge-neutral">{{ comments.count }}</div>
                 </div>
                 
-                <!-- Comment Form -->
+                <!-- 评论表单 (Comment Form) -->
                 <div class="bg-base-100 p-6 md:p-8 rounded-2xl border border-base-content/10 shadow-sm mb-12" id="comment-form">
                     <h3 class="font-bold text-lg mb-4">发表你的观点</h3>
                     {% if user.is_authenticated %}
@@ -114,14 +150,18 @@
                         {% csrf_token %}
                         <input type="hidden" name="parent_id" id="parent_id">
                         
-                        <!-- Reply Indicator -->
-                        <div id="reply-indicator" class="hidden alert alert-info py-2 shadow-sm rounded-lg">
-                            <div class="flex justify-between items-center w-full">
+                        <!-- 回复指示器 (Reply Indicator) -->
+                        <div id="reply-indicator" class="hidden animate-in fade-in slide-in-from-top-2 duration-300 mb-4">
+                            <div class="flex justify-between items-center w-full bg-base-200/50 backdrop-blur-sm border-l-4 border-primary rounded-r-lg p-3 shadow-sm">
                                 <span class="text-sm flex items-center gap-2">
-                                    <span class="material-symbols-outlined text-[18px]">reply</span>
-                                    正在回复 <span class="font-bold" id="reply-to-user"></span>
+                                    <span class="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                                        <span class="material-symbols-outlined text-[16px]">reply</span>
+                                    </span>
+                                    <span>
+                                        正在回复 <span class="font-bold text-primary" id="reply-to-user"></span>
+                                    </span>
                                 </span>
-                                <button type="button" class="btn btn-ghost btn-xs btn-circle" onclick="cancelReply()">
+                                <button type="button" class="btn btn-ghost btn-sm btn-circle hover:bg-base-300" onclick="cancelReply()" title="取消回复">
                                     <span class="material-symbols-outlined text-[18px]">close</span>
                                 </button>
                             </div>
@@ -146,12 +186,12 @@
                     {% endif %}
                 </div>
 
-                <!-- Comment List -->
+                <!-- 评论列表 (Comment List) -->
                 <div class="space-y-6">
                     {% for comment in comments %}
                     <div class="group/comment relative" id="comment-{{ comment.id }}">
                         <div class="flex gap-4">
-                            <!-- Avatar Column -->
+                            <!-- 头像列 (Avatar Column) -->
                             <div class="flex flex-col items-center shrink-0">
                                 <div class="avatar">
                                     <div class="w-10 h-10 rounded-full ring-2 ring-base-100 shadow-sm">
@@ -160,13 +200,13 @@
                                         </a>
                                     </div>
                                 </div>
-                                <!-- Thread Line -->
+                                <!-- 楼层连线 (Thread Line) -->
                                 {% if comment.active_replies %}
                                 <div class="w-0.5 h-full bg-base-content/5 my-2 rounded-full group-hover/comment:bg-primary/20 transition-colors"></div>
                                 {% endif %}
                             </div>
 
-                            <!-- Content Column -->
+                            <!-- 内容列 (Content Column) -->
                             <div class="flex-1 pb-2">
                                 <div class="bg-base-100 rounded-2xl p-0">
                                     <div class="flex justify-between items-start mb-2">
@@ -185,19 +225,18 @@
                                         
                                         <div class="flex gap-1 opacity-0 group-hover/comment:opacity-100 transition-opacity">
                                             {% if user.is_authenticated %}
-                                            <button onclick="replyTo('{{ comment.id }}', '{{ comment.user.username }}')" class="btn btn-ghost btn-xs gap-1 h-7 min-h-0 px-2 font-normal text-base-content/60 hover:text-primary hover:bg-primary/10">
+                                            <button onclick="replyTo('{{ comment.id }}', '{{ comment.user.nickname|default:comment.user.username }}')" class="btn btn-ghost btn-xs gap-1 h-7 min-h-0 px-2 font-normal text-base-content/60 hover:text-primary hover:bg-primary/10">
                                                 <span class="material-symbols-outlined text-[14px]">reply</span>
                                                 回复
                                             </button>
                                             {% endif %}
                                             {% if user.is_authenticated and user == comment.user or user.is_staff %}
-                                            <form action="{% url 'delete_comment' comment.id %}" method="post" class="inline" onsubmit="return confirm('确定要删除这条评论吗？');">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-ghost btn-xs text-error/70 hover:text-error hover:bg-error/10 gap-1 h-7 min-h-0 px-2 font-normal">
-                                                    <span class="material-symbols-outlined text-[14px]">delete</span>
-                                                    删除
-                                                </button>
-                                            </form>
+                                            <button type="button" 
+                                                    onclick="confirmAction('{% url 'delete_comment' comment.id %}', '确定要删除这条评论及其所有回复吗？', '删除评论')"
+                                                    class="btn btn-ghost btn-xs text-error/70 hover:text-error hover:bg-error/10 gap-1 h-7 min-h-0 px-2 font-normal">
+                                                <span class="material-symbols-outlined text-[14px]">delete</span>
+                                                删除
+                                            </button>
                                             {% endif %}
                                         </div>
                                     </div>
@@ -206,12 +245,12 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Replies -->
+                                <!-- 回复列表 (Replies) -->
                                 {% if comment.active_replies %}
                                 <div class="mt-4 space-y-5">
                                     {% for reply in comment.active_replies %}
                                     <div class="flex gap-4 relative group/reply" id="comment-{{ reply.id }}">
-                                        <!-- Curved Connector -->
+                                        <!-- 弯曲连接线 (Curved Connector) -->
                                         <div class="absolute -left-[27px] top-0 w-5 h-5 border-l-2 border-b-2 border-base-content/5 rounded-bl-2xl group-hover/comment:border-primary/20 transition-colors"></div>
                                         
                                         <div class="avatar shrink-0">
@@ -225,8 +264,14 @@
                                             <div class="flex justify-between items-start mb-1">
                                                 <div class="flex items-center gap-2 flex-wrap">
                                                     <a href="{% url 'users:user_public_profile' reply.user.username %}" class="font-bold text-xs link link-hover hover:text-primary transition-colors">
-                                                        {{ reply.user.nickname|default:reply.user.username }} 
+                                                        {{ reply.user.nickname|default:reply.user.username }}
                                                     </a>
+                                                    {% if reply.parent and reply.parent.user %}
+                                                    <span class="text-xs text-base-content/40 flex items-center gap-1">
+                                                        <span class="material-symbols-outlined text-[10px]">reply</span>
+                                                        回复 @{{ reply.parent.user.nickname|default:reply.parent.user.username }}
+                                                    </span>
+                                                    {% endif %}
                                                     {% if reply.user.is_staff %}
                                                     <span class="badge badge-warning badge-xs gap-0.5 px-1.5 h-5 font-medium border-none text-warning-content/80">
                                                         <span class="material-symbols-outlined text-[10px]">verified</span>
@@ -237,12 +282,11 @@
                                                 </div>
                                                 <div class="flex gap-1 opacity-0 group-hover/reply:opacity-100 transition-opacity">
                                                     {% if user.is_authenticated and user == reply.user or user.is_staff %}
-                                                    <form action="{% url 'delete_comment' reply.id %}" method="post" class="inline" onsubmit="return confirm('确定要删除这条评论吗？');">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-ghost btn-xs text-error/70 hover:text-error hover:bg-error/10 h-6 min-h-0 px-1">
-                                                            <span class="material-symbols-outlined text-[14px]">delete</span>
-                                                        </button>
-                                                    </form>
+                                                    <button type="button" 
+                                                            onclick="confirmAction('{% url 'delete_comment' reply.id %}', '确定要删除这条回复吗？', '删除回复')"
+                                                            class="btn btn-ghost btn-xs text-error/70 hover:text-error hover:bg-error/10 h-6 min-h-0 px-1">
+                                                        <span class="material-symbols-outlined text-[14px]">delete</span>
+                                                    </button>
                                                     {% endif %}
                                                 </div>
                                             </div>
@@ -270,56 +314,63 @@
             </div>
         </article>
 
-        <!-- Sidebar / TOC -->
+        <!-- 侧边栏 / 目录 (Sidebar / TOC) -->
         <aside class="hidden lg:block lg:col-span-4 relative">
             <div class="sticky top-24 space-y-8">
-                <!-- TOC Card -->
-                <div class="card bg-base-100 shadow-sm border border-base-content/5 overflow-hidden">
-                    <div class="card-body p-6">
-                        <h3 class="card-title text-sm uppercase tracking-wider opacity-50 mb-4 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
-                            目录
-                        </h3>
-                        <nav id="toc" class="space-y-1 text-sm max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-base-content/10 scrollbar-track-transparent">
-                            <!-- TOC generated by JS -->
-                        </nav>
-                    </div>
+                <!-- 目录卡片 (TOC Card) -->
+                {% captureas toc_content %}
+                <div class="p-6">
+                    <h3 class="card-title text-sm uppercase tracking-wider opacity-50 mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
+                        目录
+                    </h3>
+                    <nav id="toc" class="space-y-1 text-sm max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-base-content/10 scrollbar-track-transparent">
+                        <!-- TOC generated by JS -->
+                    </nav>
                 </div>
+                {% endcaptureas %}
+                {% include 'components/inspira/card_spotlight.html' with slot_content=toc_content extra_classes="bg-base-100 shadow-sm border border-base-content/5 overflow-hidden rounded-2xl" %}
 
-                <!-- Author Card -->
-                <div class="card bg-base-100 shadow-sm border border-base-content/5">
-                    <div class="card-body p-6 text-center">
-                        <div class="avatar mx-auto mb-4">
-                            <div class="w-20 h-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                                <img src="{{ post.author.get_avatar_url }}" alt="{{ post.author.username }}" />
-                            </div>
+                <!-- 作者卡片 (Author Card) -->
+                {% captureas author_content %}
+                <div class="p-6 text-center">
+                    <div class="avatar mx-auto mb-4">
+                        <div class="w-20 h-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                            <img src="{{ post.author.get_avatar_url }}" alt="{{ post.author.username }}" />
                         </div>
-                        <h3 class="font-bold text-lg">{{ post.author.nickname|default:post.author.username }}</h3>
-                        <p class="text-sm text-base-content/60 mt-1">
-                            {{ post.author.bio|default:"这个作者很懒，什么都没写~" }}
-                        </p>
-                        <div class="mt-6 flex justify-center gap-4">
-                            <div class="text-center">
-                                <div class="font-bold text-lg">{{ post.author.posts.count }}</div>
-                                <div class="text-xs opacity-60">文章</div>
-                            </div>
-                            <div class="w-px bg-base-content/10"></div>
-                            <div class="text-center">
-                                <div class="font-bold text-lg">{{ post.author.total_views }}</div>
-                                <div class="text-xs opacity-60">阅读</div>
-                            </div>
-                        </div>
-                        <a href="{% url 'users:user_public_profile' post.author.username %}" class="btn btn-outline btn-primary btn-sm rounded-full mt-6 w-full">
-                            访问主页
-                        </a>
                     </div>
+                    <h3 class="font-bold text-lg">{{ post.author.nickname|default:post.author.username }}</h3>
+                    <p class="text-sm text-base-content/60 mt-1">
+                        {{ post.author.bio|default:"这个作者很懒，什么都没写~" }}
+                    </p>
+                    <div class="mt-6 flex justify-center gap-4">
+                        <div class="text-center">
+                            <div class="font-bold text-lg">{{ post.author.posts.count }}</div>
+                            <div class="text-xs opacity-60">文章</div>
+                        </div>
+                        <div class="w-px bg-base-content/10"></div>
+                        <div class="text-center">
+                            <div class="font-bold text-lg">{{ post.author.total_views }}</div>
+                            <div class="text-xs opacity-60">阅读</div>
+                        </div>
+                    </div>
+                    <a href="{% url 'users:user_public_profile' post.author.username %}" class="btn btn-outline btn-primary btn-sm rounded-full mt-6 w-full">
+                        访问主页
+                    </a>
                 </div>
+                {% endcaptureas %}
+                {% include 'components/inspira/card_spotlight.html' with slot_content=author_content extra_classes="bg-base-100 shadow-sm border border-base-content/5 rounded-2xl" %}
             </div>
         </aside>
     </div>
 </div>
 
 <script>
+    /**
+     * 回复评论 (Reply to a comment)
+     * @param {string} commentId - 目标评论ID
+     * @param {string} username - 目标用户昵称
+     */
     function replyTo(commentId, username) {
         document.getElementById('parent_id').value = commentId;
         document.getElementById('reply-to-user').textContent = username;
@@ -328,23 +379,28 @@
         document.querySelector('textarea[name="content"]').focus();
     }
 
+    /**
+     * 取消回复 (Cancel reply)
+     */
     function cancelReply() {
         document.getElementById('parent_id').value = '';
         document.getElementById('reply-indicator').classList.add('hidden');
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+        // --- 自动生成目录 (Auto-generate TOC) ---
         const article = document.querySelector('article');
         const headings = article.querySelectorAll('h2, h3');
         const toc = document.getElementById('toc');
         
         if (headings.length === 0) {
+            // 如果没有标题，隐藏目录卡片
             if(toc) toc.closest('.card').style.display = 'none';
         } else {
             headings.forEach((heading, index) => {
                 const id = `heading-${index}`;
                 heading.id = id;
-                heading.classList.add('scroll-mt-24'); // Add scroll margin
+                heading.classList.add('scroll-mt-24'); // 添加滚动偏移 (Add scroll margin)
                 
                 const link = document.createElement('a');
                 link.href = `#${id}`;
@@ -360,7 +416,7 @@
                 toc.appendChild(link);
             });
             
-            // ScrollSpy
+            // --- 滚动监听 (ScrollSpy) ---
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {

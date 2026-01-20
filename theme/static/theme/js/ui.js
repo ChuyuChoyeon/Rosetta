@@ -1,10 +1,16 @@
 (function(global) {
+    /**
+     * 初始化表单提交 loading 状态
+     * 
+     * 监听所有表单提交事件，将提交按钮设为 loading 状态。
+     * 避免用户重复点击提交。
+     */
     function initSubmitLoading() {
         document.addEventListener('submit', function(e) {
             const form = e.target;
             const submitBtn = form.querySelector('button[type="submit"]');
             
-            // Skip if form has 'no-loading' class or button not found
+            // 如果表单有 'no-loading' 类或找不到提交按钮，则跳过
             if (!submitBtn || form.classList.contains('no-loading')) {
                 return;
             }
@@ -13,7 +19,7 @@
             submitBtn.disabled = true;
             submitBtn.innerHTML = '<span class="loading loading-spinner loading-sm"></span> 处理中...';
             
-            // Restore button after 10s (safety timeout)
+            // 10秒后自动恢复按钮状态 (防止因网络问题导致的永久 loading)
             setTimeout(() => {
                 if (submitBtn.disabled) {
                     submitBtn.disabled = false;
@@ -23,6 +29,11 @@
         });
     }
 
+    /**
+     * 初始化按钮点击波纹效果 (Ripple Effect)
+     * 
+     * 为 .btn 类添加点击时的激活样式模拟。
+     */
     function initRippleEffect() {
         document.addEventListener('mousedown', function(e) {
             const btn = e.target.closest('.btn');
@@ -33,7 +44,12 @@
         });
     }
 
-    // Bulk Actions
+    // --- 批量操作逻辑 (Bulk Actions) ---
+    
+    /**
+     * 全选/取消全选
+     * @param {HTMLElement} source - 全选复选框元素
+     */
     global.toggleAll = function(source) {
         const checkboxes = document.querySelectorAll('.row-checkbox');
         checkboxes.forEach(cb => {
@@ -42,6 +58,11 @@
         updateBulkToolbar();
     };
 
+    /**
+     * 更新批量操作工具栏状态
+     * 
+     * 根据选中项的数量显示或隐藏工具栏。
+     */
     global.updateBulkToolbar = function() {
         const checkboxes = document.querySelectorAll('.row-checkbox:checked');
         const count = checkboxes.length;
@@ -59,6 +80,12 @@
         }
     };
 
+    /**
+     * 提交批量操作
+     * 
+     * 将操作类型 (action) 注入表单并提交。
+     * @param {string} action - 操作名称 (如 'delete', 'published')
+     */
     global.submitBulkAction = function(action) {
         if (!confirm('确定要执行此操作吗？')) return;
         
@@ -82,12 +109,12 @@
         initRippleEffect();
     }
 
-    // Export for Node.js/Jest or Browser
+    // --- 模块导出 ---
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = { initSubmitLoading, initRippleEffect, initUI };
     } else {
         global.UIManager = { initSubmitLoading, initRippleEffect, initUI };
-        // Auto-init in browser
+        // 浏览器环境下自动初始化
         initUI();
     }
 

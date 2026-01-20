@@ -117,6 +117,37 @@
                                             </span>
                                             <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="input input-bordered w-full pl-10 focus:input-primary transition-all">
                                         </div>
+                                    {% elif 'CODE_HIGHLIGHT_STYLE' in item.key %}
+                                        <div x-data="{ 
+                                            currentStyle: '{{ item.value }}',
+                                            updatePreview() {
+                                                const link = document.getElementById('highlight-preview-css');
+                                                if (link) {
+                                                    link.href = '/static/theme/css/pygments/' + this.currentStyle + '.css';
+                                                }
+                                            }
+                                        }" x-init="updatePreview()">
+                                            
+                                            <!-- Style Selector -->
+                                            <select name="{{ item.key }}" x-model="currentStyle" @change="updatePreview()" class="select select-bordered w-full max-w-md focus:select-primary transition-all mb-4">
+                                                {% for style in pygments_styles %}
+                                                <option value="{{ style }}" {% if style == item.value %}selected{% endif %}>{{ style }}</option>
+                                                {% endfor %}
+                                            </select>
+                                            
+                                            <!-- Preview Area -->
+                                            <div class="mockup-code bg-transparent border border-base-content/10 p-0 overflow-hidden">
+                                                <div class="codehilite p-4 text-sm font-mono rounded-b-box">
+                                                    <pre><span></span><span class="k">def</span> <span class="nf">hello_world</span><span class="p">():</span>
+    <span class="c1"># This is a sample code</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Hello, Rosetta!&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span></pre>
+                                                </div>
+                                            </div>
+                                            
+                                            <!-- Dynamic CSS Loader for Preview -->
+                                            <link id="highlight-preview-css" rel="stylesheet" href="">
+                                        </div>
                                     {% elif 'TEXT' in item.key or 'DESCRIPTION' in item.key or 'CODE' in item.key %}
                                         <textarea name="{{ item.key }}" class="textarea textarea-bordered w-full h-48 focus:textarea-primary transition-all text-base leading-relaxed {% if 'CODE' in item.key %}font-mono text-sm bg-base-200/50{% endif %}" placeholder="请输入内容...">{{ item.value }}</textarea>
                                     {% elif 'URL' not in item.key %}

@@ -69,27 +69,34 @@ class PostForm(forms.ModelForm):
 
     def save(self, commit=True):
         post = super().save(commit=False)
+        
+        # 密码哈希处理
+        if 'password' in self.changed_data and post.password:
+            # 如果密码字段已更改且不为空，则进行哈希
+            # 注意：如果 PostForm 传递的是 raw password
+            from django.contrib.auth.hashers import make_password
+            if not post.password.startswith('pbkdf2_'): # 简单检查是否已哈希，防止重复哈希
+                post.set_password(post.password)
+
         if commit:
             post.save()
-            # Handle tags
+            # 处理标签 (Handle tags)
             tags_str = self.cleaned_data.get("tags_str", "")
             if tags_str:
                 tag_names = [t.strip() for t in tags_str.split(",") if t.strip()]
                 tags = []
                 for name in tag_names:
-                    # Create tag if not exists
+                    # 创建或获取标签
                     try:
                         tag, created = Tag.objects.get_or_create(name=name)
                     except Exception:
-                        # Handle potential slug collision or other errors
-                        # Try to find by slug if name fails (though name is unique in intent)
-                        # Or just skip/log
+                        # 处理潜在的 slug 冲突或其他错误
+                        # 如果名称相同但创建失败（例如 slug 冲突），尝试通过 slug 查找
                         from django.utils.text import slugify
                         slug = slugify(name)
                         tag = Tag.objects.filter(slug=slug).first()
                         if not tag:
-                            # If collision was on slug but name is different?
-                            # Let's try to append random suffix to slug
+                            # 如果 slug 冲突但名称不同，尝试添加随机后缀
                             import uuid
                             slug = f"{slug}-{uuid.uuid4().hex[:6]}"
                             tag = Tag.objects.create(name=name, slug=slug)
@@ -102,7 +109,16 @@ class PostForm(forms.ModelForm):
         return post
 
     def apply_styles(self):
-        """应用 Tailwind CSS 样式到表单字段"""
+        """
+        应用 Tailwind CSS 样式到表单字段
+        
+        遍历所有字段，根据控件类型添加相应的 daisyUI/Tailwind 类名。
+        - Checkbox: checkbox checkbox-primary
+        - FileInput: file-input ...
+        - Textarea: textarea ...
+        - Select: select ...
+        - 其他: input ...
+        """
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.update({"class": "checkbox checkbox-primary"})
@@ -246,6 +262,25 @@ class FriendLinkForm(forms.ModelForm):
                 field.widget.attrs.update({"class": "input input-bordered w-full"})
 
 
+from django.contrib.auth.models import Group
+
+class GroupForm(forms.ModelForm):
+    """
+    用户组表单
+    """
+    class Meta:
+        model = Group
+        fields = ["name", "permissions"]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "permissions": forms.SelectMultiple(attrs={"class": "select select-bordered w-full h-64"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 可以在这里优化 permissions 的显示，例如分组显示
+
+
 class UserForm(forms.ModelForm):
     """
     用户表单
@@ -270,11 +305,19 @@ class UserForm(forms.ModelForm):
             "username", 
             "nickname", 
             "email", 
+            "password", 
+            "avatar", 
+            "cover_image", 
+            "bio", 
+            "website", 
+            "github",
             "title",
-            "is_active", 
-            "is_staff", 
-            "is_superuser", 
-            "avatar"
+            "is_active",
+            "is_banned",
+            "is_staff",
+            "is_superuser",
+            "groups",
+            "user_permissions"
         ]
         widgets = {
             "username": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
@@ -282,12 +325,16 @@ class UserForm(forms.ModelForm):
             "email": forms.EmailInput(attrs={"class": "input input-bordered w-full"}),
             "title": forms.Select(attrs={"class": "select select-bordered w-full"}),
             "avatar": forms.FileInput(attrs={"class": "file-input file-input-bordered w-full"}),
+            "bio": forms.Textarea(attrs={"class": "textarea textarea-bordered w-full h-24", "rows": 3}),
+            "groups": forms.CheckboxSelectMultiple(),
+            "user_permissions": forms.SelectMultiple(attrs={"class": "select select-bordered w-full h-48"}),
         }
 
     def save(self, commit=True):
         user = super().save(commit=False)
         
         # 处理密码
+        # 如果提供了新密码，则使用 set_password 加密存储
         new_password = self.cleaned_data.get("new_password")
         if new_password:
             user.set_password(new_password)

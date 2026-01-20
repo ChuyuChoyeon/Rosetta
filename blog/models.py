@@ -4,6 +4,7 @@ from django.utils.text import slugify
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from core.validators import validate_image_file
+from core.utils import generate_unique_slug
 
 
 class Category(models.Model):
@@ -25,7 +26,7 @@ class Category(models.Model):
     def save(self, *args, **kwargs):
         """保存时自动生成 slug（如果未提供）"""
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = generate_unique_slug(Category, self.name)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -61,12 +62,14 @@ class Tag(models.Model):
     def save(self, *args, **kwargs):
         """保存时自动生成 slug（如果未提供）"""
         if not self.slug:
-            self.slug = slugify(self.name)
+            self.slug = generate_unique_slug(Tag, self.name)
         super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name
 
+
+from django.contrib.auth.hashers import make_password, check_password
 
 class Post(models.Model):
     """
@@ -127,7 +130,7 @@ class Post(models.Model):
     )
     password = models.CharField(
         "访问密码",
-        max_length=50,
+        max_length=128,  # 增加长度以容纳哈希
         blank=True,
         help_text="设置此密码后，访问文章需要输入密码",
     )
@@ -139,17 +142,25 @@ class Post(models.Model):
     allow_comments = models.BooleanField("允许评论", default=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["-is_pinned", "-created_at"]
         verbose_name = "文章"
         verbose_name_plural = verbose_name
         indexes = [
             models.Index(fields=['status', 'created_at']),
         ]
 
+    def set_password(self, raw_password):
+        """设置加密后的密码"""
+        self.password = make_password(raw_password)
+
+    def check_password(self, raw_password):
+        """验证密码是否正确"""
+        return check_password(raw_password, self.password)
+
     def save(self, *args, **kwargs):
         """保存时自动生成 slug（如果未提供）"""
         if not self.slug:
-            self.slug = slugify(self.title)
+            self.slug = generate_unique_slug(Post, self.title)
         super().save(*args, **kwargs)
 
     def __str__(self):
@@ -196,6 +207,8 @@ class Comment(models.Model):
     @property
     def active_replies(self):
         """获取当前评论下所有可见的回复"""
+        if hasattr(self, 'active_replies_list'):
+            return self.active_replies_list
         return self.replies.filter(active=True)
 
 

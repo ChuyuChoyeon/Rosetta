@@ -1,0 +1,94 @@
+{% extends "administration/base.html" %}
+{% load capture_tags %}
+
+{% block title %}{% if form.instance.pk %}编辑用户组{% else %}新建用户组{% endif %}{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li><a href="{% url 'administration:group_list' %}">用户组管理</a></li>
+        <li>{% if form.instance.pk %}编辑{% else %}新建{% endif %}</li>
+    </ul>
+</div>
+
+<div class="max-w-4xl mx-auto">
+    {% captureas card_content %}
+    <div class="p-0">
+        <div class="p-6 border-b border-base-200 bg-base-100/50 backdrop-blur-sm">
+            <h2 class="card-title text-xl font-bold flex items-center gap-2">
+                <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                    <span class="material-symbols-outlined">groups</span>
+                </div>
+                {% if form.instance.pk %}编辑用户组: <span class="text-primary">{{ form.instance.name }}</span>{% else %}新建用户组{% endif %}
+            </h2>
+        </div>
+        
+        <form method="post" novalidate class="p-6 space-y-8">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-error mb-4 shadow-sm">
+                <span class="material-symbols-outlined">error</span>
+                <div class="flex flex-col">
+                    <span class="font-bold">表单错误</span>
+                    {% for error in form.non_field_errors %}
+                    <span class="text-sm">{{ error }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 gap-6">
+                <!-- Name -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">用户组名称</span>
+                    </label>
+                    <div class="relative">
+                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm">badge</span>
+                        <input type="text" name="name" value="{{ form.name.value|default:'' }}" class="input input-bordered w-full pl-9 focus:input-primary transition-all {% if form.name.errors %}input-error{% endif %}" required placeholder="例如：编辑人员" />
+                    </div>
+                    {% if form.name.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+
+                <!-- Permissions -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">权限分配</span>
+                        <span class="label-text-alt text-base-content/60 bg-base-200 px-2 py-1 rounded text-xs">按住 Ctrl/Command 可多选</span>
+                    </label>
+                    <div class="h-96 border border-base-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                        {{ form.permissions }}
+                    </div>
+                    {% if form.permissions.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.permissions.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/50">选中的权限将被授予该组内的所有用户</span>
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-base-200">
+                <a href="{% url 'administration:group_list' %}" class="btn btn-ghost hover:bg-base-200">取消</a>
+                <button type="submit" class="btn btn-primary gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined">save</span>
+                    保存
+                </button>
+            </div>
+        </form>
+    </div>
+    {% endcaptureas %}
+
+    {% with slot_content=card_content extra_classes="w-full" %}
+        {% include 'components/inspira/card_spotlight.html' %}
+    {% endwith %}
+</div>
+{% endblock %}

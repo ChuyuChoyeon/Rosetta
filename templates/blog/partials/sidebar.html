@@ -127,15 +127,19 @@
                         {% if link.logo %}
                         <img src="{{ link.logo.url }}" class="w-4 h-4 rounded-full object-cover shrink-0">
                         {% else %}
-                        <span class="material-symbols-outlined text-sm shrink-0">public</span>
+                        <img src="{% if link.url|last == '/' %}{{ link.url }}favicon.ico{% else %}{{ link.url }}/favicon.ico{% endif %}" class="w-4 h-4 rounded-full object-cover shrink-0">
                         {% endif %}
                         <span class="truncate text-xs">{{ link.name }}</span>
                     </div>
                 {% endcaptureas %}
                 {% if link.logo %}
-                    {% include 'components/inspira/link_preview.html' with url=link.url slot_content=link_content extra_classes="btn btn-ghost btn-sm btn-block justify-start gap-2 font-normal h-auto py-2 px-2" image=link.logo.url target="_blank" %}
+                    <a href="{{ link.url }}" target="_blank" class="btn btn-ghost btn-sm btn-block justify-start gap-2 font-normal h-auto py-2 px-2">
+                        {{ link_content }}
+                    </a>
                 {% else %}
-                    {% include 'components/inspira/link_preview.html' with url=link.url slot_content=link_content extra_classes="btn btn-ghost btn-sm btn-block justify-start gap-2 font-normal h-auto py-2 px-2" target="_blank" %}
+                    <a href="{{ link.url }}" target="_blank" class="btn btn-ghost btn-sm btn-block justify-start gap-2 font-normal h-auto py-2 px-2">
+                        {{ link_content }}
+                    </a>
                 {% endif %}
                 {% endfor %}
             </div>

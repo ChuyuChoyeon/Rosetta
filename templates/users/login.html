@@ -6,17 +6,14 @@
 <div class="relative flex justify-center items-center min-h-[calc(100vh-16rem)] py-12 px-4 overflow-hidden">
     <!-- Neural Background Removed (Inherited from Base) -->
 
-    <div class="card w-full max-w-sm bg-base-100/80 backdrop-blur-md shadow-2xl border border-base-200 z-10 relative overflow-hidden">
-        <!-- Border Beam -->
-        {% include 'components/inspira/border_beam.html' with size=100 duration=10 delay=0 %}
-        
-        <div class="card-body">
+    <div class="card w-full max-w-sm bg-base-100/95 backdrop-blur-xl shadow-2xl border border-base-content/5 z-10 relative overflow-hidden">
+        <div class="card-body p-8">
             <div class="text-center mb-8">
-                <h2 class="text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">欢迎回来</h2>
-                <p class="text-base-content/60 mt-2">请登录以继续访问</p>
+                <h2 class="text-3xl font-heading font-extrabold text-base-content">欢迎回来</h2>
+                <p class="text-base-content/60 mt-3 font-medium tracking-wide">Rosetta，开启您的创作之旅</p>
             </div>
             
-            <form method="post" class="space-y-4">
+            <form method="post" class="space-y-5">
                 {% csrf_token %}
                 
                 {% if form.non_field_errors %}
@@ -54,10 +51,10 @@
                     </label>
                 </div>
 
-                <div class="card-actions justify-end mt-6">
-                    {% with slot_content='登录' extra_classes='w-full' %}
-                        {% include 'components/inspira/shimmer_button.html' %}
-                    {% endwith %}
+                <div class="card-actions justify-end mt-8">
+                    <button type="submit" class="btn btn-primary w-full text-lg font-bold rounded-xl shadow-lg hover:shadow-primary/30 transition-all duration-300">
+                        登录
+                    </button>
                 </div>
             </form>
             

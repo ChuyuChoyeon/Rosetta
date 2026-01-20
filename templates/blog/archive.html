@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}文章归档 - {{ config.SITE_NAME.value }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12 max-w-4xl">
+    <header class="mb-12 text-center">
+        <h1 class="text-4xl font-bold text-base-content mb-4">文章归档</h1>
+        <p class="text-base-content/60">共 {{ posts|length }} 篇文章，记录成长的足迹。</p>
+    </header>
+
+    {% regroup posts by created_at.year as year_list %}
+
+    <ul class="timeline timeline-snap-icon max-md:timeline-compact timeline-vertical">
+        {% for year in year_list %}
+        <li>
+            <div class="timeline-middle">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5 text-primary">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.857-9.809a.75.75 0 00-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 10-1.06 1.061l2.5 2.5a.75.75 0 001.137-.089l4-5.5z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="timeline-start md:text-end mb-10 w-full">
+                <time class="font-mono italic text-2xl font-black opacity-50 block mb-2">{{ year.grouper }}</time>
+                <div class="space-y-4">
+                    {% for post in year.list %}
+                    <article class="card bg-base-100 shadow-sm border border-base-200 hover:shadow-md transition-all duration-300 group text-left">
+                        <div class="card-body p-4">
+                            <div class="flex items-baseline gap-2 text-sm text-base-content/60 mb-1">
+                                <span class="font-mono">{{ post.created_at|date:"m-d" }}</span>
+                                {% if post.category %}
+                                <span class="badge badge-ghost badge-sm gap-1">
+                                    {{ post.category.name }}
+                                </span>
+                                {% endif %}
+                            </div>
+                            <h3 class="card-title text-lg">
+                                <a href="{{ post.get_absolute_url }}" class="hover:text-primary transition-colors">
+                                    {{ post.title }}
+                                </a>
+                            </h3>
+                            {% if post.tags.exists %}
+                            <div class="flex flex-wrap gap-1 mt-2">
+                                {% for tag in post.tags.all|slice:":3" %}
+                                <span class="text-xs text-primary">#{{ tag.name }}</span>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+                        </div>
+                    </article>
+                    {% endfor %}
+                </div>
+            </div>
+            <hr class="bg-base-300"/>
+        </li>
+        {% empty %}
+        <li>
+            <div class="timeline-middle">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="timeline-end mb-10">
+                <div class="text-lg font-black">暂无文章</div>
+                还没有发布任何文章，快去写一篇吧！
+            </div>
+            <hr/>
+        </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

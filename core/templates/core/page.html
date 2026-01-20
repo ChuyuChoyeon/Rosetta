@@ -3,12 +3,20 @@
 {% block title %}{{ page.title }} - Rosetta{% endblock %}
 
 {% block content %}
-<div class="container mx-auto px-4 py-8 max-w-4xl">
-    <article class="prose lg:prose-xl mx-auto dark:prose-invert">
-        <h1>{{ page.title }}</h1>
-        <div class="mt-8">
+<div class="container mx-auto px-4 py-12 max-w-5xl">
+    <div class="bg-base-100 rounded-3xl shadow-sm border border-base-content/5 p-8 md:p-12 relative overflow-hidden">
+        <!-- Background Decoration -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32"></div>
+        <div class="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-3xl pointer-events-none -ml-32 -mb-32"></div>
+
+        <header class="mb-12 text-center relative z-10">
+            <h1 class="text-4xl md:text-5xl font-heading font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-base-content to-base-content/70">{{ page.title }}</h1>
+            <div class="h-1 w-24 bg-gradient-to-r from-primary to-secondary rounded-full mx-auto"></div>
+        </header>
+
+        <article class="prose prose-lg md:prose-xl mx-auto dark:prose-invert relative z-10">
             {{ page.content|safe }}
-        </div>
-    </article>
+        </article>
+    </div>
 </div>
 {% endblock %}

@@ -17,15 +17,19 @@
         class="pointer-events-none absolute -inset-px opacity-0 transition duration-300 group-hover/spotlight:opacity-100 z-30"
         :style="`
             background: radial-gradient(
-                600px circle at ${mouseX}px ${mouseY}px,
-                rgba(var(--primary-rgb), 0.1),
-                transparent 40%
+                200px circle at ${mouseX}px ${mouseY}px,
+                rgba(var(--primary-rgb), 0.15),
+                transparent 80%
             );
         `"
     ></div>
     
     <div class="relative z-10 h-full">
-        {{ slot_content|safe }}
+        {% if slot_content %}
+            {{ slot_content|safe }}
+        {% else %}
+            {{ content|safe }}
+        {% endif %}
     </div>
 </div>
 

@@ -1,0 +1,114 @@
+{% extends "administration/base.html" %}
+{% load capture_tags %}
+
+{% block title %}用户组管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li>用户组管理</li>
+    </ul>
+</div>
+
+{% captureas card_content %}
+    <div class="p-0">
+        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-10">
+            <div class="flex items-center gap-3">
+                <div class="p-2 bg-secondary/10 rounded-lg">
+                    <span class="material-symbols-outlined text-secondary">groups</span>
+                </div>
+                <div>
+                    <h2 class="font-bold text-base">用户组列表</h2>
+                    <p class="text-xs text-base-content/60">管理用户角色与权限</p>
+                </div>
+            </div>
+            
+            <div class="flex gap-2">
+                {% url 'administration:group_create' as create_url %}
+                <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-1 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined text-lg">add</span>
+                    新建用户组
+                </a>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto min-h-[300px]">
+            <table class="table table-sm w-full">
+                <thead class="bg-base-200/50 text-base-content/60 font-medium">
+                    <tr>
+                        <th class="w-16 pl-4">ID</th>
+                        <th>名称</th>
+                        <th class="w-32 text-center">权限数量</th>
+                        <th class="w-32 text-center">用户数量</th>
+                        <th class="w-24 text-center">操作</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-base-200/50">
+                    {% for group in groups %}
+                    <tr class="hover:bg-base-200/50 transition-colors duration-200 group">
+                        <td class="pl-4 font-mono text-xs text-base-content/50">#{{ group.id }}</td>
+                        <td>
+                            <div class="font-semibold text-sm group-hover:text-primary transition-colors">{{ group.name }}</div>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge badge-sm badge-outline bg-base-100">{{ group.permissions.count }}</span>
+                        </td>
+                        <td class="text-center">
+                             <span class="badge badge-sm badge-ghost">{{ group.user_set.count }}</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="join opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                <a href="{% url 'administration:group_edit' group.pk %}" class="btn btn-xs btn-ghost btn-square join-item text-base-content/60 hover:text-primary hover:bg-primary/10" title="编辑">
+                                    <span class="material-symbols-outlined text-base">edit</span>
+                                </a>
+                                <a href="{% url 'administration:group_delete' group.pk %}" class="btn btn-xs btn-ghost btn-square join-item text-base-content/60 hover:text-error hover:bg-error/10" title="删除">
+                                    <span class="material-symbols-outlined text-base">delete</span>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">
+                            <div class="flex flex-col items-center justify-center py-12 text-base-content/40">
+                                <div class="w-12 h-12 rounded-full bg-base-200/50 flex items-center justify-center mb-3">
+                                    <span class="material-symbols-outlined text-2xl opacity-50">group_off</span>
+                                </div>
+                                <p class="text-sm">暂无用户组</p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="p-4 border-t border-base-200 flex justify-center bg-base-100/30">
+            <div class="join">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-xs btn-outline">«</a>
+                {% else %}
+                <button class="join-item btn btn-xs btn-outline btn-disabled">«</button>
+                {% endif %}
+                
+                <button class="join-item btn btn-xs btn-outline no-animation bg-base-200 border-base-300 text-base-content/70">第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页</button>
+                
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-xs btn-outline">»</a>
+                {% else %}
+                <button class="join-item btn btn-xs btn-outline btn-disabled">»</button>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+{% endcaptureas %}
+
+{% with slot_content=card_content extra_classes="w-full" %}
+    {% include 'components/inspira/card_spotlight.html' %}
+{% endwith %}
+
+{% endblock %}

@@ -1,0 +1,146 @@
+{% extends "administration/base.html" %}
+{% load capture_tags %}
+
+{% block title %}系统日志{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* 简单代码高亮样式 */
+    .log-content {
+        font-family: 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li>日志与审计</li>
+        <li>系统日志</li>
+    </ul>
+</div>
+
+{% captureas card_content %}
+<div class="flex h-[calc(100vh-250px)] min-h-[500px]">
+    <!-- Sidebar: File List -->
+    <div class="w-72 border-r border-base-200 flex flex-col bg-base-100/50 backdrop-blur-sm">
+        <div class="p-4 border-b border-base-200/60 flex items-center gap-2">
+            <span class="material-symbols-outlined text-warning">folder_open</span>
+            <h2 class="font-bold text-sm uppercase opacity-70 tracking-wider">日志文件</h2>
+        </div>
+        <div class="overflow-y-auto flex-1 p-3 space-y-2">
+            {% for file in log_files %}
+            <a href="?file={{ file.name }}" 
+               class="group block p-3 rounded-xl text-sm transition-all duration-200 border border-transparent {% if file.name == current_file %}bg-primary text-primary-content shadow-lg shadow-primary/20 border-primary/20{% else %}hover:bg-base-200 hover:border-base-300 text-base-content/70{% endif %}">
+                <div class="flex items-center gap-3 mb-1.5">
+                    <div class="p-1.5 rounded-lg {% if file.name == current_file %}bg-white/20{% else %}bg-base-200 group-hover:bg-base-300{% endif %} transition-colors">
+                        <span class="material-symbols-outlined text-lg opacity-90 block">
+                            {% if '.log' in file.name %}text_snippet{% else %}folder_zip{% endif %}
+                        </span>
+                    </div>
+                    <span class="font-medium truncate flex-1">{{ file.name }}</span>
+                </div>
+                <div class="flex justify-between text-xs opacity-70 pl-11">
+                    <span class="font-mono">{{ file.size|filesizeformat }}</span>
+                    <span>{{ file.mtime|date:"m-d H:i" }}</span>
+                </div>
+            </a>
+            {% empty %}
+            <div class="flex flex-col items-center justify-center py-12 text-base-content/40">
+                <span class="material-symbols-outlined text-3xl mb-2 opacity-50">folder_off</span>
+                <span class="text-xs">无日志文件</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Main Area: Log Content -->
+    <div class="flex-1 flex flex-col min-w-0 bg-base-100">
+        <!-- Toolbar -->
+        <div class="p-3 border-b border-base-200 flex justify-between items-center bg-base-100/80 backdrop-blur-sm z-10 sticky top-0">
+            <div class="flex items-center gap-3 pl-2">
+                {% if current_file %}
+                    <div class="flex flex-col">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">description</span>
+                            <span class="font-mono font-bold text-base">{{ current_file }}</span>
+                        </div>
+                        {% if current_file_info %}
+                        <div class="text-xs text-base-content/50 pl-8 flex gap-3">
+                            <span>大小: {{ current_file_info.size|filesizeformat }}</span>
+                            <span>修改: {{ current_file_info.mtime|date:"Y-m-d H:i:s" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <span class="text-base-content/50 flex items-center gap-2">
+                        <span class="material-symbols-outlined">arrow_back</span>
+                        请选择一个文件查看
+                    </span>
+                {% endif %}
+            </div>
+            
+            {% if current_file %}
+            <div class="flex gap-2">
+                <a href="." class="btn btn-sm btn-ghost gap-2" title="刷新">
+                    <span class="material-symbols-outlined text-sm">refresh</span>
+                    <span class="hidden sm:inline">刷新</span>
+                </a>
+                <a href="{% url 'administration:logfile_download' current_file %}" class="btn btn-sm btn-outline gap-2">
+                    <span class="material-symbols-outlined text-sm">download</span>
+                    <span class="hidden sm:inline">下载</span>
+                </a>
+                <div class="divider divider-horizontal mx-0 my-1"></div>
+                <form action="{% url 'administration:logfile_delete' current_file %}" method="post" class="inline" onsubmit="return confirm('确定要永久删除此日志文件吗？');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-ghost text-error gap-2 hover:bg-error/10">
+                        <span class="material-symbols-outlined text-sm">delete</span>
+                        <span class="hidden sm:inline">删除</span>
+                    </button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Content Viewer -->
+        <div class="flex-1 overflow-auto bg-[#1e1e1e] text-[#d4d4d4] p-0 relative group scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-zinc-900">
+            {% if log_content %}
+                <div class="p-4 min-w-full inline-block">
+                    <pre class="log-content">{{ log_content }}</pre>
+                </div>
+            {% else %}
+                <div class="flex flex-col items-center justify-center h-full text-base-content/20 gap-6 select-none">
+                    <div class="w-24 h-24 rounded-full bg-base-content/5 flex items-center justify-center">
+                        <span class="material-symbols-outlined text-6xl opacity-50">terminal</span>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold opacity-70">日志查看器</h3>
+                        <p class="text-sm opacity-50 mt-1">点击左侧文件列表查看详细内容</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endcaptureas %}
+
+{% with slot_content=card_content extra_classes="w-full h-full p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    {% include 'components/inspira/card_spotlight.html' %}
+{% endwith %}
+
+<script>
+    // Auto scroll to bottom for log files
+    document.addEventListener('DOMContentLoaded', function() {
+        const viewer = document.querySelector('.log-content')?.parentElement?.parentElement;
+        if (viewer) {
+            viewer.scrollTop = viewer.scrollHeight;
+        }
+    });
+</script>
+
+{% endblock %}

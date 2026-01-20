@@ -26,12 +26,24 @@ from .forms import (
     NavigationForm,
     FriendLinkForm,
     UserForm,
+    GroupForm,
     SearchPlaceholderForm,
     UserTitleForm,
 )
+from django.utils import timezone
+from django.db.models import Count
+from django.db.models.functions import TruncDate
+from datetime import timedelta
+import psutil
+import sys
+from users.models import UserTitle
+from django.contrib.auth.models import Group
+from django.contrib.admin.models import LogEntry
+from django.conf import settings
+import os
+from django.http import HttpResponse, Http404
 
 User = get_user_model()
-from users.models import UserTitle
 
 
 class StaffRequiredMixin(UserPassesTestMixin):
@@ -44,32 +56,34 @@ class StaffRequiredMixin(UserPassesTestMixin):
         return self.request.user.is_staff
 
 
-from django.utils import timezone
-from django.db.models import Count
-from django.db.models.functions import TruncDate
-from datetime import timedelta
-import psutil
-import sys
-import platform
+class SuperuserRequiredMixin(UserPassesTestMixin):
+    """
+    权限混入类：仅允许超级管理员（is_superuser=True）访问。
+    """
+    def test_func(self) -> bool:
+        return self.request.user.is_superuser
+
 
 class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     """
     管理后台首页视图
+    
+    展示系统概览，包括关键指标、图表数据和服务器状态。
     """
     template_name: str = "administration/index.html"
 
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context: Dict[str, Any] = super().get_context_data(**kwargs)
         
-        # 1. Key Metrics
+        # 1. 关键指标统计 (Key Metrics)
         today = timezone.now()
         last_month = today - timedelta(days=30)
         
-        # Posts
+        # 文章数据
         total_posts = Post.objects.count()
         posts_last_month = Post.objects.filter(created_at__gte=last_month).count()
         
-        # Calculate growth of Total Posts (Net Additions / Previous Total)
+        # 计算增长率 (净增量 / 上期总量)
         total_prev = total_posts - posts_last_month
         post_growth = 0
         if total_prev > 0:
@@ -80,27 +94,26 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         context['total_posts'] = total_posts
         context['post_growth'] = round(post_growth, 1)
         
-        # Comments
+        # 评论数据
         total_comments = Comment.objects.count()
         pending_comments = Comment.objects.filter(active=False).count()
         context['total_comments'] = total_comments
         context['pending_comments'] = pending_comments
         
-        # 2. Charts Data
+        # 2. 图表数据 (Charts Data)
         
-        # Comment Status (Pie)
+        # 评论状态分布 (饼图)
         active_comments = Comment.objects.filter(active=True).count()
         inactive_comments = pending_comments
         context['comment_status_data'] = [active_comments, inactive_comments]
         
-        # User Roles (Donut)
+        # 用户角色分布 (环形图)
         superusers = User.objects.filter(is_superuser=True).count()
         staff = User.objects.filter(is_staff=True, is_superuser=False).count()
         normal_users = User.objects.filter(is_staff=False).count()
         context['user_role_data'] = [superusers, staff, normal_users]
         
-        # Comment Trend (Line) - Last 30 Days
-        # We need a list of dates and counts.
+        # 评论趋势 (折线图) - 最近30天
         trend_data = (
             Comment.objects.filter(created_at__gte=last_month)
             .annotate(date=TruncDate('created_at'))
@@ -109,7 +122,7 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             .order_by('date')
         )
         
-        # Fill in missing dates
+        # 补全缺失日期的据
         date_map = {item['date']: item['count'] for item in trend_data}
         dates = []
         counts = []
@@ -121,16 +134,36 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         context['trend_dates'] = dates
         context['trend_counts'] = counts
         
-        # Top 5 Popular Articles (Bar)
+        # 热门文章 Top 5 (柱状图)
         top_posts = Post.objects.order_by('-views')[:5]
-        context['top_posts'] = top_posts  # Pass full objects for template links
+        context['top_posts'] = top_posts
         context['top_posts_labels'] = [p.title[:10] + '...' if len(p.title) > 10 else p.title for p in top_posts]
         
-        # System Health (Real Data)
+        # 系统健康状态 (实时数据)
         try:
             cpu_usage = psutil.cpu_percent(interval=0.1)
             memory = psutil.virtual_memory()
             disk = psutil.disk_usage('/')
+            
+            # 计算进程运行时间
+            p = psutil.Process()
+            create_time = p.create_time()
+            uptime_seconds = timezone.now().timestamp() - create_time
+            uptime = timedelta(seconds=int(uptime_seconds))
+            
+            # 格式化运行时间 (例如 "2天 4小时")
+            days = uptime.days
+            hours, remainder = divmod(uptime.seconds, 3600)
+            minutes, _ = divmod(remainder, 60)
+            
+            uptime_str = ""
+            if days > 0:
+                uptime_str += f"{days}天 "
+            if hours > 0:
+                uptime_str += f"{hours}小时 "
+            uptime_str += f"{minutes}分钟"
+            if not uptime_str:
+                uptime_str = "刚刚启动"
             
             context['system_info'] = {
                 'cpu_percent': cpu_usage,
@@ -140,21 +173,22 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
                 'platform_system': platform.system(),
                 'platform_release': platform.release(),
                 'server_time': timezone.now(),
+                'uptime': uptime_str,
             }
-            # Simplified health score (inverse of average load)
+            # 简化健康评分 (反向负载)
             health_score = 100 - max(cpu_usage, memory.percent, disk.percent)
             context['system_health'] = int(max(0, health_score))
         except Exception:
             context['system_info'] = {}
-            context['system_health'] = 85 # Fallback
+            context['system_health'] = 85 # 获取失败时的默认值
         
-        # Recent Activity (for feed)
+        # 最近动态 (用于 Feed 流)
         context['recent_comments'] = Comment.objects.select_related('user', 'post').order_by('-created_at')[:5]
         
         return context
 
 
-# --- Generic CRUD Mixins ---
+# --- 通用 CRUD 混入类 (Generic CRUD Mixins) ---
 class BaseListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
     """
     基础列表视图混入类
@@ -179,14 +213,19 @@ class BaseListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
         return self.ordering
 
     def get_template_names(self) -> List[str]:
-        # Support HTMX partials
-        # Only return partial if it's an HTMX request AND NOT a boosted request (full page nav)
+        # HTMX 局部刷新支持
+        # 如果是 HTMX 请求且非 Boosted 请求（全页导航），则仅返回局部模板
         if self.request.headers.get("HX-Request") and not self.request.headers.get(
             "HX-Boosted"
         ):
             return [
                 f"administration/partials/{self.model._meta.model_name}_list_rows.html"
             ]
+        
+        # 优先使用显式定义的 template_name
+        if self.template_name:
+            return [self.template_name]
+            
         return [f"administration/{self.model._meta.model_name}_list.html"]
 
 
@@ -272,7 +311,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.db.models import Count
 import uuid
 
-# --- Post Views ---
+# --- Post Views (文章管理视图) ---
 class PostListView(BaseListView):
     """
     文章列表视图
@@ -304,8 +343,7 @@ class PostListView(BaseListView):
         return qs
 
     def get_template_names(self) -> List[str]:
-        # Support HTMX partials
-        # Only return partial if it's an HTMX request AND NOT a boosted request (full page nav)
+        # HTMX 局部刷新支持
         if self.request.headers.get("HX-Request") and not self.request.headers.get(
             "HX-Boosted"
         ):
@@ -362,7 +400,7 @@ class PostDuplicateView(LoginRequiredMixin, StaffRequiredMixin, View):
     def post(self, request, pk):
         try:
             post = get_object_or_404(Post, pk=pk)
-            # Save M2M data before clearing pk
+            # 在清除 pk 之前保存 M2M 数据
             tags = list(post.tags.all())
             
             post.pk = None
@@ -372,7 +410,7 @@ class PostDuplicateView(LoginRequiredMixin, StaffRequiredMixin, View):
             post.views = 0
             post.save()
             
-            # Restore M2M
+            # 恢复 M2M 关系
             post.tags.set(tags)
             
             messages.success(request, "文章已复制为草稿")
@@ -382,7 +420,7 @@ class PostDuplicateView(LoginRequiredMixin, StaffRequiredMixin, View):
         return redirect('administration:post_list')
 
 
-# --- Category Views ---
+# --- Category Views (分类管理视图) ---
 class CategoryListView(BaseListView):
     """
     分类列表视图
@@ -428,7 +466,7 @@ class CategoryDeleteView(BaseDeleteView):
     success_url = reverse_lazy("administration:category_list")
 
 
-# --- Tag Views ---
+# --- Tag Views (标签管理视图) ---
 class TagListView(BaseListView):
     """
     标签列表视图
@@ -478,7 +516,7 @@ class TagAutocompleteView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     标签自动补全视图
     
-    返回 JSON 格式的标签建议列表
+    返回 JSON 格式的标签建议列表，用于前端输入联想。
     """
     def get(self, request):
         query = request.GET.get('q', '')
@@ -489,7 +527,7 @@ class TagAutocompleteView(LoginRequiredMixin, StaffRequiredMixin, View):
         return JsonResponse({'results': list(tags)})
 
 
-# --- Comment Views ---
+# --- Comment Views (评论管理视图) ---
 class CommentListView(BaseListView):
     """
     评论列表视图
@@ -539,7 +577,7 @@ class CommentDeleteView(BaseDeleteView):
     success_url = reverse_lazy("administration:comment_list")
 
 
-# --- Page Views ---
+# --- Page Views (单页面管理视图) ---
 class PageListView(BaseListView):
     """
     单页面列表视图
@@ -613,7 +651,7 @@ class PageDuplicateView(LoginRequiredMixin, StaffRequiredMixin, View):
         return redirect('administration:page_list')
 
 
-# --- Navigation Views ---
+# --- Navigation Views (导航菜单视图) ---
 class NavigationListView(BaseListView):
     """
     导航菜单列表视图
@@ -659,7 +697,7 @@ class NavigationDeleteView(BaseDeleteView):
     success_url = reverse_lazy("administration:navigation_list")
 
 
-# --- FriendLink Views ---
+# --- FriendLink Views (友情链接视图) ---
 class FriendLinkListView(BaseListView):
     """
     友情链接列表视图
@@ -705,40 +743,53 @@ class FriendLinkDeleteView(BaseDeleteView):
     success_url = reverse_lazy("administration:friendlink_list")
 
 
-# --- Search Placeholder Management ---
-
+# --- Search Placeholder Views (搜索占位符视图) ---
 class SearchPlaceholderListView(BaseListView):
+    """
+    搜索占位符列表视图
+    
+    管理前台搜索框的动态提示文字。
+    """
     model = SearchPlaceholder
     template_name = "administration/searchplaceholder_list.html"
     context_object_name = "placeholders"
     ordering = ["order", "-created_at"]
 
     def get_queryset(self):
-        qs = super().get_queryset()
-        query = self.request.GET.get("q")
-        if query:
+        qs = super().get_queryset().select_related("title")
+        q = self.request.GET.get("q")
+        if q:
             qs = qs.filter(text__icontains=query)
         return qs
 
 
 class SearchPlaceholderCreateView(BaseCreateView):
+    """
+    搜索占位符创建视图
+    """
     model = SearchPlaceholder
     form_class = SearchPlaceholderForm
     success_url = reverse_lazy("administration:searchplaceholder_list")
 
 
 class SearchPlaceholderUpdateView(BaseUpdateView):
+    """
+    搜索占位符更新视图
+    """
     model = SearchPlaceholder
     form_class = SearchPlaceholderForm
     success_url = reverse_lazy("administration:searchplaceholder_list")
 
 
 class SearchPlaceholderDeleteView(BaseDeleteView):
+    """
+    搜索占位符删除视图
+    """
     model = SearchPlaceholder
     success_url = reverse_lazy("administration:searchplaceholder_list")
 
 
-# --- User Views ---
+# --- User Views (用户管理视图) ---
 class UserListView(BaseListView):
     """
     用户列表视图
@@ -751,7 +802,7 @@ class UserListView(BaseListView):
     ordering = ["-date_joined"]
 
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = super().get_queryset().select_related("title")
         query = self.request.GET.get("q")
         if query:
             qs = qs.filter(username__icontains=query)
@@ -770,7 +821,7 @@ class UserCreateView(BaseCreateView):
     success_url = reverse_lazy("administration:user_list")
 
     def form_valid(self, form):
-        # 密码处理在 UserForm.save() 中
+        # 密码处理逻辑在 UserForm.save() 中
         return super().form_valid(form)
 
 
@@ -785,30 +836,289 @@ class UserUpdateView(BaseUpdateView):
     success_url = reverse_lazy("administration:user_list")
 
 
-# --- User Title Views ---
+# --- User Title Views (用户称号视图) ---
 class UserTitleListView(BaseListView):
+    """
+    用户称号列表视图
+    """
     model = UserTitle
     context_object_name = "titles"
 
 
 class UserTitleCreateView(BaseCreateView):
+    """
+    用户称号创建视图
+    """
     model = UserTitle
     form_class = UserTitleForm
     success_url = reverse_lazy("administration:usertitle_list")
 
 
 class UserTitleUpdateView(BaseUpdateView):
+    """
+    用户称号更新视图
+    """
     model = UserTitle
     form_class = UserTitleForm
     success_url = reverse_lazy("administration:usertitle_list")
 
 
 class UserTitleDeleteView(BaseDeleteView):
+    """
+    用户称号删除视图
+    """
     model = UserTitle
     success_url = reverse_lazy("administration:usertitle_list")
 
 
-# --- Bulk Action View ---
+# --- Group Views (用户组管理视图) ---
+class GroupListView(BaseListView):
+    """
+    用户组列表视图
+    """
+    model = Group
+    context_object_name = "groups"
+    ordering = ["name"]
+
+
+class GroupCreateView(BaseCreateView):
+    """
+    用户组创建视图
+    """
+    model = Group
+    form_class = GroupForm
+    success_url = reverse_lazy("administration:group_list")
+
+
+class GroupUpdateView(BaseUpdateView):
+    """
+    用户组更新视图
+    """
+    model = Group
+    form_class = GroupForm
+    success_url = reverse_lazy("administration:group_list")
+
+
+class GroupDeleteView(BaseDeleteView):
+    """
+    用户组删除视图
+    """
+    model = Group
+    success_url = reverse_lazy("administration:group_list")
+
+
+# --- LogEntry Views (操作日志管理视图) ---
+class LogEntryListView(BaseListView):
+    """
+    操作日志列表视图
+    
+    展示 Django Admin LogEntry。
+    """
+    model = LogEntry
+    context_object_name = "logentries"
+    ordering = ["-action_time"]
+    template_name = "administration/logentry_list.html"
+
+    def get_queryset(self):
+        qs = super().get_queryset().select_related("user", "content_type")
+        query = self.request.GET.get("q")
+        if query:
+            qs = qs.filter(object_repr__icontains=query)
+        
+        user_id = self.request.GET.get("user")
+        if user_id:
+            qs = qs.filter(user_id=user_id)
+            
+        return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 获取所有有日志的用户，用于筛选
+        context["users_with_logs"] = User.objects.filter(
+            id__in=LogEntry.objects.values_list("user_id", flat=True).distinct()
+        )
+        return context
+
+
+class LogEntryDeleteView(BaseDeleteView):
+    """
+    操作日志删除视图
+    """
+    model = LogEntry
+    success_url = reverse_lazy("administration:logentry_list")
+
+
+class LogEntryExportView(LoginRequiredMixin, StaffRequiredMixin, View):
+    """
+    操作日志导出视图
+    """
+    def get(self, request):
+        import csv
+        from django.http import HttpResponse
+        
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename="audit_logs.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Time', 'User', 'Action', 'Content Type', 'Object', 'Message'])
+        
+        logs = LogEntry.objects.select_related('user', 'content_type').order_by('-action_time')
+        for log in logs:
+            writer.writerow([
+                log.action_time,
+                log.user.username,
+                log.get_action_flag_display(),
+                str(log.content_type),
+                log.object_repr,
+                log.change_message
+            ])
+            
+        return response
+
+
+# --- System Log File Views (系统日志文件视图) ---
+class LogFileListView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+    """
+    系统日志文件查看器
+    
+    支持文件列表和内容查看，支持 AJAX 切换文件。
+    """
+    template_name = "administration/logfile_list.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        log_dir = settings.BASE_DIR / "logs"
+        files = []
+        
+        # 1. 获取文件列表
+        if log_dir.exists():
+            for f in log_dir.iterdir():
+                if f.is_file() and (f.suffix == '.log' or f.suffix == '.zip'):
+                    files.append({
+                        "name": f.name,
+                        "size": f.stat().st_size,
+                        "mtime": datetime.fromtimestamp(f.stat().st_mtime),
+                        "path": str(f)
+                    })
+        # 按修改时间倒序
+        files.sort(key=lambda x: x["mtime"], reverse=True)
+        context["log_files"] = files
+        
+        # 2. 确定当前选中的文件
+        current_file = self.request.GET.get('file')
+        if not current_file and files:
+            current_file = files[0]['name'] # 默认选中最新的
+            
+        context["current_file"] = current_file
+        
+        # 3. 读取当前文件内容
+        content = ""
+        file_info = None
+        
+        if current_file:
+            # 查找选中的文件信息
+            for f in files:
+                if f['name'] == current_file:
+                    file_info = f
+                    break
+            
+            if file_info and file_info['name'].endswith('.log'):
+                file_path = log_dir / current_file
+                try:
+                    # 读取最后 2000 行
+                    with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+                        from collections import deque
+                        lines = list(deque(f, 2000))
+                        content = "".join(lines)
+                except Exception as e:
+                    content = f"Error reading file: {str(e)}"
+            elif file_info and file_info['name'].endswith('.zip'):
+                content = "ZIP archives cannot be viewed directly. Please download to view."
+                
+        context["log_content"] = content
+        context["current_file_info"] = file_info
+        
+        return context
+
+
+from datetime import datetime
+
+class LogFileView(LoginRequiredMixin, StaffRequiredMixin, View):
+    """
+    查看系统日志文件内容
+    """
+    def get(self, request, filename):
+        log_dir = settings.BASE_DIR / "logs"
+        file_path = log_dir / filename
+        
+        # 安全检查：防止路径遍历
+        if not file_path.resolve().is_relative_to(log_dir.resolve()):
+            raise Http404("Invalid file path")
+            
+        if not file_path.exists():
+            raise Http404("File not found")
+            
+        # 读取最后 2000 行
+        lines = []
+        try:
+            with open(file_path, 'r', encoding='utf-8', errors='replace') as f:
+                # 简单读取，大文件可能需要优化 (seek)
+                # 这里假设日志文件不会特别巨大，或者我们只读最后一部分
+                # 使用 deque 读取最后 N 行
+                from collections import deque
+                lines = list(deque(f, 2000))
+        except Exception as e:
+            lines = [f"Error reading file: {str(e)}"]
+            
+        content = "".join(lines)
+        
+        return render(request, "administration/logfile_detail.html", {
+            "filename": filename,
+            "content": content
+        })
+
+
+class LogFileDownloadView(LoginRequiredMixin, StaffRequiredMixin, View):
+    """
+    下载系统日志文件
+    """
+    def get(self, request, filename):
+        log_dir = settings.BASE_DIR / "logs"
+        file_path = log_dir / filename
+        
+        if not file_path.resolve().is_relative_to(log_dir.resolve()):
+            raise Http404("Invalid file path")
+            
+        if not file_path.exists():
+            raise Http404("File not found")
+            
+        from django.http import FileResponse
+        return FileResponse(open(file_path, 'rb'), as_attachment=True, filename=filename)
+
+
+class LogFileDeleteView(LoginRequiredMixin, StaffRequiredMixin, View):
+    """
+    删除系统日志文件
+    """
+    def post(self, request, filename):
+        log_dir = settings.BASE_DIR / "logs"
+        file_path = log_dir / filename
+        
+        if not file_path.resolve().is_relative_to(log_dir.resolve()):
+            messages.error(request, "非法文件路径")
+        elif not file_path.exists():
+            messages.error(request, "文件不存在")
+        else:
+            try:
+                os.remove(file_path)
+                messages.success(request, f"文件 {filename} 已删除")
+            except Exception as e:
+                messages.error(request, f"删除失败: {str(e)}")
+                
+        return redirect("administration:logfile_list")
+
+
+# --- Bulk Action View (批量操作视图) ---
 from django.apps import apps
 
 class BulkActionView(LoginRequiredMixin, StaffRequiredMixin, View):
@@ -826,11 +1136,6 @@ class BulkActionView(LoginRequiredMixin, StaffRequiredMixin, View):
     - export_json: 导出选中项为 JSON
     - set_staff: 设为管理员 (User)
     - remove_staff: 移除管理员权限 (User)
-    
-    逻辑:
-    1. 根据 model 参数动态查找模型类。
-    2. 根据 action 参数执行相应的批量更新或删除操作。
-    3. 返回操作结果消息。
     """
     def post(self, request, model):
         action = request.POST.get("action")
@@ -908,7 +1213,7 @@ class BulkActionView(LoginRequiredMixin, StaffRequiredMixin, View):
         return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
 
 
-# --- Export/Import Views ---
+# --- Export/Import Views (导入导出视图) ---
 class ExportAllView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     导出全部数据视图
@@ -1004,11 +1309,14 @@ class ImportJsonView(LoginRequiredMixin, StaffRequiredMixin, View):
         return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
 
 
-# --- Debug Views ---
+# --- Debug Views (调试工具视图) ---
 from django.core.cache import cache
 from django.core.mail import send_mail
-from django.urls import get_resolver
+from django.urls import get_resolver, reverse
 from django.db import connection
+from django.apps import apps
+import re
+
 try:
     from faker import Faker
 except ImportError:
@@ -1023,12 +1331,15 @@ class DebugDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     - 关键对象数量统计
     - 系统所有 URL 模式列表 (前 50 条)
     """
-    template_name = "administration/debug/dashboard.html"
+    template_name = "administration/debug.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Database check
+        # 显式添加 debug_mode 到上下文
+        context['debug_mode'] = settings.DEBUG
+
+        # 数据库连接检查
         try:
             with connection.cursor() as cursor:
                 cursor.execute("SELECT 1")
@@ -1036,35 +1347,148 @@ class DebugDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         except Exception:
             context["db_ok"] = False
 
-        # Counts
+        # 对象计数
         context["counts"] = {
             "users": User.objects.count(),
             "posts": Post.objects.count(),
             "comments": Comment.objects.count(),
         }
 
-        # URL Patterns
+        # URL 路由解析与展示
         url_patterns = []
         resolver = get_resolver()
-        for pattern in resolver.url_patterns:
-            if hasattr(pattern, 'url_patterns'):
-                for sub_pattern in pattern.url_patterns:
+        
+        def process_patterns(patterns, prefix="", namespace_prefix=""):
+            for pattern in patterns:
+                if hasattr(pattern, 'url_patterns'):
+                    # 递归处理 include()
+                    new_prefix = prefix + str(pattern.pattern)
+                    
+                    # 处理命名空间
+                    new_ns = namespace_prefix
+                    if hasattr(pattern, 'namespace') and pattern.namespace:
+                        if new_ns:
+                            new_ns = f"{new_ns}:{pattern.namespace}"
+                        else:
+                            new_ns = pattern.namespace
+                    
+                    process_patterns(pattern.url_patterns, new_prefix, new_ns)
+                elif hasattr(pattern, 'name') and pattern.name:
+                    # 叶子节点 (实际视图)
+                    full_pattern = prefix + str(pattern.pattern)
+                    
+                    # 构建包含命名空间的完整名称
+                    full_name = pattern.name
+                    if namespace_prefix:
+                        full_name = f"{namespace_prefix}:{pattern.name}"
+                    
+                    # 清理正则表达式符号，用于显示
+                    display_pattern = full_pattern.replace('^', '').replace('$', '')
+                    if not display_pattern.startswith('/'):
+                        display_pattern = '/' + display_pattern
+                        
+                    # 尝试生成示例 URL
+                    sample_url = None
+                    description = ""
+                    
+                    # --- 自动生成描述逻辑 ---
+                    
+                    # 1. 自动解析 Admin 视图
+                    if 'admin' in full_name:
+                        try:
+                            local_name = pattern.name
+                            
+                            action = ""
+                            model_info = ""
+                            
+                            if local_name == 'index':
+                                description = "后台管理首页"
+                            elif local_name == 'password_change':
+                                description = "修改密码"
+                            elif local_name == 'logout':
+                                description = "注销登录"
+                            elif local_name.endswith('_changelist'):
+                                action = "列表"
+                                model_info = local_name[:-11]
+                            elif local_name.endswith('_add'):
+                                action = "添加"
+                                model_info = local_name[:-4]
+                            elif local_name.endswith('_change'):
+                                action = "编辑"
+                                model_info = local_name[:-7]
+                            elif local_name.endswith('_delete'):
+                                action = "删除"
+                                model_info = local_name[:-7]
+                            elif local_name.endswith('_history'):
+                                action = "历史"
+                                model_info = local_name[:-8]
+                            
+                            if action and model_info:
+                                parts = model_info.split('_')
+                                found_model = None
+                                # 尝试解析 App 和 Model
+                                for i in range(1, len(parts)):
+                                    app_label = '_'.join(parts[:i])
+                                    model_name = '_'.join(parts[i:])
+                                    try:
+                                        found_model = apps.get_model(app_label, model_name)
+                                        break
+                                    except LookupError:
+                                        continue
+                                
+                                if found_model:
+                                    description = f"{found_model._meta.verbose_name} {action}"
+                                else:
+                                    formatted_name = model_info.replace('_', ' ').title()
+                                    description = f"{formatted_name} {action}"
+                            
+                            if not description:
+                                description = "后台管理功能"
+                                
+                        except Exception:
+                            description = "后台管理"
+                    
+                    # 2. 手动映射 (高优先级覆盖)
+                    if full_name == 'home': description = "前台首页"
+                    elif full_name == 'post_list': description = "文章列表"
+                    elif full_name == 'post_detail': description = "文章详情"
+                    elif full_name == 'archive': description = "文章归档"
+                    elif full_name == 'category_list': description = "分类列表"
+                    elif full_name == 'tag_list': description = "标签列表"
+                    elif full_name == 'search': description = "搜索页面"
+                    elif full_name == 'about': description = "关于页面"
+                    elif full_name == 'contact': description = "联系页面"
+                    elif full_name.startswith('administration:'): description = "自定义管理面板"
+                    
+                    # --- URL 反向解析逻辑 ---
+                    
+                    # 尝试反向解析无参数 URL
                     try:
-                        url_patterns.append({
-                            "pattern": str(pattern.pattern) + str(sub_pattern.pattern),
-                            "name": sub_pattern.name,
-                            "lookup_str": sub_pattern.lookup_str
-                        })
+                        sample_url = reverse(full_name)
                     except Exception:
                         pass
-            elif hasattr(pattern, 'name'):
-                url_patterns.append({
-                    "pattern": str(pattern.pattern),
-                    "name": pattern.name,
-                    "lookup_str": pattern.lookup_str
-                })
+                    
+                    # 判断是否需要参数
+                    has_args = '<' in full_pattern or '(?P' in full_pattern
+                    
+                    # 如果有 sample_url，说明不需要参数（或使用了默认值）
+                    needs_args = has_args and not sample_url
+                    
+                    url_patterns.append({
+                        "pattern": full_pattern,
+                        "display_pattern": display_pattern,
+                        "name": full_name,
+                        "sample_url": sample_url,
+                        "description": description,
+                        "needs_args": needs_args
+                    })
+
+        process_patterns(resolver.url_patterns)
         
-        context["url_patterns"] = url_patterns[:50]
+        # 按名称排序以提高可读性
+        url_patterns.sort(key=lambda x: x['name'] or '')
+        
+        context["url_patterns"] = url_patterns
         return context
 
 
@@ -1080,8 +1504,13 @@ class DebugMockView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     template_name = "administration/debug/mock.html"
 
     def post(self, request, *args, **kwargs):
+        # 仅在调试模式下允许生成 Mock 数据
+        if not settings.DEBUG:
+            messages.error(request, "生产环境禁止生成 Mock 数据")
+            return redirect("administration:index")
+
         try:
-            # Extract counts from form
+            # 从表单提取数量
             users_count = int(request.POST.get("users_count", 0))
             categories_count = int(request.POST.get("categories_count", 0))
             tags_count = int(request.POST.get("tags_count", 0))
@@ -1089,11 +1518,6 @@ class DebugMockView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             comments_count = int(request.POST.get("comments_count", 0))
             password = request.POST.get("password", "password123")
             generate_extras = request.POST.get("generate_extras") == "on"
-            
-            # If "Generate All" or specific section, we can handle logic here.
-            # But simpler to just pass all non-zero values to the service.
-            # The UI might send 0 for hidden sections or we might need to check which section is active.
-            # Let's assume the new UI will submit all relevant fields.
             
             results = generate_mock_data(
                 users_count=users_count,
@@ -1124,6 +1548,11 @@ class DebugMockView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 
 
 class DebugCacheView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+    """
+    缓存调试视图
+    
+    提供缓存清理功能，用于开发调试或解决缓存一致性问题。
+    """
     template_name = "administration/debug/cache.html"
 
     def post(self, request, *args, **kwargs):
@@ -1132,19 +1561,24 @@ class DebugCacheView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             cache.clear()
             messages.success(request, "全站缓存已清理")
         elif action == "clear_templates":
-            # Django templates might not use the default cache backend directly, 
-            # but usually cache.clear() handles standard caching.
-            # Specific template loader cache clearing depends on loader.
+            # 清理模板缓存
             cache.clear() 
             messages.success(request, "模板缓存已清理")
         return self.get(request, *args, **kwargs)
 
 
 class DebugEmailView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+    """
+    邮件发送调试视图
+    
+    用于测试 SMTP 配置是否正确，可以发送测试邮件。
+    显示当前 SMTP 配置信息 (SMTP_HOST, SMTP_PORT, etc.)。
+    """
     template_name = "administration/debug/email.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        # 从 config (Constance) 获取当前动态配置，用于展示
         context["email_host"] = getattr(config, "SMTP_HOST", "Unknown")
         context["email_port"] = getattr(config, "SMTP_PORT", "Unknown")
         context["email_host_user"] = getattr(config, "SMTP_USER", "Unknown")
@@ -1160,6 +1594,7 @@ class DebugEmailView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             messages.error(request, "请填写完整信息")
             return self.get(request, *args, **kwargs)
             
+        # 优先使用动态配置的发送地址，否则回退到系统默认
         from_email = getattr(config, "SMTP_FROM_EMAIL", None) or settings.DEFAULT_FROM_EMAIL
 
         try:
@@ -1178,11 +1613,13 @@ class DebugEmailView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 
 from constance import config
 from django.conf import settings as django_settings
+from pygments.styles import get_all_styles
 
 
 class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     """
     系统设置视图
+    
     基于 django-constance 动态管理网站配置。
     """
     template_name = "administration/settings.html"
@@ -1190,7 +1627,10 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         
-        # Helper to get item data
+        # 获取所有可用的 Pygments 风格并排序
+        context["pygments_styles"] = sorted(list(get_all_styles()))
+        
+        # 辅助函数：获取配置项数据
         def get_item_data(key):
             if not hasattr(django_settings, "CONSTANCE_CONFIG") or key not in django_settings.CONSTANCE_CONFIG:
                 return None
@@ -1215,13 +1655,16 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
                     if item_data:
                         items.append(item_data)
                 
-                # Map titles to icons/slugs for UI
+                # UI 映射：将标题映射为图标和 Slug
                 icon = "settings"
                 slug = "general"
                 
                 if "基本设置" in title or "General" in title:
                     icon = "tune"
                     slug = "general"
+                elif "外观设置" in title or "Appearance" in title:
+                    icon = "palette"
+                    slug = "appearance"
                 elif "后台界面" in title or "Admin" in title:
                     icon = "admin_panel_settings"
                     slug = "admin"
@@ -1245,7 +1688,7 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
                     "items": items
                 })
         else:
-            # Fallback if no fieldsets defined
+            # 降级处理：如果未定义分组配置
             items = []
             if hasattr(django_settings, "CONSTANCE_CONFIG"):
                 for key in django_settings.CONSTANCE_CONFIG.keys():
@@ -1263,12 +1706,12 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         return context
 
     def post(self, request, *args, **kwargs):
-        # Save settings
+        # 保存设置
         if hasattr(django_settings, "CONSTANCE_CONFIG"):
             for key in django_settings.CONSTANCE_CONFIG.keys():
                 if key in request.POST:
                     new_value = request.POST.get(key)
-                    # Simple type conversion (improve this for booleans, ints etc)
+                    # 简单类型转换 (后续可优化布尔值、整数等的处理)
                     current_value = getattr(config, key)
                     if isinstance(current_value, bool):
                         setattr(config, key, new_value == "on")
@@ -1280,7 +1723,7 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
                     else:
                         setattr(config, key, new_value)
                 elif isinstance(getattr(config, key), bool):
-                    # Checkbox unchecked
+                    # 处理未选中的复选框 (HTML 表单不提交未选中的 checkbox)
                     setattr(config, key, False)
                     
         messages.success(request, "设置已保存")

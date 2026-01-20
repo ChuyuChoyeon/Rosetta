@@ -1,0 +1,28 @@
+{% for group in groups %}
+<tr class="hover">
+    <td>{{ group.id }}</td>
+    <td class="font-medium">{{ group.name }}</td>
+    <td>
+        <span class="badge badge-sm badge-outline">{{ group.permissions.count }}</span>
+    </td>
+    <td>
+            <span class="badge badge-sm badge-ghost">{{ group.user_set.count }}</span>
+    </td>
+    <td class="text-center">
+        <div class="join">
+            <a href="{% url 'administration:group_edit' group.pk %}" class="btn btn-xs btn-ghost join-item" title="编辑">
+                <span class="material-symbols-outlined text-sm">edit</span>
+            </a>
+            <a href="{% url 'administration:group_delete' group.pk %}" class="btn btn-xs btn-ghost text-error join-item" title="删除">
+                <span class="material-symbols-outlined text-sm">delete</span>
+            </a>
+        </div>
+    </td>
+</tr>
+{% empty %}
+<tr>
+    <td colspan="5" class="text-center py-8 text-base-content/60">
+        暂无用户组
+    </td>
+</tr>
+{% endfor %}

@@ -4,8 +4,7 @@
 {% block debug_title %}Mock 数据生成{% endblock %}
 
 {% block debug_content %}
-{% captureas card_content %}
-<div class="p-6">
+<div class="p-6 bg-base-100 rounded-xl border border-base-content/10 shadow-sm">
     <h2 class="card-title mb-4 flex items-center gap-2">
         <span class="material-symbols-outlined text-primary">science</span>
         高级 Mock 数据生成器
@@ -18,77 +17,85 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <!-- User Settings -->
-            <div class="card bg-base-200/50 border border-base-200 shadow-sm">
-                <div class="card-body p-4">
-                    <h3 class="card-title text-base flex items-center gap-2 mb-2">
-                        <span class="material-symbols-outlined text-info text-lg">group</span> 用户数据
-                    </h3>
-                    <div class="form-control w-full">
-                        <label class="label"><span class="label-text">生成用户数量</span></label>
-                        <input type="number" name="users_count" value="5" min="0" max="50" class="input input-bordered focus:input-primary">
-                        <label class="label"><span class="label-text-alt opacity-70">包含头像、简介、社交链接</span></label>
-                    </div>
-                    <div class="form-control w-full mt-2">
-                        <label class="label"><span class="label-text">默认密码</span></label>
-                        <input type="text" name="password" value="password123" class="input input-bordered focus:input-primary font-mono">
-                    </div>
+            {% captureas user_card %}
+            <div class="h-full p-4">
+                <h3 class="card-title text-base flex items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined text-info text-lg">group</span> 用户数据
+                </h3>
+                <div class="form-control w-full">
+                    <label class="label"><span class="label-text">生成用户数量</span></label>
+                    <input type="number" name="users_count" value="5" min="0" max="50" class="input input-bordered focus:input-primary">
+                    <label class="label"><span class="label-text-alt opacity-70">包含头像、简介、社交链接</span></label>
+                </div>
+                <div class="form-control w-full mt-2">
+                    <label class="label"><span class="label-text">默认密码</span></label>
+                    <input type="text" name="password" value="password123" class="input input-bordered focus:input-primary font-mono">
                 </div>
             </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=user_card extra_classes="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100" %}
 
             <!-- Taxonomy Settings -->
-            <div class="card bg-base-200/50 border border-base-200 shadow-sm">
-                <div class="card-body p-4">
-                    <h3 class="card-title text-base flex items-center gap-2 mb-2">
-                        <span class="material-symbols-outlined text-success text-lg">category</span> 内容分类
-                    </h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div class="form-control w-full">
-                            <label class="label"><span class="label-text">分类数量</span></label>
-                            <input type="number" name="categories_count" value="5" min="0" max="20" class="input input-bordered focus:input-primary">
-                        </div>
-                        <div class="form-control w-full">
-                            <label class="label"><span class="label-text">标签数量</span></label>
-                            <input type="number" name="tags_count" value="10" min="0" max="50" class="input input-bordered focus:input-primary">
-                        </div>
+            {% captureas taxonomy_card %}
+            <div class="h-full p-4">
+                <h3 class="card-title text-base flex items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined text-success text-lg">category</span> 内容分类
+                </h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">分类数量</span></label>
+                        <input type="number" name="categories_count" value="5" min="0" max="20" class="input input-bordered focus:input-primary">
+                    </div>
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">标签数量</span></label>
+                        <input type="number" name="tags_count" value="10" min="0" max="50" class="input input-bordered focus:input-primary">
                     </div>
                 </div>
             </div>
+            {% endcaptureas %}
+            {% include 'components/inspira/card_spotlight.html' with slot_content=taxonomy_card extra_classes="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100" %}
 
             <!-- Content Settings -->
-            <div class="card bg-base-200/50 border border-base-200 shadow-sm md:col-span-2">
-                <div class="card-body p-4">
-                    <h3 class="card-title text-base flex items-center gap-2 mb-2">
-                        <span class="material-symbols-outlined text-accent text-lg">article</span> 文章与互动
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="form-control w-full">
-                            <label class="label"><span class="label-text">文章数量</span></label>
-                            <input type="number" name="posts_count" value="10" min="0" max="50" class="input input-bordered focus:input-primary">
-                            <label class="label"><span class="label-text-alt opacity-70">生成包含代码块、表格、长文本的 Markdown 文章</span></label>
-                        </div>
-                        <div class="form-control w-full">
-                            <label class="label"><span class="label-text">评论数量</span></label>
-                            <input type="number" name="comments_count" value="30" min="0" max="200" class="input input-bordered focus:input-primary">
-                            <label class="label"><span class="label-text-alt opacity-70">生成多级嵌套评论与通知</span></label>
-                        </div>
+            {% captureas content_card %}
+            <div class="h-full p-4">
+                <h3 class="card-title text-base flex items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined text-accent text-lg">article</span> 文章与互动
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">文章数量</span></label>
+                        <input type="number" name="posts_count" value="10" min="0" max="50" class="input input-bordered focus:input-primary">
+                        <label class="label"><span class="label-text-alt opacity-70">生成包含代码块、表格、长文本的 Markdown 文章</span></label>
+                    </div>
+                    <div class="form-control w-full">
+                        <label class="label"><span class="label-text">评论数量</span></label>
+                        <input type="number" name="comments_count" value="30" min="0" max="200" class="input input-bordered focus:input-primary">
+                        <label class="label"><span class="label-text-alt opacity-70">生成多级嵌套评论与通知</span></label>
                     </div>
                 </div>
+            </div>
+            {% endcaptureas %}
+            <div class="md:col-span-2">
+                {% include 'components/inspira/card_spotlight.html' with slot_content=content_card extra_classes="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100 h-full" %}
             </div>
 
             <!-- Site Config Settings -->
-            <div class="card bg-base-200/50 border border-base-200 shadow-sm md:col-span-2">
-                <div class="card-body p-4">
-                    <h3 class="card-title text-base flex items-center gap-2 mb-2">
-                        <span class="material-symbols-outlined text-warning text-lg">settings_applications</span> 站点配置
-                    </h3>
-                    <div class="form-control">
-                        <label class="label cursor-pointer justify-start gap-4">
-                            <input type="checkbox" name="generate_extras" class="checkbox checkbox-primary" checked>
-                            <span class="label-text">生成附加数据</span>
-                        </label>
-                        <p class="text-xs text-base-content/70 ml-10 mt-1">包含：友情链接、导航菜单、搜索框占位符</p>
-                    </div>
+            {% captureas config_card %}
+            <div class="h-full p-4">
+                <h3 class="card-title text-base flex items-center gap-2 mb-2">
+                    <span class="material-symbols-outlined text-warning text-lg">settings_applications</span> 站点配置
+                </h3>
+                <div class="form-control">
+                    <label class="label cursor-pointer justify-start gap-4">
+                        <input type="checkbox" name="generate_extras" class="checkbox checkbox-primary" checked>
+                        <span class="label-text">生成附加数据</span>
+                    </label>
+                    <p class="text-xs text-base-content/70 ml-10 mt-1">包含：友情链接、导航菜单、搜索框占位符</p>
                 </div>
+            </div>
+            {% endcaptureas %}
+            <div class="md:col-span-2">
+                {% include 'components/inspira/card_spotlight.html' with slot_content=config_card extra_classes="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100 h-full" %}
             </div>
         </div>
 
@@ -101,6 +108,4 @@
         </div>
     </form>
 </div>
-{% endcaptureas %}
-{% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
 {% endblock %}

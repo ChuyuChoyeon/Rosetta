@@ -27,6 +27,7 @@ from core.services import generate_mock_data
 class PageView(DetailView):
     """
     单页面视图
+    
     用于展示关于页、联系页等静态内容页面。
     """
     model = Page
@@ -40,7 +41,9 @@ class PageView(DetailView):
 def health_check(request):
     """
     健康检查接口
+    
     用于监控系统状态，检查数据库连接是否正常。
+    通常由负载均衡器或监控服务调用。
     """
     try:
         connection.ensure_connection()
@@ -62,6 +65,7 @@ def health_check(request):
 def admin_debug(request):
     """
     调试工具视图
+    
     提供 Mock 数据生成、缓存清理和邮件测试功能。
     仅限管理员访问。
     """
@@ -70,6 +74,7 @@ def admin_debug(request):
     if request.method == "POST":
         action = str(request.POST.get("action") or "")
 
+        # --- Mock 数据生成 ---
         if action == "generate_mock":
             try:
                 users_count = max(0, int(request.POST.get("users") or 0))
@@ -97,6 +102,7 @@ def admin_debug(request):
             )
             return redirect(reverse("administration:debug"))
 
+        # --- 缓存清理 ---
         elif action == "clear_cache":
             try:
                 cache.clear()
@@ -105,6 +111,7 @@ def admin_debug(request):
                 messages.error(request, f"清理缓存失败: {str(e)}")
             return redirect(reverse("administration:debug"))
 
+        # --- 邮件发送测试 ---
         elif action == "test_email":
             try:
                 fake = Faker("zh_CN")
@@ -123,6 +130,7 @@ def admin_debug(request):
         messages.error(request, "未知操作。")
         return redirect(reverse("administration:debug"))
 
+    # --- GET 请求处理 ---
     try:
         connection.ensure_connection()
         db_ok = True
@@ -155,7 +163,7 @@ def admin_debug(request):
             "comments": 60,
             "password": "password123",
         },
-        "url_patterns": url_patterns[:20],  # Show first 20 for brevity
+        "url_patterns": url_patterns[:20],  # 仅展示前20条，避免页面过长
     }
     return render(request, "administration/debug.html", context)
 
@@ -164,6 +172,7 @@ def admin_debug(request):
 def debug_api_stats(request):
     """
     调试 API：返回系统统计数据
+    
     包括用户、分类、文章、评论数量和数据库连接状态。
     """
     User = get_user_model()
@@ -190,6 +199,7 @@ def debug_api_stats(request):
 def debug_api_system(request):
     """
     调试 API：返回系统环境信息
+    
     包括 Python/Django 版本、已安装应用、中间件以及资源使用情况（CPU、内存、磁盘）。
     """
     installed_apps = list(getattr(settings, "INSTALLED_APPS", []))
@@ -204,7 +214,7 @@ def debug_api_system(request):
         and app not in {"blog", "users", "core"}
     ]
 
-    # PSUtil info
+    # 获取系统资源信息 (依赖 psutil)
     try:
         cpu_percent = psutil.cpu_percent(interval=None)
         memory = psutil.virtual_memory()
@@ -273,19 +283,19 @@ def debug_api_migrations(request):
 def debug_execute_command(request):
     """
     调试 API：执行受限的 Django 管理命令。
-    仅支持白名单内的命令。
+    
+    出于安全考虑，仅支持白名单内的命令。
     """
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
     command = request.POST.get("command")
-    args = request.POST.get("args", "").split()
-
-    # Allowed commands whitelist for security
+    
+    # 安全白名单：仅允许执行以下无害或只读命令
     ALLOWED_COMMANDS = {
         "check": ["--deploy", "--fail-level", "WARNING"],
         "showmigrations": ["--list"],
-        "diffsettings": ["--all"],
+        # "diffsettings": ["--all"],  # 已移除以防止敏感信息泄露
         "clearsessions": [],
         "help": [],
     }
@@ -293,24 +303,23 @@ def debug_execute_command(request):
     if command not in ALLOWED_COMMANDS:
         return JsonResponse({"error": "Command not allowed"}, status=403)
 
-    # Filter args strictly? For now, we trust staff, but let's be careful.
-    # Actually, let's just ignore user args for now and use safe defaults or empty
-    # Or allow user to provide args but we should probably sanitize.
-    # For this iteration, let's allow "safe" args if provided, or fallback to defaults.
-
-    # Simple approach: Run command with no args (or safe default args if needed)
-    # If user provides args, we append them.
-    # Be aware of injection, but call_command handles list of args safely (it's not shell=True).
-
+    # 目前忽略用户传递的参数，强制使用白名单中的安全参数
+    # 避免命令注入风险
+    safe_args = ALLOWED_COMMANDS[command]
+    
     out = StringIO()
     err = StringIO()
-
+    
     try:
-        call_command(command, *args, stdout=out, stderr=err)
-        return JsonResponse(
-            {"status": "ok", "output": out.getvalue(), "error": err.getvalue()}
-        )
+        call_command(command, *safe_args, stdout=out, stderr=err)
+        return JsonResponse({
+            "status": "success",
+            "output": out.getvalue(),
+            "error": err.getvalue()
+        })
     except Exception as e:
-        return JsonResponse(
-            {"status": "error", "output": out.getvalue(), "error": str(e)}
-        )
+        return JsonResponse({
+            "status": "error",
+            "output": out.getvalue(),
+            "error": str(e)
+        }, status=500)

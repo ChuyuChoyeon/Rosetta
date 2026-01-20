@@ -43,9 +43,17 @@ class CustomLoginView(LoginView):
     特性:
     - 使用自定义模板 users/login.html。
     - 若用户已登录，访问此页面会自动重定向到首页 (redirect_authenticated_user=True)。
+    - 增加封禁用户检查。
     """
     template_name = "users/login.html"
     redirect_authenticated_user = True
+
+    def form_valid(self, form):
+        user = form.get_user()
+        if user.is_banned:
+            messages.error(self.request, "您的账号已被封禁，禁止登录。")
+            return self.form_invalid(form)
+        return super().form_valid(form)
 
 
 class UpdateThemeView(LoginRequiredMixin, View):

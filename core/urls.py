@@ -23,13 +23,6 @@ urlpatterns = [
     path("about/", PageView.as_view(), {"slug": "about"}, name="about"),
     path("contact/", PageView.as_view(), {"slug": "contact"}, name="contact"),
     
-    # Rosetta 介绍页
-    path(
-        "rosetta/",
-        TemplateView.as_view(template_name="rosetta_intro.html"),
-        name="rosetta_intro",
-    ),
-    
     # 通用单页面路由 (放在最后)
     path("p/<slug:slug>/", PageView.as_view(), name="page_detail"),
 ]

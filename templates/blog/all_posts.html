@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% load static capture_tags %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    <div class="flex items-center gap-3">
+        <div class="p-3 rounded-xl bg-primary/10 text-primary">
+            <span class="material-symbols-outlined text-3xl">article</span>
+        </div>
+        <div>
+            <h1 class="text-3xl font-bold font-heading">全部文章</h1>
+            <p class="text-base-content/60 text-sm mt-1">共 {{ paginator.count|default:posts.count }} 篇文章</p>
+        </div>
+    </div>
+</div>
+
+<div class="flex flex-col lg:flex-row gap-8">
+    <!-- Main Content -->
+    <div class="flex-1 min-w-0">
+        
+        <!-- Post Grid -->
+        <div class="grid gap-6 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {% for post in posts %}
+            
+            {% captureas card_content %}
+            <div class="h-full flex flex-col group/card bg-base-100 rounded-2xl overflow-hidden transition-all duration-300 border border-base-content/5 hover:border-primary/20 hover:shadow-lg">
+                {% if post.cover_image %}
+                <figure class="overflow-hidden relative w-full aspect-w-3 aspect-h-2">
+                    <img src="{{ post.cover_image.url }}" 
+                         alt="{{ post.title }}" 
+                         class="object-cover w-full h-full group-hover/card:scale-105 transition-transform duration-300 absolute inset-0"
+                         loading="lazy" />
+                    <div class="absolute inset-0 bg-black/0 group-hover/card:bg-black/10 transition-colors duration-300"></div>
+                </figure>
+                {% else %}
+                <figure class="pattern-placeholder relative overflow-hidden group-hover/card:brightness-110 transition-all duration-300 ease-in-out flex items-center justify-center text-center w-full aspect-w-3 aspect-h-2"
+                        data-seed="{{ post.title }}"
+                        x-init="initGeoPattern($el, '{{ post.title }}')"
+                        x-effect="initGeoPattern($el, '{{ post.title }}')">
+                    <div class="flex items-center justify-center p-4 absolute inset-0">
+                        <div class="text-white font-bold text-lg leading-tight opacity-90 drop-shadow-md z-10 break-words w-full">{{ post.title }}</div>
+                    </div>
+                </figure>
+                {% endif %}
+                
+                <div class="card-body flex-1 p-6 relative">
+                    <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                        <a href="{% url 'post_detail' post.slug %}" class="line-clamp-2 before:absolute before:inset-0 z-20">{{ post.title }}</a>
+                    </h2>
+                    
+                    <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                        {% if post.is_pinned %}
+                        <div class="badge badge-accent badge-outline badge-sm gap-1 pl-1.5 pr-2 h-6">
+                            <span class="material-symbols-outlined text-[14px] leading-none -rotate-45">push_pin</span>
+                            <span class="text-xs font-medium">置顶</span>
+                        </div>
+                        {% endif %}
+                        {% if post.created_at|date:"Y-m-d" == now|date:"Y-m-d" %}
+                        <div class="badge badge-secondary badge-sm">最新</div>
+                        {% endif %}
+                        {% if post.category %}
+                        <a href="{% url 'post_by_category' post.category.slug %}" class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                            {{ post.category.name }}
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <p class="text-base-content/70 text-sm line-clamp-3 mb-4">{{ post.content|striptags|truncatechars:100 }}</p>
+                    
+                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-1" title="发布时间">
+                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                <span>{{ post.created_at|date:"m-d" }}</span>
+                            </div>
+                            <div class="flex items-center gap-1" title="阅读量">
+                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                <span>{{ post.views }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1" title="作者">
+                            <span class="material-symbols-outlined text-[14px]">person</span>
+                            <span class="font-medium">{{ post.author.nickname|default:post.author.username }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endcaptureas %}
+            
+            {% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden border-none shadow-none hover:shadow-xl bg-transparent h-full" %}
+            
+            {% empty %}
+            <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
+                <div class="w-24 h-24 bg-base-200 rounded-full flex items-center justify-center mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+                </div>
+                <h3 class="text-xl font-bold text-base-content/70">暂无文章</h3>
+                <p class="text-base-content/50 mt-2">敬请期待更多精彩内容！</p>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if is_paginated %}
+        <div class="join grid grid-cols-2 w-full max-w-xs mx-auto mt-12 shadow-sm">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-outline border-base-content/10 hover:bg-primary hover:border-primary hover:text-primary-content">上一页</a>
+            {% else %}
+            <button class="join-item btn btn-outline border-base-content/10 btn-disabled opacity-50">上一页</button>
+            {% endif %}
+            
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-outline border-base-content/10 hover:bg-primary hover:border-primary hover:text-primary-content">下一页</a>
+            {% else %}
+            <button class="join-item btn btn-outline border-base-content/10 btn-disabled opacity-50">下一页</button>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="{% static 'theme/js/geopattern.min.js' %}"></script>
+<script>
+    (function() {
+        window.initGeoPattern = function(el, title) {
+            if (!window.GeoPattern) return;
+            // Force regenerate if seed changed or not set
+            const seed = title || el.dataset.seed || 'Rosetta';
+            const pattern = GeoPattern.generate(seed);
+            el.style.backgroundImage = pattern.toDataUrl();
+        };
+
+        function initPatterns() {
+            if (!window.GeoPattern) return;
+            document.querySelectorAll('.pattern-placeholder').forEach(function(el) {
+                // Skip if already set
+                if (el.style.backgroundImage) return;
+                
+                const seed = el.dataset.seed || 'Rosetta';
+                const pattern = GeoPattern.generate(seed);
+                el.style.backgroundImage = pattern.toDataUrl();
+            });
+        }
+        
+        // Initial load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initPatterns);
+        } else {
+            initPatterns();
+        }
+
+        // Re-run on HTMX swaps
+        document.body.addEventListener('htmx:afterSwap', initPatterns);
+    })();
+</script>
+{% endblock %}
