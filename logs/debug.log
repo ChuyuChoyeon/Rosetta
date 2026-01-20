@@ -1,6 +1,0 @@
-2026-01-20 15:21:58.984 | ℹ️ INFO     | - | django.core.handlers.asgi:process_request:191 - 127.0.0.1:9836 - "POST /admin/logs/system/debug.log/delete/ HTTP/1.1" 302
-2026-01-20 15:21:58.984 | ℹ️ INFO     | - | django.core.handlers.asgi:process_request:191 - 127.0.0.1:9836 - "POST /admin/logs/system/debug.log/delete/ HTTP/1.1" 302
-2026-01-20 15:21:59.032 | ℹ️ INFO     | - | django.core.handlers.asgi:process_request:191 - 127.0.0.1:9836 - "GET /admin/logs/system/ HTTP/1.1" 200
-2026-01-20 15:21:59.032 | ℹ️ INFO     | - | django.core.handlers.asgi:process_request:191 - 127.0.0.1:9836 - "GET /admin/logs/system/ HTTP/1.1" 200
-2026-01-20 15:21:59.094 | ℹ️ INFO     | - | django.core.handlers.asgi:process_request:191 - 127.0.0.1:9836 - "GET /static/django-browser-reload/reload-listener.js HTTP/1.1" 304
-2026-01-20 15:21:59.094 | ℹ️ INFO     | - | django.core.handlers.asgi:process_request:191 - 127.0.0.1:9836 - "GET /static/django-browser-reload/reload-listener.js HTTP/1.1" 304
