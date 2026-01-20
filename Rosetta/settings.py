@@ -36,7 +36,18 @@ DEBUG = os.environ.get("DEBUG", "True") == "True"
 
 # 允许访问的主机域名
 # 生产环境请填入具体的域名或 IP 地址，避免 HTTP Host 头攻击。
-ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = ["*"]
+
+# CSRF 信任源配置 (解决 Django 4.0+ Origin 验证失败问题)
+# 必须包含协议 (http:// 或 https://)
+CSRF_TRUSTED_ORIGINS = [
+    "https://choyeon.cc",
+    "http://choyeon.cc",
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+]
+if os.environ.get("CSRF_TRUSTED_ORIGINS"):
+    CSRF_TRUSTED_ORIGINS.extend(os.environ.get("CSRF_TRUSTED_ORIGINS").split(","))
 
 
 # ------------------------------------------------------------------------------
@@ -47,9 +58,9 @@ SECURE_BROWSER_XSS_FILTER = True
 # 防止浏览器嗅探 Content-Type
 SECURE_CONTENT_TYPE_NOSNIFF = True
 # 仅通过 HTTPS 传输 Session Cookie（非调试模式下生效）
-SESSION_COOKIE_SECURE = not DEBUG
+SESSION_COOKIE_SECURE = False
 # 仅通过 HTTPS 传输 CSRF Cookie（非调试模式下生效）
-CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = False
 # 禁止 JavaScript 访问 Session Cookie，防止 XSS 窃取 Session
 SESSION_COOKIE_HTTPONLY = True
 # 默认字符集
@@ -101,7 +112,8 @@ INSTALLED_APPS = [
     "watson",                 # 数据库全文搜索
     "meta",                   # SEO Meta 标签生成
     "constance",              # 动态配置系统 (支持数据库或 Redis)
-    # "constance.backends.database",
+    'constance.backends.database',
+
 
     
     # --- 核心业务模块 ---
@@ -117,7 +129,6 @@ INSTALLED_APPS = [
 # 注意：中间件的顺序至关重要，请求从上往下处理，响应从下往上返回。
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    # "whitenoise.middleware.WhiteNoiseMiddleware",        # 静态文件服务 (生产环境)
     "core.logging.RequestIDMiddleware",                  # 请求 ID 追踪 (新增)
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -228,22 +239,14 @@ USE_TZ = True                 # 启用时区支持 (数据库存储 UTC，显示
 # ------------------------------------------------------------------------------
 # 静态文件与媒体资源
 # ------------------------------------------------------------------------------
-# 静态文件 URL 前缀
-STATIC_URL = "static/"
-# 收集静态文件的目录 (执行 python manage.py collectstatic 后生成)
-STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# 用户上传文件 URL 前缀
-MEDIA_URL = "/media/"
-# 用户上传文件存储路径
-MEDIA_ROOT = BASE_DIR / "media"
 
 # settings.py
 STATIC_URL = '/static/'
-STATIC_ROOT = '/opt/www/sites/choyeon.cc/index/static'  # 直接输出到挂载目录
+STATIC_ROOT = BASE_DIR / "static"
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/opt/www/sites/choyeon.cc/index/media'
+MEDIA_ROOT = BASE_DIR / "media"
 
 
 # 静态文件查找策略
@@ -326,7 +329,7 @@ if os.environ.get("REDIS_URL"):
     SESSION_CACHE_ALIAS = "default"
     
     # 3. 动态配置存储 (切换到 Redis)
-    CONSTANCE_BACKEND = "constance.backends.redis.RedisBackend"
+    CONSTANCE_BACKEND = "constance.backends.redisd.RedisBackend"
     CONSTANCE_REDIS_CONNECTION = os.environ.get("REDIS_URL")
     CONSTANCE_REDIS_PREFIX = "rosetta_config:"
 

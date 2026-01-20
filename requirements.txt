@@ -659,3 +659,4 @@ win32-setctime==1.2.0 ; sys_platform == 'win32' \
     --hash=sha256:95d644c4e708aba81dc3704a116d8cbc974d70b3bdb8be1d150e36be6e9d1390 \
     --hash=sha256:ae1fdf948f5640aae05c511ade119313fb6a30d7eabe25fef9764dca5873c4c0
     # via loguru
+django-constance[redis]
