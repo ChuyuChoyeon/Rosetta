@@ -29,3 +29,5 @@ migrations/
 .env
 logs/debug.log
 logs/
+static/
+media/
