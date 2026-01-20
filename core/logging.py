@@ -1,6 +1,41 @@
 import logging
+import uuid
+import threading
 from loguru import logger
 from django.conf import settings
+
+# Thread-local storage for request ID
+_thread_locals = threading.local()
+
+def get_request_id():
+    """获取当前线程的请求 ID"""
+    return getattr(_thread_locals, "request_id", None)
+
+def set_request_id(request_id):
+    """设置当前线程的请求 ID"""
+    _thread_locals.request_id = request_id
+
+
+class RequestIDMiddleware:
+    """
+    请求 ID 中间件 (Request ID Middleware)
+    
+    为每个请求生成唯一的 ID，并将其注入到当前线程的上下文中。
+    """
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        request_id = str(uuid.uuid4())
+        set_request_id(request_id)
+        
+        # 将 request_id 绑定到 loguru 上下文
+        with logger.contextualize(request_id=request_id):
+            response = self.get_response(request)
+            
+        # 在响应头中返回请求 ID，方便调试
+        response["X-Request-ID"] = request_id
+        return response
 
 
 class InterceptHandler(logging.Handler):

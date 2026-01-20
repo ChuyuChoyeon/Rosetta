@@ -1098,7 +1098,7 @@ class LogFileDownloadView(LoginRequiredMixin, StaffRequiredMixin, View):
 
 class LogFileDeleteView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
-    删除系统日志文件
+    删除或清空系统日志文件
     """
     def post(self, request, filename):
         log_dir = settings.BASE_DIR / "logs"
@@ -1110,10 +1110,18 @@ class LogFileDeleteView(LoginRequiredMixin, StaffRequiredMixin, View):
             messages.error(request, "文件不存在")
         else:
             try:
-                os.remove(file_path)
-                messages.success(request, f"文件 {filename} 已删除")
+                action = request.POST.get("action")
+                if action == "clear":
+                    # 清空文件内容，但不删除文件
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        f.truncate()
+                    messages.success(request, f"文件 {filename} 内容已清空")
+                else:
+                    # 默认行为：删除文件
+                    os.remove(file_path)
+                    messages.success(request, f"文件 {filename} 已删除")
             except Exception as e:
-                messages.error(request, f"删除失败: {str(e)}")
+                messages.error(request, f"操作失败: {str(e)}")
                 
         return redirect("administration:logfile_list")
 

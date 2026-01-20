@@ -94,10 +94,7 @@ INSTALLED_APPS = [
     "theme",                  # 前端主题 (DaisyUI)
     "django_browser_reload",  # 开发环境浏览器自动刷新
     "django_htmx",            # HTMX 前后端交互支持
-    "django_filters",         # 高级查询过滤器
-    "import_export",          # 数据导入导出工具
     "captcha",                # 图形验证码
-    "simple_history",         # 模型变更审计与回滚
     "rest_framework",         # RESTful API 框架
     "rest_framework_simplejwt", # JWT 认证支持
     "imagekit",               # 图片处理 (缩略图、调整大小)
@@ -106,7 +103,6 @@ INSTALLED_APPS = [
     "meta",                   # SEO Meta 标签生成
     "constance",              # 动态配置系统 (支持数据库或 Redis)
     "constance.backends.database",
-    "chartjs",                # Chart.js 图表渲染辅助
     
     # --- 核心业务模块 ---
     "blog.apps.BlogConfig",   # 博客内容管理
@@ -122,6 +118,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",        # 静态文件服务 (生产环境)
+    "core.logging.RequestIDMiddleware",                  # 请求 ID 追踪 (新增)
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -131,7 +128,6 @@ MIDDLEWARE = [
     
     # --- 扩展中间件 ---
     "django_htmx.middleware.HtmxMiddleware",             # 解析 HTMX 请求头
-    "simple_history.middleware.HistoryRequestMiddleware", # 自动记录操作用户
     "watson.middleware.SearchContextMiddleware",         # 自动更新搜索索引
 ]
 
@@ -430,6 +426,16 @@ LOGGING = {
             "level": "INFO",
             "propagate": True,
         },
+        "uvicorn": {
+            "handlers": ["intercept"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "uvicorn.access": {
+            "handlers": ["intercept"],
+            "level": "INFO",
+            "propagate": True,
+        },
         "django.db.backends": {
             "handlers": ["intercept"],
             "level": "WARNING",  # 仅记录警告级以上的 SQL 问题，避免日志爆炸
@@ -437,6 +443,8 @@ LOGGING = {
         },
     },
 }
+
+import sys
 
 # Loguru 文件日志配置
 LOG_DIR = BASE_DIR / "logs"
@@ -447,9 +455,48 @@ if not LOG_DIR.exists():
     except Exception:
         pass
 
+# 定义“清晰雄壮”的日志格式
+# 包含时间、级别图标、Request ID、位置和消息
+LOG_FORMAT = (
+    "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
+    "<level>{level.icon} {level: <8}</level> | "
+    "<cyan>{extra[request_id]}</cyan> | "
+    "<blue>{name}:{function}:{line}</blue> - "
+    "<level>{message}</level>"
+)
+
+# 移除默认的 handler
+from loguru import logger
+logger.remove()
+
+# 设置默认的 request_id，防止未经过中间件的日志报错
+logger.configure(extra={"request_id": "-"})
+
+# 配置级别图标 (让日志更雄壮)
+logger.level("TRACE", icon="🔍")
+logger.level("DEBUG", icon="🐛")
+logger.level("INFO", icon="ℹ️")
+logger.level("SUCCESS", icon="✅")
+logger.level("WARNING", icon="⚠️")
+logger.level("ERROR", icon="❌")
+logger.level("CRITICAL", icon="🚨")
+
 if not DEBUG:
-    # 生产环境：记录 INFO 及以上级别，按大小轮转，压缩归档
-    from loguru import logger
+    # --- 生产环境 ---
+    
+    # 1. 控制台输出 (Docker logs)
+    # 使用带颜色的格式，方便运维直接查看
+    logger.add(
+        sys.stderr,
+        level="INFO",
+        format=LOG_FORMAT,
+        enqueue=True,
+        backtrace=True,
+        diagnose=False, # 生产环境不泄露变量值
+    )
+    
+    # 2. 文件日志 (JSON)
+    # 用于 ELK 等日志分析系统
     logger.add(
         LOG_DIR / "rosetta.log",
         rotation="10 MB",     # 文件超过 10MB 时轮转
@@ -457,13 +504,33 @@ if not DEBUG:
         level="WARNING",      # 仅记录警告及以上
         compression="zip",    # 历史日志压缩存储
         enqueue=True,         # 异步写入，不阻塞主线程
+        serialize=True,       # JSON 序列化
+        backtrace=True,
+        diagnose=False,
     )
 else:
-    # 开发环境：记录 DEBUG 级别，方便调试
-    from loguru import logger
+    # --- 开发环境 ---
+    
+    # 1. 控制台输出
+    # 详细、高亮、全彩
+    logger.add(
+        sys.stderr,
+        level="DEBUG",
+        format=LOG_FORMAT,
+        enqueue=True,
+        backtrace=True,
+        diagnose=True,
+    )
+    
+    # 2. 文件日志
     logger.add(
         LOG_DIR / "debug.log",
         level="DEBUG",
+        format=LOG_FORMAT,
+        rotation="50 MB",
+        retention="7 days",
+        backtrace=True,
+        diagnose=True,
     )
 
 # 邮件后端配置 (使用支持 Constance 动态配置的自定义后端)

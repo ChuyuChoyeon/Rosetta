@@ -96,13 +96,32 @@
                     <span class="hidden sm:inline">下载</span>
                 </a>
                 <div class="divider divider-horizontal mx-0 my-1"></div>
-                <form action="{% url 'administration:logfile_delete' current_file %}" method="post" class="inline" onsubmit="return confirm('确定要永久删除此日志文件吗？');">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-ghost text-error gap-2 hover:bg-error/10">
-                        <span class="material-symbols-outlined text-sm">delete</span>
-                        <span class="hidden sm:inline">删除</span>
-                    </button>
-                </form>
+                <button type="button" class="btn btn-sm btn-ghost text-error gap-2 hover:bg-error/10" onclick="clear_log_modal.showModal()">
+                    <span class="material-symbols-outlined text-sm">ink_eraser</span>
+                    <span class="hidden sm:inline">清空</span>
+                </button>
+                <dialog id="clear_log_modal" class="modal">
+                    <div class="modal-box">
+                        <h3 class="font-bold text-lg text-error flex items-center gap-2">
+                            <span class="material-symbols-outlined">warning</span>
+                            确认清空日志？
+                        </h3>
+                        <p class="py-4">您确定要清空 <span class="font-mono font-bold">{{ current_file }}</span> 的内容吗？<br/>此操作<span class="font-bold text-error">不可恢复</span>，但不会删除文件本身。</p>
+                        <div class="modal-action">
+                            <form method="dialog">
+                                <button class="btn">取消</button>
+                            </form>
+                            <form action="{% url 'administration:logfile_delete' current_file %}" method="post">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="clear">
+                                <button type="submit" class="btn btn-error text-white">确认清空</button>
+                            </form>
+                        </div>
+                    </div>
+                    <form method="dialog" class="modal-backdrop">
+                        <button>close</button>
+                    </form>
+                </dialog>
             </div>
             {% endif %}
         </div>

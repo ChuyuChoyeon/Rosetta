@@ -26,15 +26,18 @@
     </div>
 </div>
 
-<div class="mockup-code bg-[#1e1e1e] text-gray-300 w-full overflow-x-auto">
+<div class="mockup-code bg-[#1e1e1e] text-gray-300 w-full overflow-x-auto max-h-[80vh] overflow-y-auto" id="log-container">
     <pre class="px-4 py-2 text-xs leading-5 font-mono"><code>{{ content }}</code></pre>
 </div>
 
 <script>
     // 自动滚动到底部
-    window.onload = function() {
-        window.scrollTo(0, document.body.scrollHeight);
-    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const logContainer = document.getElementById('log-container');
+        if (logContainer) {
+            logContainer.scrollTop = logContainer.scrollHeight;
+        }
+    });
 </script>
 
 {% endblock %}
