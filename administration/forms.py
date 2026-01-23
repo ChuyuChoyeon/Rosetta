@@ -68,6 +68,24 @@ class PostForm(forms.ModelForm):
             self.fields["tags_str"].initial = ",".join([t.name for t in self.instance.tags.all()])
         self.apply_styles()
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Apply styles to all fields
+        for name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.update({"class": "toggle toggle-success"})
+            elif isinstance(field.widget, (forms.ClearableFileInput, forms.FileInput)):
+                field.widget.attrs.update({"class": "file-input file-input-bordered w-full"})
+            elif isinstance(field.widget, forms.CheckboxSelectMultiple):
+                pass # CheckboxSelectMultiple needs special handling in template or custom widget
+            else:
+                field.widget.attrs.update({"class": "input input-bordered w-full"})
+                
+            if isinstance(field.widget, forms.Textarea):
+                field.widget.attrs.update({"class": "textarea textarea-bordered w-full"})
+            if isinstance(field.widget, forms.Select):
+                field.widget.attrs.update({"class": "select select-bordered w-full"})
+
     def save(self, commit=True):
         post = super().save(commit=False)
         
@@ -174,7 +192,7 @@ class TagForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs.update({"class": "checkbox checkbox-primary"})
+                field.widget.attrs.update({"class": "toggle toggle-success"})
             else:
                 field.widget.attrs.update({"class": "input input-bordered w-full"})
             
@@ -215,12 +233,17 @@ class NavigationForm(forms.ModelForm):
     """
     class Meta:
         model = Navigation
-        fields = ["title", "url", "order"]
+        fields = ["title", "url", "location", "order", "is_active"]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
-            field.widget.attrs.update({"class": "input input-bordered w-full"})
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.update({"class": "toggle toggle-success"})
+            elif isinstance(field.widget, forms.Select):
+                field.widget.attrs.update({"class": "select select-bordered w-full"})
+            else:
+                field.widget.attrs.update({"class": "input input-bordered w-full"})
 
 
 class SearchPlaceholderForm(forms.ModelForm):
@@ -235,7 +258,7 @@ class SearchPlaceholderForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs.update({"class": "checkbox checkbox-primary"})
+                field.widget.attrs.update({"class": "toggle toggle-success"})
             else:
                 field.widget.attrs.update({"class": "input input-bordered w-full"})
 
@@ -254,7 +277,7 @@ class FriendLinkForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
-                field.widget.attrs.update({"class": "checkbox checkbox-primary"})
+                field.widget.attrs.update({"class": "toggle toggle-success"})
             elif isinstance(field.widget, (forms.ClearableFileInput, forms.FileInput)):
                 field.widget.attrs.update(
                     {"class": "file-input file-input-bordered w-full"}
@@ -330,6 +353,24 @@ class UserForm(forms.ModelForm):
             "groups": forms.CheckboxSelectMultiple(),
             "user_permissions": forms.SelectMultiple(attrs={"class": "select select-bordered w-full h-48"}),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Apply styles to all fields
+        for name, field in self.fields.items():
+            if isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs.update({"class": "toggle toggle-success"})
+            elif isinstance(field.widget, (forms.ClearableFileInput, forms.FileInput)):
+                field.widget.attrs.update({"class": "file-input file-input-bordered w-full"})
+            elif isinstance(field.widget, forms.CheckboxSelectMultiple):
+                pass # CheckboxSelectMultiple needs special handling in template or custom widget
+            else:
+                field.widget.attrs.update({"class": "input input-bordered w-full"})
+                
+            if isinstance(field.widget, forms.Textarea):
+                field.widget.attrs.update({"class": "textarea textarea-bordered w-full"})
+            if isinstance(field.widget, forms.Select):
+                field.widget.attrs.update({"class": "select select-bordered w-full"})
 
     def save(self, commit=True):
         user = super().save(commit=False)

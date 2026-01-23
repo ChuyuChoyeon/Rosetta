@@ -1,18 +1,11 @@
 from .models import FriendLink, Navigation, SearchPlaceholder
 from users.models import UserPreference
+from constance import config
 
 
 def site_settings(request):
     """
     全局上下文处理器 (Context Processor)
-    
-    向所有模板注入全站通用的配置和数据，避免在每个视图中重复获取。
-    
-    注入数据:
-    - friend_links: 友情链接 (FriendLink)
-    - navigations: 导航菜单 (Navigation)
-    - themes: 可选的主题列表 (用于主题切换器)
-    - search_placeholders: 搜索框占位符文本列表 (用于前端打字机效果)
     """
     # 将元组形式的选项转换为字典列表，方便模板遍历使用
     themes = [
@@ -30,4 +23,5 @@ def site_settings(request):
         "navigations": Navigation.objects.filter(is_active=True),
         "themes": themes,
         "search_placeholders": placeholders,
+        "config": config,
     }

@@ -84,7 +84,7 @@
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200">
                         <li>
-                            <a href="{% url 'administration:export_all' 'User' %}" target="_blank" class="gap-3">
+                            <a href="{% url 'administration:export_all' 'user' %}" target="_blank" class="gap-3">
                                 <span class="material-symbols-outlined text-base-content/70">file_download</span>
                                 导出全部 (JSON)
                             </a>
@@ -135,9 +135,9 @@
                     <!-- Head -->
                     <thead class="bg-base-200/30 text-base-content/60 font-medium">
                         <tr>
-                            <th class="w-10 pl-6">
+                            <th class="w-10 pl-6 rounded-tl-2xl">
                                 <label>
-                                    <input type="checkbox" class="checkbox checkbox-xs rounded-sm" onclick="toggleAll(this)" />
+                                    <input type="checkbox" class="checkbox checkbox-sm rounded-sm" onclick="toggleAll(this)" />
                                 </label>
                             </th>
                             <th class="w-[200px]">
@@ -148,11 +148,11 @@
                                     {% endif %}
                                 </a>
                             </th>
-                            <th>邮箱</th>
-                            <th class="w-28">称号</th>
-                            <th class="w-28">角色</th>
+                            <th class="hidden lg:table-cell">邮箱</th>
+                            <th class="w-28 hidden sm:table-cell">称号</th>
+                            <th class="w-28 hidden md:table-cell">角色</th>
                             <th class="w-32">状态</th>
-                            <th class="w-32">
+                            <th class="w-32 hidden xl:table-cell">
                                 <a href="?sort=date_joined&order={% if request.GET.sort == 'date_joined' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
                                     加入时间
                                     {% if request.GET.sort == 'date_joined' %}
@@ -160,7 +160,7 @@
                                     {% endif %}
                                 </a>
                             </th>
-                            <th class="w-32">
+                            <th class="w-32 hidden xl:table-cell">
                                 <a href="?sort=last_login&order={% if request.GET.sort == 'last_login' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
                                     最近登录
                                     {% if request.GET.sort == 'last_login' %}
@@ -168,7 +168,7 @@
                                     {% endif %}
                                 </a>
                             </th>
-                            <th class="w-24 text-center pr-6">操作</th>
+                            <th class="w-24 text-center pr-6 rounded-tr-2xl">操作</th>
                         </tr>
                     </thead>
                     <!-- Body (HTMX Target) -->
@@ -210,7 +210,7 @@
         导入数据 (JSON)
     </h3>
     <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
-    <form action="{% url 'administration:import_json' 'User' %}" method="post" enctype="multipart/form-data">
+    <form action="{% url 'administration:import_json' 'user' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="file" name="json_file" class="file-input file-input-bordered w-full mb-6" accept=".json" required />
         <div class="modal-action">

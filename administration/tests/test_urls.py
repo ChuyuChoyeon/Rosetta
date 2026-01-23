@@ -1,3 +1,4 @@
+
 import pytest
 from django.urls import reverse
 from django.contrib.auth import get_user_model
@@ -7,35 +8,32 @@ from core.models import Page, Navigation, FriendLink
 
 User = get_user_model()
 
+@pytest.fixture
+def admin_data(client):
+    user = User.objects.create_superuser(username="admin", password="password")
+    client.force_login(user)
+    
+    post_obj = baker.make(Post, author=user)
+    category = baker.make(Category)
+    tag = baker.make(Tag)
+    comment = baker.make(Comment, post=post_obj, user=user)
+    page = baker.make(Page)
+    navigation = baker.make(Navigation)
+    friendlink = baker.make(FriendLink)
+    
+    return {
+        "post": post_obj,
+        "category": category,
+        "tag": tag,
+        "comment": comment,
+        "page": page,
+        "navigation": navigation,
+        "friendlink": friendlink,
+        "user": user,
+    }
 
 @pytest.mark.django_db
 class TestAdministrationUrls:
-
-    @pytest.fixture(autouse=True)
-    def setup_data(self, client):
-        self.client = client
-        self.user = User.objects.create_superuser(username="admin", password="password")
-        self.client.force_login(self.user)
-
-        self.category = baker.make(Category)
-        self.tag = baker.make(Tag)
-        self.post_obj = baker.make(Post, author=self.user)
-        self.comment = baker.make(Comment, post=self.post_obj, user=self.user)
-        self.page = baker.make(Page)
-        self.navigation = baker.make(Navigation)
-        self.friendlink = baker.make(FriendLink)
-
-        # Helper to map object types to instances
-        self.instances = {
-            "post": self.post_obj,
-            "category": self.category,
-            "tag": self.tag,
-            "comment": self.comment,
-            "page": self.page,
-            "navigation": self.navigation,
-            "friendlink": self.friendlink,
-            "user": self.user,
-        }
 
     @pytest.mark.parametrize(
         "url_name, obj_key",
@@ -46,17 +44,6 @@ class TestAdministrationUrls:
             ("administration:post_create", None),
             ("administration:post_edit", "post"),
             ("administration:post_delete", "post"),
-            # Duplicate (POST only, but here we check URL resolution)
-            # Since DuplicateView is POST-only logic (in the view implementation), a GET might return 405 or redirect.
-            # But here we are just checking if the URL resolves and is accessible (even if it redirects or 405s).
-            # Wait, the current test checks status_code == 200.
-            # PostDuplicateView is a View with only 'post' method defined?
-            # Let's check administration/views.py.
-            # class PostDuplicateView(..., View): def post(self, request, pk): ...
-            # It only has a post method. So GET will return 405 Method Not Allowed.
-            # The current test assertion is `response.status_code == 200`.
-            # So I should NOT add it to this parametrized test list which expects 200.
-            # I should create a separate test for it or skip it here.
             
             # Category
             ("administration:category_list", None),
@@ -94,13 +81,25 @@ class TestAdministrationUrls:
             ("administration:settings", None),
         ],
     )
-    def test_url_access(self, url_name, obj_key):
+    def test_url_access(self, client, admin_data, url_name, obj_key):
         kwargs = {}
         if obj_key:
-            kwargs["pk"] = self.instances[obj_key].pk
+            kwargs["pk"] = admin_data[obj_key].pk
 
         url = reverse(url_name, kwargs=kwargs)
-        response = self.client.get(url)
+        
+        try:
+            response = client.get(url)
+        except Exception as e:
+             print(f"FAILED URL: {url} | Error: {e}")
+             raise e
+
+        if response.status_code != 200:
+            print(f"FAILED URL: {url} | Status: {response.status_code}")
+            if hasattr(response, 'context') and response.context:
+                print(f"Context keys: {list(response.context[0].keys())}")
+            else:
+                print("No context available")
 
         assert (
             response.status_code == 200

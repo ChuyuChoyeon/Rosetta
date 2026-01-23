@@ -1,0 +1,157 @@
+{% extends "administration/base.html" %}
+{% load capture_tags %}
+{% load widget_tweaks %}
+
+{% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+
+{% block content %}
+<div class="text-sm breadcrumbs mb-4">
+    <ul>
+        <li><a href="{% url 'administration:index' %}">首页</a></li>
+        <li><a href="{% url 'administration:navigation_list' %}">导航管理</a></li>
+        <li>{{ title|default:"编辑导航" }}</li>
+    </ul>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    {% csrf_token %}
+    
+    <!-- Left Column: Main Content -->
+    <div class="lg:col-span-2 space-y-6">
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body p-6">
+                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">menu_open</span>
+                    基本信息
+                </h2>
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-error mb-4 shadow-sm">
+                    <span class="material-symbols-outlined">error</span>
+                    <div class="flex flex-col">
+                        <span class="font-bold">表单错误</span>
+                        {% for error in form.non_field_errors %}
+                        <span class="text-sm">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Title Field -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-bold text-base">导航标题 <span class="text-error">*</span></span>
+                    </label>
+                    {% render_field form.title class="input input-bordered w-full focus:input-primary transition-all" placeholder="输入导航显示名称" %}
+                    {% if form.title.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+
+                <!-- URL Field -->
+                <div class="form-control w-full mt-4">
+                    <label class="label">
+                        <span class="label-text font-bold text-base">链接地址 (URL) <span class="text-error">*</span></span>
+                    </label>
+                    {% render_field form.url class="input input-bordered w-full focus:input-primary transition-all font-mono" placeholder="输入链接地址 (如 /about/ 或 https://...)" %}
+                    {% if form.url.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.url.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Location & Order -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body p-6">
+                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">tune</span>
+                    配置选项
+                </h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Location Field -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text font-medium">显示位置</span>
+                        </label>
+                        {% render_field form.location class="select select-bordered w-full focus:select-primary transition-all" %}
+                        {% if form.location.errors %}
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ form.location.errors.0 }}</span>
+                        </label>
+                        {% endif %}
+                    </div>
+
+                    <!-- Order Field -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text font-medium">排序权重</span>
+                        </label>
+                        {% render_field form.order class="input input-bordered w-full focus:input-primary transition-all" type="number" %}
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/60">数字越小越靠前 (默认 0)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Publish Box -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
+            <div class="card-body p-4">
+                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">发布</h3>
+                
+                <div class="flex flex-col gap-3">
+                    <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                        <span class="material-symbols-outlined">save</span>
+                        保存更改
+                    </button>
+                    
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">保存并新增</button>
+                        <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">保存并继续</button>
+                    </div>
+
+                    {% if object %}
+                    <div class="divider my-1"></div>
+                    <div class="flex justify-between items-center">
+                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">取消</a>
+                        <button type="button" onclick="confirmDelete('{% url 'administration:navigation_delete' object.pk %}', '确定要删除导航《{{ object.title|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
+                            删除导航
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="divider my-1"></div>
+                    <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">取消</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Box -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body p-4">
+                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">状态设置</h3>
+                
+                <div class="form-control">
+                    <label class="label cursor-pointer justify-between">
+                        <span class="label-text font-medium">启用显示</span>
+                        {% render_field form.is_active class="toggle toggle-success" %}
+                    </label>
+                    <label class="label pt-0">
+                        <span class="label-text-alt text-base-content/60">禁用后，该导航将不会在前端显示。</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

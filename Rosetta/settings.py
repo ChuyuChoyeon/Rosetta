@@ -146,6 +146,7 @@ INSTALLED_APPS = [
     "meta",                   # SEO
     "constance",              # 动态配置
     "constance.backends.database", # 注册 Database Backend App (即使在 Redis 模式下保留也不影响，除非 strict)
+    "widget_tweaks",          # 表单渲染增强
 
     # --- 核心业务模块 ---
     "blog.apps.BlogConfig",

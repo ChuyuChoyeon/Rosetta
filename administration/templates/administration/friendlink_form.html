@@ -8,8 +8,8 @@
 <div class="text-sm breadcrumbs mb-4">
     <ul>
         <li><a href="{% url 'administration:index' %}">首页</a></li>
-        <li><a href="{% url 'administration:tag_list' %}">标签管理</a></li>
-        <li>{{ title|default:"编辑标签" }}</li>
+        <li><a href="{% url 'administration:friendlink_list' %}">友情链接</a></li>
+        <li>{{ title|default:"编辑友链" }}</li>
     </ul>
 </div>
 
@@ -21,7 +21,7 @@
         <div class="card bg-base-100 shadow-sm border border-base-content/5">
             <div class="card-body p-6">
                 <h2 class="card-title text-lg mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">edit_note</span>
+                    <span class="material-symbols-outlined text-primary">link</span>
                     基本信息
                 </h2>
                 
@@ -40,32 +40,63 @@
                 <!-- Name Field -->
                 <div class="form-control w-full">
                     <label class="label">
-                        <span class="label-text font-bold text-base">名称 <span class="text-error">*</span></span>
+                        <span class="label-text font-bold text-base">网站名称 <span class="text-error">*</span></span>
                     </label>
-                    {% render_field form.name class="input input-bordered w-full focus:input-primary transition-all" placeholder="输入标签名称" %}
+                    {% render_field form.name class="input input-bordered w-full focus:input-primary transition-all" placeholder="输入网站名称" %}
                     {% if form.name.errors %}
                     <label class="label">
                         <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
                     </label>
                     {% endif %}
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">这将是它在站点上显示的名字。</span>
-                    </label>
                 </div>
 
-                <!-- Slug Field -->
-                <div class="form-control w-full">
+                <!-- URL Field -->
+                <div class="form-control w-full mt-4">
                     <label class="label">
-                        <span class="label-text font-bold text-base">别名 (Slug)</span>
+                        <span class="label-text font-bold text-base">网站链接 <span class="text-error">*</span></span>
                     </label>
-                    {% render_field form.slug class="input input-bordered w-full focus:input-primary transition-all font-mono" placeholder="输入URL别名" %}
-                    {% if form.slug.errors %}
+                    {% render_field form.url class="input input-bordered w-full focus:input-primary transition-all font-mono" placeholder="https://" %}
+                    {% if form.url.errors %}
                     <label class="label">
-                        <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
+                        <span class="label-text-alt text-error">{{ form.url.errors.0 }}</span>
                     </label>
                     {% endif %}
+                </div>
+
+                <!-- Description Field -->
+                <div class="form-control w-full mt-4">
                     <label class="label">
-                        <span class="label-text-alt text-base-content/60">“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。</span>
+                        <span class="label-text font-medium">网站描述</span>
+                    </label>
+                    {% render_field form.description class="input input-bordered w-full focus:input-primary transition-all" placeholder="简短描述该网站..." %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Logo Box -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body p-6">
+                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">image</span>
+                    Logo 设置
+                </h2>
+                
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">网站 Logo</span>
+                    </label>
+                    {% if object.logo %}
+                    <div class="mb-4">
+                        <div class="avatar">
+                            <div class="w-20 h-20 rounded-lg ring ring-base-200 ring-offset-2">
+                                <img src="{{ object.logo.url }}" alt="{{ object.name }}" />
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                    {% render_field form.logo class="file-input file-input-bordered w-full" %}
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">建议尺寸: 64x64px 或 128x128px</span>
                     </label>
                 </div>
             </div>
@@ -94,8 +125,8 @@
                     <div class="divider my-1"></div>
                     <div class="flex justify-between items-center">
                         <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">取消</a>
-                        <button type="button" onclick="confirmDelete('{% url 'administration:tag_delete' object.pk %}', '确定要删除标签《{{ object.name|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
-                            删除标签
+                        <button type="button" onclick="confirmDelete('{% url 'administration:friendlink_delete' object.pk %}', '确定要删除友情链接《{{ object.name|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
+                            删除友链
                         </button>
                     </div>
                     {% else %}
@@ -113,41 +144,21 @@
                 
                 <div class="form-control">
                     <label class="label cursor-pointer justify-between">
-                        <span class="label-text font-medium">启用状态</span>
+                        <span class="label-text font-medium">启用显示</span>
                         {% render_field form.is_active class="toggle toggle-success" %}
                     </label>
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">禁用后，该标签将不会在前端显示。</span>
-                    </label>
                 </div>
-            </div>
-        </div>
 
-        <!-- Appearance Box -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">外观设置</h3>
-                
-                <!-- Color Field -->
+                <div class="divider my-2"></div>
+
                 <div class="form-control w-full">
                     <label class="label">
-                        <span class="label-text font-medium">颜色标识</span>
+                        <span class="label-text font-medium">排序权重</span>
                     </label>
-                    {% render_field form.color class="input input-bordered w-full focus:input-primary transition-all" placeholder="输入颜色类名或Hex值" %}
+                    {% render_field form.order class="input input-bordered w-full focus:input-primary transition-all" type="number" %}
                     <label class="label">
-                        <span class="label-text-alt text-base-content/60">支持 Tailwind 颜色类名 (如 primary, error) 或 Hex 代码。</span>
+                        <span class="label-text-alt text-base-content/60">数字越小越靠前 (默认 0)</span>
                     </label>
-                    
-                    <div class="flex flex-wrap gap-2 mt-2">
-                        <div class="badge badge-primary badge-outline cursor-pointer" onclick="document.getElementById('id_color').value='primary'">primary</div>
-                        <div class="badge badge-secondary badge-outline cursor-pointer" onclick="document.getElementById('id_color').value='secondary'">secondary</div>
-                        <div class="badge badge-accent badge-outline cursor-pointer" onclick="document.getElementById('id_color').value='accent'">accent</div>
-                        <div class="badge badge-neutral badge-outline cursor-pointer" onclick="document.getElementById('id_color').value='neutral'">neutral</div>
-                        <div class="badge badge-info badge-outline cursor-pointer" onclick="document.getElementById('id_color').value='info'">info</div>
-                        <div class="badge badge-success badge-outline cursor-pointer" onclick="document.getElementById('id_color').value='success'">success</div>
-                        <div class="badge badge-warning badge-outline cursor-pointer" onclick="document.getElementById('id_color').value='warning'">warning</div>
-                        <div class="badge badge-error badge-outline cursor-pointer" onclick="document.getElementById('id_color').value='error'">error</div>
-                    </div>
                 </div>
             </div>
         </div>

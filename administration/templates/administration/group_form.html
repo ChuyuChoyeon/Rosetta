@@ -1,7 +1,8 @@
 {% extends "administration/base.html" %}
 {% load capture_tags %}
+{% load widget_tweaks %}
 
-{% block title %}{% if form.instance.pk %}编辑用户组{% else %}新建用户组{% endif %}{% endblock %}
+{% block title %}{% if form.instance.pk %}编辑用户组: {{ form.instance.name }}{% else %}新建用户组{% endif %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 <div class="text-sm breadcrumbs mb-4">
@@ -12,34 +13,30 @@
     </ul>
 </div>
 
-<div class="max-w-4xl mx-auto">
-    {% captureas card_content %}
-    <div class="p-0">
-        <div class="p-6 border-b border-base-200 bg-base-100/50 backdrop-blur-sm">
-            <h2 class="card-title text-xl font-bold flex items-center gap-2">
-                <div class="p-2 bg-primary/10 rounded-lg text-primary">
-                    <span class="material-symbols-outlined">groups</span>
+<form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-6" novalidate>
+    {% csrf_token %}
+    
+    <!-- Left Column: Main Content -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Group Info -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body p-6">
+                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">groups</span>
+                    基本信息
+                </h2>
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-error mb-4">
+                    <span class="material-symbols-outlined">error</span>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
                 </div>
-                {% if form.instance.pk %}编辑用户组: <span class="text-primary">{{ form.instance.name }}</span>{% else %}新建用户组{% endif %}
-            </h2>
-        </div>
-        
-        <form method="post" novalidate class="p-6 space-y-8">
-            {% csrf_token %}
-            
-            {% if form.non_field_errors %}
-            <div class="alert alert-error mb-4 shadow-sm">
-                <span class="material-symbols-outlined">error</span>
-                <div class="flex flex-col">
-                    <span class="font-bold">表单错误</span>
-                    {% for error in form.non_field_errors %}
-                    <span class="text-sm">{{ error }}</span>
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
+                {% endif %}
 
-            <div class="grid grid-cols-1 gap-6">
                 <!-- Name -->
                 <div class="form-control w-full">
                     <label class="label">
@@ -47,7 +44,7 @@
                     </label>
                     <div class="relative">
                         <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm">badge</span>
-                        <input type="text" name="name" value="{{ form.name.value|default:'' }}" class="input input-bordered w-full pl-9 focus:input-primary transition-all {% if form.name.errors %}input-error{% endif %}" required placeholder="例如：编辑人员" />
+                        {% render_field form.name class+="input input-bordered w-full pl-9 focus:input-primary transition-all" placeholder="例如：编辑人员" %}
                     </div>
                     {% if form.name.errors %}
                     <label class="label">
@@ -55,40 +52,60 @@
                     </label>
                     {% endif %}
                 </div>
+            </div>
+        </div>
 
-                <!-- Permissions -->
+        <!-- Permissions -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body p-6">
+                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">security</span>
+                    权限分配
+                </h2>
+                
+                <div class="alert alert-info shadow-sm mb-4">
+                    <span class="material-symbols-outlined">info</span>
+                    <span class="text-sm">选中的权限将被授予该组内的所有用户。按住 Ctrl/Command 可多选。</span>
+                </div>
+
                 <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-medium">权限分配</span>
-                        <span class="label-text-alt text-base-content/60 bg-base-200 px-2 py-1 rounded text-xs">按住 Ctrl/Command 可多选</span>
-                    </label>
-                    <div class="h-96 border border-base-300 rounded-xl overflow-hidden focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-                        {{ form.permissions }}
-                    </div>
+                    {% render_field form.permissions class+="select select-bordered w-full h-96 font-mono text-sm" size="15" %}
                     {% if form.permissions.errors %}
                     <label class="label">
                         <span class="label-text-alt text-error">{{ form.permissions.errors.0 }}</span>
                     </label>
                     {% endif %}
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/50">选中的权限将被授予该组内的所有用户</span>
-                    </label>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-base-200">
-                <a href="{% url 'administration:group_list' %}" class="btn btn-ghost hover:bg-base-200">取消</a>
-                <button type="submit" class="btn btn-primary gap-2 shadow-lg shadow-primary/20">
-                    <span class="material-symbols-outlined">save</span>
-                    保存
-                </button>
+    <!-- Right Column: Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Publish Box -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
+            <div class="card-body p-4">
+                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">操作</h3>
+                
+                <div class="flex flex-col gap-3">
+                    <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                        <span class="material-symbols-outlined">save</span>
+                        保存更改
+                    </button>
+                    <a href="{% url 'administration:group_list' %}" class="btn btn-ghost w-full">取消</a>
+                </div>
+
+                {% if form.instance.pk %}
+                <div class="divider my-2"></div>
+                <div class="text-xs text-base-content/50 space-y-1">
+                    <div class="flex justify-between">
+                        <span>成员数量:</span>
+                        <span class="font-mono">{{ form.instance.user_set.count }}</span>
+                    </div>
+                </div>
+                {% endif %}
             </div>
-        </form>
+        </div>
     </div>
-    {% endcaptureas %}
-
-    <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5 w-full">
-        {{ card_content }}
-    </div>
-</div>
+</form>
 {% endblock %}

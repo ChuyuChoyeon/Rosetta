@@ -123,18 +123,23 @@ urlpatterns = [
     path("users/", views.UserListView.as_view(), name="user_list"),
     path("users/create/", views.UserCreateView.as_view(), name="user_create"),
     path("users/<int:pk>/edit/", views.UserUpdateView.as_view(), name="user_edit"),
+    path("users/<int:pk>/delete/", views.UserDeleteView.as_view(), name="user_delete"),
     
     # 用户称号管理 (User Titles)
     path("titles/", views.UserTitleListView.as_view(), name="usertitle_list"),
     path("titles/create/", views.UserTitleCreateView.as_view(), name="usertitle_create"),
     path("titles/<int:pk>/edit/", views.UserTitleUpdateView.as_view(), name="usertitle_edit"),
     path("titles/<int:pk>/delete/", views.UserTitleDeleteView.as_view(), name="usertitle_delete"),
+    path("titles/export/", views.UserTitleExportView.as_view(), name="usertitle_export"),
+    path("titles/import/", views.UserTitleImportView.as_view(), name="usertitle_import"),
 
     # 用户组管理 (Groups)
     path("groups/", views.GroupListView.as_view(), name="group_list"),
     path("groups/create/", views.GroupCreateView.as_view(), name="group_create"),
     path("groups/<int:pk>/edit/", views.GroupUpdateView.as_view(), name="group_edit"),
     path("groups/<int:pk>/delete/", views.GroupDeleteView.as_view(), name="group_delete"),
+    path("groups/export/", views.GroupExportView.as_view(), name="group_export"),
+    path("groups/import/", views.GroupImportView.as_view(), name="group_import"),
 
     # --- Logs & Audit (日志与审计) ---
     # 操作日志 (Admin LogEntry)

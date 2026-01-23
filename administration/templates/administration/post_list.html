@@ -15,23 +15,13 @@
     <h1 class="text-2xl font-bold">文章管理</h1>
     <div class="flex gap-2">
         <div class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
-                <span class="material-symbols-outlined text-lg">more_vert</span>
+            <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal">
                 更多
+                <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
             </div>
-            <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow bg-base-100 rounded-box w-52">
-                <li>
-                    <a href="{% url 'administration:export_all' 'Post' %}" target="_blank">
-                        <span class="material-symbols-outlined">file_download</span>
-                        导出全部 (JSON)
-                    </a>
-                </li>
-                <li>
-                    <button onclick="import_modal.showModal()">
-                        <span class="material-symbols-outlined">file_upload</span>
-                        导入数据 (JSON)
-                    </button>
-                </li>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-content/5">
+                <li><a href="{% url 'administration:export_all' 'Post' %}" target="_blank"><span class="material-symbols-outlined">download</span> 导出 JSON</a></li>
+                <li><button onclick="import_modal.showModal()"><span class="material-symbols-outlined">upload</span> 导入 JSON</button></li>
             </ul>
         </div>
         {% url 'administration:post_create' as create_url %}
@@ -44,7 +34,10 @@
 <!-- Import Modal -->
 <dialog id="import_modal" class="modal">
   <div class="modal-box">
-    <h3 class="font-bold text-lg">导入数据 (JSON)</h3>
+    <h3 class="font-bold text-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">file_upload</span>
+        导入数据 (JSON)
+    </h3>
     <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
     <form action="{% url 'administration:import_json' 'Post' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
@@ -80,8 +73,8 @@
         </div>
 
         <!-- Filter Tabs -->
-        <div class="px-4 py-2 border-b border-base-200 bg-base-100">
-            <div class="tabs tabs-boxed bg-transparent p-0 gap-2">
+        <div class="px-4 py-2 border-b border-base-200 bg-base-100 overflow-x-auto">
+            <div class="tabs tabs-boxed bg-transparent p-0 gap-2 min-w-max">
                 <a href="{% url 'administration:post_list' %}" class="tab tab-sm {% if not request.GET.status %}tab-active bg-primary text-primary-content{% else %}bg-base-200{% endif %} rounded-btn">全部</a>
                 <a href="{% url 'administration:post_list' %}?status=published" class="tab tab-sm {% if request.GET.status == 'published' %}tab-active bg-success text-success-content{% else %}bg-base-200{% endif %} rounded-btn">已发布</a>
                 <a href="{% url 'administration:post_list' %}?status=draft" class="tab tab-sm {% if request.GET.status == 'draft' %}tab-active bg-neutral text-neutral-content{% else %}bg-base-200{% endif %} rounded-btn">草稿</a>
@@ -98,70 +91,39 @@
                 <button onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral gap-2">
                     <span class="material-symbols-outlined text-[18px]">drafts</span> 草稿
                 </button>
-                <button onclick="submitBulkAction('export_json')" class="btn btn-sm btn-ghost gap-2 hover:bg-base-content/10">
-                    <span class="material-symbols-outlined text-[18px]">download</span> 导出
-                </button>
-                <div class="divider divider-horizontal mx-0 my-1"></div>
-                <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-ghost text-error hover:bg-error/10 gap-2">
-                    <span class="material-symbols-outlined text-[18px]">delete</span> 删除
+                <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1">
+                    <span class="material-symbols-outlined text-[16px]">delete</span> 删除
                 </button>
             </div>
         </div>
 
-        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' 'Post' %}">
+        <!-- Table -->
+        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='post' %}">
             {% csrf_token %}
-            <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
-                <table class="table table-zebra table-pin-rows w-full">
+            <div class="overflow-x-auto min-h-[500px]">
+                <table class="table table-pin-rows w-full">
                     <!-- Head -->
-                    <thead class="bg-base-200 text-base-content sticky top-0 z-30">
+                    <thead class="bg-base-200/30 text-base-content/60 font-medium">
                         <tr>
-                            <th class="w-10 bg-base-200">
+                            <th class="w-10 pl-6 rounded-tl-2xl">
                                 <label>
-                                    <input type="checkbox" class="checkbox checkbox-xs" onclick="toggleAll(this)" />
+                                    <input type="checkbox" class="checkbox checkbox-sm rounded-sm" onclick="toggleAll(this)" />
                                 </label>
                             </th>
-                            <th class="w-12 bg-base-200">ID</th>
-                            <th class="w-16 bg-base-200">封面</th>
-                            <th class="min-w-[150px] bg-base-200">
-                                <a href="?sort=title&order={% if request.GET.sort == 'title' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    标题
-                                    {% if request.GET.sort == 'title' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="w-32 bg-base-200">作者</th>
-                            <th class="w-32 bg-base-200">分类</th>
-                            <th class="w-48 bg-base-200">标签</th>
-                            <th class="w-32 bg-base-200">
-                                <a href="?sort=status&order={% if request.GET.sort == 'status' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    状态
-                                    {% if request.GET.sort == 'status' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="w-32 bg-base-200">
-                                <a href="?sort=created_at&order={% if request.GET.sort == 'created_at' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    发布时间
-                                    {% if request.GET.sort == 'created_at' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="w-24 bg-base-200">
-                                <a href="?sort=views&order={% if request.GET.sort == 'views' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    浏览
-                                    {% if request.GET.sort == 'views' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="w-32 bg-base-200">操作</th>
+                            <th class="w-16 font-mono hidden md:table-cell">ID</th>
+                            <th class="w-16 hidden md:table-cell">封面</th>
+                            <th>标题 / 摘要</th>
+                            <th class="hidden lg:table-cell">作者</th>
+                            <th class="hidden lg:table-cell">分类</th>
+                            <th class="hidden xl:table-cell">标签</th>
+                            <th class="w-24">状态</th>
+                            <th class="hidden md:table-cell w-32">发布时间</th>
+                            <th class="hidden md:table-cell w-20 text-center">浏览</th>
+                            <th class="w-24 text-center pr-6 rounded-tr-2xl">操作</th>
                         </tr>
                     </thead>
                     <!-- Body (HTMX Target) -->
-                    <tbody id="post-list-body">
+                    <tbody id="post-list-body" class="divide-y divide-base-200/50">
                         {% include "administration/partials/post_list_rows.html" %}
                     </tbody>
                 </table>

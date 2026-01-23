@@ -5,26 +5,31 @@
             <input type="checkbox" name="selected_ids" value="{{ category.pk }}" class="checkbox checkbox-xs rounded-sm row-checkbox" onchange="updateBulkToolbar()" />
         </label>
     </th>
-    <th class="font-mono text-xs opacity-50">{{ category.id }}</th>
+    <th class="font-mono text-xs opacity-50 hidden md:table-cell">{{ category.id }}</th>
     <td>
         <div class="flex items-center gap-3">
             {% if category.icon %}
-                <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center text-{{ category.color|default:'base-content' }}">
+                <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center text-{{ category.color|default:'base-content' }} shrink-0">
                     <span class="material-symbols-outlined text-lg">{{ category.icon }}</span>
                 </div>
             {% else %}
-                <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center text-base-content/20">
+                <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center text-base-content/20 shrink-0">
                     <span class="material-symbols-outlined text-lg">category</span>
                 </div>
             {% endif %}
-            <span class="font-bold text-{{ category.color|default:'base-content' }} group-hover:text-primary transition-colors">{{ category.name }}</span>
+            <div class="min-w-0">
+                <a href="{% url 'administration:category_edit' category.pk %}" class="font-bold text-{{ category.color|default:'base-content' }} group-hover:text-primary transition-colors block truncate" title="{{ category.name }}">
+                    {{ category.name }}
+                </a>
+                <div class="text-xs text-base-content/50 font-mono truncate lg:hidden">{{ category.slug }}</div>
+            </div>
         </div>
     </td>
-    <td class="font-mono text-xs text-base-content/60">{{ category.slug }}</td>
-    <td class="text-center">
+    <td class="font-mono text-xs text-base-content/60 hidden lg:table-cell">{{ category.slug }}</td>
+    <td class="text-center hidden sm:table-cell">
         <span class="badge badge-sm badge-outline bg-base-100 font-mono">{{ category.post_count }}</span>
     </td>
-    <td class="text-center">
+    <td class="text-right pr-4">
         <div class="join">
             <a href="{% url 'post_by_category' category.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="查看">
                 <span class="material-symbols-outlined text-base">visibility</span>
@@ -40,13 +45,10 @@
 </tr>
 {% empty %}
 <tr>
-    <td colspan="6">
-        <div class="flex flex-col items-center justify-center py-12 text-base-content/40">
-            <div class="w-16 h-16 rounded-full bg-base-200/50 flex items-center justify-center mb-4">
-                <span class="material-symbols-outlined text-3xl opacity-50">category</span>
-            </div>
-            <h3 class="font-bold text-lg text-base-content/70">暂无分类</h3>
-            <p class="text-sm opacity-50 mt-1">请添加一个新的文章分类</p>
+    <td colspan="6" class="text-center py-10 text-base-content/50">
+        <div class="flex flex-col items-center gap-2">
+            <span class="material-symbols-outlined text-4xl opacity-20">category</span>
+            <span>暂无分类</span>
         </div>
     </td>
 </tr>

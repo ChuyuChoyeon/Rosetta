@@ -41,42 +41,36 @@
                         更多
                         <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
                     </div>
-                    <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200">
-                        <li>
-                            <a href="{% url 'administration:export_all' 'Tag' %}" target="_blank" class="gap-3">
-                                <span class="material-symbols-outlined text-base-content/70">file_download</span>
-                                导出全部 (JSON)
-                            </a>
-                        </li>
-                        <li>
-                            <button onclick="import_modal.showModal()" class="gap-3">
-                                <span class="material-symbols-outlined text-base-content/70">file_upload</span>
-                                导入数据 (JSON)
-                            </button>
-                        </li>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-content/5">
+                        <li><a href="{% url 'administration:export_all' 'Tag' %}" target="_blank"><span class="material-symbols-outlined">download</span> 导出 JSON</a></li>
+                        <li><button onclick="import_modal.showModal()"><span class="material-symbols-outlined">upload</span> 导入 JSON</button></li>
+                        <div class="divider my-1"></div>
+                        <li><button onclick="submitBulkAction('active')"><span class="material-symbols-outlined text-success">visibility</span> 设为可见</button></li>
+                        <li><button onclick="submitBulkAction('inactive')"><span class="material-symbols-outlined text-neutral">visibility_off</span> 设为隐藏</button></li>
+                        <li><button onclick="submitBulkAction('delete')" class="text-error"><span class="material-symbols-outlined">delete</span> 批量删除</button></li>
                     </ul>
                 </div>
             </div>
+        </div>
 
-            <!-- Bulk Actions (Dynamic Overlay) -->
-            <div id="bulk-actions" class="absolute inset-0 bg-base-100 z-40 hidden flex items-center justify-between px-4 animate-in fade-in zoom-in duration-200 rounded-t-2xl">
-                <div class="flex items-center gap-3">
-                    <button onclick="updateBulkToolbar()" class="btn btn-sm btn-circle btn-ghost">
-                        <span class="material-symbols-outlined">close</span>
-                    </button>
-                    <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
-                </div>
-                <div class="join">
-                    <button onclick="submitBulkAction('active')" class="btn btn-sm btn-primary gap-1 join-item">
-                        <span class="material-symbols-outlined text-[16px]">visibility</span> 可见
-                    </button>
-                    <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-neutral gap-1 join-item">
-                        <span class="material-symbols-outlined text-[16px]">visibility_off</span> 隐藏
-                    </button>
-                    <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1 join-item">
-                        <span class="material-symbols-outlined text-[16px]">delete</span> 删除
-                    </button>
-                </div>
+        <!-- Bulk Actions (Dynamic Overlay) -->
+        <div id="bulk-actions" class="absolute inset-0 bg-base-100 z-40 hidden flex items-center justify-between px-4 animate-in fade-in zoom-in duration-200 rounded-t-2xl">
+            <div class="flex items-center gap-3">
+                <button onclick="updateBulkToolbar()" class="btn btn-sm btn-circle btn-ghost">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+                <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
+            </div>
+            <div class="join">
+                <button onclick="submitBulkAction('active')" class="btn btn-sm btn-primary gap-1 join-item">
+                    <span class="material-symbols-outlined text-[16px]">visibility</span> 可见
+                </button>
+                <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-neutral gap-1 join-item">
+                    <span class="material-symbols-outlined text-[16px]">visibility_off</span> 隐藏
+                </button>
+                <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1 join-item">
+                    <span class="material-symbols-outlined text-[16px]">delete</span> 删除
+                </button>
             </div>
         </div>
 
@@ -87,17 +81,17 @@
                     <!-- Head -->
                     <thead class="bg-base-200/30 text-base-content/60 font-medium">
                         <tr>
-                            <th class="w-10 pl-6">
+                            <th class="w-10 pl-6 rounded-tl-2xl">
                                 <label>
-                                    <input type="checkbox" class="checkbox checkbox-xs rounded-sm" onclick="toggleAll(this)" />
+                                    <input type="checkbox" class="checkbox checkbox-sm rounded-sm" onclick="toggleAll(this)" />
                                 </label>
                             </th>
-                            <th class="w-16">ID</th>
-                            <th>名称</th>
-                            <th>Slug</th>
-                            <th class="w-24 text-center">状态</th>
-                            <th class="w-24 text-center">文章数</th>
-                            <th class="w-24 text-center pr-6">操作</th>
+                            <th class="w-16 font-mono hidden md:table-cell">ID</th>
+                            <th>名称 / 样式</th>
+                            <th class="hidden lg:table-cell">Slug</th>
+                            <th class="w-24 text-center hidden sm:table-cell">状态</th>
+                            <th class="w-24 text-center hidden sm:table-cell">文章数</th>
+                            <th class="w-24 text-center pr-6 rounded-tr-2xl">操作</th>
                         </tr>
                     </thead>
                     <!-- Body (HTMX Target) -->

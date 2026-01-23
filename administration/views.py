@@ -41,6 +41,8 @@ from django.contrib.auth.models import Group
 from django.contrib.admin.models import LogEntry
 from django.conf import settings
 import os
+import json
+from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, Http404
 
 User = get_user_model()
@@ -293,6 +295,88 @@ class BaseUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
         return super().form_valid(form)
 
 
+class BaseExportView(LoginRequiredMixin, StaffRequiredMixin, View):
+    """
+    基础导出视图
+    
+    将模型数据导出为 JSON 文件。
+    """
+    model = None
+
+    def get(self, request, *args, **kwargs):
+        if not self.model:
+            raise NotImplementedError("BaseExportView requires a model definition")
+        
+        queryset = self.model.objects.all()
+        data = list(queryset.values())
+        
+        # 处理 datetime 和 UUID 等无法序列化的对象
+        response = HttpResponse(
+            json.dumps(data, cls=DjangoJSONEncoder, ensure_ascii=False, indent=2),
+            content_type="application/json"
+        )
+        filename = f"{self.model._meta.model_name}_export_{timezone.now().strftime('%Y%m%d%H%M%S')}.json"
+        response["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
+
+
+class BaseImportView(LoginRequiredMixin, StaffRequiredMixin, View):
+    """
+    基础导入视图
+    
+    从 JSON 文件导入数据。
+    """
+    model = None
+    success_url = None
+
+    def post(self, request, *args, **kwargs):
+        if not self.model:
+            raise NotImplementedError("BaseImportView requires a model definition")
+        
+        if 'json_file' not in request.FILES:
+            messages.error(request, "请上传 JSON 文件")
+            return redirect(self.success_url)
+            
+        json_file = request.FILES['json_file']
+        try:
+            data = json.load(json_file)
+            if not isinstance(data, list):
+                raise ValueError("JSON 格式错误：根元素应为列表")
+                
+            success_count = 0
+            for item in data:
+                # 移除 id 以避免冲突，或用于查找
+                item_id = item.pop('id', None)
+                
+                # 尝试查找唯一键
+                lookup_fields = {}
+                if hasattr(self.model, 'slug') and 'slug' in item:
+                    lookup_fields['slug'] = item['slug']
+                elif hasattr(self.model, 'username') and 'username' in item:
+                    lookup_fields['username'] = item['username']
+                elif hasattr(self.model, 'name') and 'name' in item:
+                    lookup_fields['name'] = item['name']
+                elif item_id:
+                    lookup_fields['id'] = item_id
+                
+                if lookup_fields:
+                    obj, created = self.model.objects.update_or_create(
+                        defaults=item,
+                        **lookup_fields
+                    )
+                    success_count += 1
+                else:
+                    self.model.objects.create(**item)
+                    success_count += 1
+                    
+            messages.success(request, f"成功导入 {success_count} 条数据")
+            
+        except Exception as e:
+            messages.error(request, f"导入失败: {str(e)}")
+            
+        return redirect(self.success_url)
+
+
 class BaseDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
     """
     基础删除视图混入类
@@ -536,6 +620,21 @@ class TagAutocompleteView(LoginRequiredMixin, StaffRequiredMixin, View):
         return JsonResponse({'results': list(tags)})
 
 
+class TagExportView(BaseExportView):
+    """
+    标签导出视图
+    """
+    model = Tag
+
+
+class TagImportView(BaseImportView):
+    """
+    标签导入视图
+    """
+    model = Tag
+    success_url = reverse_lazy("administration:tag_list")
+
+
 # --- Comment Views (评论管理视图) ---
 class CommentListView(BaseListView):
     """
@@ -749,6 +848,21 @@ class NavigationDeleteView(BaseDeleteView):
     success_url = reverse_lazy("administration:navigation_list")
 
 
+class NavigationExportView(BaseExportView):
+    """
+    导航菜单导出视图
+    """
+    model = Navigation
+
+
+class NavigationImportView(BaseImportView):
+    """
+    导航菜单导入视图
+    """
+    model = Navigation
+    success_url = reverse_lazy("administration:navigation_list")
+
+
 # --- FriendLink Views (友情链接视图) ---
 class FriendLinkListView(BaseListView):
     """
@@ -795,6 +909,21 @@ class FriendLinkDeleteView(BaseDeleteView):
     success_url = reverse_lazy("administration:friendlink_list")
 
 
+class FriendLinkExportView(BaseExportView):
+    """
+    友情链接导出视图
+    """
+    model = FriendLink
+
+
+class FriendLinkImportView(BaseImportView):
+    """
+    友情链接导入视图
+    """
+    model = FriendLink
+    success_url = reverse_lazy("administration:friendlink_list")
+
+
 # --- Search Placeholder Views (搜索占位符视图) ---
 class SearchPlaceholderListView(BaseListView):
     """
@@ -836,6 +965,21 @@ class SearchPlaceholderUpdateView(BaseUpdateView):
 class SearchPlaceholderDeleteView(BaseDeleteView):
     """
     搜索占位符删除视图
+    """
+    model = SearchPlaceholder
+    success_url = reverse_lazy("administration:searchplaceholder_list")
+
+
+class SearchPlaceholderExportView(BaseExportView):
+    """
+    搜索占位符导出视图
+    """
+    model = SearchPlaceholder
+
+
+class SearchPlaceholderImportView(BaseImportView):
+    """
+    搜索占位符导入视图
     """
     model = SearchPlaceholder
     success_url = reverse_lazy("administration:searchplaceholder_list")
@@ -888,6 +1032,29 @@ class UserUpdateView(BaseUpdateView):
     success_url = reverse_lazy("administration:user_list")
 
 
+class UserDeleteView(BaseDeleteView):
+    """
+    用户删除视图
+    """
+    model = User
+    success_url = reverse_lazy("administration:user_list")
+
+
+class UserExportView(BaseExportView):
+    """
+    用户导出视图
+    """
+    model = User
+
+
+class UserImportView(BaseImportView):
+    """
+    用户导入视图
+    """
+    model = User
+    success_url = reverse_lazy("administration:user_list")
+
+
 # --- User Title Views (用户称号视图) ---
 class UserTitleListView(BaseListView):
     """
@@ -918,6 +1085,21 @@ class UserTitleUpdateView(BaseUpdateView):
 class UserTitleDeleteView(BaseDeleteView):
     """
     用户称号删除视图
+    """
+    model = UserTitle
+    success_url = reverse_lazy("administration:usertitle_list")
+
+
+class UserTitleExportView(BaseExportView):
+    """
+    用户称号导出视图
+    """
+    model = UserTitle
+
+
+class UserTitleImportView(BaseImportView):
+    """
+    用户称号导入视图
     """
     model = UserTitle
     success_url = reverse_lazy("administration:usertitle_list")
@@ -954,6 +1136,21 @@ class GroupUpdateView(BaseUpdateView):
 class GroupDeleteView(BaseDeleteView):
     """
     用户组删除视图
+    """
+    model = Group
+    success_url = reverse_lazy("administration:group_list")
+
+
+class GroupExportView(BaseExportView):
+    """
+    用户组导出视图
+    """
+    model = Group
+
+
+class GroupImportView(BaseImportView):
+    """
+    用户组导入视图
     """
     model = Group
     success_url = reverse_lazy("administration:group_list")
@@ -1283,14 +1480,22 @@ class ExportAllView(LoginRequiredMixin, StaffRequiredMixin, View):
     def get(self, request, model):
         try:
             model_cls = None
-            try:
-                model_cls = apps.get_model("blog", model)
-            except LookupError:
+            # 1. Try to find model in known apps
+            for app_label in ["blog", "core", "users"]:
                 try:
-                    model_cls = apps.get_model("core", model)
+                    model_cls = apps.get_model(app_label, model)
+                    break
                 except LookupError:
-                    if model.lower() == "user":
-                        model_cls = User
+                    continue
+            
+            # 2. Handle special cases
+            if not model_cls:
+                if model.lower() == "user":
+                    model_cls = User
+                elif model.lower() == "group":
+                    model_cls = Group
+                elif model.lower() == "logentry":
+                    model_cls = LogEntry
             
             if not model_cls:
                 messages.error(request, f"未知模型: {model}")
@@ -1302,7 +1507,7 @@ class ExportAllView(LoginRequiredMixin, StaffRequiredMixin, View):
             
             data = list(model_cls.objects.all().values())
             response = HttpResponse(
-                json.dumps(data, cls=DjangoJSONEncoder, indent=4), 
+                json.dumps(data, cls=DjangoJSONEncoder, indent=4, ensure_ascii=False), 
                 content_type="application/json"
             )
             response['Content-Disposition'] = f'attachment; filename="{model}_all_export.json"'
@@ -1317,7 +1522,7 @@ class ImportJsonView(LoginRequiredMixin, StaffRequiredMixin, View):
     导入 JSON 数据视图
     
     从 JSON 文件导入数据到指定模型。
-    支持更新现有记录 (基于 ID) 或创建新记录。
+    支持更新现有记录 (基于 ID 或其他唯一键) 或创建新记录。
     """
     def post(self, request, model):
         if 'json_file' not in request.FILES:
@@ -1331,14 +1536,22 @@ class ImportJsonView(LoginRequiredMixin, StaffRequiredMixin, View):
 
         try:
             model_cls = None
-            try:
-                model_cls = apps.get_model("blog", model)
-            except LookupError:
+            # 1. Try to find model in known apps
+            for app_label in ["blog", "core", "users"]:
                 try:
-                    model_cls = apps.get_model("core", model)
+                    model_cls = apps.get_model(app_label, model)
+                    break
                 except LookupError:
-                    if model.lower() == "user":
-                        model_cls = User
+                    continue
+            
+            # 2. Handle special cases
+            if not model_cls:
+                if model.lower() == "user":
+                    model_cls = User
+                elif model.lower() == "group":
+                    model_cls = Group
+                elif model.lower() == "logentry":
+                    model_cls = LogEntry
             
             if not model_cls:
                 messages.error(request, f"未知模型: {model}")
@@ -1353,11 +1566,31 @@ class ImportJsonView(LoginRequiredMixin, StaffRequiredMixin, View):
 
             success_count = 0
             for item in data:
+                # 尝试智能匹配唯一键
                 pk = item.pop('id', None)
-                if pk:
-                    model_cls.objects.update_or_create(id=pk, defaults=item)
+                lookup_fields = {}
+                
+                # 优先使用 slug, username, name 等作为唯一标识
+                if hasattr(model_cls, 'slug') and 'slug' in item:
+                    lookup_fields['slug'] = item['slug']
+                elif hasattr(model_cls, 'username') and 'username' in item:
+                    lookup_fields['username'] = item['username']
+                elif hasattr(model_cls, 'name') and 'name' in item:
+                     # name 并不总是唯一的，但对于 Category/Tag 来说通常是
+                     # 检查 name 是否 unique
+                     name_field = model_cls._meta.get_field('name')
+                     if name_field.unique:
+                         lookup_fields['name'] = item['name']
+                
+                # 如果没有找到语义化的唯一键，回退到 ID
+                if not lookup_fields and pk:
+                    lookup_fields['id'] = pk
+
+                if lookup_fields:
+                    model_cls.objects.update_or_create(defaults=item, **lookup_fields)
                     success_count += 1
                 else:
+                    # 如果没有任何唯一键，直接创建
                     model_cls.objects.create(**item)
                     success_count += 1
             

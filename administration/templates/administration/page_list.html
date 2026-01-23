@@ -113,39 +113,19 @@
             <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
                 <table class="table table-zebra table-pin-rows w-full">
                     <!-- Head -->
-                    <thead class="bg-base-200 text-base-content sticky top-0 z-30">
+                    <thead class="bg-base-200/30 text-base-content/60 font-medium">
                         <tr>
-                            <th class="w-10 bg-base-200">
+                            <th class="w-10 pl-6 rounded-tl-2xl">
                                 <label>
-                                    <input type="checkbox" class="checkbox checkbox-xs" onclick="toggleAll(this)" />
+                                    <input type="checkbox" class="checkbox checkbox-sm rounded-sm" onclick="toggleAll(this)" />
                                 </label>
                             </th>
-                            <th class="bg-base-200">
-                                <a href="?sort=title&order={% if request.GET.sort == 'title' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    标题
-                                    {% if request.GET.sort == 'title' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="bg-base-200">Slug</th>
-                            <th class="bg-base-200">
-                                <a href="?sort=status&order={% if request.GET.sort == 'status' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    状态
-                                    {% if request.GET.sort == 'status' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="bg-base-200">
-                                <a href="?sort=created_at&order={% if request.GET.sort == 'created_at' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary">
-                                    创建时间
-                                    {% if request.GET.sort == 'created_at' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="w-32 bg-base-200">操作</th>
+                            <th class="w-16 font-mono hidden md:table-cell">ID</th>
+                            <th>标题</th>
+                            <th class="hidden lg:table-cell">Slug</th>
+                            <th class="w-24 text-center hidden sm:table-cell">状态</th>
+                            <th class="w-32 hidden lg:table-cell">创建时间</th>
+                            <th class="w-24 text-center pr-6 rounded-tr-2xl">操作</th>
                         </tr>
                     </thead>
                     <!-- Body (HTMX Target) -->

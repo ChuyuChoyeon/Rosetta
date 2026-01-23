@@ -11,47 +11,65 @@
     </ul>
 </div>
 
-{% captureas card_content %}
-    <div class="p-0">
-        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-secondary/10 rounded-lg">
-                    <span class="material-symbols-outlined text-secondary">menu</span>
-                </div>
-                <div>
-                    <h2 class="font-bold text-base">导航列表</h2>
-                    <p class="text-xs text-base-content/60">管理前台导航菜单</p>
-                </div>
+<div class="card bg-base-100 shadow-sm border border-base-content/5">
+    <div class="card-body p-0">
+        <!-- Toolbar -->
+        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col lg:flex-row justify-between items-center gap-4 sticky top-0 z-30 rounded-t-2xl">
+            <!-- Left: Filter Tabs -->
+            <div class="tabs tabs-boxed bg-base-200/50 p-1 gap-1">
+                <a href="{% url 'administration:navigation_list' %}" class="tab tab-sm {% if not request.GET.location %}tab-active bg-white shadow-sm text-base-content font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">全部</a>
+                <a href="?location=header" class="tab tab-sm {% if request.GET.location == 'header' %}tab-active bg-primary text-primary-content shadow-sm font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">顶部</a>
+                <a href="?location=footer" class="tab tab-sm {% if request.GET.location == 'footer' %}tab-active bg-secondary text-secondary-content shadow-sm font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">底部</a>
             </div>
             
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <div class="join w-full sm:w-auto">
-                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索导航..." class="input input-sm input-bordered join-item w-full sm:w-64 focus:input-primary transition-all" />
-                    <button type="submit" class="btn btn-sm btn-ghost join-item pointer-events-none border border-base-300">
+            <!-- Right: Search & Actions -->
+            <div class="flex items-center gap-2 w-full lg:w-auto">
+                <form action="." method="get" class="join w-full lg:w-auto">
+                    {% if request.GET.location %}<input type="hidden" name="location" value="{{ request.GET.location }}">{% endif %}
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索导航..." class="input input-sm input-bordered join-item w-full lg:w-64 focus:input-primary transition-all" />
+                    <button type="submit" class="btn btn-sm btn-ghost join-item border border-base-300 bg-base-100">
                         <span class="material-symbols-outlined text-base-content/50">search</span>
                     </button>
-                </div>
+                </form>
 
                 {% url 'administration:navigation_create' as create_url %}
-                <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-1 shadow-lg shadow-primary/20">
-                    <span class="material-symbols-outlined text-lg">add</span>
-                    新建导航
-                </a>
+                {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建导航' extra_classes='px-4 !h-8 text-xs min-h-0' href=create_url %}
+                    {% include 'components/inspira/rainbow_button.html' %}
+                {% endwith %}
+
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal">
+                        更多
+                        <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
+                    </div>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-content/5">
+                        <li><a href="{% url 'administration:export_all' 'Navigation' %}" target="_blank"><span class="material-symbols-outlined">download</span> 导出 JSON</a></li>
+                        <li><button onclick="import_modal.showModal()"><span class="material-symbols-outlined">upload</span> 导入 JSON</button></li>
+                        <div class="divider my-1"></div>
+                        <li><button onclick="submitBulkAction('active')"><span class="material-symbols-outlined text-success">visibility</span> 设为可见</button></li>
+                        <li><button onclick="submitBulkAction('inactive')"><span class="material-symbols-outlined text-neutral">visibility_off</span> 设为隐藏</button></li>
+                        <li><button onclick="submitBulkAction('delete')" class="text-error"><span class="material-symbols-outlined">delete</span> 批量删除</button></li>
+                    </ul>
+                </div>
             </div>
         </div>
 
-        <!-- Bulk Actions Toolbar -->
-        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
-            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
-            <div class="flex gap-2">
-                <button onclick="submitBulkAction('active')" class="btn btn-xs btn-primary gap-1">
+        <!-- Bulk Actions (Dynamic Overlay) -->
+        <div id="bulk-actions" class="absolute inset-0 bg-base-100 z-40 hidden flex items-center justify-between px-4 animate-in fade-in zoom-in duration-200 rounded-t-2xl">
+            <div class="flex items-center gap-3">
+                <button onclick="updateBulkToolbar()" class="btn btn-sm btn-circle btn-ghost">
+                    <span class="material-symbols-outlined">close</span>
+                </button>
+                <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
+            </div>
+            <div class="join">
+                <button onclick="submitBulkAction('active')" class="btn btn-sm btn-primary gap-1 join-item">
                     <span class="material-symbols-outlined text-[16px]">visibility</span> 可见
                 </button>
-                <button onclick="submitBulkAction('inactive')" class="btn btn-xs btn-neutral gap-1">
+                <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-neutral gap-1 join-item">
                     <span class="material-symbols-outlined text-[16px]">visibility_off</span> 隐藏
                 </button>
-                <div class="divider divider-horizontal mx-0 my-1"></div>
-                <button onclick="submitBulkAction('delete')" class="btn btn-xs btn-ghost text-error hover:bg-error/10 gap-1">
+                <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1 join-item">
                     <span class="material-symbols-outlined text-[16px]">delete</span> 删除
                 </button>
             </div>
@@ -59,22 +77,22 @@
 
         <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='navigation' %}">
             {% csrf_token %}
-            <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
-                <table class="table table-sm table-pin-rows w-full">
+            <div class="overflow-x-auto min-h-[500px]">
+                <table class="table table-pin-rows w-full">
                     <!-- Head -->
-                    <thead class="bg-base-200/50 text-base-content/60 font-medium sticky top-0 z-30">
+                    <thead class="bg-base-200/30 text-base-content/60 font-medium">
                         <tr>
-                            <th class="w-10 pl-4">
+                            <th class="w-10 pl-6 rounded-tl-2xl">
                                 <label>
-                                    <input type="checkbox" class="checkbox checkbox-xs rounded-sm" onclick="toggleAll(this)" />
+                                    <input type="checkbox" class="checkbox checkbox-sm rounded-sm" onclick="toggleAll(this)" />
                                 </label>
                             </th>
-                            <th>名称</th>
-                            <th>URL</th>
-                            <th class="w-24 text-center">位置</th>
-                            <th class="w-24 text-center">排序</th>
-                            <th class="w-24 text-center">状态</th>
-                            <th class="w-24 text-center">操作</th>
+                            <th>标题</th>
+                            <th class="hidden lg:table-cell">URL</th>
+                            <th class="w-24 text-center hidden sm:table-cell">位置</th>
+                            <th class="w-24 text-center hidden md:table-cell">排序</th>
+                            <th class="w-24 text-center hidden sm:table-cell">状态</th>
+                            <th class="w-24 text-center pr-6 rounded-tr-2xl">操作</th>
                         </tr>
                     </thead>
                     <!-- Body (HTMX Target) -->
@@ -87,10 +105,10 @@
         
         <!-- Pagination -->
         {% if is_paginated %}
-        <div class="p-4 border-t border-base-200 flex justify-center bg-base-100/30">
+        <div class="p-4 border-t border-base-200 flex justify-center bg-base-100/30 rounded-b-2xl">
             <div class="join">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-xs btn-outline">«</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-xs btn-outline">«</a>
                 {% else %}
                 <button class="join-item btn btn-xs btn-outline btn-disabled">«</button>
                 {% endif %}
@@ -98,7 +116,7 @@
                 <button class="join-item btn btn-xs btn-outline no-animation bg-base-200 border-base-300 text-base-content/70">第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页</button>
                 
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-xs btn-outline">»</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.location %}&location={{ request.GET.location }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-xs btn-outline">»</a>
                 {% else %}
                 <button class="join-item btn btn-xs btn-outline btn-disabled">»</button>
                 {% endif %}
@@ -106,8 +124,27 @@
         </div>
         {% endif %}
     </div>
-{% endcaptureas %}
-<div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-    {{ card_content }}
 </div>
+
+<!-- Import Modal -->
+<dialog id="import_modal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">file_upload</span>
+        导入导航数据 (JSON)
+    </h3>
+    <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
+    <form action="{% url 'administration:import_json' 'Navigation' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="json_file" class="file-input file-input-bordered w-full mb-6" accept=".json" required />
+        <div class="modal-action">
+            <button type="button" class="btn btn-ghost" onclick="import_modal.close()">取消</button>
+            <button type="submit" class="btn btn-primary">开始导入</button>
+        </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
 {% endblock %}

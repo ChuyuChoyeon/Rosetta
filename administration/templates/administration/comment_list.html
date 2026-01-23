@@ -169,22 +169,16 @@
                 <!-- More Actions Dropdown -->
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal">
-                        操作
+                        更多
                         <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
                     </div>
-                    <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200">
-                        <li>
-                            <a href="{% url 'administration:export_all' 'Comment' %}" target="_blank" class="gap-3">
-                                <span class="material-symbols-outlined text-base-content/70">file_download</span>
-                                导出全部 (JSON)
-                            </a>
-                        </li>
-                        <li>
-                            <button onclick="import_modal.showModal()" class="gap-3">
-                                <span class="material-symbols-outlined text-base-content/70">file_upload</span>
-                                导入数据 (JSON)
-                            </button>
-                        </li>
+                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-content/5">
+                        <li><a href="{% url 'administration:export_all' 'Comment' %}" target="_blank"><span class="material-symbols-outlined">download</span> 导出 JSON</a></li>
+                        <li><button onclick="import_modal.showModal()"><span class="material-symbols-outlined">upload</span> 导入 JSON</button></li>
+                        <div class="divider my-1"></div>
+                        <li><button onclick="submitBulkAction('active')" class="text-success"><span class="material-symbols-outlined">check_circle</span> 批量通过</button></li>
+                        <li><button onclick="submitBulkAction('inactive')" class="text-warning"><span class="material-symbols-outlined">pending</span> 批量待审</button></li>
+                        <li><button onclick="submitBulkAction('delete')" class="text-error"><span class="material-symbols-outlined">delete</span> 批量删除</button></li>
                     </ul>
                 </div>
             </div>
@@ -219,16 +213,16 @@
                     <!-- Head -->
                     <thead class="bg-base-200/30 text-base-content/60 font-medium">
                         <tr>
-                            <th class="w-10 pl-6">
+                            <th class="w-10 pl-6 rounded-tl-2xl">
                                 <label>
-                                    <input type="checkbox" class="checkbox checkbox-xs rounded-sm" onclick="toggleAll(this)" />
+                                    <input type="checkbox" class="checkbox checkbox-sm rounded-sm" onclick="toggleAll(this)" />
                                 </label>
                             </th>
-                            <th class="w-16">ID</th>
+                            <th class="w-16 font-mono hidden md:table-cell">ID</th>
                             <th>用户 / 内容</th>
-                            <th class="w-48 text-right">文章 / 时间</th>
-                            <th class="w-24 text-center">状态</th>
-                            <th class="w-24 text-center pr-6">操作</th>
+                            <th class="w-48 text-right hidden lg:table-cell">文章 / 时间</th>
+                            <th class="w-24 text-center hidden sm:table-cell">状态</th>
+                            <th class="w-24 text-center pr-6 rounded-tr-2xl">操作</th>
                         </tr>
                     </thead>
                     <!-- Body (HTMX Target) -->
@@ -267,7 +261,7 @@
   <div class="modal-box">
     <h3 class="font-bold text-lg flex items-center gap-2">
         <span class="material-symbols-outlined text-primary">file_upload</span>
-        导入数据 (JSON)
+        导入评论数据 (JSON)
     </h3>
     <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
     <form action="{% url 'administration:import_json' 'Comment' %}" method="post" enctype="multipart/form-data">

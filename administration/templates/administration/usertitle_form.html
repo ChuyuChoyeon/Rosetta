@@ -1,5 +1,6 @@
 {% extends "administration/base.html" %}
 {% load capture_tags %}
+{% load widget_tweaks %}
 
 {% block title %}{% if form.instance.pk %}编辑称号: {{ form.instance.name }}{% else %}新建称号{% endif %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
@@ -12,148 +13,182 @@
     </ul>
 </div>
 
-<div class="max-w-2xl mx-auto">
-    {% captureas card_content %}
-    <div class="p-6">
-        <h2 class="card-title mb-6">
-            {% if form.instance.pk %}编辑称号: {{ form.instance.name }}{% else %}新建称号{% endif %}
-        </h2>
-        
-        <form method="post" novalidate>
-            {% csrf_token %}
-            
-            {% if form.non_field_errors %}
-            <div class="alert alert-error mb-4">
-                <span class="material-symbols-outlined">error</span>
-                <div>
-                    {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
+<form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-6" novalidate x-data="{ 
+    name: '{{ form.name.value|default:''|escapejs }}',
+    color: '{{ form.color.value|default:'primary' }}',
+    iconCode: `{{ form.icon.value|default:''|escapejs }}`,
+    description: '{{ form.description.value|default:''|escapejs }}',
+    presets: [
+        { name: '认证 (Verified)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M10.6026 3.00799L12.0006 0.5L13.3986 3.00799L16.2236 3.46451L17.5252 1.13998L18.4787 3.82928L21.2917 4.70321L21.9471 2.14716L22.4132 4.96017L25 6.52248L22.7918 8.08479L24.2799 10.6408L21.4669 11.5147L22.4204 14.204L20.0958 11.8795L18.7942 14.204L15.9692 13.7475L17.3672 16.2555L14.5542 17.1294L14.0977 19.9544L12.0006 23.5L9.90349 19.9544L9.44697 17.1294L6.63396 16.2555L8.03196 13.7475L5.20696 14.204L3.90532 11.8795L1.58079 14.204L2.53427 11.5147L-0.278687 10.6408L1.20939 8.08479L-0.999023 6.52248L-0.532982 4.96017L1.67243 2.14716L4.48544 4.70321L5.43892 1.13998L6.74056 3.46451L9.56556 3.00799L10.6026 0.5V3.00799Z\'/><path d=\'M9.99976 15.586L6.70686 12.2931L8.12108 10.8789L9.99976 12.7576L16.3637 6.39355L17.7779 7.80777L9.99976 15.586Z\'/></svg>' },
+        { name: '皇冠 (Crown)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M11.9998 3L8.99977 9H3.99976L6.99977 15H16.9998L19.9998 9H14.9998L11.9998 3Z\'/><path d=\'M3.99976 17H19.9998V19H3.99976V17Z\'/></svg>' },
+        { name: '星星 (Star)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z\'/></svg>' },
+        { name: '闪电 (Bolt)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M13 10V3L4 14H11V21L20 10H13Z\'/></svg>' },
+        { name: '钻石 (Diamond)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M11.6489 0.554688L4.42578 5.66669L2.61914 14.7042L11.6489 23.4453L20.6787 14.7042L18.872 5.66669L11.6489 0.554688ZM11.6489 12.1667L6.23242 8.33335L11.6489 3.33335L17.0654 8.33335L11.6489 12.1667Z\'/></svg>' },
+        { name: '盾牌 (Shield)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M3.78307 2.82598L12 1L20.2169 2.82598C20.6745 2.92766 21 3.33347 21 3.80217V13.7889C21 15.795 19.9974 17.6684 18.3282 18.9498L12 23.8068L5.6718 18.9498C4.00261 17.6684 3 15.795 3 13.7889V3.80217C3 3.33347 3.32553 2.92766 3.78307 2.82598Z\'/></svg>' },
+        { name: '奖章 (Badge)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z\'/></svg>' },
+        { name: '火焰 (Fire)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 23C15.866 23 19 19.866 19 16C19 12.8983 16.9698 10.2834 14.1627 9.30852C15.2929 10.6306 15.7629 12.4239 15.2371 14.1376C15.1539 14.4087 14.8004 14.4534 14.6562 14.2045C13.5971 12.3761 13.2031 9.77163 14.5054 6.78069C14.6219 6.5133 14.3675 6.24009 14.1035 6.35362C10.7962 7.77685 8.5 11.0967 8.5 14.875C8.5 15.2893 8.83579 15.625 9.25 15.625C9.66421 15.625 10 15.2893 10 14.875C10 13.6328 10.5 12.5 11.25 11.5C11.5268 11.131 12.0426 11.4566 11.8594 11.8797C11.3036 13.1629 11 14.5574 11 16C11 16.5523 11.4477 17 12 17C12.5523 17 13 16.5523 13 16C13 15.4477 13.4477 15 14 15C14.5523 15 15 15.4477 15 16C15 17.6569 13.6569 19 12 19C10.3431 19 9 17.6569 9 16C9 15.4477 8.55228 15 8 15C7.44772 15 7 15.4477 7 16C7 18.7614 9.23858 21 12 21V23Z\'/></svg>' },
+        { name: '心形 (Heart)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12.001 4.52853C14.35 2.42 17.98 2.49 20.2426 4.75736C22.5053 7.02472 22.583 10.6375 20.4786 12.993L11.9999 21.485L3.52138 12.993C1.41705 10.6375 1.49571 7.01901 3.75736 4.75736C6.02157 2.49315 9.64519 2.31686 12.001 4.52853Z\'/></svg>' },
+        { name: '火箭 (Rocket)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M13 2.04932C13 2.04932 16.3667 3.38297 18.1751 5.19137C19.9835 7.00007 21.317 10.3667 21.317 10.3667L19.8333 11.8503L21.5333 13.5503C22.75 14.7667 22.75 16.7333 21.5333 17.9503C20.3167 19.167 18.35 19.167 17.1333 17.9503L15.4333 16.2503L13.95 17.7333C13.95 17.7333 10.5833 16.4 8.775 14.5917C6.96667 12.7833 5.63333 9.41667 5.63333 9.41667L13 2.04932ZM17.65 8.35032C17.65 7.52189 16.9784 6.85032 16.15 6.85032C15.3216 6.85032 14.65 7.52189 14.65 8.35032C14.65 9.17875 15.3216 9.85032 16.15 9.85032C16.9784 9.85032 17.65 9.17875 17.65 8.35032ZM4.21667 13.0333L6.03333 14.85C5.46667 15.4167 5.46667 16.3167 6.03333 16.8833L7.73333 18.5833C8.3 19.15 9.2 19.15 9.76667 18.5833L11.5833 20.4C11.9667 20.7833 11.9667 21.4167 11.5833 21.8L10.3 22.0833C9.9 22.1667 9.5 22.0667 9.2 21.7667L2.83333 15.4C2.53333 15.1 2.43333 14.7 2.51667 14.3L2.8 13.0167C3.18333 12.6333 3.83333 12.65 4.21667 13.0333Z\'/></svg>' },
+        { name: '管理员 (Admin)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 11.99H7V10.99H17V11.99H12ZM12 15.99C10.34 15.99 9 14.65 9 12.99C9 10.33 10.34 9.99 12 9.99C13.66 9.99 15 10.33 15 12.99C15 14.65 13.66 15.99 12 15.99Z\'/></svg>' },
+        { name: '贡献者 (User)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z\'/></svg>' },
+        { name: 'VIP', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M2.5 19H5L7 5H4.5L2.5 19ZM9.25 19H11.75L13.25 5H10.75L9.25 19ZM16.5 19H21.5C22.33 19 23 18.33 23 17.5V6.5C23 5.67 22.33 5 21.5 5H16.5V19ZM19 7.5H20.5V10.5H19V7.5ZM19 13.5H20.5V16.5H19V13.5Z\'/></svg>' },
+        { name: 'Bug 猎手', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M19 8H16.85C16.95 7.68 17 7.35 17 7C17 4.24 14.76 2 12 2C9.24 2 7 4.24 7 7C7 7.35 7.05 7.68 7.15 8H5C3.34 8 2 9.34 2 11V13H4V17C4 18.66 5.34 20 7 20H17C18.66 20 18.66 20 17V13H22V11C22 9.34 20.66 8 19 8ZM12 4C13.66 4 15 5.34 15 7C15 8.66 13.66 10 12 10C10.34 10 9 8.66 9 7C9 5.34 10.34 4 12 4ZM14 16H10V14H14V16ZM14 12H10V10H14V12Z\'/></svg>' },
+        { name: '代码 (Code)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M9.4 16.6L4.8 12L9.4 7.4L8 6L2 12L8 18L9.4 16.6ZM14.6 16.6L19.2 12L14.6 7.4L16 6L22 12L16 18L14.6 16.6Z\'/></svg>' },
+        { name: '魔法 (Magic)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M10.59 4.59C10.21 4.21 9.7 4 9.17 4C8.64 4 8.13 4.21 7.76 4.59L3.17 9.17C2.79 9.55 2.58 10.06 2.58 10.59C2.58 11.12 2.79 11.63 3.17 12.01L12.01 20.84C12.39 21.22 12.9 21.43 13.43 21.43C13.96 21.43 14.47 21.22 14.85 20.84L19.43 16.25C19.81 15.87 20.02 15.36 20.02 14.83C20.02 14.3 19.81 13.79 19.43 13.41L10.59 4.59ZM17 10C17.55 10 18 10.45 18 11C18 11.55 17.55 12 17 12C16.45 12 16 11.55 16 11C16 10.45 16.45 10 17 10ZM19 3C19.55 3 20 3.45 20 4C20 4.55 19.55 5 19 5C18.45 5 18 4.55 18 4C18 3.45 18.45 3 19 3ZM22 7C22.55 7 23 7.45 23 8C23 8.55 22.55 9 22 9C21.45 9 21 8.55 21 8C21 7.45 21.45 7 22 7Z\'/></svg>' },
+        { name: '地球 (Global)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z\'/></svg>' },
+        { name: '灯泡 (Idea)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M9 21C9 21.55 9.45 22 10 22H14C14.55 22 15 21.55 15 21V20H9V21ZM12 2C8.14 2 5 5.14 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.14 15.86 2 12 2ZM14.85 13.12L14 13.7V16H10V13.7L9.15 13.12C7.8 12.21 7 10.68 7 9C7 6.24 9.24 4 12 4C14.76 4 17 6.24 17 9C17 10.68 16.2 12.21 14.85 13.12Z\'/></svg>' },
+        { name: '书本 (Scholar)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M18 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V4C20 2.9 19.1 2 18 2ZM6 4H11V12L8.5 10.5L6 12V4Z\'/></svg>' },
+        { name: '咖啡 (Coffee)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M18.5 3H6C4.9 3 4 3.9 4 5V14C4 16.76 6.24 19 9 19H14C16.76 19 19 16.76 19 14V12H20C21.1 12 22 11.1 22 10V5C22 3.9 21.1 3 20 3H18.5ZM17 14C17 15.65 15.65 17 14 17H9C7.35 17 6 15.65 6 14V5H17V14ZM20 10H19V5H20V10Z\'/></svg>' },
+        { name: '音乐 (Music)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 3V13.55C11.41 13.21 10.73 13 10 13C7.79 13 6 14.79 6 17C6 19.21 7.79 21 10 21C12.21 21 14 19.21 14 17V7H18V3H12ZM10 19C8.9 19 8 18.1 8 17C8 15.9 8.9 15 10 15C11.1 15 12 15.9 12 17C12 18.1 11.1 19 10 19Z\'/></svg>' },
+        { name: '相机 (Camera)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM9 14C6.34 14 2 15.34 2 18V20H22V18C22 15.34 17.66 14 15 14H9ZM12 10C10.9 10 10 9.1 10 8C10 6.9 10.9 6 12 6C13.1 6 14 6.9 14 8C14 9.1 13.1 10 12 10Z\'/></svg>' },
+        { name: '调色板 (Artist)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21C12.83 21 13.5 20.33 13.5 19.5C13.5 19.11 13.35 18.76 13.11 18.5C12.88 18.23 12.73 17.88 12.73 17.5C12.73 16.67 13.4 16 14.23 16H16C18.76 16 21 13.76 21 11C21 6.58 16.97 3 12 3ZM6.5 12C5.67 12 5 11.33 5 10.5C5 9.67 5.67 9 6.5 9C7.33 9 8 9.67 8 10.5C8 11.33 7.33 12 6.5 12ZM9.5 8C8.67 8 8 7.33 8 6.5C8 5.67 8.67 5 9.5 5C10.33 5 11 5.67 11 6.5C11 7.33 10.33 8 9.5 8ZM14.5 8C13.67 8 13 7.33 13 6.5C13 5.67 13.67 5 14.5 5C15.33 5 16 5.67 16 6.5C16 7.33 15.33 8 14.5 8ZM17.5 12C16.67 12 16 11.33 16 10.5C16 9.67 16.67 9 17.5 9C18.33 9 19 9.67 19 10.5C19 11.33 18.33 12 17.5 12Z\'/></svg>' },
+        { name: '手柄 (Gamer)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M21 9L17.5 5.5L16 7L19.5 10.5L21 9ZM10.5 15H13.5V12H15V15H18V16.5H15V19.5H13.5V16.5H10.5V15ZM3 9L4.5 10.5L8 7L6.5 5.5L3 9Z\'/></svg>' },
+        { name: '叶子 (Eco)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M17 8C17 12.97 12.97 17 8 17C7.45 17 6.91 16.95 6.39 16.86C6.12 17.84 6 18.89 6 20H4C4 18.66 4.25 17.38 4.69 16.2C4.24 15.31 4 14.32 4 13.28C4 13.19 4 13.09 4 13C4 8.03 8.03 4 13 4C13.09 4 13.19 4 13.28 4C14.32 4 15.31 4.24 16.2 4.69C16.7 5.64 17 6.77 17 8ZM13 6C10.24 6 8 8.24 8 11C8 11.55 8.45 12 9 12C9.55 12 10 11.55 10 11C10 9.34 11.34 8 13 8C13.55 8 14 7.55 14 7C14 6.45 13.55 6 13 6Z\'/></svg>' },
+    ]
+}">
+    {% csrf_token %}
+    
+    <!-- Left Column: Form -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Main Info -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body p-6">
+                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-info">badge</span>
+                    基本信息
+                </h2>
+                
+                {% if form.non_field_errors %}
+                <div class="alert alert-error mb-4">
+                    <span class="material-symbols-outlined">error</span>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Name -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">称号名称</span>
+                    </label>
+                    {% render_field form.name class+="input input-bordered w-full" x-model="name" placeholder="例如：VIP" %}
+                    {% if form.name.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+
+                <!-- Color -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">颜色风格</span>
+                    </label>
+                    {% render_field form.color class+="select select-bordered w-full" x-model="color" %}
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">
+                            选择一个醒目的颜色来区分不同类型的称号
+                        </span>
+                    </label>
+                    {% if form.color.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.color.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+                
+                <!-- Description -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">称号说明</span>
+                    </label>
+                    {% render_field form.description class+="input input-bordered w-full" x-model="description" placeholder="简短描述该称号的获取条件或含义" %}
+                    {% if form.description.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.description.errors.0 }}</span>
+                    </label>
+                    {% endif %}
                 </div>
             </div>
-            {% endif %}
+        </div>
 
-            <!-- Name -->
-            <div class="form-control w-full mb-4">
-                <label class="label">
-                    <span class="label-text">称号名称</span>
-                </label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                <label class="label">
-                    <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
-                </label>
-                {% endif %}
-            </div>
+        <!-- Icon Settings -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body p-6">
+                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">extension</span>
+                    图标设置
+                </h2>
 
-            <!-- Color -->
-            <div class="form-control w-full mb-4">
-                <label class="label">
-                    <span class="label-text">颜色风格</span>
-                </label>
-                {{ form.color }}
-                <label class="label">
-                    <span class="label-text-alt text-base-content/60">
-                        可用颜色: 
-                        <span class="text-primary">蓝色</span>, 
-                        <span class="text-secondary">紫色</span>, 
-                        <span class="text-success">绿色</span>, 
-                        <span class="text-warning">金色</span>, 
-                        <span class="text-error">红色</span>
-                    </span>
-                </label>
-                {% if form.color.errors %}
-                <label class="label">
-                    <span class="label-text-alt text-error">{{ form.color.errors.0 }}</span>
-                </label>
-                {% endif %}
-            </div>
-
-            <!-- Icon -->
-            <div class="form-control w-full mb-4" x-data="{ 
-                iconCode: `{{ form.icon.value|default:''|escapejs }}`,
-                presets: [
-                    { name: '认证 (Verified)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M10.6026 3.00799L12.0006 0.5L13.3986 3.00799L16.2236 3.46451L17.5252 1.13998L18.4787 3.82928L21.2917 4.70321L21.9471 2.14716L22.4132 4.96017L25 6.52248L22.7918 8.08479L24.2799 10.6408L21.4669 11.5147L22.4204 14.204L20.0958 11.8795L18.7942 14.204L15.9692 13.7475L17.3672 16.2555L14.5542 17.1294L14.0977 19.9544L12.0006 23.5L9.90349 19.9544L9.44697 17.1294L6.63396 16.2555L8.03196 13.7475L5.20696 14.204L3.90532 11.8795L1.58079 14.204L2.53427 11.5147L-0.278687 10.6408L1.20939 8.08479L-0.999023 6.52248L-0.532982 4.96017L1.67243 2.14716L4.48544 4.70321L5.43892 1.13998L6.74056 3.46451L9.56556 3.00799L10.6026 0.5V3.00799Z\'/><path d=\'M9.99976 15.586L6.70686 12.2931L8.12108 10.8789L9.99976 12.7576L16.3637 6.39355L17.7779 7.80777L9.99976 15.586Z\'/></svg>' },
-                    { name: '皇冠 (Crown)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M11.9998 3L8.99977 9H3.99976L6.99977 15H16.9998L19.9998 9H14.9998L11.9998 3Z\'/><path d=\'M3.99976 17H19.9998V19H3.99976V17Z\'/></svg>' },
-                    { name: '星星 (Star)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12.0006 18.26L4.94715 22.2082L6.52248 14.2799L0.587891 8.7918L8.61493 7.84006L12.0006 0.5L15.3862 7.84006L23.4132 8.7918L17.4787 14.2799L19.054 22.2082L12.0006 18.26Z\'/></svg>' },
-                    { name: '闪电 (Bolt)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M13 10V3L4 14H11V21L20 10H13Z\'/></svg>' },
-                    { name: '钻石 (Diamond)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M11.6489 0.554688L4.42578 5.66669L2.61914 14.7042L11.6489 23.4453L20.6787 14.7042L18.872 5.66669L11.6489 0.554688ZM11.6489 12.1667L6.23242 8.33335L11.6489 3.33335L17.0654 8.33335L11.6489 12.1667Z\'/></svg>' },
-                    { name: '盾牌 (Shield)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M3.78307 2.82598L12 1L20.2169 2.82598C20.6745 2.92766 21 3.33347 21 3.80217V13.7889C21 15.795 19.9974 17.6684 18.3282 18.9498L12 23.8068L5.6718 18.9498C4.00261 17.6684 3 15.795 3 13.7889V3.80217C3 3.33347 3.32553 2.92766 3.78307 2.82598Z\'/></svg>' },
-                    { name: '奖章 (Badge)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z\'/></svg>' },
-                    { name: '火焰 (Fire)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 23C15.866 23 19 19.866 19 16C19 12.8983 16.9698 10.2834 14.1627 9.30852C15.2929 10.6306 15.7629 12.4239 15.2371 14.1376C15.1539 14.4087 14.8004 14.4534 14.6562 14.2045C13.5971 12.3761 13.2031 9.77163 14.5054 6.78069C14.6219 6.5133 14.3675 6.24009 14.1035 6.35362C10.7962 7.77685 8.5 11.0967 8.5 14.875C8.5 15.2893 8.83579 15.625 9.25 15.625C9.66421 15.625 10 15.2893 10 14.875C10 13.6328 10.5 12.5 11.25 11.5C11.5268 11.131 12.0426 11.4566 11.8594 11.8797C11.3036 13.1629 11 14.5574 11 16C11 16.5523 11.4477 17 12 17C12.5523 17 13 16.5523 13 16C13 15.4477 13.4477 15 14 15C14.5523 15 15 15.4477 15 16C15 17.6569 13.6569 19 12 19C10.3431 19 9 17.6569 9 16C9 15.4477 8.55228 15 8 15C7.44772 15 7 15.4477 7 16C7 18.7614 9.23858 21 12 21V23Z\'/></svg>' },
-                    { name: '心形 (Heart)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12.001 4.52853C14.35 2.42 17.98 2.49 20.2426 4.75736C22.5053 7.02472 22.583 10.6375 20.4786 12.993L11.9999 21.485L3.52138 12.993C1.41705 10.6375 1.49571 7.01901 3.75736 4.75736C6.02157 2.49315 9.64519 2.31686 12.001 4.52853Z\'/></svg>' },
-                    { name: '火箭 (Rocket)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M13 2.04932C13 2.04932 16.3667 3.38297 18.1751 5.19137C19.9835 7.00007 21.317 10.3667 21.317 10.3667L19.8333 11.8503L21.5333 13.5503C22.75 14.7667 22.75 16.7333 21.5333 17.9503C20.3167 19.167 18.35 19.167 17.1333 17.9503L15.4333 16.2503L13.95 17.7333C13.95 17.7333 10.5833 16.4 8.775 14.5917C6.96667 12.7833 5.63333 9.41667 5.63333 9.41667L13 2.04932ZM17.65 8.35032C17.65 7.52189 16.9784 6.85032 16.15 6.85032C15.3216 6.85032 14.65 7.52189 14.65 8.35032C14.65 9.17875 15.3216 9.85032 16.15 9.85032C16.9784 9.85032 17.65 9.17875 17.65 8.35032ZM4.21667 13.0333L6.03333 14.85C5.46667 15.4167 5.46667 16.3167 6.03333 16.8833L7.73333 18.5833C8.3 19.15 9.2 19.15 9.76667 18.5833L11.5833 20.4C11.9667 20.7833 11.9667 21.4167 11.5833 21.8L10.3 22.0833C9.9 22.1667 9.5 22.0667 9.2 21.7667L2.83333 15.4C2.53333 15.1 2.43333 14.7 2.51667 14.3L2.8 13.0167C3.18333 12.6333 3.83333 12.65 4.21667 13.0333Z\'/></svg>' },
-                    { name: '管理员 (Admin)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 1L3 5V11C3 16.55 6.84 21.74 12 23C17.16 21.74 21 16.55 21 11V5L12 1ZM12 11.99H7V10.99H17V11.99H12ZM12 15.99C10.34 15.99 9 14.65 9 12.99C9 10.33 10.34 9.99 12 9.99C13.66 9.99 15 10.33 15 12.99C15 14.65 13.66 15.99 12 15.99Z\'/></svg>' },
-                    { name: '贡献者 (User)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM12 14C9.33 14 4 15.34 4 18V20H20V18C20 15.34 14.67 14 12 14Z\'/></svg>' },
-                    { name: 'VIP', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M2.5 19H5L7 5H4.5L2.5 19ZM9.25 19H11.75L13.25 5H10.75L9.25 19ZM16.5 19H21.5C22.33 19 23 18.33 23 17.5V6.5C23 5.67 22.33 5 21.5 5H16.5V19ZM19 7.5H20.5V10.5H19V7.5ZM19 13.5H20.5V16.5H19V13.5Z\'/></svg>' },
-                    { name: 'Bug 猎手', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M19 8H16.85C16.95 7.68 17 7.35 17 7C17 4.24 14.76 2 12 2C9.24 2 7 4.24 7 7C7 7.35 7.05 7.68 7.15 8H5C3.34 8 2 9.34 2 11V13H4V17C4 18.66 5.34 20 7 20H17C18.66 20 20 18.66 20 17V13H22V11C22 9.34 20.66 8 19 8ZM12 4C13.66 4 15 5.34 15 7C15 8.66 13.66 10 12 10C10.34 10 9 8.66 9 7C9 5.34 10.34 4 12 4ZM14 16H10V14H14V16ZM14 12H10V10H14V12Z\'/></svg>' },
-                    { name: '代码 (Code)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M9.4 16.6L4.8 12L9.4 7.4L8 6L2 12L8 18L9.4 16.6ZM14.6 16.6L19.2 12L14.6 7.4L16 6L22 12L16 18L14.6 16.6Z\'/></svg>' },
-                    { name: '魔法 (Magic)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M10.59 4.59C10.21 4.21 9.7 4 9.17 4C8.64 4 8.13 4.21 7.76 4.59L3.17 9.17C2.79 9.55 2.58 10.06 2.58 10.59C2.58 11.12 2.79 11.63 3.17 12.01L12.01 20.84C12.39 21.22 12.9 21.43 13.43 21.43C13.96 21.43 14.47 21.22 14.85 20.84L19.43 16.25C19.81 15.87 20.02 15.36 20.02 14.83C20.02 14.3 19.81 13.79 19.43 13.41L10.59 4.59ZM17 10C17.55 10 18 10.45 18 11C18 11.55 17.55 12 17 12C16.45 12 16 11.55 16 11C16 10.45 16.45 10 17 10ZM19 3C19.55 3 20 3.45 20 4C20 4.55 19.55 5 19 5C18.45 5 18 4.55 18 4C18 3.45 18.45 3 19 3ZM22 7C22.55 7 23 7.45 23 8C23 8.55 22.55 9 22 9C21.45 9 21 8.55 21 8C21 7.45 21.45 7 22 7Z\'/></svg>' },
-                    { name: '地球 (Global)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM11 19.93C7.05 19.44 4 16.08 4 12C4 11.38 4.08 10.79 4.21 10.21L9 15V16C9 17.1 9.9 18 11 18V19.93ZM17.9 17.39C17.64 16.58 16.9 16 16 16H15V13C15 12.45 14.55 12 14 12H8V10H10C10.55 10 11 9.55 11 9V7H13C14.1 7 15 6.1 15 5V4.59C17.93 5.78 20 8.65 20 12C20 14.08 19.2 15.97 17.9 17.39Z\'/></svg>' },
-                    { name: '灯泡 (Idea)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M9 21C9 21.55 9.45 22 10 22H14C14.55 22 15 21.55 15 21V20H9V21ZM12 2C8.14 2 5 5.14 5 9C5 11.38 6.19 13.47 8 14.74V17C8 17.55 8.45 18 9 18H15C15.55 18 16 17.55 16 17V14.74C17.81 13.47 19 11.38 19 9C19 5.14 15.86 2 12 2ZM14.85 13.12L14 13.7V16H10V13.7L9.15 13.12C7.8 12.21 7 10.68 7 9C7 6.24 9.24 4 12 4C14.76 4 17 6.24 17 9C17 10.68 16.2 12.21 14.85 13.12Z\'/></svg>' },
-                    { name: '书本 (Scholar)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M18 2H6C4.9 2 4 2.9 4 4V20C4 21.1 4.9 22 6 22H18C19.1 22 20 21.1 20 20V4C20 2.9 19.1 2 18 2ZM6 4H11V12L8.5 10.5L6 12V4Z\'/></svg>' },
-                    { name: '咖啡 (Coffee)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M18.5 3H6C4.9 3 4 3.9 4 5V14C4 16.76 6.24 19 9 19H14C16.76 19 19 16.76 19 14V12H20C21.1 12 22 11.1 22 10V5C22 3.9 21.1 3 20 3H18.5ZM17 14C17 15.65 15.65 17 14 17H9C7.35 17 6 15.65 6 14V5H17V14ZM20 10H19V5H20V10Z\'/></svg>' },
-                    { name: '音乐 (Music)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 3V13.55C11.41 13.21 10.73 13 10 13C7.79 13 6 14.79 6 17C6 19.21 7.79 21 10 21C12.21 21 14 19.21 14 17V7H18V3H12ZM10 19C8.9 19 8 18.1 8 17C8 15.9 8.9 15 10 15C11.1 15 12 15.9 12 17C12 18.1 11.1 19 10 19Z\'/></svg>' },
-                    { name: '相机 (Camera)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 12C14.21 12 16 10.21 16 8C16 5.79 14.21 4 12 4C9.79 4 8 5.79 8 8C8 10.21 9.79 12 12 12ZM9 14C6.34 14 2 15.34 2 18V20H22V18C22 15.34 17.66 14 15 14H9ZM12 10C10.9 10 10 9.1 10 8C10 6.9 10.9 6 12 6C13.1 6 14 6.9 14 8C14 9.1 13.1 10 12 10Z\'/></svg>' },
-                    { name: '调色板 (Artist)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 3C7.03 3 3 7.03 3 12C3 16.97 7.03 21 12 21C12.83 21 13.5 20.33 13.5 19.5C13.5 19.11 13.35 18.76 13.11 18.5C12.88 18.23 12.73 17.88 12.73 17.5C12.73 16.67 13.4 16 14.23 16H16C18.76 16 21 13.76 21 11C21 6.58 16.97 3 12 3ZM6.5 12C5.67 12 5 11.33 5 10.5C5 9.67 5.67 9 6.5 9C7.33 9 8 9.67 8 10.5C8 11.33 7.33 12 6.5 12ZM9.5 8C8.67 8 8 7.33 8 6.5C8 5.67 8.67 5 9.5 5C10.33 5 11 5.67 11 6.5C11 7.33 10.33 8 9.5 8ZM14.5 8C13.67 8 13 7.33 13 6.5C13 5.67 13.67 5 14.5 5C15.33 5 16 5.67 16 6.5C16 7.33 15.33 8 14.5 8ZM17.5 12C16.67 12 16 11.33 16 10.5C16 9.67 16.67 9 17.5 9C18.33 9 19 9.67 19 10.5C19 11.33 18.33 12 17.5 12Z\'/></svg>' },
-                    { name: '手柄 (Gamer)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M21 9L17.5 5.5L16 7L19.5 10.5L21 9ZM10.5 15H13.5V12H15V15H18V16.5H15V19.5H13.5V16.5H10.5V15ZM3 9L4.5 10.5L8 7L6.5 5.5L3 9Z\'/></svg>' },
-                    { name: '叶子 (Eco)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M17 8C17 12.97 12.97 17 8 17C7.45 17 6.91 16.95 6.39 16.86C6.12 17.84 6 18.89 6 20H4C4 18.66 4.25 17.38 4.69 16.2C4.24 15.31 4 14.32 4 13.28C4 13.19 4 13.09 4 13C4 8.03 8.03 4 13 4C13.09 4 13.19 4 13.28 4C14.32 4 15.31 4.24 16.2 4.69C16.7 5.64 17 6.77 17 8ZM13 6C10.24 6 8 8.24 8 11C8 11.55 8.45 12 9 12C9.55 12 10 11.55 10 11C10 9.34 11.34 8 13 8C13.55 8 14 7.55 14 7C14 6.45 13.55 6 13 6Z\'/></svg>' },
-                    { name: '指纹 (Identity)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M17.81 4.47C17.73 4.47 17.65 4.45 17.58 4.41C15.66 3.42 14.02 3 12 3C9.98 3 8.34 3.42 6.42 4.41C5.98 4.63 5.43 4.45 5.21 4C4.99 3.55 5.17 3.01 5.62 2.78C7.82 1.64 9.8 1 12 1C14.2 1 16.18 1.64 18.38 2.78C18.83 3.01 19.01 3.55 18.79 4C18.62 4.33 18.23 4.47 17.81 4.47ZM12 5.8C9.38 5.8 7.07 7.03 5.68 8.87C5.36 9.29 5.44 9.89 5.86 10.21C6.28 10.53 6.88 10.45 7.2 10.03C8.17 8.74 9.94 7.8 12 7.8C14.06 7.8 15.83 8.74 16.8 10.03C17.12 10.45 17.72 10.53 18.14 10.21C18.56 9.89 18.64 9.29 18.32 8.87C16.93 7.03 14.62 5.8 12 5.8ZM21.78 14.39C21.46 14.93 20.76 15.1 20.22 14.78C19.5 14.35 18.64 14.08 17.74 14.03C17.2 14 16.74 14.41 16.71 14.95C16.68 15.49 17.09 15.95 17.63 15.98C18.91 16.05 20.14 16.44 21.16 17.04C21.28 17.11 21.42 17.15 21.55 17.15C21.94 17.15 22.31 16.94 22.49 16.58C22.75 16.08 22.56 15.46 22.06 15.2C21.97 15.15 21.87 15.11 21.78 15.06V14.39ZM2.22 14.39C1.9 14.39 1.58 14.53 1.34 14.8C0.95 15.23 0.98 15.89 1.41 16.28C2.55 17.3 3.96 17.8 5.45 17.8C5.66 17.8 5.88 17.78 6.09 17.74C6.63 17.64 6.98 17.13 6.88 16.59C6.78 16.05 6.27 15.7 5.73 15.8C5.63 15.82 5.54 15.82 5.45 15.82C4.46 15.82 3.53 15.49 2.76 14.8C2.6 14.53 2.41 14.39 2.22 14.39Z\'/></svg>' },
-                    { name: '锚 (Core)', code: '<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 24 24\' fill=\'currentColor\'><path d=\'M12 2C13.66 2 15 3.34 15 5C15 6.66 13.66 8 12 8C10.34 8 9 6.66 9 5C9 3.34 10.34 2 12 2ZM13 18.93V11H11V18.93C7.05 18.44 4 15.08 4 11H2C2 16.52 6.48 21 12 21C17.52 21 22 16.52 22 11H20C20 15.08 16.95 18.44 13 18.93Z\'/></svg>' }
-                ]
-            }">
-                <label class="label">
-                    <span class="label-text">图标 (SVG 代码)</span>
-                </label>
-                
-                <!-- Presets -->
-                <div class="flex gap-2 mb-2 overflow-x-auto pb-2">
-                    <template x-for="preset in presets">
-                        <button type="button" 
-                                class="btn btn-sm btn-outline gap-2" 
-                                @click="iconCode = preset.code; $nextTick(() => $refs.textarea.value = preset.code)"
+                <!-- Icon Presets -->
+                <div class="form-control w-full mb-4">
+                    <label class="label">
+                        <span class="label-text font-medium">预设图标</span>
+                    </label>
+                    <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-2">
+                        <template x-for="preset in presets" :key="preset.name">
+                            <button type="button" 
+                                @click="iconCode = preset.code"
+                                class="btn btn-square btn-outline btn-sm h-10 w-10 p-2 hover:btn-primary transition-all"
+                                :class="{'btn-primary': iconCode === preset.code}"
                                 :title="preset.name">
-                            <span class="w-4 h-4" x-html="preset.code"></span>
-                        </button>
-                    </template>
+                                <span class="w-full h-full flex items-center justify-center [&>svg]:w-full [&>svg]:h-full" x-html="preset.code"></span>
+                            </button>
+                        </template>
+                    </div>
                 </div>
 
-                <textarea x-ref="textarea" name="icon" x-model="iconCode" class="textarea textarea-bordered w-full h-24 font-mono text-xs focus:textarea-primary transition-all" placeholder="<svg...>"></textarea>
-                
-                <label class="label justify-start gap-4">
-                    <span class="label-text-alt text-base-content/60">预览:</span>
-                    <div class="w-6 h-6 text-primary border border-base-300 rounded p-0.5" x-html="iconCode || '<span class=\'text-xs opacity-50\'>无</span>'"></div>
-                </label>
-                
-                {% if form.icon.errors %}
-                <label class="label">
-                    <span class="label-text-alt text-error">{{ form.icon.errors.0 }}</span>
-                </label>
-                {% endif %}
+                <!-- Custom Icon Code -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">自定义 SVG 代码</span>
+                        <span class="label-text-alt text-base-content/50">推荐尺寸 24x24</span>
+                    </label>
+                    {% render_field form.icon class+="textarea textarea-bordered font-mono text-xs h-32" x-model="iconCode" placeholder="<svg...>" %}
+                    {% if form.icon.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.icon.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
             </div>
-
-            <!-- Description -->
-            <div class="form-control w-full mb-6">
-                <label class="label">
-                    <span class="label-text">说明</span>
-                </label>
-                {{ form.description }}
-                {% if form.description.errors %}
-                <label class="label">
-                    <span class="label-text-alt text-error">{{ form.description.errors.0 }}</span>
-                </label>
-                {% endif %}
-            </div>
-
-            <div class="card-actions justify-end mt-4">
-                <a href="{% url 'administration:usertitle_list' %}" class="btn btn-ghost">取消</a>
-                <button type="submit" class="btn btn-primary">保存</button>
-            </div>
-        </form>
+        </div>
     </div>
-    {% endcaptureas %}
-    <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-        {{ card_content }}
+
+    <!-- Right Column: Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+        <!-- Publish Box -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
+            <div class="card-body p-4">
+                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">操作</h3>
+                
+                <div class="flex flex-col gap-3">
+                    <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                        <span class="material-symbols-outlined">save</span>
+                        保存更改
+                    </button>
+                    <a href="{% url 'administration:usertitle_list' %}" class="btn btn-ghost w-full">取消</a>
+                </div>
+
+                <div class="divider my-4">预览</div>
+                
+                <div class="flex flex-col items-center gap-4 p-4 bg-base-200/50 rounded-lg border border-base-content/5">
+                    <div class="text-xs font-mono opacity-50 mb-1">Badge Preview</div>
+                    
+                    <span class="badge badge-lg gap-2 shadow-sm" :class="'badge-' + color">
+                        <template x-if="iconCode">
+                            <span class="w-4 h-4 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full" x-html="iconCode"></span>
+                        </template>
+                        <span x-text="name || '称号名称'"></span>
+                    </span>
+                    
+                    <div class="text-xs text-center mt-2 opacity-60" x-text="description || '暂无描述'"></div>
+                </div>
+            </div>
+        </div>
     </div>
-</div>
+</form>
 {% endblock %}

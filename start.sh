@@ -29,7 +29,7 @@ python manage.py buildwatson
 
 # 启动服务器
 echo "🔥 正在启动 Uvicorn 服务器..."
-# 使用 exec 替换当前 shell 进程为 uvicorn
+
 exec uvicorn Rosetta.asgi:application \
     --host 0.0.0.0 \
     --port 8000 \
