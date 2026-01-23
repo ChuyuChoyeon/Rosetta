@@ -104,6 +104,41 @@
         form.submit();
     };
 
+    /**
+     * 初始化 GeoPattern (用于生成文章默认封面)
+     * @param {HTMLElement} el - 目标元素
+     * @param {string} title - 用于生成种子的标题
+     */
+    global.initGeoPattern = function(el, title) {
+        // Ensure element has size or minimum height to display background
+        if (!el.classList.contains('min-h-[10rem]') && el.offsetHeight === 0) {
+             el.style.minHeight = '10rem'; 
+        }
+
+        const generate = () => {
+             const seed = title || el.dataset.seed || 'Rosetta';
+             const pattern = GeoPattern.generate(seed);
+             el.style.backgroundImage = pattern.toDataUrl();
+        };
+
+        if (window.GeoPattern) {
+             generate();
+        } else {
+             // Retry mechanism
+             let retries = 0;
+             const interval = setInterval(() => {
+                 if (window.GeoPattern) {
+                     clearInterval(interval);
+                     generate();
+                 } else if (retries > 10) { // Give up after 1s
+                     clearInterval(interval);
+                     console.warn('GeoPattern library failed to load.');
+                 }
+                 retries++;
+             }, 100);
+        }
+    };
+
     function initUI() {
         initSubmitLoading();
         initRippleEffect();

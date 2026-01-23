@@ -29,7 +29,9 @@
         </div>
     </div>
     {% endcaptureas %}
-    {% include 'components/inspira/card_spotlight.html' with slot_content=system_status_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+        {{ system_status_card }}
+    </div>
 
     <!-- Data Counts -->
     {% captureas data_counts_card %}
@@ -54,7 +56,9 @@
         </div>
     </div>
     {% endcaptureas %}
-    {% include 'components/inspira/card_spotlight.html' with slot_content=data_counts_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+        {{ data_counts_card }}
+    </div>
 
     <!-- URL Patterns -->
     {% captureas url_patterns_card %}
@@ -68,7 +72,7 @@
         </div>
         <div class="overflow-y-auto max-h-[600px] p-0 flex-grow scrollbar-thin scrollbar-thumb-base-300">
             <table class="table table-pin-rows table-sm w-full">
-                <thead class="bg-base-200 z-10">
+                <thead class="bg-base-200 z-30">
                     <tr>
                         <th class="w-5/12 pl-6">路由信息 (Route Info)</th>
                         <th class="w-4/12">功能描述 (Description)</th>
@@ -118,6 +122,8 @@
         </div>
     </div>
     {% endcaptureas %}
-    {% include 'components/inspira/card_spotlight.html' with slot_content=url_patterns_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5 md:col-span-2" %}
+    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5 md:col-span-2">
+        {{ url_patterns_card }}
+    </div>
 </div>
 {% endblock %}

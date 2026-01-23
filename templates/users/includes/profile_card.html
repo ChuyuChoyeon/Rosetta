@@ -1,7 +1,7 @@
 {% load capture_tags %}
 {% captureas card_content %}
 <div class="h-full flex flex-col justify-between relative z-20">
-    <!-- Cover Image -->
+    <!-- 封面图片 -->
     <figure class="h-32 w-full bg-base-200 relative overflow-hidden group">
         {% if profile_user.cover_image %}
         <img src="{{ profile_user.cover_image.url }}" alt="Cover" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" />
@@ -14,7 +14,7 @@
 
     <div class="card-body items-center text-center -mt-16 pt-0 relative z-10">
         <div class="avatar cursor-zoom-in group relative" @click="showAvatarModal = true">
-            <!-- Avatar Glow Effect -->
+            <!-- 头像光晕效果 -->
             <div class="absolute inset-0 rounded-full bg-primary/20 blur-xl scale-90 group-hover:scale-110 transition-transform duration-500"></div>
             
             <div class="w-32 h-32 rounded-full ring-4 ring-base-100 ring-offset-0 bg-base-100 transition-transform duration-300 group-hover:scale-105 shadow-2xl relative z-10">
@@ -85,4 +85,6 @@
     </div>
 </div>
 {% endcaptureas %}
-{% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="overflow-hidden p-0 rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5 !h-auto" %}
+<div class="overflow-hidden p-0 rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5 !h-auto">
+    {{ card_content }}
+</div>

@@ -62,7 +62,7 @@
     <!-- Main Area: Log Content -->
     <div class="flex-1 flex flex-col min-w-0 bg-base-100">
         <!-- Toolbar -->
-        <div class="p-3 border-b border-base-200 flex justify-between items-center bg-base-100/80 backdrop-blur-sm z-10 sticky top-0">
+        <div class="p-3 border-b border-base-200 flex justify-between items-center bg-base-100/80 backdrop-blur-sm z-30 sticky top-0">
             <div class="flex items-center gap-3 pl-2">
                 {% if current_file %}
                     <div class="flex flex-col">
@@ -149,7 +149,9 @@
 {% endcaptureas %}
 
 {% with slot_content=card_content extra_classes="w-full h-full p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
-    {% include 'components/inspira/card_spotlight.html' %}
+    <div class="w-full h-full p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+        {{ card_content }}
+    </div>
 {% endwith %}
 
 <script>

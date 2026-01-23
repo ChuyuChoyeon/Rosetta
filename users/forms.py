@@ -38,14 +38,14 @@ class UserPreferenceForm(forms.ModelForm):
     用于更新 UserPreference 模型。
     字段:
     - public_profile: 是否公开个人资料
-    - theme: 界面主题选择
+    - theme: 界面主题选择 (Light/Dark)
     """
     class Meta:
         model = UserPreference
         fields = ["public_profile", "theme"]
         widgets = {
-            "theme": forms.Select(attrs={"class": "select select-bordered w-full"}),
-            "public_profile": forms.CheckboxInput(attrs={"class": "checkbox"}),
+            "theme": forms.RadioSelect(attrs={"class": "radio"}),
+            "public_profile": forms.CheckboxInput(attrs={"class": "toggle toggle-primary"}),
         }
 
 

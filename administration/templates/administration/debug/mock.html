@@ -33,7 +33,9 @@
                 </div>
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=user_card extra_classes="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100" %}
+            <div class="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100">
+                {{ user_card }}
+            </div>
 
             <!-- Taxonomy Settings -->
             {% captureas taxonomy_card %}
@@ -53,7 +55,9 @@
                 </div>
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=taxonomy_card extra_classes="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100" %}
+            <div class="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100">
+                {{ taxonomy_card }}
+            </div>
 
             <!-- Content Settings -->
             {% captureas content_card %}
@@ -76,7 +80,9 @@
             </div>
             {% endcaptureas %}
             <div class="md:col-span-2">
-                {% include 'components/inspira/card_spotlight.html' with slot_content=content_card extra_classes="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100 h-full" %}
+                <div class="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100 h-full">
+                    {{ content_card }}
+                </div>
             </div>
 
             <!-- Site Config Settings -->
@@ -95,7 +101,9 @@
             </div>
             {% endcaptureas %}
             <div class="md:col-span-2">
-                {% include 'components/inspira/card_spotlight.html' with slot_content=config_card extra_classes="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100 h-full" %}
+                <div class="p-0 overflow-hidden rounded-xl border border-base-content/10 shadow-sm hover:shadow-md bg-base-100 h-full">
+                    {{ config_card }}
+                </div>
             </div>
         </div>
 

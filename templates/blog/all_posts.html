@@ -87,7 +87,9 @@
             </div>
             {% endcaptureas %}
             
-            {% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden border-none shadow-none hover:shadow-xl bg-transparent h-full" %}
+            <div class="p-0 overflow-hidden border-none shadow-none hover:shadow-xl bg-transparent h-full">
+                {{ card_content }}
+            </div>
             
             {% empty %}
             <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">

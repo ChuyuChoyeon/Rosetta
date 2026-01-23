@@ -132,42 +132,66 @@ class UnifiedProfileView(View):
         if not profile_user:
             return redirect("users:login")
 
+        # --- 隐私检查 ---
+        # 1. 如果是本人，允许
+        # 2. 如果是管理员，允许
+        # 3. 如果 public_profile 为 True，允许
+        # 4. 否则，标记为私密模式
+        is_me = request.user.is_authenticated and request.user == profile_user
+        is_staff = request.user.is_authenticated and request.user.is_staff
+        
+        # 确保偏好设置存在
+        if not hasattr(profile_user, "preference"):
+            UserPreference.objects.create(user=profile_user)
+            profile_user.refresh_from_db()
+            
+        is_public = profile_user.preference.public_profile
+        is_private_profile = False
+
+        if not (is_me or is_staff or is_public):
+            is_private_profile = True
+
         active_tab = request.GET.get("tab", "articles")
         context = {
             "profile_user": profile_user,
             "active_tab": active_tab,
+            "is_private_profile": is_private_profile,
         }
 
-        # --- 公共数据 (所有人都可见) ---
+        # --- 公共数据 (所有人都可见，除非私密) ---
         # 侧边栏评论总数
         context["comments_count"] = Comment.objects.filter(
             user=profile_user, active=True
         ).count()
 
-        # Tab Data Loading
-        if active_tab == "articles":
-            context["posts"] = (
-                Post.objects.filter(author=profile_user, status="published")
-                .select_related("category")
-                .prefetch_related("tags")
-                .order_by("-created_at")[:20]
-            )
-        elif active_tab == "comments":
-            context["comments"] = (
-                Comment.objects.filter(user=profile_user, active=True)
-                .select_related("post")
-                .order_by("-created_at")[:20]
-            )
-        elif active_tab == "likes":
-            context["liked_posts"] = (
-                profile_user.liked_posts.filter(status="published")
-                .select_related("author", "category")
-                .prefetch_related("tags")
-                .order_by("-id")[:20]
-            )
+        if is_private_profile:
+            # 私密模式下，不加载具体内容
+            pass
+        else:
+            # Tab Data Loading
+            if active_tab == "articles":
+                context["posts"] = (
+                    Post.objects.filter(author=profile_user, status="published")
+                    .select_related("category")
+                    .prefetch_related("tags")
+                    .order_by("-created_at")[:20]
+                )
+            elif active_tab == "comments":
+                context["comments"] = (
+                    Comment.objects.filter(user=profile_user, active=True)
+                    .select_related("post")
+                    .order_by("-created_at")[:20]
+                )
+            elif active_tab == "likes":
+                context["liked_posts"] = (
+                    profile_user.liked_posts.filter(status="published")
+                    .select_related("author", "category")
+                    .prefetch_related("tags")
+                    .order_by("-id")[:20]
+                )
 
         # --- 私有数据 (仅限本人查看) ---
-        if request.user.is_authenticated and request.user == profile_user:
+        if is_me:
             # 个人资料编辑表单
             context["form"] = UserProfileForm(instance=profile_user)
 

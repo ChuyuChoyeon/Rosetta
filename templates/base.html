@@ -4,11 +4,12 @@
 <head>
     <title>{% block title %}{{ config.SITE_NAME.value|default:"Rosetta Blog" }}{% endblock %}</title>
     <link rel="shortcut icon" href="{{ config.SITE_FAVICON|default:'/static/core/img/favicon.ico' }}">
+    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="{% url 'post_feed' %}">
     
-    <!-- Google Fonts: Poppins & Open Sans (Local) -->
+    <!-- Google 字体：Poppins & Open Sans (本地化) -->
     <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">
     
-    <!-- Meta Tags -->
+    <!-- Meta 标签 -->
     {% include 'meta/meta.html' %}
     
     {% if config.SITE_KEYWORDS %}
@@ -19,7 +20,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     
-    <!-- Material Symbols -->
+    <!-- Material Symbols 图标字体 -->
     <style>
         @font-face {
             font-family: 'Material Symbols Outlined';
@@ -54,7 +55,7 @@
     {{ config.EXTRA_HEAD_CODE|safe }}
     {% endif %}
 
-    <!-- NProgress Loading Bar (Must be after Tailwind for variables) -->
+    <!-- NProgress 加载进度条 (必须在 Tailwind 之后以获取变量) -->
     <script src="{% static 'theme/js/nprogress.js' %}"></script>
     <link rel="stylesheet" href="{% static 'theme/css/nprogress.css' %}" />
     
@@ -103,10 +104,16 @@
     <script src="{% static 'theme/js/htmx.min.js' %}"></script>
     <script defer src="{% static 'theme/js/alpine.min.js' %}"></script>
     <script src="{% static 'theme/js/cropper.min.js' %}"></script>
+    <script src="{% static 'theme/js/geopattern.min.js' %}"></script>
     <script src="{% static 'theme/js/theme.js' %}"></script>
     <script src="{% static 'theme/js/ui.js' %}"></script>
 
     <script>
+        // --- 全局配置 ---
+        {% if user.is_authenticated %}
+        window.USER_PREFERENCE_URL = "{% url 'users:update_theme' %}";
+        {% endif %}
+
         // --- 主题初始化 (Theme Initialization) ---
         // 立即执行以防止 FOUC (Flash of Unstyled Content, 无样式内容闪烁)
         (function() {
@@ -124,13 +131,16 @@
                 // 3. 应用主题
                 // 如果 ThemeManager 已加载 (theme.js)，则使用它
                 if (window.ThemeManager) {
-                    window.ThemeManager.applyTheme(theme);
+                    // false = 不要立即同步回后端 (避免冗余请求，因为我们刚从后端获取)
+                    window.ThemeManager.applyTheme(theme, false);
                 } else {
                     // 降级处理：直接设置 HTML 属性
                     document.documentElement.setAttribute('data-theme', theme);
                     // 为某些主题添加 dark 类 (Tailwind dark mode 支持)
-                    if (['dark', 'synthwave', 'halloween', 'forest', 'aqua', 'black', 'luxury', 'dracula', 'business', 'night', 'coffee', 'dim', 'sunset'].includes(theme)) {
+                    if (['dark'].includes(theme)) {
                         document.documentElement.classList.add('dark');
+                    } else {
+                        document.documentElement.classList.remove('dark');
                     }
                 }
             } catch (e) {
@@ -179,32 +189,32 @@
 
 <body class="min-h-screen flex flex-col font-sans text-base-content selection:bg-primary selection:text-primary-content scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-base-100 {% if debug %}debug-screens{% endif %}" x-data="{ showScrollTop: false }" @scroll.window="showScrollTop = (window.pageYOffset > 300)">
 
-    <!-- Inspira UI: Neural Background -->
+    <!-- Inspira UI: 神经元背景动画 -->
     {% include 'components/inspira/neural_background.html' %}
 
-    <!-- Reading Progress Bar -->
+    <!-- 阅读进度条 -->
     <div class="progress-container">
         <div class="progress-bar" id="readingProgress"></div>
     </div>
 
-    <!-- Wrap content -->
+    <!-- 内容包裹层 -->
     <div id="main-wrapper" class="flex flex-col min-h-screen">
         {% include 'partials/navbar.html' %}
 
         <main class="flex-grow container mx-auto px-4 py-8">
-            <!-- Toast Notifications -->
+            <!-- Toast 通知 -->
             {% include 'components/toast.html' %}
             
             {% block content %}{% endblock %}
         </main>
         
-        <!-- Global Confirm Modal -->
+        <!-- 全局确认弹窗 -->
         {% include 'components/confirm_modal.html' %}
 
         {% include 'partials/footer.html' %}
     </div>
 
-    <!-- Scroll to Top Button -->
+    <!-- 回到顶部按钮 -->
     <button 
         x-show="showScrollTop" 
         x-transition:enter="transition ease-out duration-300"

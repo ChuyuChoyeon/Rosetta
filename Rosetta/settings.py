@@ -1,85 +1,118 @@
 """
-Rosetta 项目核心配置文件。
+Rosetta 项目核心配置文件 (Production Ready / 1Panel Optimized).
 
-包含项目的所有全局配置，如数据库连接、应用注册、中间件、静态资源管理等。
-生产环境配置请优先使用环境变量覆盖默认值。
+遵循 12-Factor App 原则，严格区分开发与生产环境。
+核心逻辑：DEBUG 模式决定一切配置策略。
 """
 
 import os
+import sys
 from pathlib import Path
 from datetime import timedelta
-import dj_database_url
+import environ  # requires: django-environ
 
 # ------------------------------------------------------------------------------
-# 基础路径配置
+# 环境与路径配置
 # ------------------------------------------------------------------------------
-# 项目根目录，用于定位数据库、静态文件和模板等资源
+# 项目根目录
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# 初始化环境变量
+env = environ.Env()
+
+# 读取 .env 文件
+# 在 1Panel/Docker 部署中，环境变量通常直接注入容器，.env 文件可能不存在。
+# 为了兼容本地开发和容器部署，我们尝试读取但忽略错误。
+env.read_env(BASE_DIR / ".env")
 
 # ------------------------------------------------------------------------------
-# 核心安全与调试配置
+# 核心模式控制 (The Cornerstone)
 # ------------------------------------------------------------------------------
+# 警告：DEBUG 必须由环境变量控制。
+# 默认开启 (Safe for Dev)，但生产环境必须显式设置为 False。
+DEBUG = env.bool("DEBUG", default=True)
 
+# ------------------------------------------------------------------------------
+# 安全配置 (Security)
+# ------------------------------------------------------------------------------
 # 密钥配置
-# 警告：生产环境必须保持密钥私密，泄露可能导致安全漏洞（如 Session 劫持）。
-# 优先从环境变量 DJANGO_SECRET_KEY 获取，开发环境使用默认值。
-SECRET_KEY = os.environ.get(
-    "DJANGO_SECRET_KEY",
-    "django-insecure-598u(^sv4vtl1)@)uxmsz%&oeoxtgau09)5en^0#n!uz63$o@(",
-)
+if DEBUG:
+    # 开发环境使用硬编码密钥，方便且无风险
+    SECRET_KEY = env("DJANGO_SECRET_KEY", default="django-insecure-dev-key-rosetta-local-dev-only")
+else:
+    # 生产环境必须从环境变量获取，否则拒绝启动
+    # 1Panel 设置：在应用配置 -> 环境变量中添加 DJANGO_SECRET_KEY
+    SECRET_KEY = env("DJANGO_SECRET_KEY")
 
-# 调试模式
-# 警告：生产环境必须设置为 False。
-# 开启调试模式会暴露详细的错误堆栈信息，可能包含敏感数据。
-DEBUG = os.environ.get("DEBUG", "True") == "True"
-
-# 允许访问的主机域名
-# 生产环境请填入具体的域名或 IP 地址，避免 HTTP Host 头攻击。
-ALLOWED_HOSTS = ["*"]
-
-# CSRF 信任源配置 (解决 Django 4.0+ Origin 验证失败问题)
-# 必须包含协议 (http:// 或 https://)
-CSRF_TRUSTED_ORIGINS = [
-    "https://choyeon.cc",
-    "http://choyeon.cc",
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-]
-if os.environ.get("CSRF_TRUSTED_ORIGINS"):
-    CSRF_TRUSTED_ORIGINS.extend(os.environ.get("CSRF_TRUSTED_ORIGINS").split(","))
-
+# 主机与源信任
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+    CSRF_TRUSTED_ORIGINS = ["http://localhost:8000", "http://127.0.0.1:8000"]
+else:
+    # 生产环境必须严格限制 Host
+    # 示例: ALLOWED_HOSTS=rosetta.com,www.rosetta.com
+    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+    # 解决反向代理后的 CSRF 问题
+    CSRF_TRUSTED_ORIGINS = env.list("CSRF_TRUSTED_ORIGINS", default=[])
 
 # ------------------------------------------------------------------------------
-# 安全加固配置 (生产环境建议开启)
+# 数据库配置 (Database)
 # ------------------------------------------------------------------------------
-# 浏览器 XSS 过滤保护
-SECURE_BROWSER_XSS_FILTER = True
-# 防止浏览器嗅探 Content-Type
-SECURE_CONTENT_TYPE_NOSNIFF = True
-# 仅通过 HTTPS 传输 Session Cookie（非调试模式下生效）
-SESSION_COOKIE_SECURE = False
-# 仅通过 HTTPS 传输 CSRF Cookie（非调试模式下生效）
-CSRF_COOKIE_SECURE = False
-# 禁止 JavaScript 访问 Session Cookie，防止 XSS 窃取 Session
-SESSION_COOKIE_HTTPONLY = True
-# 默认字符集
-DEFAULT_CHARSET = 'utf-8'
-# 禁止页面被嵌入 iframe，防止点击劫持
-X_FRAME_OPTIONS = 'DENY'
-# Referrer 策略：同源请求发送 Referrer，跨域仅发送源站信息
-REFERRER_POLICY = 'same-origin'
+# 严格分离：开发用 SQLite，生产用 Database URL
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+else:
+    # 生产环境：强制使用 DATABASE_URL
+    # 格式: postgres://user:password@host:port/dbname
+    # 1Panel: 确保数据库容器与应用在同一网络，host 使用容器名或内部 IP
+    DATABASES = {
+        "default": env.db("DATABASE_URL")
+    }
+    
+    # 数据库连接优化 (针对 PostgreSQL/MySQL)
+    DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=600)  # 保持连接 10 分钟
+    DATABASES["default"]["CONN_HEALTH_CHECKS"] = True  # 定期检查连接健康
 
-if not DEBUG:
-    # HSTS (HTTP Strict Transport Security) 配置
-    # 强制浏览器在指定时间内仅使用 HTTPS 访问，防止降级攻击
-    SECURE_HSTS_SECONDS = 31536000  # 1年
-    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
-    SECURE_HSTS_PRELOAD = True
-    # 强制将所有 HTTP 请求重定向到 HTTPS
-    SECURE_SSL_REDIRECT = True
-    # 代理设置 (如果部署在 Nginx/LB 后)
-    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+# ------------------------------------------------------------------------------
+# 缓存与动态配置 (Cache & Constance)
+# ------------------------------------------------------------------------------
+if DEBUG:
+    # 开发环境：本地内存缓存
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        }
+    }
+    # 动态配置存储在数据库中 (方便调试)
+    CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
+else:
+    # 生产环境：强制使用 Redis
+    # 格式: redis://:password@host:port/db
+    if not env("REDIS_URL", default=None):
+         # 如果未提供 REDIS_URL，可以选择报错或回退，这里建议报错以强制最佳实践
+         # 但为了灵活性，如果确实没有 Redis，可以回退到 Database Backend (不推荐)
+         # 这里我们遵循"严格"原则，假设生产环境应当有 Redis
+         pass 
+
+    CACHES = {
+        "default": env.cache("REDIS_URL")
+    }
+    
+    # Session 使用缓存 (高性能)
+    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+    SESSION_CACHE_ALIAS = "default"
+
+    # Constance 使用 Redis (高性能)
+    CONSTANCE_BACKEND = "constance.backends.redisd.RedisBackend"
+    CONSTANCE_REDIS_CONNECTION = env("REDIS_URL")
+    CONSTANCE_REDIS_PREFIX = "rosetta_config:"
+    # Redis 连接池配置
+    CONSTANCE_REDIS_CONNECTION_CLASS = 'django_redis.client.DefaultClient'
 
 
 # ------------------------------------------------------------------------------
@@ -90,80 +123,68 @@ INSTALLED_APPS = [
     "administration",         # 自定义管理后台
     
     # --- Django 内置组件 ---
-    "django.contrib.admin",       # 默认管理后台
-    "django.contrib.auth",        # 认证系统
-    "django.contrib.contenttypes",# 内容类型框架
-    "django.contrib.sessions",    # 会话管理
-    "django.contrib.messages",    # 消息框架
-    "django.contrib.staticfiles", # 静态文件管理
-    "django.contrib.sites",       # 多站点框架 (评论、站点地图依赖)
-    "django.contrib.sitemaps",    # 站点地图生成
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "django.contrib.sitemaps",
     
     # --- 第三方扩展 ---
     "guardian",               # 对象级权限控制
-    "tailwind",               # Tailwind CSS 集成
-    "theme",                  # 前端主题 (DaisyUI)
-    "django_browser_reload",  # 开发环境浏览器自动刷新
-    "django_htmx",            # HTMX 前后端交互支持
-    "captcha",                # 图形验证码
-    "rest_framework",         # RESTful API 框架
-    "rest_framework_simplejwt", # JWT 认证支持
-    "imagekit",               # 图片处理 (缩略图、调整大小)
-    "watson",                 # 数据库全文搜索
-    "meta",                   # SEO Meta 标签生成
-    "constance",              # 动态配置系统 (支持数据库或 Redis)
-    'constance.backends.database',
+    "tailwind",               # Tailwind CSS
+    "theme",                  # DaisyUI Theme
+    "django_browser_reload",  # 浏览器自动刷新 (Middleware handle logic)
+    "django_htmx",            # HTMX
+    "captcha",                # 验证码
+    "rest_framework",         # DRF
+    "rest_framework_simplejwt", # JWT
+    "imagekit",               # 图片处理
+    "watson",                 # 全文搜索
+    "meta",                   # SEO
+    "constance",              # 动态配置
+    "constance.backends.database", # 注册 Database Backend App (即使在 Redis 模式下保留也不影响，除非 strict)
 
-
-    
     # --- 核心业务模块 ---
-    "blog.apps.BlogConfig",   # 博客内容管理
-    "users.apps.UsersConfig", # 用户账户与权限
-    "core.apps.CoreConfig",   # 通用基础设施
+    "blog.apps.BlogConfig",
+    "users.apps.UsersConfig",
+    "core.apps.CoreConfig",
 ]
-
 
 # ------------------------------------------------------------------------------
 # 中间件配置 (Middleware)
 # ------------------------------------------------------------------------------
-# 注意：中间件的顺序至关重要，请求从上往下处理，响应从下往上返回。
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "core.logging.RequestIDMiddleware",                  # 请求 ID 追踪 (新增)
+    "core.logging.RequestIDMiddleware",                  # 请求 ID
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    
-    # --- 扩展中间件 ---
-    "django_htmx.middleware.HtmxMiddleware",             # 解析 HTMX 请求头
-    "watson.middleware.SearchContextMiddleware",         # 自动更新搜索索引
+    "django_htmx.middleware.HtmxMiddleware",
+    "watson.middleware.SearchContextMiddleware",
 ]
 
-# 开发环境下启用浏览器自动刷新
+# 开发环境专用中间件
 if DEBUG:
     MIDDLEWARE += [
         "django_browser_reload.middleware.BrowserReloadMiddleware",
     ]
 
-# 根 URL 路由配置
+# ------------------------------------------------------------------------------
+# 模板与入口 (Templates & WSGI)
+# ------------------------------------------------------------------------------
 ROOT_URLCONF = "Rosetta.urls"
-
-# WSGI 应用入口
 WSGI_APPLICATION = "Rosetta.wsgi.application"
 
-
-# ------------------------------------------------------------------------------
-# 模板系统配置 (Templates)
-# ------------------------------------------------------------------------------
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        # 模板搜索路径：优先查找项目根目录下的 templates 文件夹
         "DIRS": [BASE_DIR / "templates"],
-        # 启用应用内模板查找 (templates/ 目录)
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -171,300 +192,202 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                # 自定义上下文处理器
-                "core.context_processors.site_settings", # 注入全局站点设置
-                "constance.context_processors.config",   # 注入动态配置变量
+                "core.context_processors.site_settings",
+                "constance.context_processors.config",
             ],
         },
     },
 ]
 
-
 # ------------------------------------------------------------------------------
-# 数据库配置 (Database)
+# 认证与用户 (Auth)
 # ------------------------------------------------------------------------------
-# 默认使用 SQLite3，适合开发环境。
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
-}
-
-# 生产环境数据库适配
-# 如果存在 DATABASE_URL 环境变量 (例如在 PaaS 平台)，则自动配置数据库连接。
-# 格式示例: postgres://user:password@host:port/dbname
-if os.environ.get("DATABASE_URL"):
-    DATABASES["default"] = dj_database_url.config(
-        conn_max_age=600,        # 保持数据库连接 10 分钟，减少连接开销
-        conn_health_checks=True, # 定期检查连接健康状态
-    )
-
-
-# ------------------------------------------------------------------------------
-# 认证与用户系统
-# ------------------------------------------------------------------------------
-# 指定自定义用户模型
 AUTH_USER_MODEL = "users.User"
-
-# 认证后端
 AUTHENTICATION_BACKENDS = (
-    "django.contrib.auth.backends.ModelBackend",   # 标准用户名/密码认证
-    "guardian.backends.ObjectPermissionBackend",   # 对象级权限认证
+    "django.contrib.auth.backends.ModelBackend",
+    "guardian.backends.ObjectPermissionBackend",
 )
-
-# 密码强度验证
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"}, # 避免与用户信息太相似
-    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},           # 最小长度限制
-    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},          # 禁止常见弱密码
-    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},         # 禁止纯数字密码
+    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
+    {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
+    {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# 登录跳转配置
-LOGIN_REDIRECT_URL = "/"      # 登录成功后跳转地址
-LOGOUT_REDIRECT_URL = "/"     # 登出成功后跳转地址
-LOGIN_URL = "users:login"     # 登录页面 URL 名称
-
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
+LOGIN_URL = "users:login"
 
 # ------------------------------------------------------------------------------
-# 国际化与时区 (I18N & L10N)
+# 国际化 (I18N)
 # ------------------------------------------------------------------------------
-LANGUAGE_CODE = "zh-hans"     # 语言代码：简体中文
-TIME_ZONE = "Asia/Shanghai"   # 时区：亚洲/上海
-USE_I18N = True               # 启用翻译系统
-USE_TZ = True                 # 启用时区支持 (数据库存储 UTC，显示时转换为本地时间)
-
+LANGUAGE_CODE = "zh-hans"
+TIME_ZONE = "Asia/Shanghai"
+USE_I18N = True
+USE_TZ = True
 
 # ------------------------------------------------------------------------------
-# 静态文件与媒体资源
+# 静态资源与媒体 (Static & Media)
 # ------------------------------------------------------------------------------
+# 1Panel/Nginx 部署关键点：
+# 1. Nginx 需配置 location /static/ { alias /path/to/rosetta/static/; }
+# 2. Nginx 需配置 location /media/ { alias /path/to/rosetta/media/; }
+# 3. 确保容器挂载卷权限正确 (www-data 或 1000:1000)
 
-
-# settings.py
-STATIC_URL = '/static/'
+STATIC_URL = "/static/"
 STATIC_ROOT = BASE_DIR / "static"
 
-MEDIA_URL = '/media/'
+MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-
-# 静态文件查找策略
 STATICFILES_FINDERS = (
-    "django.contrib.staticfiles.finders.FileSystemFinder", # 查找 STATICFILES_DIRS
-    "django.contrib.staticfiles.finders.AppDirectoriesFinder", # 查找各 App 下的 static 目录
+    "django.contrib.staticfiles.finders.FileSystemFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
 
-# 静态文件存储引擎 (集成 WhiteNoise)
-# 支持静态文件压缩和长期缓存 (Cache Busting)
-# STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# 生产环境使用 WhiteNoise (可选，如果不想完全依赖 Nginx 处理静态文件)
+# 但通常 1Panel + Nginx 组合直接由 Nginx 处理效率更高。
+# 这里保持默认 Storage，假设 Nginx 接管。
 STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 
+# ------------------------------------------------------------------------------
+# 安全加固 (Production Security)
+# ------------------------------------------------------------------------------
+# 默认安全设置
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SESSION_COOKIE_HTTPONLY = True
+X_FRAME_OPTIONS = "DENY"
+REFERRER_POLICY = "same-origin"
 
+if not DEBUG:
+    # 生产环境强制 HTTPS
+    # 前提：Nginx 配置了 SSL 并且正确转发了 Proto 头
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    
+    # Cookie 安全
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    
+    # HSTS
+    SECURE_HSTS_SECONDS = 31536000
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
 
 # ------------------------------------------------------------------------------
-# 第三方组件配置
+# 第三方组件 (Third Party)
 # ------------------------------------------------------------------------------
-
-# --- Tailwind CSS ---
+# Tailwind
 TAILWIND_APP_NAME = "theme"
-# NPM_BIN_PATH = "C:\\Program Files\\nodejs\\npm.cmd"
-# 请确保此路径与本地开发环境一致，或通过环境变量配置
-NPM_BIN_PATH = os.environ.get("NPM_BIN_PATH", "C:\\Program Files\\nodejs\\npm.cmd")
+NPM_BIN_PATH = env("NPM_BIN_PATH", default=r"C:\Program Files\nodejs\npm.cmd" if os.name == 'nt' else "npm")
 
-# --- Django Sites Framework ---
-# 当前站点 ID，多站点部署时需修改
+# Sites
 SITE_ID = 1
 
-# --- REST Framework (API) ---
+# DRF & JWT
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication", # API 优先使用 JWT
-        "rest_framework.authentication.SessionAuthentication",       # 浏览器调试使用 Session
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+        "rest_framework.authentication.SessionAuthentication",
     )
 }
-
-# --- Simple JWT (Token 配置) ---
 SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60), # Access Token 有效期
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),    # Refresh Token 有效期
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=60),
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": False,
     "BLACKLIST_AFTER_ROTATION": False,
     "UPDATE_LAST_LOGIN": True,
 }
 
-# --- Django Meta (SEO 配置) ---
-META_SITE_PROTOCOL = "http"
-META_SITE_DOMAIN = "localhost:8000"
-META_USE_OG_PROPERTIES = True      # Open Graph 协议支持 (Facebook/微信等)
-META_USE_TWITTER_PROPERTIES = True # Twitter 卡片支持
-
+# Meta
+META_SITE_PROTOCOL = "https" if not DEBUG else "http"
+META_SITE_DOMAIN = env("SITE_DOMAIN", default="localhost:8000")
+META_USE_OG_PROPERTIES = True
+META_USE_TWITTER_PROPERTIES = True
 
 # ------------------------------------------------------------------------------
-# 动态配置与缓存系统 (Constance & Cache)
+# Constance 配置定义 (保持不变)
 # ------------------------------------------------------------------------------
-# 默认使用数据库作为动态配置存储
-CONSTANCE_BACKEND = "constance.backends.database.DatabaseBackend"
-
-# Redis 集成 (生产环境推荐)
-# 如果检测到 REDIS_URL 环境变量，自动切换缓存、Session 和动态配置后端为 Redis
-if os.environ.get("REDIS_URL"):
-    # 1. 缓存配置
-    CACHES = {
-        "default": {
-            "BACKEND": "django_redis.cache.RedisCache",
-            "LOCATION": os.environ.get("REDIS_URL"),
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "IGNORE_EXCEPTIONS": True,  # Redis 连接失败时不中断服务
-                "CONNECTION_POOL_KWARGS": {"max_connections": 100},
-            },
-            "KEY_PREFIX": "rosetta",
-        }
-    }
-    
-    # 2. Session 存储 (使用缓存)
-    SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-    SESSION_CACHE_ALIAS = "default"
-    
-    # 3. 动态配置存储 (切换到 Redis)
-    CONSTANCE_BACKEND = "constance.backends.redisd.RedisBackend"
-    CONSTANCE_REDIS_CONNECTION = os.environ.get("REDIS_URL")
-    CONSTANCE_REDIS_PREFIX = "rosetta_config:"
-
-# Constance 配置项定义
-# 格式: "KEY": (默认值, "描述文本", 类型[可选])
 CONSTANCE_CONFIG = {
-    # 站点基础信息
     "SITE_NAME": ("Rosetta Blog", "站点名称"),
     "SITE_DESCRIPTION": ("A modern Django blog.", "站点描述"),
     "SITE_KEYWORDS": ("blog, django, python", "SEO 关键词"),
+    "SITE_AUTHOR": ("Rosetta", "站点作者"),
     "SHOW_SITE_LOGO": (True, "是否显示站点 Logo"),
     "SITE_LOGO": ("/static/core/img/logo.png", "站点 Logo URL"),
     "SITE_FAVICON": ("/static/core/img/favicon.ico", "站点 Favicon URL"),
-    
-    # 后台界面定制
     "SITE_HEADER": ("Rosetta Dashboard", "后台头部标题"),
     "SITE_ADMIN_SUFFIX": (" - Rosetta Dashboard", "后台页面标题后缀"),
     "ADMIN_NAVBAR_TITLE": ("Rosetta 管理后台", "后台导航栏标题"),
     "DASHBOARD_WELCOME_TEXT": ("这里是您的站点概览，祝您有美好的一天。", "仪表盘欢迎语"),
     "DASHBOARD_WELCOME_WORDS": ("['Creator', 'Admin', 'Master', 'Manager']", "仪表盘动态欢迎词 (Flip Words)"),
-    
-    # 页脚信息
     "FOOTER_TEXT": ("© 2026 Rosetta Blog", "页脚版权文本"),
     "FOOTER_SLOGAN": ("分享代码，记录生活。<br/>构建属于你的知识花园。", "页脚标语/简介"),
     "BEIAN_CODE": ("", "ICP 备案号"),
-    
-    # 社交媒体链接
     "GITHUB_URL": ("", "GitHub 链接"),
-    "X_URL": ("", "X (Twitter) 链接"),
+    "X_URL": ("", "X 链接"),
     "BILIBILI_URL": ("", "Bilibili 链接"),
     "CONTACT_EMAIL": ("", "联系邮箱"),
-    
-    # 邮件服务配置
     "SMTP_HOST": ("smtp.qq.com", "SMTP 服务器地址"),
     "SMTP_PORT": (465, "SMTP 端口"),
     "SMTP_USER": ("", "SMTP 用户名"),
     "SMTP_PASSWORD": ("", "SMTP 密码/授权码"),
     "SMTP_USE_TLS": (True, "启用 SSL/TLS 加密"),
     "SMTP_FROM_EMAIL": ("", "默认发件人邮箱"),
-    
-    # 功能特性开关
     "MAINTENANCE_MODE": (False, "开启维护模式"),
     "ENABLE_COMMENTS": (True, "开启评论功能"),
     "ENABLE_REGISTRATION": (True, "开启用户注册"),
     "ENABLE_EMAIL_NOTIFICATIONS": (False, "开启邮件通知"),
-    
-    # 自定义代码注入
     "EXTRA_HEAD_CODE": ("", "自定义 Head 代码 (CSS/JS)"),
     "EXTRA_FOOTER_CODE": ("", "自定义 Footer 代码 (JS)"),
-    
-    # 外观设置
     "CODE_HIGHLIGHT_STYLE": ("default", "代码高亮风格 (Pygments)"),
 }
 
-# Constance 配置分组显示
 CONSTANCE_CONFIG_FIELDSETS = {
-    "基本设置": (
-        "SITE_NAME", "SITE_DESCRIPTION", "SITE_KEYWORDS",
-        "SHOW_SITE_LOGO", "SITE_LOGO", "SITE_FAVICON",
-        "FOOTER_SLOGAN", "FOOTER_TEXT", "BEIAN_CODE",
-        "BEIAN_CODE", "FOOTER_TEXT",
-    ),
-    "外观设置": (
-        "CODE_HIGHLIGHT_STYLE",
-    ),
-    "后台界面": (
-        "SITE_HEADER", "SITE_ADMIN_SUFFIX", "ADMIN_NAVBAR_TITLE",
-        "DASHBOARD_WELCOME_TEXT", "DASHBOARD_WELCOME_WORDS",
-    ),
-    "社交与联系": (
-        "GITHUB_URL", "X_URL", "BILIBILI_URL", "CONTACT_EMAIL",
-    ),
-    "邮件服务": (
-        "SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD",
-        "SMTP_USE_TLS", "SMTP_FROM_EMAIL", "ENABLE_EMAIL_NOTIFICATIONS",
-    ),
-    "功能开关": (
-        "MAINTENANCE_MODE", "ENABLE_COMMENTS", "ENABLE_REGISTRATION",
-    ),
-    "自定义代码": (
-        "EXTRA_HEAD_CODE", "EXTRA_FOOTER_CODE",
-    ),
+    "基本设置": ("SITE_NAME", "SITE_DESCRIPTION", "SITE_KEYWORDS", "SITE_AUTHOR", "SHOW_SITE_LOGO", "SITE_LOGO", "SITE_FAVICON", "FOOTER_SLOGAN", "FOOTER_TEXT", "BEIAN_CODE"),
+    "外观设置": ("CODE_HIGHLIGHT_STYLE",),
+    "后台界面": ("SITE_HEADER", "SITE_ADMIN_SUFFIX", "ADMIN_NAVBAR_TITLE", "DASHBOARD_WELCOME_TEXT", "DASHBOARD_WELCOME_WORDS"),
+    "社交与联系": ("GITHUB_URL", "X_URL", "BILIBILI_URL", "CONTACT_EMAIL"),
+    "邮件服务": ("SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD", "SMTP_USE_TLS", "SMTP_FROM_EMAIL", "ENABLE_EMAIL_NOTIFICATIONS"),
+    "功能开关": ("MAINTENANCE_MODE", "ENABLE_COMMENTS", "ENABLE_REGISTRATION"),
+    "自定义代码": ("EXTRA_HEAD_CODE", "EXTRA_FOOTER_CODE"),
 }
-
 
 # ------------------------------------------------------------------------------
 # 日志系统 (Loguru Integration)
 # ------------------------------------------------------------------------------
-# 拦截 Django 默认日志并转发给 Loguru
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "intercept": {
-            "level": "INFO",
-            "class": "core.logging.InterceptHandler", # 使用自定义拦截器
-        },
-    },
-    "loggers": {
-        "django": {
-            "handlers": ["intercept"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        "uvicorn": {
-            "handlers": ["intercept"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        "uvicorn.access": {
-            "handlers": ["intercept"],
-            "level": "INFO",
-            "propagate": True,
-        },
-        "django.db.backends": {
-            "handlers": ["intercept"],
-            "level": "WARNING",  # 仅记录警告级以上的 SQL 问题，避免日志爆炸
-            "propagate": False,
-        },
-    },
-}
-
-import sys
-
-# Loguru 文件日志配置
 LOG_DIR = BASE_DIR / "logs"
-# 自动创建日志目录
 if not LOG_DIR.exists():
     try:
         LOG_DIR.mkdir(parents=True, exist_ok=True)
     except Exception:
         pass
 
-# 定义“清晰雄壮”的日志格式
-# 包含时间、级别图标、Request ID、位置和消息
+# Django Logging 拦截器
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "intercept": {
+            "level": "INFO",
+            "class": "core.logging.InterceptHandler",
+        },
+    },
+    "loggers": {
+        "django": {"handlers": ["intercept"], "level": "INFO", "propagate": True},
+        "uvicorn": {"handlers": ["intercept"], "level": "INFO", "propagate": True},
+        "uvicorn.access": {"handlers": ["intercept"], "level": "INFO", "propagate": True},
+        "django.db.backends": {"handlers": ["intercept"], "level": "WARNING", "propagate": False},
+    },
+}
+
+# Loguru 配置
+from loguru import logger
+logger.remove() # 移除默认
+logger.configure(extra={"request_id": "-"}) # 默认 Context
+
 LOG_FORMAT = (
     "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
     "<level>{level.icon} {level: <8}</level> | "
@@ -473,14 +396,6 @@ LOG_FORMAT = (
     "<level>{message}</level>"
 )
 
-# 移除默认的 handler
-from loguru import logger
-logger.remove()
-
-# 设置默认的 request_id，防止未经过中间件的日志报错
-logger.configure(extra={"request_id": "-"})
-
-# 配置级别图标 (让日志更雄壮)
 logger.level("TRACE", icon="🔍")
 logger.level("DEBUG", icon="🐛")
 logger.level("INFO", icon="ℹ️")
@@ -489,57 +404,24 @@ logger.level("WARNING", icon="⚠️")
 logger.level("ERROR", icon="❌")
 logger.level("CRITICAL", icon="🚨")
 
-if not DEBUG:
-    # --- 生产环境 ---
-    
-    # 1. 控制台输出 (Docker logs)
-    # 使用带颜色的格式，方便运维直接查看
-    logger.add(
-        sys.stderr,
-        level="INFO",
-        format=LOG_FORMAT,
-        enqueue=True,
-        backtrace=True,
-        diagnose=False, # 生产环境不泄露变量值
-    )
-    
-    # 2. 文件日志 (JSON)
-    # 用于 ELK 等日志分析系统
+if DEBUG:
+    # 开发环境：全彩、详细堆栈
+    logger.add(sys.stderr, level="DEBUG", format=LOG_FORMAT, enqueue=True, backtrace=True, diagnose=True)
+    logger.add(LOG_DIR / "debug.log", level="DEBUG", format=LOG_FORMAT, rotation="50 MB", retention="7 days")
+else:
+    # 生产环境：标准错误输出 (供 Docker 采集)、JSON 文件日志
+    logger.add(sys.stderr, level="INFO", format=LOG_FORMAT, enqueue=True, backtrace=True, diagnose=False)
     logger.add(
         LOG_DIR / "rosetta.log",
-        rotation="10 MB",     # 文件超过 10MB 时轮转
-        retention="30 days",  # 保留最近 30 天的日志
-        level="WARNING",      # 仅记录警告及以上
-        compression="zip",    # 历史日志压缩存储
-        enqueue=True,         # 异步写入，不阻塞主线程
-        serialize=True,       # JSON 序列化
+        rotation="10 MB",
+        retention="30 days",
+        level="WARNING",
+        compression="zip",
+        enqueue=True,
+        serialize=True, # JSON 格式，方便 ELK/1Panel 分析
         backtrace=True,
         diagnose=False,
     )
-else:
-    # --- 开发环境 ---
-    
-    # 1. 控制台输出
-    # 详细、高亮、全彩
-    logger.add(
-        sys.stderr,
-        level="DEBUG",
-        format=LOG_FORMAT,
-        enqueue=True,
-        backtrace=True,
-        diagnose=True,
-    )
-    
-    # 2. 文件日志
-    logger.add(
-        LOG_DIR / "debug.log",
-        level="DEBUG",
-        format=LOG_FORMAT,
-        rotation="50 MB",
-        retention="7 days",
-        backtrace=True,
-        diagnose=True,
-    )
 
-# 邮件后端配置 (使用支持 Constance 动态配置的自定义后端)
+# 邮件后端
 EMAIL_BACKEND = "core.backends.ConstanceEmailBackend"

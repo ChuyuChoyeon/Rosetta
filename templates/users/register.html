@@ -4,112 +4,120 @@
 {% block title %}注册 - {{ config.SITE_NAME|default:"Rosetta" }}{% endblock %}
 
 {% block content %}
-<div class="relative flex justify-center items-center min-h-[calc(100vh-16rem)] py-12 px-4 overflow-hidden">
-    <!-- Neural Background Removed (Inherited from Base) -->
-
-    <div class="card w-full max-w-lg bg-base-100/90 backdrop-blur-md shadow-2xl border border-base-200 z-10 relative overflow-hidden">
-        <!-- Border Beam -->
-        {% include 'components/inspira/border_beam.html' with size=150 duration=12 delay=0 %}
-        
-        <div class="card-body">
-            <div class="text-center mb-8">
+<div class="min-h-[calc(100vh-16rem)] flex items-center justify-center px-4 py-12">
+    <section class="w-full max-w-2xl">
+        <div class="rounded-2xl border border-base-200 bg-base-100 shadow-lg p-8">
+            <header class="text-center mb-8">
                 <h2 class="text-3xl font-extrabold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">注册新账号</h2>
-                <p class="text-base-content/60 mt-2">加入 Rosetta，开启您的创作之旅</p>
-            </div>
-            
-            <form method="post" enctype="multipart/form-data" class="space-y-4">
+                <p class="text-base-content/60 mt-2">加入 {{ config.SITE_NAME|default:"Rosetta" }}，开启您的创作之旅</p>
+            </header>
+
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
                 {% csrf_token %}
-                
-                {% for field in form %}
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-bold">
-                            {% if field.name == 'nickname' %}昵称{% elif field.name == 'email' %}邮箱{% elif field.name == 'avatar' %}头像{% else %}{{ field.label }}{% endif %}
-                        </span>
-                    </label>
-                    
-                    {% if field.name == 'captcha' %}
-                        <div class="flex flex-col gap-3 captcha-container">
-                            {{ field }}
-                        </div>
-                        <label class="label">
-                            <span class="label-text-alt text-base-content/60 flex items-center gap-1 cursor-pointer hover:text-primary transition-colors" onclick="document.querySelector('.captcha').click()">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                                点击图片刷新验证码
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% for field in form %}
+                    <div class="form-control w-full {% if field.name in 'avatar captcha' %}md:col-span-2{% endif %}">
+                        <label class="label" for="{{ field.id_for_label }}">
+                            <span class="label-text font-semibold">
+                                {% if field.name == 'nickname' %}昵称{% elif field.name == 'email' %}邮箱{% elif field.name == 'avatar' %}头像{% else %}{{ field.label }}{% endif %}
                             </span>
                         </label>
-                    {% elif field.name == 'avatar' %}
-                        <!-- Avatar Preview and Cropper -->
-                        <div class="flex items-center gap-4 mb-2">
-                            <div class="avatar">
-                                <div class="w-20 h-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
-                                    <img id="avatar-preview" src="{% static 'core/img/avatar-default.svg' %}" alt="Avatar Preview" />
+
+                        {% if field.name == 'captcha' %}
+                            <div class="flex flex-col gap-3">
+                                {{ field }}
+                            </div>
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/60 flex items-center gap-1 cursor-pointer hover:text-primary" onclick="document.querySelector('.captcha').click()">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                                    点击图片刷新验证码
+                                </span>
+                            </label>
+                        {% elif field.name == 'avatar' %}
+                            <div class="flex items-center gap-4 mb-2">
+                                <div class="avatar">
+                                    <div class="w-20 h-20 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                                        <img id="avatar-preview" src="{% static 'core/img/avatar-default.svg' %}" alt="Avatar Preview" />
+                                    </div>
+                                </div>
+                                <div class="flex-1">
+                                    <input type="file" name="{{ field.name }}" id="id_avatar" class="file-input file-input-bordered w-full file-input-sm {% if field.errors %}file-input-error{% endif %}" accept="image/*" onchange="previewImage(this)" />
+                                    <div class="text-xs text-base-content/60 mt-1">支持 JPG, PNG, WebP 格式</div>
                                 </div>
                             </div>
-                            <div class="flex-1">
-                                <input type="file" name="{{ field.name }}" id="id_avatar" class="file-input file-input-bordered w-full file-input-sm {% if field.errors %}file-input-error{% endif %}" accept="image/*" onchange="previewImage(this)" />
-                                <div class="text-xs text-base-content/60 mt-1">支持 JPG, PNG, WebP 格式</div>
-                            </div>
-                        </div>
-                        
-                        <!-- Cropper Modal -->
-                        <dialog id="cropper_modal" class="modal">
-                            <div class="modal-box">
-                                <h3 class="font-bold text-lg mb-4">裁剪头像</h3>
-                                <div class="w-full h-64 bg-base-300 rounded-lg overflow-hidden relative">
-                                    <img id="cropper-image" src="" class="max-w-full" style="display:none;" />
+                            <dialog id="cropper_modal" class="modal">
+                                <div class="modal-box">
+                                    <h3 class="font-bold text-lg mb-4">裁剪头像</h3>
+                                    <div class="w-full h-64 bg-base-300 rounded-lg overflow-hidden relative">
+                                        <img id="cropper-image" src="" class="max-w-full" style="display:none;" />
+                                    </div>
+                                    <div class="modal-action">
+                                        <button type="button" class="btn" onclick="closeCropper()">取消</button>
+                                        <button type="button" class="btn btn-primary" onclick="saveCroppedImage()">确定</button>
+                                    </div>
                                 </div>
-                                <div class="modal-action">
-                                    <button type="button" class="btn" onclick="closeCropper()">取消</button>
-                                    <button type="button" class="btn btn-primary" onclick="saveCroppedImage()">确定</button>
-                                </div>
-                            </div>
-                        </dialog>
-                    {% else %}
-                        <input type="{{ field.field.widget.input_type }}" 
-                               name="{{ field.name }}" 
-                               id="{{ field.id_for_label }}"
-                               class="input input-bordered w-full focus:input-primary transition-all {% if field.errors %}input-error{% endif %}" 
-                               value="{{ field.value|default:'' }}"
-                               placeholder="请输入{{ field.label }}"
-                               autocomplete="{% if field.name == 'username' %}username{% elif field.name == 'email' %}email{% elif 'password' in field.name %}new-password{% else %}off{% endif %}"
-                               {% if field.field.required %}required{% endif %}>
-                    {% endif %}
-                    
-                    {% if field.help_text and field.name != 'captcha' %}
-                    <label class="label pt-0">
-                        <span class="label-text-alt text-base-content/50 break-words whitespace-normal leading-tight">{{ field.help_text|safe }}</span>
-                    </label>
-                    {% endif %}
-                    
-                    {% for error in field.errors %}
-                    <label class="label pt-0">
-                        <span class="label-text-alt text-error flex items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            {{ error }}
-                        </span>
-                    </label>
+                            </dialog>
+                        {% else %}
+                            <input type="{{ field.field.widget.input_type }}"
+                                   name="{{ field.name }}"
+                                   id="{{ field.id_for_label }}"
+                                   class="input input-bordered w-full {% if field.errors %}input-error{% endif %}"
+                                   value="{{ field.value|default:'' }}"
+                                   placeholder="请输入{{ field.label }}"
+                                   autocomplete="{% if field.name == 'username' %}username{% elif field.name == 'email' %}email{% elif 'password' in field.name %}new-password{% else %}off{% endif %}"
+                                   {% if field.field.required %}required{% endif %}>
+                        {% endif %}
+
+                        {% if field.help_text and field.name != 'captcha' %}
+                        <label class="label pt-0">
+                            <span class="label-text-alt text-base-content/50 break-words whitespace-normal leading-tight">{{ field.help_text|safe }}</span>
+                        </label>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                        <label class="label pt-0">
+                            <span class="label-text-alt text-error flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                {{ error }}
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
                     {% endfor %}
                 </div>
-                {% endfor %}
 
-                <div class="card-actions justify-end mt-8">
-                    <button type="submit" class="btn btn-primary w-full text-lg font-bold rounded-xl shadow-lg hover:shadow-primary/30 transition-all duration-300">
+                <div class="mt-6">
+                    <button type="submit" class="btn btn-primary w-full text-lg font-bold rounded-xl">
                         立即注册
                     </button>
                 </div>
             </form>
-            
+
             <div class="text-center text-sm mt-6">
-                <p>已有账号？ <a href="{% url 'users:login' %}" class="link link-primary font-bold hover:link-accent transition-colors">立即登录</a></p>
+                <p>已有账号？ <a href="{% url 'users:login' %}" class="link link-primary font-bold">立即登录</a></p>
             </div>
         </div>
-    </div>
+    </section>
 </div>
 
 <script>
-    // Simple avatar preview and cropper logic placeholder
-    // In a real implementation, this would handle the Cropper.js logic
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const eyeIcon = btn.querySelector('.eye-icon');
+        const eyeSlashIcon = btn.querySelector('.eye-slash-icon');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            eyeIcon.classList.add('hidden');
+            eyeSlashIcon.classList.remove('hidden');
+        } else {
+            input.type = 'password';
+            eyeIcon.classList.remove('hidden');
+            eyeSlashIcon.classList.add('hidden');
+        }
+    }
+
     function previewImage(input) {
         if (input.files && input.files[0]) {
             var reader = new FileReader();

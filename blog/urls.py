@@ -9,14 +9,16 @@ from .views import (
     SearchView,
     ArchiveView,
     delete_comment,
-    subscribe_view,
-    unsubscribe_view,
 )
+from .feeds import LatestPostsFeed
 
 urlpatterns = [
     # 首页
     path("", HomeView.as_view(), name="home"),
     
+    # RSS Feed
+    path("feed/", LatestPostsFeed(), name="post_feed"),
+
     # 文章详情
     path("post/<slug:slug>/", PostDetailView.as_view(), name="post_detail"),
     
@@ -42,8 +44,4 @@ urlpatterns = [
     
     # 评论删除
     path("comment/<int:pk>/delete/", delete_comment, name="delete_comment"),
-    
-    # 订阅与退订
-    path("subscribe/", subscribe_view, name="subscribe"),
-    path("unsubscribe/<uuid:token>/", unsubscribe_view, name="unsubscribe"),
 ]

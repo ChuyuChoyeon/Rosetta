@@ -24,7 +24,7 @@
 {% captureas card_content %}
     <div class="p-0">
         <!-- Toolbar -->
-        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-10">
+        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-30">
             <div class="flex gap-2 items-center">
                 <div class="p-2 bg-warning/10 rounded-lg">
                     <span class="material-symbols-outlined text-warning">history</span>
@@ -105,7 +105,9 @@
 {% endcaptureas %}
 
 {% with slot_content=card_content extra_classes="w-full" %}
-    {% include 'components/inspira/card_spotlight.html' %}
+    <div class="w-full rounded-2xl border border-base-content/5 bg-base-100 shadow-sm p-0">
+        {{ card_content }}
+    </div>
 {% endwith %}
 
 {% endblock %}

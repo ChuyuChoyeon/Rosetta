@@ -67,7 +67,7 @@
 {% captureas card_content %}
     <div class="p-0">
         <!-- Card Title & Search -->
-        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-10">
+        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-30">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-warning/10 rounded-lg">
                     <span class="material-symbols-outlined text-warning">comment</span>
@@ -144,7 +144,7 @@
             <div class="overflow-x-auto min-h-[400px]">
                 <table class="table table-sm table-pin-rows w-full">
                     <!-- Head -->
-                    <thead class="bg-base-200/50 text-base-content/60 font-medium sticky top-0 z-10">
+                    <thead class="bg-base-200/50 text-base-content/60 font-medium sticky top-0 z-30">
                         <tr>
                             <th class="w-10 pl-4">
                                 <label>
@@ -218,7 +218,9 @@
         {% endif %}
     </div>
 {% endcaptureas %}
-{% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+<div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+    {{ card_content }}
+</div>
 
 <!-- Import Modal -->
 <dialog id="import_modal" class="modal">

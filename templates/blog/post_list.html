@@ -135,7 +135,9 @@
                 </div>
                 {% endcaptureas %}
                 
-                {% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden border-none shadow-none hover:shadow-xl bg-transparent h-full" %}
+                <div class="p-0 overflow-hidden border-none shadow-none hover:shadow-xl bg-transparent h-full">
+                    {{ card_content }}
+                </div>
                 
                 {% empty %}
                 <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
@@ -173,42 +175,4 @@
     </div>
 
 </div>
-
-<script src="{% static 'theme/js/geopattern.min.js' %}"></script>
-<script>
-    (function() {
-        window.initGeoPattern = function(el, title) {
-            if (!window.GeoPattern) return;
-            // Force regenerate if seed changed or not set
-            const seed = title || el.dataset.seed || 'Rosetta';
-            const pattern = GeoPattern.generate(seed);
-            el.style.backgroundImage = pattern.toDataUrl();
-        };
-
-        function initPatterns() {
-            if (!window.GeoPattern) return;
-            document.querySelectorAll('.pattern-placeholder').forEach(function(el) {
-                // Skip if already set
-                if (el.style.backgroundImage) return;
-                
-                const seed = el.dataset.seed || 'Rosetta';
-                const pattern = GeoPattern.generate(seed);
-                el.style.backgroundImage = pattern.toDataUrl();
-            });
-        }
-
-        // Init on load
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initPatterns);
-        } else {
-            initPatterns();
-        }
-
-        // Support HTMX swaps
-        document.addEventListener('htmx:afterSwap', initPatterns);
-        
-        // Backup: Retry if GeoPattern loads late
-        window.addEventListener('load', initPatterns);
-    })();
-</script>
 {% endblock %}

@@ -113,7 +113,7 @@
             <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
                 <table class="table table-zebra table-pin-rows w-full">
                     <!-- Head -->
-                    <thead class="bg-base-200 text-base-content sticky top-0 z-10">
+                    <thead class="bg-base-200 text-base-content sticky top-0 z-30">
                         <tr>
                             <th class="w-10 bg-base-200">
                                 <label>
@@ -190,5 +190,7 @@
         </div>
     </div>
 {% endcaptureas %}
-{% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+<div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+    {{ card_content }}
+</div>
 {% endblock %}

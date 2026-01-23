@@ -11,7 +11,9 @@
             {% include 'components/inspira/placeholders_and_vanish_input.html' with action=search_url placeholders=search_placeholders|default:"['搜索文章...', '搜索 Django...', '搜索 Python...', '搜索 Tailwind...']" %}
         </div>
     {% endcaptureas %}
-    {% include 'components/inspira/card_spotlight.html' with slot_content=search_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+        {{ search_card }}
+    </div>
 
     <!-- Popular Posts -->
     {% if sidebar_popular_posts %}
@@ -45,7 +47,9 @@
             </div>
         </div>
     {% endcaptureas %}
-    {% include 'components/inspira/card_spotlight.html' with slot_content=popular_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+        {{ popular_card }}
+    </div>
     {% endif %}
 
     <!-- Tag Cloud -->
@@ -75,7 +79,9 @@
             </div>
         </div>
     {% endcaptureas %}
-    {% include 'components/inspira/card_spotlight.html' with slot_content=tags_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+        {{ tags_card }}
+    </div>
     {% endif %}
 
     <!-- Recent Comments -->
@@ -108,7 +114,9 @@
             </div>
         </div>
     {% endcaptureas %}
-    {% include 'components/inspira/card_spotlight.html' with slot_content=comments_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+        {{ comments_card }}
+    </div>
     {% endif %}
 
     <!-- Friend Links -->
@@ -145,6 +153,8 @@
             </div>
         </div>
     {% endcaptureas %}
-    {% include 'components/inspira/card_spotlight.html' with slot_content=links_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+        {{ links_card }}
+    </div>
     {% endif %}
 </div>

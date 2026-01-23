@@ -24,6 +24,43 @@ from blog.models import Category, Comment, Post
 from core.services import generate_mock_data
 
 
+from django.views.decorators.http import require_GET, require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse, JsonResponse
+from django.core.files.storage import default_storage
+import os
+import uuid
+from django.conf import settings
+
+@require_GET
+def robots_txt(request):
+    lines = [
+        "User-agent: *",
+        "Disallow: /admin/",
+        "Disallow: /users/",
+        "Allow: /",
+        f"Sitemap: {request.scheme}://{request.get_host()}/sitemap.xml",
+    ]
+    return HttpResponse("\n".join(lines), content_type="text/plain")
+
+@require_POST
+@csrf_exempt
+def upload_image(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+
+    if 'image' not in request.FILES:
+        return JsonResponse({'error': 'No image provided'}, status=400)
+    
+    image = request.FILES['image']
+    ext = os.path.splitext(image.name)[1]
+    filename = f"uploads/{uuid.uuid4().hex}{ext}"
+    
+    file_path = default_storage.save(filename, image)
+    file_url = default_storage.url(file_path)
+    
+    return JsonResponse({'url': file_url})
+
 class PageView(DetailView):
     """
     单页面视图

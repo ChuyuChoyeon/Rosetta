@@ -7,8 +7,6 @@ class BlogConfig(AppConfig):
     verbose_name = "博客管理"
 
     def ready(self):
-        import blog.signals
-
         try:
             from watson import search as watson
             from watson.search import RegistrationError

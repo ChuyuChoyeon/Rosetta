@@ -1,0 +1,27 @@
+{% load static %}
+<meta name="description" content="{{ meta.description|default:config.SITE_DESCRIPTION|default:'' }}">
+<meta name="keywords" content="{{ meta.keywords|join:','|default:config.SITE_KEYWORDS|default:'' }}">
+<meta name="author" content="{{ meta.author|default:config.SITE_AUTHOR|default:'' }}">
+<link rel="canonical" href="{{ meta.url|default:request.build_absolute_uri }}">
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="{{ meta.object_type|default:'website' }}">
+<meta property="og:url" content="{{ meta.url|default:request.build_absolute_uri }}">
+<meta property="og:title" content="{{ meta.title|default:config.SITE_NAME|default:'' }}">
+<meta property="og:description" content="{{ meta.description|default:config.SITE_DESCRIPTION|default:'' }}">
+{% if meta.image %}
+<meta property="og:image" content="{{ meta.image }}">
+{% else %}
+<meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'core/img/default_og.png' %}">
+{% endif %}
+
+<!-- Twitter / X -->
+<meta property="twitter:card" content="summary_large_image">
+<meta property="twitter:url" content="{{ meta.url|default:request.build_absolute_uri }}">
+<meta property="twitter:title" content="{{ meta.title|default:config.SITE_NAME|default:'' }}">
+<meta property="twitter:description" content="{{ meta.description|default:config.SITE_DESCRIPTION|default:'' }}">
+{% if meta.image %}
+<meta property="twitter:image" content="{{ meta.image }}">
+{% else %}
+<meta property="twitter:image" content="{{ request.scheme }}://{{ request.get_host }}{% static 'core/img/default_og.png' %}">
+{% endif %}

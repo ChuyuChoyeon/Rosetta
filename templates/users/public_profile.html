@@ -6,23 +6,25 @@
 {% load capture_tags %}
 <div class="container mx-auto px-4 py-8" x-data="{ showAvatarModal: false, avatarUrl: '{{ profile_user.get_avatar_url }}' }">
     <div class="flex flex-col md:flex-row gap-8 items-start">
-        <!-- Sidebar: User Info -->
+        <!-- 侧边栏：用户信息 -->
         <div class="w-full md:w-80 flex-shrink-0 md:sticky md:top-24">
             {% include 'users/includes/profile_card.html' with profile_user=profile_user comments=comments %}
         </div>
         
-        <!-- Main Content -->
+        <!-- 主要内容区域 -->
         <div class="flex-1 min-w-0">
             {% captureas card_content %}
             <div id="profile-container" class="p-6 min-h-[500px]">
                 {% include 'users/includes/profile_content.html' %}
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="bg-base-100 shadow-xl border border-base-content/5 rounded-2xl" %}
+            <div class="bg-base-100 shadow-xl border border-base-content/5 rounded-2xl">
+                {{ card_content }}
+            </div>
         </div>
     </div>
 
-    <!-- Avatar Lightbox Modal -->
+    <!-- 头像灯箱弹窗 -->
     <template x-teleport="body">
         <div x-show="showAvatarModal" 
              class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 backdrop-blur-sm transition-opacity duration-300"
@@ -52,7 +54,7 @@
     </template>
 </div>
 
-<!-- Edit Profile Modal -->
+<!-- 编辑资料弹窗 -->
 {% include 'users/includes/edit_profile_modal.html' %}
 
 {% endblock %}

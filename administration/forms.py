@@ -59,6 +59,7 @@ class PostForm(forms.ModelForm):
         widgets = {
             "content": forms.Textarea(attrs={"rows": 20}),
             "excerpt": forms.Textarea(attrs={"rows": 3}),
+            "cover_image": forms.FileInput(attrs={"class": "file-input file-input-bordered w-full"}),
         }
 
     def __init__(self, *args, **kwargs):

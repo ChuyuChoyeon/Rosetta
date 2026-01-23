@@ -1,49 +1,10 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
+{% load capture_tags static %}
 
-{% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{{ title|default:"编辑文章" }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block extra_head %}
-<style>
-    /* Fix Toast UI Editor Theme Visibility */
-    .toastui-editor-defaultUI {
-        border: none !important;
-        background-color: transparent !important;
-    }
-    .toastui-editor-toolbar {
-        background-color: hsl(var(--b2)) !important;
-        border-bottom: 1px solid hsl(var(--b3)) !important;
-    }
-    .toastui-editor-md-container, .toastui-editor-ww-container {
-        background-color: hsl(var(--b1)) !important;
-    }
-    .toastui-editor-contents {
-        font-family: inherit !important;
-    }
-    [data-theme='dark'] .toastui-editor-contents p, 
-    [data-theme='dark'] .toastui-editor-contents h1, 
-    [data-theme='dark'] .toastui-editor-contents h2, 
-    [data-theme='dark'] .toastui-editor-contents h3, 
-    [data-theme='dark'] .toastui-editor-contents h4, 
-    [data-theme='dark'] .toastui-editor-contents h5, 
-    [data-theme='dark'] .toastui-editor-contents h6,
-    [data-theme='dark'] .toastui-editor-contents li,
-    [data-theme='dark'] .toastui-editor-contents span {
-        color: #e5e7eb !important; /* gray-200 */
-    }
-    /* Hide the status bar if not needed or fix its color */
-    .toastui-editor-mode-switch {
-        background-color: hsl(var(--b2)) !important;
-        border-top: 1px solid hsl(var(--b3)) !important;
-    }
-    .toastui-editor-mode-switch .tab-item {
-        color: hsl(var(--bc)) !important;
-    }
-    .toastui-editor-mode-switch .tab-item.active {
-        background-color: hsl(var(--b1)) !important;
-        color: hsl(var(--p)) !important;
-    }
-</style>
+<!-- ByteMD 样式由 js/editor.js 动态注入和管理 -->
 {% endblock %}
 
 {% block content %}
@@ -61,7 +22,7 @@
         <!-- Main Content (Left Column - 75%) -->
         <div class="lg:col-span-3 space-y-6">
             {% captureas main_card %}
-            <div class="p-6 relative z-20">
+            <div class="p-6 relative">
                 <div class="form-control w-full">
                     <label class="label">
                         <span class="label-text font-bold text-lg">文章标题</span>
@@ -79,60 +40,47 @@
                         <span class="label-text font-bold">内容 (Markdown)</span>
                     </label>
                     
-                    <!-- Toast UI Editor Container -->
-                    <div id="editor" class="border border-base-300 rounded-lg overflow-hidden bg-base-100 shadow-inner"></div>
+                    <div id="editor" class="bg-base-100"></div>
 
-                    <!-- Hidden Input for Form Submission -->
                     <div class="hidden">
                         {{ form.content }}
                     </div>
 
                     <script>
                         (function() {
-                            if (typeof toastui === 'undefined') return;
-                            
-                            const editorEl = document.querySelector('#editor');
-                            if (!editorEl) return;
-                            if (editorEl.innerHTML.trim() !== '') return;
-
-                            const editor = new toastui.Editor({
-                                el: editorEl,
-                                height: '700px',
-                                initialEditType: 'markdown',
-                                previewStyle: 'vertical',
-                                initialValue: `{{ form.content.value|default:""|escapejs }}`,
-                                language: 'zh-CN',
-                                theme: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
-                                usageStatistics: false,
-                                toolbarItems: [
-                                    ['heading', 'bold', 'italic', 'strike'],
-                                    ['hr', 'quote'],
-                                    ['ul', 'ol', 'task', 'indent', 'outdent'],
-                                    ['table', 'image', 'link'],
-                                    ['code', 'codeblock']
-                                ],
-                                events: {
-                                    change: function() {
-                                        document.querySelector('#id_content').value = editor.getMarkdown();
-                                    }
+                            const initEditor = () => {
+                                const container = document.getElementById('editor');
+                                // 检查容器是否存在，且未初始化，且 ByteMD 已加载
+                                if (container && !container.dataset.initialized && window.initByteMD) {
+                                    container.innerHTML = ''; // 清空容器
+                                    window.initByteMD('editor', 'id_content', `{{ form.content.value|default:""|escapejs }}`);
+                                    container.dataset.initialized = '1'; // 标记已初始化
                                 }
-                            });
+                            };
 
-                            // Sync theme changes
-                            const observer = new MutationObserver(function(mutations) {
-                                mutations.forEach(function(mutation) {
-                                    if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
-                                        // Force reload or re-apply styles if needed
-                                        // For now, CSS overrides handle most colors
+                            initEditor();
+
+                            if (document.readyState === 'loading') {
+                                document.addEventListener('DOMContentLoaded', initEditor);
+                            } else {
+                                // 如果 DOM 已加载，延迟执行以防脚本执行过快
+                                setTimeout(initEditor, 50);
+                            }
+                            
+                            // 异步加载兜底：轮询检查 window.initByteMD 是否就绪
+                            if (!window.initByteMD) {
+                                const checkInterval = setInterval(() => {
+                                    if (window.initByteMD) {
+                                        clearInterval(checkInterval);
+                                        initEditor();
                                     }
-                                });
-                            });
-                            observer.observe(document.documentElement, {
-                                attributes: true,
-                                attributeFilter: ["data-theme"]
-                            });
+                                }, 100);
+                                // 5秒后停止轮询，防止死循环
+                                setTimeout(() => clearInterval(checkInterval), 5000);
+                            }
                         })();
                     </script>
+
                     {% if form.content.errors %}
                     <label class="label">
                         <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
@@ -151,11 +99,14 @@
                 </div>
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=main_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+            <!-- Use simple div instead of Card Spotlight to prevent Stacking Context issues with Fullscreen Editor -->
+            <div class="rounded-2xl border border-base-content/5 bg-base-100 shadow-sm p-0">
+                {{ main_card }}
+            </div>
             
             <!-- SEO / Slug Settings -->
             {% captureas seo_card %}
-            <div class="p-6 relative z-20">
+            <div class="p-6 relative">
                 <h3 class="card-title text-base mb-4">SEO 设置</h3>
                 <div class="form-control w-full">
                     <label class="label">
@@ -168,14 +119,16 @@
                 </div>
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=seo_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+                {{ seo_card }}
+            </div>
         </div>
 
         <!-- Sidebar (Right Column - 25% - Sticky) -->
-        <div class="lg:col-span-1 space-y-6 sticky top-24">
+        <div class="lg:col-span-1 space-y-6 sticky top-24 z-30">
             <!-- Publish Actions -->
             {% captureas publish_card %}
-            <div class="p-6 relative z-20">
+            <div class="p-6 relative">
                 <h3 class="card-title text-base mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary">publish</span>
                     发布
@@ -223,11 +176,13 @@
                 </div>
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=publish_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+                {{ publish_card }}
+            </div>
 
             <!-- Categories & Tags -->
             {% captureas taxonomy_card %}
-            <div class="p-6 relative z-20">
+            <div class="p-6 relative">
                 <h3 class="card-title text-base mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-secondary">category</span>
                     分类与标签
@@ -346,29 +301,56 @@
                 </div>
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=taxonomy_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+                {{ taxonomy_card }}
+            </div>
 
-            <!-- Featured Image -->
+            <!-- 特色图片 -->
             {% captureas image_card %}
-            <div class="p-6 relative z-20">
+            <div class="p-6 relative" x-data="{ showPreview: false }">
                 <h3 class="card-title text-base mb-4 flex items-center gap-2">
                     <span class="material-symbols-outlined text-accent">image</span>
                     特色图片
                 </h3>
                 <div class="form-control w-full">
                     {{ form.cover_image }}
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">支持 JPG, PNG, WebP 格式</span>
+                    </label>
                 </div>
                 {% if object.cover_image %}
-                <div class="mt-4 rounded-lg overflow-hidden border border-base-200 relative group">
-                    <img src="{{ object.cover_image.url }}" class="w-full h-auto" />
-                    <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs">
-                        当前封面
+                <div class="mt-4 group relative rounded-xl overflow-hidden border border-base-content/10 shadow-sm cursor-zoom-in bg-base-200" @click="showPreview = true">
+                    <!-- 图片显示：固定高度，覆盖模式，确保布局整齐 -->
+                    <img src="{{ object.cover_image.url }}" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105" alt="封面预览" />
+                    
+                    <!-- 悬停遮罩 -->
+                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white gap-2 backdrop-blur-sm">
+                        <span class="material-symbols-outlined text-3xl">zoom_in</span>
+                        <span class="text-xs font-medium">点击查看大图</span>
                     </div>
                 </div>
+
+                <!-- 预览模态框 (使用 Teleport 传送到 body 避免被裁剪) -->
+                <template x-teleport="body">
+                    <div class="modal modal-bottom sm:modal-middle" :class="{ 'modal-open': showPreview }" @keydown.escape.window="showPreview = false" style="z-index: 9999;">
+                        <!-- 移除 @click.outside 防止打开瞬间被误触发 -->
+                        <div class="modal-box p-0 max-w-5xl bg-transparent shadow-none overflow-visible text-center">
+                            <div class="relative inline-block" @click.stop>
+                                <img src="{{ object.cover_image.url }}" class="max-h-[85vh] max-w-full rounded-lg shadow-2xl object-contain bg-black/20" alt="封面大图" />
+                                <button class="btn btn-circle btn-sm absolute -top-4 -right-4 bg-base-100 border-none shadow-md hover:bg-base-200 text-base-content z-50" @click="showPreview = false">
+                                    <span class="material-symbols-outlined text-sm">close</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="modal-backdrop bg-black/80 backdrop-blur-sm" @click="showPreview = false"></div>
+                    </div>
+                </template>
                 {% endif %}
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=image_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+                {{ image_card }}
+            </div>
         </div>
     </div>
 </form>

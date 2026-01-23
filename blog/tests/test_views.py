@@ -1,7 +1,7 @@
 from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth import get_user_model
-from blog.models import Post, Category, Comment, Subscriber
+from blog.models import Post, Category, Comment
 
 User = get_user_model()
 
@@ -23,14 +23,15 @@ class BlogPostTests(TestCase):
             status="published",
         )
 
-        self.protected_post = Post.objects.create(
+        self.protected_post = Post(
             title="Protected Post",
             content="Secret Content",
             author=self.user,
             category=self.category,
             status="published",
-            password="secretpassword",
         )
+        self.protected_post.set_password("secretpassword")
+        self.protected_post.save()
 
     def test_post_detail_renders_comment_user_profile_link(self):
         Comment.objects.create(
@@ -134,36 +135,6 @@ class BlogPostTests(TestCase):
         delete_url = reverse("delete_comment", kwargs={"pk": comment.pk})
         response = self.client.post(delete_url, follow=True)
         self.assertFalse(Comment.objects.filter(pk=comment.pk).exists())
-
-    def test_subscribe_success(self):
-        response = self.client.post(
-            reverse("subscribe"), {"email": "newsub@example.com"}, follow=True
-        )
-        self.assertContains(response, "订阅成功")
-        self.assertTrue(Subscriber.objects.filter(email="newsub@example.com").exists())
-
-    def test_subscribe_htmx(self):
-        response = self.client.post(
-            reverse("subscribe"), {"email": "htmx@example.com"}, HTTP_HX_REQUEST="true"
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "blog/partials/subscribe_success.html")
-
-    def test_subscribe_duplicate(self):
-        Subscriber.objects.create(email="dup@example.com", is_active=True)
-        response = self.client.post(
-            reverse("subscribe"), {"email": "dup@example.com"}, follow=True
-        )
-        self.assertContains(response, "订阅失败")
-
-    def test_unsubscribe(self):
-        sub = Subscriber.objects.create(email="unsub@example.com", is_active=True)
-        response = self.client.get(
-            reverse("unsubscribe", kwargs={"token": sub.token}), follow=True
-        )
-        self.assertContains(response, "退订成功")
-        sub.refresh_from_db()
-        self.assertFalse(sub.is_active)
 
     def test_comment_mentions_notification(self):
         self.client.force_login(self.user)

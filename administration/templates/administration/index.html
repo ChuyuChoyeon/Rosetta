@@ -51,7 +51,9 @@
             </div>
         </div>
         {% endcaptureas %}
-        {% include "components/inspira/card_spotlight.html" with slot_content=card_content_1 extra_classes="h-full bg-base-100 border border-base-content/5 rounded-2xl" %}
+        <div class="h-full bg-base-100 border border-base-content/5 rounded-2xl">
+            {{ card_content_1 }}
+        </div>
 
         <!-- Total Comments -->
         {% captureas card_content_2 %}
@@ -71,7 +73,9 @@
             </div>
         </div>
         {% endcaptureas %}
-        {% include "components/inspira/card_spotlight.html" with slot_content=card_content_2 extra_classes="h-full bg-base-100 border border-base-content/5 rounded-2xl" %}
+        <div class="h-full bg-base-100 border border-base-content/5 rounded-2xl">
+            {{ card_content_2 }}
+        </div>
         
         <!-- System Health -->
         {% captureas card_content_3 %}
@@ -88,7 +92,9 @@
             </div>
         </div>
         {% endcaptureas %}
-        {% include "components/inspira/card_spotlight.html" with slot_content=card_content_3 extra_classes="h-full bg-base-100 border border-base-content/5 rounded-2xl" %}
+        <div class="h-full bg-base-100 border border-base-content/5 rounded-2xl">
+            {{ card_content_3 }}
+        </div>
 
         <!-- Quick Actions (Mock) -->
         {% captureas card_content_4 %}
@@ -107,7 +113,9 @@
             </div>
         </div>
         {% endcaptureas %}
-        {% include "components/inspira/card_spotlight.html" with slot_content=card_content_4 extra_classes="h-full bg-base-100 border border-base-content/5 rounded-2xl" %}
+        <div class="h-full bg-base-100 border border-base-content/5 rounded-2xl">
+            {{ card_content_4 }}
+        </div>
     </div>
 
     <!-- Charts Grid (Bento Box 2) -->
@@ -273,8 +281,7 @@
 </div>
 
 <script>
-    (function() {
-        const initCharts = () => {
+    window.initCharts = function () {
             // 1. Trend Chart (Area)
             const trendEl = document.querySelector("#trendChart");
             if (trendEl) {
@@ -375,20 +382,9 @@
                 chartDonut.render();
                 donutEl._chart = chartDonut;
             }
-        };
-
-        // Run on initial load
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initCharts);
-        } else {
-            initCharts();
-        }
-
-        // Run on HTMX load (for navigation)
-        document.addEventListener('htmx:afterSettle', initCharts);
-        
-        // Cleanup on HTMX swap to prevent "setting width of undefined" errors
-        document.addEventListener('htmx:beforeSwap', function(evt) {
+    };
+    // Cleanup on HTMX swap to prevent "setting width of undefined" errors
+    document.addEventListener('htmx:beforeSwap', function(evt) {
              const trendEl = document.querySelector("#trendChart");
              if (trendEl && trendEl._chart) {
                  try { trendEl._chart.destroy(); } catch(e) {}
@@ -400,7 +396,14 @@
                  try { donutEl._chart.destroy(); } catch(e) {}
                  delete donutEl._chart;
              }
+    });
+    // Initial page load
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function () {
+            window.initCharts();
         });
-    })();
+    } else {
+        window.initCharts();
+    }
 </script>
 {% endblock %}

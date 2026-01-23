@@ -1,10 +1,12 @@
+import core.validators
+import django.db.models.deletion
 from django.db import models
 from django.conf import settings
-from django.utils.text import slugify
+from django.contrib.auth.hashers import make_password, check_password
+from core.utils import generate_unique_slug
+from core.validators import validate_image_file
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
-from core.validators import validate_image_file
-from core.utils import generate_unique_slug
 
 
 class Category(models.Model):
@@ -137,9 +139,34 @@ class Post(models.Model):
     views = models.PositiveIntegerField("阅读量", default=0)
     created_at = models.DateTimeField("创建时间", auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField("更新时间", auto_now=True)
-    notification_sent = models.BooleanField("已发送通知", default=False, editable=False)
     is_pinned = models.BooleanField("置顶", default=False)
     allow_comments = models.BooleanField("允许评论", default=True)
+
+    @property
+    def reading_time(self):
+        """
+        计算阅读时长 (分钟)
+        假设阅读速度: 中文 300 字/分钟, 英文 150 词/分钟
+        """
+        import re
+        import math
+        
+        # 移除 HTML 标签 (如果 content 已经是 Markdown 还没渲染 HTML，则直接计算)
+        # 这里假设 content 是 Markdown 源码
+        text = self.content
+        
+        # 简单统计：中文算 1 个字，英文单词算 1 个字
+        # 1. 匹配中文字符
+        chinese_char_count = len(re.findall(r'[\u4e00-\u9fa5]', text))
+        
+        # 2. 匹配英文单词 (简单的空格分割，移除标点)
+        english_words = re.findall(r'[a-zA-Z0-9]+', text)
+        english_word_count = len(english_words)
+        
+        # 计算总分钟数
+        minutes = (chinese_char_count / 300) + (english_word_count / 150)
+        
+        return math.ceil(minutes) if minutes > 0 else 1
 
     class Meta:
         ordering = ["-is_pinned", "-created_at"]
@@ -239,24 +266,4 @@ class PostViewHistory(models.Model):
         return f"{self.user.username} 浏览了 {self.post.title}"
 
 
-import uuid
 
-
-class Subscriber(models.Model):
-    """
-    邮件订阅者模型
-    用于管理博客的邮件订阅列表。
-    """
-
-    email = models.EmailField("邮箱地址", unique=True)
-    is_active = models.BooleanField("是否订阅", default=True)
-    created_at = models.DateTimeField("订阅时间", auto_now_add=True)
-    token = models.UUIDField(default=uuid.uuid4, editable=False)
-
-    class Meta:
-        verbose_name = "订阅者"
-        verbose_name_plural = verbose_name
-        ordering = ["-created_at"]
-
-    def __str__(self):
-        return self.email

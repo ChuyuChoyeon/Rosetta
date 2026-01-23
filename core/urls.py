@@ -7,9 +7,15 @@ from .views import (
     debug_api_system,
     debug_execute_command,
     health_check,
+    robots_txt,
+    upload_image,
 )
 
 urlpatterns = [
+    # SEO & Utils
+    path("robots.txt", robots_txt, name="robots_txt"),
+    path("upload/image/", upload_image, name="upload_image"),
+
     # 健康检查
     path("health/", health_check, name="health_check"),
     

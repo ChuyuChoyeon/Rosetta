@@ -2,8 +2,17 @@
 {% include 'users/includes/profile_tabs.html' %}
 
 <div id="profile-content-inner" class="fade-in">
-{% if active_tab == 'articles' %}
-    <!-- --- 文章 Tab (Articles Tab) --- -->
+{% if is_private_profile %}
+    <!-- 私密资料提示状态 -->
+    <div class="flex flex-col items-center justify-center py-24 text-center">
+        <div class="w-24 h-24 bg-base-200 rounded-full flex items-center justify-center mb-6">
+            <span class="material-symbols-outlined text-5xl text-base-content/30">lock</span>
+        </div>
+        <h3 class="text-xl font-bold mb-2">该用户已开启隐私保护</h3>
+        <p class="text-base-content/60">详细资料仅对用户本人可见</p>
+    </div>
+{% elif active_tab == 'articles' %}
+    <!-- 文章列表选项卡 -->
     <h2 class="card-title mb-6">发布文章</h2>
     {% if posts %}
         <div class="flex flex-col gap-6">
@@ -40,12 +49,12 @@
     {% endif %}
 
 {% elif active_tab == 'comments' %}
-    <!-- --- 评论 Tab (Comments Tab) --- -->
+    <!-- 评论记录选项卡 -->
     <h2 class="card-title mb-6">评论记录</h2>
     {% include 'users/includes/comments_list.html' with comments=comments %}
 
 {% elif active_tab == 'likes' %}
-    <!-- --- 喜欢/点赞 Tab (Likes Tab) --- -->
+    <!-- 喜欢的文章选项卡 -->
     <h2 class="card-title mb-6">喜欢的文章</h2>
     {% if liked_posts %}
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -82,7 +91,7 @@
     {% endif %}
 
 {% elif active_tab == 'info' and user == profile_user %}
-    <!-- --- 个人资料 Tab (Personal Info Tab - Private) --- -->
+    <!-- 个人资料选项卡（仅本人可见） -->
     <div class="flex justify-between items-center mb-6">
         <h2 class="card-title">个人信息</h2>
         <button class="btn btn-sm btn-outline btn-primary" onclick="profile_edit_modal.showModal()">
@@ -93,7 +102,7 @@
     {% include 'users/includes/user_info.html' %}
 
 {% elif active_tab == 'history' and user == profile_user %}
-    <!-- --- 浏览历史 Tab (History Tab - Private) --- -->
+    <!-- 浏览历史选项卡（仅本人可见） -->
     <div class="flex justify-between items-center mb-6">
         <h2 class="card-title">浏览历史</h2>
         <span class="text-xs text-base-content/50">仅显示最近20条记录</span>
@@ -133,7 +142,7 @@
     {% endif %}
 
 {% elif active_tab == 'notifications' and user == profile_user %}
-    <!-- --- 通知消息 Tab (Notifications Tab - Private) --- -->
+    <!-- 通知消息选项卡（仅本人可见） -->
     <div class="flex justify-between items-center mb-6">
         <h2 class="card-title">消息通知</h2>
     </div>
@@ -165,12 +174,12 @@
                     </div>
                     <div class="flex flex-col gap-2">
                         {% if not notification.is_read %}
-                        <!-- HTMX Action: Mark Read -->
+                        <!-- HTMX 操作：标记为已读 -->
                         <button hx-post="{% url 'users:mark_notification_read' notification.pk %}" hx-swap="outerHTML" class="btn btn-xs btn-ghost text-primary">
                             标为已读
                         </button>
                         {% endif %}
-                        <!-- HTMX Action: Delete -->
+                        <!-- HTMX 操作：删除 -->
                         <button hx-delete="{% url 'users:delete_notification' notification.pk %}" hx-target="closest .card" hx-swap="outerHTML" class="btn btn-xs btn-ghost text-error">
                             删除
                         </button>
@@ -188,34 +197,70 @@
     {% endif %}
 
 {% elif active_tab == 'settings' and user == profile_user %}
-    <!-- --- 偏好设置 Tab (Settings Tab - Private) --- -->
+    <!-- 偏好设置选项卡（仅本人可见） -->
     <h2 class="card-title mb-6">偏好设置</h2>
     <form action="{% url 'users:user_public_profile' user.username %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="save_preferences" value="true">
         
-        {% for field in preference_form %}
-        <div class="form-control w-full mb-4">
-            <label class="label cursor-pointer justify-start gap-4">
-                {% if field.field.widget.input_type == 'checkbox' %}
-                    {{ field }}
-                    <span class="label-text">{{ field.label }}</span>
-                {% else %}
-                    <span class="label-text w-24">{{ field.label }}</span>
-                    <div class="flex-1">{{ field }}</div>
-                {% endif %}
-            </label>
-            {% if field.help_text %}
-            <label class="label pt-0">
-                <span class="label-text-alt text-gray-500 pl-28">{{ field.help_text }}</span>
-            </label>
-            {% endif %}
-        </div>
-        {% endfor %}
+        <div class="space-y-6">
+            <!-- 主题选择 -->
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-bold">界面主题</span>
+                </label>
+                
+                <!-- 实际表单输入项（隐藏） -->
+                <div class="hidden">
+                    <input type="radio" name="theme" value="light" id="theme-light" {% if user.preference.theme == 'light' %}checked{% endif %}>
+                    <input type="radio" name="theme" value="dark" id="theme-dark" {% if user.preference.theme == 'dark' %}checked{% endif %}>
+                </div>
+                
+                <label class="flex items-center justify-between p-4 border border-base-300 rounded-lg hover:bg-base-200/50 transition-all cursor-pointer">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-bold text-sm">暗黑模式</span>
+                        <span class="text-xs text-base-content/60">切换明亮/暗黑主题</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-warning text-sm">light_mode</span>
+                        <input type="checkbox" 
+                               class="toggle toggle-primary theme-controller toggle-no-icon" 
+                               {% if user.preference.theme == 'dark' %}checked{% endif %}
+                               onclick="toggleTheme(this)" />
+                        <span class="material-symbols-outlined text-base-content text-sm">dark_mode</span>
+                    </div>
+                </label>
+            </div>
 
-        <div class="card-actions justify-end mt-6">
-            <button type="submit" class="btn btn-primary">保存设置</button>
+            <!-- 公开个人资料开关 -->
+            <div class="form-control w-full">
+                <label class="flex items-center justify-between p-4 border border-base-300 rounded-lg hover:bg-base-200/50 transition-all cursor-pointer">
+                    <div class="flex flex-col gap-1">
+                        <span class="font-bold text-sm">公开个人资料</span>
+                        <span class="text-xs text-base-content/60">允许其他人查看您的个人资料和浏览历史</span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <span class="material-symbols-outlined text-base-content/50 text-sm">lock</span>
+                        <input type="checkbox" 
+                               name="public_profile" 
+                               class="toggle toggle-primary toggle-no-icon" 
+                               {% if user.preference.public_profile %}checked{% endif %}>
+                        <span class="material-symbols-outlined text-primary text-sm">public</span>
+                    </div>
+                </label>
+            </div>
+        </div>
+
+        <div class="card-actions justify-end mt-8">
+            <button type="submit" class="btn btn-primary px-8">保存设置</button>
         </div>
     </form>
+
+    <style>
+        .toggle-no-icon:checked {
+            background-image: radial-gradient(circle, var(--tglbg) calc(100% - 1px), transparent calc(100% - 1px)) !important;
+            background-size: 100% 100%; 
+        }
+    </style>
 {% endif %}
 </div>

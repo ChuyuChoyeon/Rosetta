@@ -4,9 +4,9 @@ from django.views.generic import ListView, DetailView
 from django.db.models import Q, Count
 from django.contrib import messages
 from django.http import HttpResponse
-from .models import Post, Category, Tag, Comment, PostViewHistory, Subscriber
+from .models import Post, Category, Tag, Comment, PostViewHistory
 from core.models import Page
-from .forms import CommentForm, SubscriberForm
+from .forms import CommentForm
 from users.models import Notification, User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
@@ -84,7 +84,7 @@ class PostDetailView(DetailView):
         
         # 预加载回复以避免模板中的 N+1 查询问题
         # 注意：只获取顶级评论，子回复通过 prefetch_related 加载
-        from django.db.models import Prefetch# 预加载回复
+        from django.db.models import Prefetch
         replies_prefetch = Prefetch(
             'replies',
             queryset=Comment.objects.filter(active=True).select_related('user'),
@@ -99,14 +99,68 @@ class PostDetailView(DetailView):
         # 生成 SEO Meta 数据
         context["meta"] = self.get_meta_data()
 
+        # 获取相关文章 (基于相同标签，排除当前文章)
+        # 算法：
+        # 1. 获取当前文章的所有标签 ID
+        # 2. 查找包含这些标签的其他文章
+        # 3. 按匹配标签的数量降序排序
+        # 4. 取前 3 篇
+        post_tags_ids = self.object.tags.values_list('id', flat=True)
+        related_posts = Post.objects.filter(
+            tags__in=post_tags_ids,
+            status='published'
+        ).exclude(id=self.object.id).annotate(
+            same_tags=Count('tags')
+        ).order_by('-same_tags', '-created_at')[:3]
+        
+        # 如果相关文章不足 3 篇，补充同分类下的最新文章
+        if related_posts.count() < 3 and self.object.category:
+            remaining_count = 3 - related_posts.count()
+            category_posts = Post.objects.filter(
+                category=self.object.category,
+                status='published'
+            ).exclude(
+                id=self.object.id
+            ).exclude(
+                id__in=[p.id for p in related_posts]
+            ).order_by('-created_at')[:remaining_count]
+            
+            # 合并查询集 (转换为列表)
+            related_posts = list(related_posts) + list(category_posts)
+            
+        context["related_posts"] = related_posts
+
+        # 上一篇和下一篇 (Previous & Next Post)
+        # 仅获取已发布的文章，且按时间排序
+        context["previous_post"] = Post.objects.filter(
+            status='published',
+            created_at__lt=self.object.created_at
+        ).order_by('-created_at').first()
+
+        context["next_post"] = Post.objects.filter(
+            status='published',
+            created_at__gt=self.object.created_at
+        ).order_by('created_at').first()
+
         return context
 
     def get_meta_data(self):
         """生成页面 Meta 数据用于 SEO"""
         post = self.object
+        
+        # 处理描述：优先使用摘要，否则截取内容并去除 Markdown/HTML 标签
+        description = post.excerpt
+        if not description:
+            from django.utils.html import strip_tags
+            import markdown
+            # 先渲染成 HTML 去除 Markdown 符号，再去除 HTML 标签
+            html_content = markdown.markdown(post.content)
+            text_content = strip_tags(html_content)
+            description = text_content[:150] + "..." if len(text_content) > 150 else text_content
+
         return Meta(
             title=post.title,
-            description=post.excerpt or post.content[:150],
+            description=description,
             keywords=[tag.name for tag in post.tags.all()],
             image=post.cover_image.url if post.cover_image else None,
             url=self.request.build_absolute_uri(),
@@ -351,37 +405,3 @@ def delete_comment(request, pk):
         
     messages.success(request, "评论已删除")
     return redirect(post_url)
-
-
-def subscribe_view(request):
-    """
-    邮件订阅视图
-    
-    处理侧边栏或底部的邮件订阅请求。
-    """
-    if request.method == "POST":
-        form = SubscriberForm(request.POST)
-        if form.is_valid():
-            subscriber = form.save(commit=False)
-            # 检查是否已存在
-            if not Subscriber.objects.filter(email=subscriber.email).exists():
-                subscriber.save()
-                messages.success(request, "订阅成功！感谢您的关注。")
-            else:
-                messages.info(request, "您已经订阅过了。")
-        else:
-            messages.error(request, "订阅失败，请输入有效的邮箱地址。")
-            
-    return redirect(request.META.get("HTTP_REFERER", "/"))
-
-
-def unsubscribe_view(request, token):
-    """
-    取消订阅视图
-    
-    通过邮件中的 token 链接取消订阅。
-    """
-    subscriber = get_object_or_404(Subscriber, token=token)
-    subscriber.delete()
-    messages.success(request, "您已成功取消订阅。")
-    return redirect("home")

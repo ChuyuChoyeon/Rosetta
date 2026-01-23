@@ -51,4 +51,14 @@ def markdown_format(text):
         strip=True
     )
     
-    return mark_safe(cleaned_html)
+    # 注入 DaisyUI mockup-code 样式
+    # 将 Pygments 生成的 .codehilite 容器转换为 DaisyUI 的 .mockup-code 组件
+    # 结构: <div class="codehilite"> -> <div class="mockup-code codehilite">
+    # 注意：mockup-code 默认有 min-width: 18rem，可能需要 CSS 覆盖以适应移动端
+    final_html = cleaned_html.replace('<div class="codehilite">', '<div class="mockup-code codehilite">')
+    
+    # 为所有表格添加 DaisyUI 样式
+    final_html = final_html.replace('<table>', '<div class="overflow-x-auto"><table class="table table-zebra">')
+    final_html = final_html.replace('</table>', '</table></div>')
+    
+    return mark_safe(final_html)

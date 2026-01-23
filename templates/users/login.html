@@ -3,67 +3,110 @@
 {% block title %}登录 - {{ config.SITE_NAME|default:"Rosetta" }}{% endblock %}
 
 {% block content %}
-<div class="relative flex justify-center items-center min-h-[calc(100vh-16rem)] py-12 px-4 overflow-hidden">
-    <!-- Neural Background Removed (Inherited from Base) -->
-
-    <div class="card w-full max-w-sm bg-base-100/95 backdrop-blur-xl shadow-2xl border border-base-content/5 z-10 relative overflow-hidden">
-        <div class="card-body p-8">
-            <div class="text-center mb-8">
+<div class="min-h-[calc(100vh-16rem)] flex items-center justify-center px-4 py-12">
+    <section class="w-full max-w-md">
+        <div class="rounded-2xl border border-base-200 bg-base-100 shadow-lg p-8">
+            <header class="text-center mb-8">
                 <h2 class="text-3xl font-heading font-extrabold text-base-content">欢迎回来</h2>
-                <p class="text-base-content/60 mt-3 font-medium tracking-wide">Rosetta，开启您的创作之旅</p>
+                <p class="text-base-content/60 mt-2">登录以继续您的创作之旅</p>
+            </header>
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-error text-sm mb-4">
+                <span>{{ form.non_field_errors.0 }}</span>
             </div>
-            
+            {% endif %}
+
             <form method="post" class="space-y-5">
                 {% csrf_token %}
-                
-                {% if form.non_field_errors %}
-                <div class="alert alert-error shadow-lg text-sm p-3">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-6 w-6" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                    <span>{{ form.non_field_errors.0 }}</span>
-                </div>
-                {% endif %}
 
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-bold">用户名</span>
+                <div class="form-control">
+                    <label for="id_username" class="label">
+                        <span class="label-text font-semibold">用户名</span>
                     </label>
                     <div class="relative">
-                        <input type="text" name="username" placeholder="请输入用户名" autocomplete="username" class="input input-bordered w-full pl-10 focus:input-primary transition-all {% if form.errors %}input-error{% endif %}" required autofocus>
+                        <input id="id_username" type="text" name="username" placeholder="请输入用户名" autocomplete="username" class="input input-bordered w-full pl-10 {% if form.errors.username or form.errors %}input-error{% endif %}" required autofocus>
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70"><path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM12.735 14c.618 0 1.093-.561.872-1.139a6.002 6.002 0 0 0-11.215 0c-.22.578.254 1.139.872 1.139h9.47Z" /></svg>
                         </div>
                     </div>
+                    {% if form.errors.username %}
+                    <label class="label pt-0">
+                        <span class="label-text-alt text-error">{{ form.errors.username.0 }}</span>
+                    </label>
+                    {% endif %}
                 </div>
 
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-bold">密码</span>
+                <div class="form-control">
+                    <label for="id_password" class="label">
+                        <span class="label-text font-semibold">密码</span>
                     </label>
                     <div class="relative">
-                        <input type="password" name="password" placeholder="请输入密码" autocomplete="current-password" class="input input-bordered w-full pl-10 focus:input-primary transition-all {% if form.errors %}input-error{% endif %}" required>
+                        <input id="id_password" type="password" name="password" placeholder="请输入密码" autocomplete="current-password" class="input input-bordered w-full pl-10 pr-10 {% if form.errors.password or form.errors %}input-error{% endif %}" required>
                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-base-content/50">
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="w-4 h-4 opacity-70"><path fill-rule="evenodd" d="M14 6a4 4 0 0 1-4.899 3.899l-1.955 1.955a.5.5 0 0 1-.353.146H5v1.5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1-.5-.5v-2.293a.5.5 0 0 1 .146-.353l3.955-3.955A4 4 0 1 1 14 6Zm-4-2a.75.75 0 0 0 0 1.5.5.5 0 0 1 .5.5.75.75 0 0 0 1.5 0 2 2 0 0 0-2-2Z" clip-rule="evenodd" /></svg>
                         </div>
+                        <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/60 cursor-pointer hover:text-primary transition-colors" onclick="togglePassword('id_password', this)">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 eye-icon">
+                                <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+                                <path fill-rule="evenodd" d="M1.323 11.447C2.811 6.976 7.028 3.75 12.001 3.75c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113-1.487 4.471-5.705 7.697-10.677 7.697-4.97 0-9.186-3.223-10.675-7.69a1.762 1.762 0 010-1.113zM17.25 12a5.25 5.25 0 11-10.5 0 5.25 5.25 0 0110.5 0z" clip-rule="evenodd" />
+                            </svg>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-5 h-5 eye-slash-icon hidden">
+                                <path d="M3.53 2.47a.75.75 0 00-1.06 1.06l18 18a.75.75 0 101.06-1.06l-18-18zM22.676 12.553a11.249 11.249 0 01-2.631 4.31l-3.099-3.099a5.25 5.25 0 00-6.71-6.71L7.759 4.577a11.217 11.217 0 014.242-.827c4.97 0 9.185 3.223 10.675 7.69.12.362.12.752 0 1.113z" />
+                                <path d="M15.75 12c0 .18-.013.357-.037.53l-4.244-4.243A3.75 3.75 0 0115.75 12zM12.53 15.713l-4.243-4.244a3.75 3.75 0 004.243 4.243z" />
+                                <path d="M6.75 12c0-.619.107-1.213.304-1.764l-3.1-3.1a11.25 11.25 0 00-2.63 4.31c-.12.362-.12.752 0 1.114 1.489 4.467 5.704 7.69 10.675 7.69 1.176 0 2.29-.154 3.344-.45l-3.115-3.114A5.25 5.25 0 016.75 12z" />
+                            </svg>
+                        </button>
                     </div>
+                    {% if form.errors.password %}
+                    <label class="label pt-0">
+                        <span class="label-text-alt text-error">{{ form.errors.password.0 }}</span>
+                    </label>
+                    {% endif %}
                     <label class="label">
                         <span class="label-text-alt"></span>
-                        <a href="#" class="label-text-alt link link-primary hover:link-accent">忘记密码？</a>
+                        <a href="#" class="label-text-alt link link-primary">忘记密码？</a>
                     </label>
                 </div>
 
-                <div class="card-actions justify-end mt-8">
-                    <button type="submit" class="btn btn-primary w-full text-lg font-bold rounded-xl shadow-lg hover:shadow-primary/30 transition-all duration-300">
+                <div class="flex items-center justify-between">
+                    <label class="cursor-pointer flex items-center gap-2">
+                        <input type="checkbox" class="checkbox checkbox-sm" name="remember">
+                        <span class="text-sm text-base-content/70">记住我</span>
+                    </label>
+                </div>
+
+                <div>
+                    <button type="submit" class="btn btn-primary w-full text-lg font-bold rounded-xl">
                         登录
                     </button>
                 </div>
             </form>
-            
-            <div class="divider text-xs text-base-content/50 my-6">OR</div>
-            
+
+            <div class="divider text-xs text-base-content/50 my-6">或</div>
+
             <div class="text-center text-sm">
-                <p>还没有账号？ <a href="{% url 'users:register' %}" class="link link-primary font-bold hover:link-accent transition-colors">立即注册</a></p>
+                <p>还没有账号？ <a href="{% url 'users:register' %}" class="link link-primary font-bold">立即注册</a></p>
             </div>
         </div>
-    </div>
+    </section>
 </div>
+
+<script>
+    function togglePassword(inputId, btn) {
+        const input = document.getElementById(inputId);
+        const eyeIcon = btn.querySelector('.eye-icon');
+        const eyeSlashIcon = btn.querySelector('.eye-slash-icon');
+        
+        if (input.type === 'password') {
+            input.type = 'text';
+            eyeIcon.classList.add('hidden');
+            eyeSlashIcon.classList.remove('hidden');
+        } else {
+            input.type = 'password';
+            eyeIcon.classList.remove('hidden');
+            eyeSlashIcon.classList.add('hidden');
+        }
+    }
+</script>
 {% endblock %}
