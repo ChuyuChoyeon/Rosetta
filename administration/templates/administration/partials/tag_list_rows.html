@@ -34,15 +34,15 @@
     </td>
     <td>
         <div class="join">
-            <a href="{% url 'post_by_tag' tag.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip" data-tip="查看">
+            <a href="{% url 'post_by_tag' tag.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="查看">
                 <span class="material-symbols-outlined text-base">visibility</span>
             </a>
-            <a href="{% url 'administration:tag_edit' tag.pk %}" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+            <a href="{% url 'administration:tag_edit' tag.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
                 <span class="material-symbols-outlined text-base">edit</span>
             </a>
-            <a href="{% url 'administration:tag_delete' tag.pk %}" class="btn btn-ghost btn-xs join-item text-error tooltip" data-tip="删除">
+            <button onclick="confirmDelete('{% url 'administration:tag_delete' tag.pk %}', '确定要删除标签《{{ tag.name|escapejs }}》吗？')" class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" data-tip="删除">
                 <span class="material-symbols-outlined text-base">delete</span>
-            </a>
+            </button>
         </div>
     </td>
 </tr>

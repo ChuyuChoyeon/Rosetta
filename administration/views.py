@@ -326,6 +326,7 @@ class PostListView(BaseListView):
     template_name = "dashboard/post_list.html"
     context_object_name = "posts"
     ordering = ["-created_at"]
+    paginate_by = 20
 
     def get_queryset(self) -> QuerySet[Post]:
         qs = super().get_queryset()
@@ -341,6 +342,14 @@ class PostListView(BaseListView):
             qs = qs.filter(status=status)
             
         return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 统计数据
+        context['total_count'] = Post.objects.count()
+        context['published_count'] = Post.objects.filter(status='published').count()
+        context['draft_count'] = Post.objects.filter(status='draft').count()
+        return context
 
     def get_template_names(self) -> List[str]:
         # HTMX 局部刷新支持
@@ -536,16 +545,19 @@ class CommentListView(BaseListView):
     支持：
     - 内容搜索
     - 状态过滤 (已审核/待审核)
-    - 关联查询优化 (post, user)
+    - 关联查询优化 (post, user, parent)
     """
     model = Comment
     context_object_name = "comments"
     ordering = ["-created_at"]
+    paginate_by = 20
 
     def get_queryset(self):
-        qs = super().get_queryset().select_related("post", "user")
+        qs = super().get_queryset().select_related("post", "user", "parent", "parent__user")
         query = self.request.GET.get("q")
         status = self.request.GET.get("status")
+        user_id = self.request.GET.get("user")
+        post_id = self.request.GET.get("post")
 
         if query:
             qs = qs.filter(content__icontains=query)
@@ -554,8 +566,22 @@ class CommentListView(BaseListView):
             qs = qs.filter(active=True)
         elif status == "pending":
             qs = qs.filter(active=False)
+            
+        if user_id:
+            qs = qs.filter(user_id=user_id)
+            
+        if post_id:
+            qs = qs.filter(post_id=post_id)
 
         return qs
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # 添加统计数据
+        context['total_count'] = Comment.objects.count()
+        context['pending_count'] = Comment.objects.filter(active=False).count()
+        context['active_count'] = Comment.objects.filter(active=True).count()
+        return context
 
 
 class CommentUpdateView(BaseUpdateView):
@@ -567,6 +593,32 @@ class CommentUpdateView(BaseUpdateView):
     model = Comment
     fields = ["content", "active"]
     success_url = reverse_lazy("administration:comment_list")
+
+
+class CommentReplyView(LoginRequiredMixin, StaffRequiredMixin, View):
+    """
+    评论回复视图
+    
+    管理员直接在后台回复用户评论。
+    """
+    def post(self, request, pk):
+        parent_comment = get_object_or_404(Comment, pk=pk)
+        content = request.POST.get("content")
+        
+        if not content:
+            messages.error(request, "回复内容不能为空")
+            return redirect("administration:comment_list")
+            
+        Comment.objects.create(
+            post=parent_comment.post,
+            user=request.user,
+            parent=parent_comment,
+            content=content,
+            active=True # 管理员回复默认可见
+        )
+        
+        messages.success(request, "回复已发布")
+        return redirect("administration:comment_list")
 
 
 class CommentDeleteView(BaseDeleteView):
@@ -756,10 +808,10 @@ class SearchPlaceholderListView(BaseListView):
     ordering = ["order", "-created_at"]
 
     def get_queryset(self):
-        qs = super().get_queryset().select_related("title")
+        qs = super().get_queryset()
         q = self.request.GET.get("q")
         if q:
-            qs = qs.filter(text__icontains=query)
+            qs = qs.filter(text__icontains=q)
         return qs
 
 

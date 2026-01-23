@@ -100,7 +100,7 @@
             </div>
             {% endcaptureas %}
             <!-- Use simple div instead of Card Spotlight to prevent Stacking Context issues with Fullscreen Editor -->
-            <div class="rounded-2xl border border-base-content/5 bg-base-100 shadow-sm p-0">
+            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
                 {{ main_card }}
             </div>
             
@@ -319,7 +319,7 @@
                     </label>
                 </div>
                 {% if object.cover_image %}
-                <div class="mt-4 group relative rounded-xl overflow-hidden border border-base-content/10 shadow-sm cursor-zoom-in bg-base-200" @click="showPreview = true">
+                <div class="mt-4 group relative rounded-xl overflow-hidden border border-base-content/10 shadow-sm cursor-zoom-in bg-base-200" @click.stop="showPreview = true">
                     <!-- 图片显示：固定高度，覆盖模式，确保布局整齐 -->
                     <img src="{{ object.cover_image.url }}" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105" alt="封面预览" />
                     

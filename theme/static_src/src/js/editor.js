@@ -48,6 +48,13 @@ const injectStyles = () => {
             height: 100vh !important;
             width: 100vw !important;
             background-color: #ffffff;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+
+        .bytemd-fullscreen .bytemd-body {
+            flex: 1 !important;
+            height: auto !important;
         }
         
         :root[data-theme="dark"] .bytemd,
@@ -108,7 +115,7 @@ const injectStyles = () => {
         :root[data-theme="dark"] .markdown-body,
         html.dark .markdown-body {
             color: var(--bytemd-text) !important;
-            background-color: transparent !important;
+            background-color: var(--bytemd-bg) !important;
             font-family: inherit !important;
         }
         

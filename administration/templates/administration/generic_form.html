@@ -41,13 +41,13 @@
             {% for field in form %}
             <div class="form-control w-full group">
                 {% if field.field.widget.input_type == 'checkbox' %}
-                <label class="label cursor-pointer justify-start gap-3 p-3 border border-base-200 rounded-lg hover:border-primary/50 hover:bg-base-200/50 transition-all">
+                <label class="label cursor-pointer justify-start gap-3 p-4 border border-base-200 rounded-xl hover:border-primary/50 hover:bg-base-200/50 transition-all">
                     {{ field }}
                     <span class="label-text font-medium">{{ field.label }}</span>
                 </label>
                 {% else %}
                 <label class="label">
-                    <span class="label-text font-medium flex items-center gap-1">
+                    <span class="label-text font-medium flex items-center gap-1 text-base">
                         {{ field.label }}
                         {% if field.field.required %}<span class="text-error">*</span>{% endif %}
                     </span>
@@ -83,6 +83,8 @@
         </form>
     </div>
     {% endcaptureas %}
-    {% include 'components/inspira/card_spotlight.html' with slot_content=card_content extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+    <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+        {{ card_content }}
+    </div>
 </div>
 {% endblock %}

@@ -91,16 +91,20 @@
     {% include 'components/inspira/neural_background.html' %}
 
     <!-- Navbar -->
-    <div class="navbar bg-base-100 shadow-lg z-40 sticky top-0 flex-col lg:flex-row lg:justify-between h-auto lg:h-16 py-2 lg:py-0">
+    <div class="navbar bg-base-100/80 backdrop-blur-md shadow-sm border-b border-base-content/5 z-40 sticky top-0 flex-col lg:flex-row lg:justify-between h-auto lg:h-16 py-2 lg:py-0 transition-all duration-300">
         <!-- Mobile Wrapper -->
         <div class="w-full flex flex-col lg:flex-row lg:items-center lg:w-auto">
             <!-- Line 1: Logo & Title -->
             <div class="w-full flex justify-center lg:justify-start lg:w-auto py-2 lg:py-0">
-                <a href="{% url 'administration:index' %}" class="normal-case text-xl flex items-center gap-2 font-bold text-base-content hover:opacity-80 transition-opacity">
+                <a href="{% url 'administration:index' %}" class="normal-case text-xl flex items-center gap-3 font-bold text-base-content hover:opacity-80 transition-opacity">
                     {% if config.SHOW_SITE_LOGO and config.SITE_LOGO %}
                     <img src="{{ config.SITE_LOGO }}" alt="Admin Logo" class="h-8 w-auto object-contain">
+                    {% else %}
+                    <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                        <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
+                    </div>
                     {% endif %}
-                    <span class="text-primary truncate">{{ config.ADMIN_NAVBAR_TITLE|default:"Rosetta 管理后台" }}</span>
+                    <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-extrabold tracking-tight">{{ config.ADMIN_NAVBAR_TITLE|default:"Rosetta Admin" }}</span>
                 </a>
             </div>
             
@@ -235,115 +239,118 @@
             
             {% block content %}{% endblock %}
         </div> 
-        <div class="drawer-side z-50 bg-base-100">
+        <div class="drawer-side z-50">
             <label for="my-drawer-2" aria-label="close sidebar" class="drawer-overlay"></label> 
-            <ul class="menu p-4 w-64 min-h-full bg-base-100 text-base-content gap-2 border-r border-base-200">
+            <ul class="menu p-4 w-64 min-h-full bg-base-100/90 backdrop-blur-lg text-base-content gap-1 border-r border-base-content/5">
                 <!-- Sidebar content here -->
-                <li>
-                    <a href="{% url 'administration:index' %}" class="{% if request.resolver_match.url_name == 'index' %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
+                <li class="mb-2">
+                    <a href="{% url 'administration:index' %}" class="{% if request.resolver_match.url_name == 'index' %}active bg-primary text-primary-content shadow-lg shadow-primary/20 scale-[1.02]{% else %}hover:bg-base-200 hover:scale-[1.02]{% endif %} transition-all duration-200 rounded-xl py-3 font-medium">
                         <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'index' %}text-primary-content{% else %}text-primary{% endif %}">dashboard</span>
                         概览
                     </a>
                 </li>
                 
-                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4">内容管理</li>
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">内容管理</li>
                 <li>
-                    <a href="{% url 'administration:post_list' %}" class="{% if 'post' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'post' in request.resolver_match.url_name %}text-primary-content{% else %}text-secondary{% endif %}">article</span>
+                    <a href="{% url 'administration:post_list' %}" class="{% if 'post' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'post' in request.resolver_match.url_name %}text-primary{% else %}text-secondary{% endif %}">article</span>
                         文章
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'administration:category_list' %}" class="{% if 'category' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'category' in request.resolver_match.url_name %}text-primary-content{% else %}text-secondary{% endif %}">category</span>
+                    <a href="{% url 'administration:category_list' %}" class="{% if 'category' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'category' in request.resolver_match.url_name %}text-primary{% else %}text-secondary{% endif %}">category</span>
                         分类
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'administration:tag_list' %}" class="{% if 'tag' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'tag' in request.resolver_match.url_name %}text-primary-content{% else %}text-secondary{% endif %}">label</span>
+                    <a href="{% url 'administration:tag_list' %}" class="{% if 'tag' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'tag' in request.resolver_match.url_name %}text-primary{% else %}text-secondary{% endif %}">label</span>
                         标签
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'administration:comment_list' %}" class="{% if 'comment' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'comment' in request.resolver_match.url_name %}text-primary-content{% else %}text-secondary{% endif %}">comment</span>
-                        评论
+                    <a href="{% url 'administration:comment_list' %}" class="{% if 'comment' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5 justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="material-symbols-outlined {% if 'comment' in request.resolver_match.url_name %}text-primary{% else %}text-secondary{% endif %}">comment</span>
+                            评论
+                        </div>
                         {% if pending_comments > 0 %}
                         <span class="badge badge-sm badge-error animate-pulse">{{ pending_comments }}</span>
                         {% endif %}
                     </a>
                 </li>
 
-                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4">页面管理</li>
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">页面管理</li>
                 <li>
-                    <a href="{% url 'administration:page_list' %}" class="{% if 'page' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'page' in request.resolver_match.url_name %}text-primary-content{% else %}text-accent{% endif %}">description</span>
+                    <a href="{% url 'administration:page_list' %}" class="{% if 'page' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'page' in request.resolver_match.url_name %}text-primary{% else %}text-accent{% endif %}">description</span>
                         页面
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'administration:navigation_list' %}" class="{% if 'navigation' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'navigation' in request.resolver_match.url_name %}text-primary-content{% else %}text-accent{% endif %}">menu</span>
+                    <a href="{% url 'administration:navigation_list' %}" class="{% if 'navigation' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'navigation' in request.resolver_match.url_name %}text-primary{% else %}text-accent{% endif %}">menu</span>
                         导航
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'administration:friendlink_list' %}" class="{% if 'friendlink' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'friendlink' in request.resolver_match.url_name %}text-primary-content{% else %}text-accent{% endif %}">link</span>
+                    <a href="{% url 'administration:friendlink_list' %}" class="{% if 'friendlink' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'friendlink' in request.resolver_match.url_name %}text-primary{% else %}text-accent{% endif %}">link</span>
                         友情链接
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'administration:searchplaceholder_list' %}" class="{% if 'searchplaceholder' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'searchplaceholder' in request.resolver_match.url_name %}text-primary-content{% else %}text-accent{% endif %}">manage_search</span>
+                    <a href="{% url 'administration:searchplaceholder_list' %}" class="{% if 'searchplaceholder' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'searchplaceholder' in request.resolver_match.url_name %}text-primary{% else %}text-accent{% endif %}">manage_search</span>
                         搜索占位符
                     </a>
                 </li>
 
-                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4">系统管理</li>
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">系统管理</li>
                 <li>
-                    <a href="{% url 'administration:user_list' %}" class="{% if 'user' in request.resolver_match.url_name and 'title' not in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'user' in request.resolver_match.url_name and 'title' not in request.resolver_match.url_name %}text-primary-content{% else %}text-info{% endif %}">group</span>
+                    <a href="{% url 'administration:user_list' %}" class="{% if 'user' in request.resolver_match.url_name and 'title' not in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'user' in request.resolver_match.url_name and 'title' not in request.resolver_match.url_name %}text-primary{% else %}text-info{% endif %}">group</span>
                         用户
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'administration:usertitle_list' %}" class="{% if 'usertitle' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'usertitle' in request.resolver_match.url_name %}text-primary-content{% else %}text-info{% endif %}">badge</span>
+                    <a href="{% url 'administration:usertitle_list' %}" class="{% if 'usertitle' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'usertitle' in request.resolver_match.url_name %}text-primary{% else %}text-info{% endif %}">badge</span>
                         称号
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'administration:group_list' %}" class="{% if 'group' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'group' in request.resolver_match.url_name %}text-primary-content{% else %}text-info{% endif %}">groups</span>
+                    <a href="{% url 'administration:group_list' %}" class="{% if 'group' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'group' in request.resolver_match.url_name %}text-primary{% else %}text-info{% endif %}">groups</span>
                         用户组
                     </a>
                 </li>
 
-                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4">日志与审计</li>
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">日志与审计</li>
                 <li>
-                    <a href="{% url 'administration:logentry_list' %}" class="{% if 'logentry' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'logentry' in request.resolver_match.url_name %}text-primary-content{% else %}text-warning{% endif %}">history</span>
+                    <a href="{% url 'administration:logentry_list' %}" class="{% if 'logentry' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'logentry' in request.resolver_match.url_name %}text-primary{% else %}text-warning{% endif %}">history</span>
                         操作日志
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'administration:logfile_list' %}" class="{% if 'logfile' in request.resolver_match.url_name %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if 'logfile' in request.resolver_match.url_name %}text-primary-content{% else %}text-warning{% endif %}">description</span>
+                    <a href="{% url 'administration:logfile_list' %}" class="{% if 'logfile' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'logfile' in request.resolver_match.url_name %}text-primary{% else %}text-warning{% endif %}">description</span>
                         系统日志
                     </a>
                 </li>
 
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">维护与工具</li>
                 <li>
-                    <a href="{% url 'administration:settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'settings' %}text-primary-content{% else %}text-info{% endif %}">settings</span>
+                    <a href="{% url 'administration:settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'settings' %}text-primary{% else %}text-info{% endif %}">settings</span>
                         站点设置
                     </a>
                 </li>
                 <li>
-                    <a href="{% url 'administration:debug' %}" class="{% if request.resolver_match.url_name == 'debug' %}active shadow-md bg-primary text-primary-content{% endif %} hover:bg-base-200 transition-colors duration-200 rounded-lg">
-                        <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'debug' %}text-primary-content{% else %}text-warning{% endif %}">bug_report</span>
+                    <a href="{% url 'administration:debug' %}" class="{% if request.resolver_match.url_name == 'debug' %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'debug' %}text-primary{% else %}text-warning{% endif %}">bug_report</span>
                         调试工具
                     </a>
                 </li>
@@ -351,7 +358,7 @@
                 <div class="divider my-4"></div>
                 
                 <li>
-                    <a href="{% url 'users:logout' %}" class="text-error hover:bg-error/10 transition-colors duration-200 rounded-lg">
+                    <a href="{% url 'users:logout' %}" class="text-error hover:bg-error/10 transition-colors duration-200 rounded-lg mx-2">
                         <span class="material-symbols-outlined">logout</span>
                         退出登录
                     </a>

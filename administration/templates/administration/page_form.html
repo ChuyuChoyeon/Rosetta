@@ -97,7 +97,9 @@
                 </div>
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=main_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+                {{ main_card }}
+            </div>
             
             <!-- SEO / Slug Settings -->
             {% captureas seo_card %}
@@ -114,7 +116,9 @@
                 </div>
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=seo_card extra_classes="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+            <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+                {{ seo_card }}
+            </div>
         </div>
 
         <!-- Sidebar (Right Column) -->
@@ -142,7 +146,9 @@
                 </div>
             </div>
             {% endcaptureas %}
-            {% include 'components/inspira/card_spotlight.html' with slot_content=publish_card extra_classes="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5" %}
+            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+                {{ publish_card }}
+            </div>
         </div>
     </div>
 </form>

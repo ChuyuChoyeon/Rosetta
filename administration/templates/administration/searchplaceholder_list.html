@@ -59,7 +59,7 @@
 
         <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='searchplaceholder' %}">
             {% csrf_token %}
-            <div class="overflow-x-auto min-h-[300px]">
+            <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
                 <table class="table table-sm table-pin-rows w-full">
                     <thead class="bg-base-200/50 text-base-content/60 font-medium sticky top-0 z-30">
                         <tr>

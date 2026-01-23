@@ -87,8 +87,8 @@
     </div>
     {% endcaptureas %}
 
-    {% with slot_content=card_content extra_classes="w-full" %}
-        {% include 'components/inspira/card_spotlight.html' %}
-    {% endwith %}
+    <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5 w-full">
+        {{ card_content }}
+    </div>
 </div>
 {% endblock %}

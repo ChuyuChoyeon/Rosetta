@@ -54,10 +54,10 @@
         </p>
     </td>
     <td>
-        <div class="tooltip tooltip-left" data-tip="删除记录">
-            <a href="{% url 'administration:logentry_delete' log.pk %}" class="btn btn-xs btn-ghost btn-square text-base-content/40 hover:text-error hover:bg-error/10 transition-all">
-                <span class="material-symbols-outlined text-lg">delete</span>
-            </a>
+        <div class="join">
+            <button onclick="confirmDelete('{% url 'administration:logentry_delete' log.pk %}', '确定要删除这条日志吗？')" class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" data-tip="删除">
+                <span class="material-symbols-outlined text-base">delete</span>
+            </button>
         </div>
     </td>
 </tr>

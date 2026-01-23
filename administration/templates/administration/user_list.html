@@ -11,28 +11,72 @@
     </ul>
 </div>
 
-{% captureas card_content %}
-    <div class="p-0">
-        <!-- Toolbar -->
-        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-30">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-info/10 rounded-lg">
-                    <span class="material-symbols-outlined text-info">group</span>
-                </div>
-                <div>
-                    <h2 class="font-bold text-base">用户列表</h2>
-                    <p class="text-xs text-base-content/60">管理系统所有注册用户</p>
-                </div>
+<!-- Stats Overview -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="stats shadow bg-base-100 border border-base-content/5">
+        <div class="stat">
+            <div class="stat-figure text-primary">
+                <span class="material-symbols-outlined text-3xl">group</span>
             </div>
-            
-            <div class="flex items-center gap-2 w-full sm:w-auto">
+            <div class="stat-title">总用户数</div>
+            <div class="stat-value text-primary">{{ total_count }}</div>
+            <div class="stat-desc">所有注册用户</div>
+        </div>
+    </div>
+    
+    <div class="stats shadow bg-base-100 border border-base-content/5">
+        <div class="stat">
+            <div class="stat-figure text-success">
+                <span class="material-symbols-outlined text-3xl">how_to_reg</span>
+            </div>
+            <div class="stat-title">已激活</div>
+            <div class="stat-value text-success">{{ active_count }}</div>
+            <div class="stat-desc">账户状态正常</div>
+        </div>
+    </div>
+    
+    <div class="stats shadow bg-base-100 border border-base-content/5">
+        <div class="stat">
+            <div class="stat-figure text-secondary">
+                <span class="material-symbols-outlined text-3xl">verified_user</span>
+            </div>
+            <div class="stat-title">管理员</div>
+            <div class="stat-value text-secondary">{{ staff_count }}</div>
+            <div class="stat-desc">拥有后台权限</div>
+        </div>
+    </div>
+</div>
+
+<div class="card bg-base-100 shadow-sm border border-base-content/5">
+    <div class="card-body p-0">
+        <!-- Toolbar -->
+        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col lg:flex-row justify-between items-center gap-4 sticky top-0 z-30 rounded-t-2xl">
+            <!-- Left: Filter Tabs -->
+            <div class="tabs tabs-boxed bg-base-200/50 p-1 gap-1">
+                <a href="{% url 'administration:user_list' %}" class="tab tab-sm {% if not request.GET.is_active and not request.GET.is_staff %}tab-active bg-white shadow-sm text-base-content font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">全部</a>
+                <a href="{% url 'administration:user_list' %}?is_active=true" class="tab tab-sm {% if request.GET.is_active == 'true' %}tab-active bg-success text-success-content shadow-sm font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">已激活</a>
+                <a href="{% url 'administration:user_list' %}?is_staff=true" class="tab tab-sm {% if request.GET.is_staff == 'true' %}tab-active bg-secondary text-secondary-content shadow-sm font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">管理员</a>
+            </div>
+
+            <!-- Right: Actions -->
+            <div class="flex items-center gap-2 w-full lg:w-auto">
                 <!-- Search -->
-                <form action="." method="get" class="relative w-full sm:w-64">
-                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm">search</span>
-                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索用户..." class="input input-sm input-bordered pl-9 w-full focus:input-primary transition-all" />
+                <form action="." method="get" class="join w-full lg:w-auto">
+                    {% if request.GET.is_active %}<input type="hidden" name="is_active" value="{{ request.GET.is_active }}">{% endif %}
+                    {% if request.GET.is_staff %}<input type="hidden" name="is_staff" value="{{ request.GET.is_staff }}">{% endif %}
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索用户..." class="input input-sm input-bordered join-item w-full lg:w-64 focus:input-primary transition-all" />
+                    <button type="submit" class="btn btn-sm btn-ghost join-item border border-base-300 bg-base-100">
+                        <span class="material-symbols-outlined text-base-content/50">search</span>
+                    </button>
                 </form>
 
-                <!-- Actions Dropdown -->
+                <!-- New User -->
+                {% url 'administration:user_create' as create_url %}
+                {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建用户' extra_classes='px-4 !h-8 text-xs min-h-0' href=create_url %}
+                    {% include 'components/inspira/rainbow_button.html' %}
+                {% endwith %}
+
+                <!-- More Actions Dropdown -->
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal">
                         更多
@@ -53,48 +97,45 @@
                         </li>
                     </ul>
                 </div>
+            </div>
 
-                <!-- Add Button -->
-                {% url 'administration:user_create' as create_url %}
-                <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-1 shadow-lg shadow-primary/20">
-                    <span class="material-symbols-outlined text-lg">add</span>
-                    新建用户
-                </a>
+            <!-- Bulk Actions (Dynamic Overlay) -->
+            <div id="bulk-actions" class="absolute inset-0 bg-base-100 z-40 hidden flex items-center justify-between px-4 animate-in fade-in zoom-in duration-200 rounded-t-2xl">
+                <div class="flex items-center gap-3">
+                    <button onclick="updateBulkToolbar()" class="btn btn-sm btn-circle btn-ghost">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                    <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
+                </div>
+                <div class="join">
+                    <button onclick="submitBulkAction('active')" class="btn btn-sm btn-success gap-1 text-white join-item">
+                        <span class="material-symbols-outlined text-[16px]">person_check</span> 启用
+                    </button>
+                    <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-warning gap-1 join-item">
+                        <span class="material-symbols-outlined text-[16px]">person_off</span> 禁用
+                    </button>
+                    <button onclick="submitBulkAction('set_staff')" class="btn btn-sm btn-info gap-1 text-white join-item">
+                        <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span> 设为管理
+                    </button>
+                    <button onclick="submitBulkAction('remove_staff')" class="btn btn-sm btn-ghost gap-1 hover:bg-base-content/10 join-item">
+                        <span class="material-symbols-outlined text-[16px]">person</span> 取消管理
+                    </button>
+                    <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1 join-item">
+                        <span class="material-symbols-outlined text-[16px]">delete</span> 删除
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Bulk Actions Toolbar -->
-        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
-            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
-            <div class="flex gap-2">
-                <button onclick="submitBulkAction('active')" class="btn btn-xs btn-success gap-1 text-white">
-                    <span class="material-symbols-outlined text-[16px]">person_check</span> 启用
-                </button>
-                <button onclick="submitBulkAction('inactive')" class="btn btn-xs btn-warning gap-1">
-                    <span class="material-symbols-outlined text-[16px]">person_off</span> 禁用
-                </button>
-                <div class="divider divider-horizontal mx-0 my-1"></div>
-                <button onclick="submitBulkAction('set_staff')" class="btn btn-xs btn-info gap-1 text-white">
-                    <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span> 设为管理
-                </button>
-                <button onclick="submitBulkAction('remove_staff')" class="btn btn-xs btn-ghost gap-1 hover:bg-base-content/10">
-                    <span class="material-symbols-outlined text-[16px]">person</span> 取消管理
-                </button>
-                <div class="divider divider-horizontal mx-0 my-1"></div>
-                <button onclick="submitBulkAction('delete')" class="btn btn-xs btn-ghost text-error hover:bg-error/10 gap-1">
-                    <span class="material-symbols-outlined text-[16px]">delete</span> 删除
-                </button>
-            </div>
-        </div>
-
+        <!-- Table -->
         <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='user' %}">
             {% csrf_token %}
-            <div class="overflow-x-auto min-h-[400px]">
-                <table class="table table-sm w-full">
+            <div class="overflow-x-auto min-h-[500px]">
+                <table class="table table-pin-rows w-full">
                     <!-- Head -->
-                    <thead class="bg-base-200/50 text-base-content/60 font-medium">
+                    <thead class="bg-base-200/30 text-base-content/60 font-medium">
                         <tr>
-                            <th class="w-10">
+                            <th class="w-10 pl-6">
                                 <label>
                                     <input type="checkbox" class="checkbox checkbox-xs rounded-sm" onclick="toggleAll(this)" />
                                 </label>
@@ -110,7 +151,7 @@
                             <th>邮箱</th>
                             <th class="w-28">称号</th>
                             <th class="w-28">角色</th>
-                            <th>状态</th>
+                            <th class="w-32">状态</th>
                             <th class="w-32">
                                 <a href="?sort=date_joined&order={% if request.GET.sort == 'date_joined' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
                                     加入时间
@@ -127,7 +168,7 @@
                                     {% endif %}
                                 </a>
                             </th>
-                            <th class="w-24 text-center">操作</th>
+                            <th class="w-24 text-center pr-6">操作</th>
                         </tr>
                     </thead>
                     <!-- Body (HTMX Target) -->
@@ -139,34 +180,26 @@
         </form>
         
         <!-- Pagination -->
-        <div class="p-4 border-t border-base-200 flex justify-between items-center bg-base-100/30">
-            {% if is_paginated %}
-            <div class="text-xs text-base-content/50">
-                显示第 {{ page_obj.start_index }} 到 {{ page_obj.end_index }} 条，共 {{ page_obj.paginator.count }} 条
-            </div>
+        {% if is_paginated %}
+        <div class="p-4 border-t border-base-200 flex justify-center bg-base-100/30 rounded-b-2xl">
             <div class="join">
                 {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-xs btn-outline">«</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}{% if request.GET.is_staff %}&is_staff={{ request.GET.is_staff }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-xs btn-outline">«</a>
                 {% else %}
                 <button class="join-item btn btn-xs btn-outline btn-disabled">«</button>
                 {% endif %}
                 
-                <button class="join-item btn btn-xs btn-outline no-animation bg-base-200 border-base-300 text-base-content/70">第 {{ page_obj.number }} 页</button>
+                <button class="join-item btn btn-xs btn-outline no-animation bg-base-200 border-base-300 text-base-content/70">第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页</button>
                 
                 {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-xs btn-outline">»</a>
+                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.is_active %}&is_active={{ request.GET.is_active }}{% endif %}{% if request.GET.is_staff %}&is_staff={{ request.GET.is_staff }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-xs btn-outline">»</a>
                 {% else %}
                 <button class="join-item btn btn-xs btn-outline btn-disabled">»</button>
                 {% endif %}
             </div>
-            {% else %}
-            <div class="text-xs text-base-content/50">共 {{ users|length }} 条记录</div>
-            {% endif %}
         </div>
+        {% endif %}
     </div>
-{% endcaptureas %}
-<div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-    {{ card_content }}
 </div>
 
 <!-- Import Modal -->

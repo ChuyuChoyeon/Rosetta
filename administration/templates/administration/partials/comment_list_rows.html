@@ -1,60 +1,74 @@
 {% for comment in comments %}
-<tr class="hover group">
-    <th class="rounded-l-2xl">
+<tr class="hover group transition-colors">
+    <th class="pl-4">
         <label>
-            <input type="checkbox" name="selected_ids" value="{{ comment.pk }}" class="checkbox checkbox-xs row-checkbox" onchange="updateBulkToolbar()" />
+            <input type="checkbox" name="selected_ids" value="{{ comment.pk }}" class="checkbox checkbox-xs rounded-sm row-checkbox" onchange="updateBulkToolbar()" />
         </label>
     </th>
-    <th class="font-mono text-xs opacity-50">{{ comment.id }}</th>
-    <td>
-        <div class="flex items-center space-x-3">
-            <div class="avatar">
+    <td class="font-mono text-xs opacity-50">{{ comment.id }}</td>
+    <td class="max-w-[300px]">
+        <div class="flex items-start gap-3">
+            <div class="avatar mt-1">
                 <div class="w-8 h-8 rounded-full ring ring-base-200 ring-offset-1 group-hover:ring-primary/20 transition-all">
                     <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}" />
                 </div>
             </div>
-            <a href="{% url 'administration:user_edit' comment.user.pk %}" class="font-bold text-sm hover:text-primary transition-colors">{{ comment.user.username }}</a>
+            <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2">
+                    <a href="{% url 'administration:user_edit' comment.user.pk %}" class="font-bold text-sm hover:text-primary transition-colors truncate">{{ comment.user.nickname|default:comment.user.username }}</a>
+                    {% if comment.user.is_staff %}
+                    <span class="badge badge-xs badge-warning gap-0.5" title="管理员">
+                        <span class="material-symbols-outlined text-[10px]">verified</span>
+                    </span>
+                    {% endif %}
+                </div>
+                
+                {% if comment.parent %}
+                <div class="text-xs text-base-content/60 flex items-center gap-1 mt-0.5 mb-1 bg-base-200/50 p-1 rounded w-fit max-w-full truncate">
+                    <span class="material-symbols-outlined text-[10px] rotate-180">reply</span>
+                    回复 <span class="font-medium">{{ comment.parent.user.nickname|default:comment.parent.user.username }}</span>: {{ comment.parent.content|truncatechars:20 }}
+                </div>
+                {% endif %}
+                
+                <p class="text-sm text-base-content/80 line-clamp-2 break-all group-hover:text-base-content transition-colors cursor-pointer" onclick="openCommentModal('{{ comment.pk }}', '{{ comment.content|escapejs }}', '{{ comment.active|yesno:'true,false' }}')">
+                    {{ comment.content }}
+                </p>
+            </div>
         </div>
     </td>
-    <td>
-        <div class="max-w-[200px] truncate" title="{{ comment.content }}">
-            <a href="#" onclick="openCommentModal('{{ comment.pk }}', '{{ comment.content|escapejs }}', '{{ comment.active|yesno:'true,false' }}')" class="hover:text-primary hover:underline decoration-dashed underline-offset-4 cursor-pointer transition-colors">
-                {{ comment.content }}
+    <td class="text-right">
+        <div class="flex flex-col items-end gap-1">
+            <a href="{% url 'post_detail' comment.post.slug %}" target="_blank" class="text-xs font-medium hover:text-primary transition-colors line-clamp-1 max-w-[150px]" title="{{ comment.post.title }}">
+                {{ comment.post.title }}
             </a>
+            <span class="text-[10px] text-base-content/40 font-mono" title="{{ comment.created_at }}">{{ comment.created_at|date:"Y-m-d H:i" }}</span>
         </div>
     </td>
-    <td>
-        <div class="max-w-[200px] truncate" title="{{ comment.post.title }}">
-            <a href="{% url 'post_detail' comment.post.slug %}" target="_blank" class="link link-hover text-sm opacity-70 hover:opacity-100 hover:text-primary transition-all">{{ comment.post.title }}</a>
-        </div>
+    <td class="text-center">
+        {% if comment.active %}
+        <span class="badge badge-xs badge-success badge-outline gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+            已发布
+        </span>
+        {% else %}
+        <span class="badge badge-xs badge-warning badge-outline gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+            待审核
+        </span>
+        {% endif %}
     </td>
-    <td>
-        <div class="flex flex-col gap-1">
-            {% if comment.active %}
-                <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/10">
-                    <span class="w-1.5 h-1.5 rounded-full bg-success animate-[pulse_2s_infinite]"></span>
-                    已发布
-                </div>
-            {% else %}
-                <div class="badge badge-warning badge-sm gap-1 badge-outline bg-warning/10">
-                    <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
-                    待审核
-                </div>
-            {% endif %}
-        </div>
-    </td>
-    <td class="text-sm font-mono opacity-50 group-hover:opacity-100 transition-opacity">{{ comment.created_at|date:"Y-m-d H:i" }}</td>
-    <td class="rounded-r-2xl">
-        <div class="join">
-            <button type="button" onclick="openCommentModal('{{ comment.pk }}', '{{ comment.content|escapejs }}', '{{ comment.active|yesno:'true,false' }}')" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
-                <span class="material-symbols-outlined text-base">edit</span>
+    <td class="text-center">
+        <div class="join opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button type="button" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="回复" onclick="openReplyModal('{{ comment.pk }}', '{{ comment.content|escapejs }}')">
+                <span class="material-symbols-outlined text-base">reply</span>
             </button>
-            <form method="post" action="{% url 'administration:comment_edit' comment.pk %}" class="inline">
+            <form action="{% url 'administration:comment_edit' comment.pk %}" method="post" class="inline">
                 {% csrf_token %}
-                <input type="hidden" name="active" value="{% if comment.active %}False{% else %}True{% endif %}">
-                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip tooltip-left {% if not comment.active %}text-success{% endif %}" data-tip="{% if comment.active %}撤回{% else %}通过{% endif %}">
+                <input type="hidden" name="content" value="{{ comment.content }}">
+                <input type="hidden" name="active" value="{% if comment.active %}false{% else %}true{% endif %}">
+                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip tooltip-left {% if not comment.active %}text-success{% endif %}" data-tip="{% if comment.active %}隐藏{% else %}发布{% endif %}">
                     {% if comment.active %}
-                    <span class="material-symbols-outlined text-base">block</span>
+                    <span class="material-symbols-outlined text-base">visibility_off</span>
                     {% else %}
                     <span class="material-symbols-outlined text-base">check_circle</span>
                     {% endif %}
@@ -68,14 +82,14 @@
 </tr>
 {% empty %}
 <tr>
-    <td colspan="7" class="text-center py-16 text-base-content/50">
+    <td colspan="6" class="text-center py-20 text-base-content/50">
         <div class="flex flex-col items-center gap-4">
-            <div class="w-16 h-16 rounded-full bg-base-200 flex items-center justify-center">
-                <span class="material-symbols-outlined text-4xl opacity-40">chat_bubble_outline</span>
+            <div class="w-20 h-20 rounded-full bg-base-200 flex items-center justify-center shadow-inner">
+                <span class="material-symbols-outlined text-5xl opacity-40">mark_chat_unread</span>
             </div>
             <div class="text-center">
-                <h3 class="font-bold text-lg">暂无评论</h3>
-                <p class="text-sm opacity-60 mt-1">还没有收到任何评论</p>
+                <h3 class="font-bold text-lg">列表为空</h3>
+                <p class="text-sm opacity-60 mt-1">没有找到符合条件的评论</p>
             </div>
         </div>
     </td>

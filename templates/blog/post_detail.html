@@ -3,27 +3,22 @@
 
 {% block extra_css %}
 <!-- 代码高亮样式 (Code Highlighting Styles) -->
-<!-- 动态加载选定的 Pygments 风格 (Dynamically load selected Pygments style) -->
 <link href="{% static 'theme/css/pygments/' %}{{ config.CODE_HIGHLIGHT_STYLE|default:'default' }}.css" rel="stylesheet">
+<!-- KaTeX 数学公式样式 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
 <style>
     /* 优化代码块样式 (Enhance Code Block Styles) */
     .codehilite {
-        /* background: #f8f8f8;  移除硬编码背景，使用主题自带背景 */
-        /* border-radius: 0.75rem; -> 由 mockup-code 处理 */
         margin-bottom: 1.5rem;
-        /* overflow-x: auto; -> 由 mockup-code 处理 */
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
         font-size: 0.875rem; /* text-sm */
         line-height: 1.5;
-        /* border: 1px solid rgba(0, 0, 0, 0.05); -> mockup-code 通常无边框或自带 */
     }
     
     /* DaisyUI Mockup Code 适配 */
     .mockup-code {
         min-width: 0; /* 允许在移动端收缩 */
         border-radius: 0.75rem; /* 保持一致的圆角 */
-        
-        /* 强制使用深色背景和浅色文字，解决代码块泛白和对比度低的问题 */
         background-color: #282a36 !important; /* 通用深色背景 */
         color: #f8f8f2 !important; /* 浅色文字 */
     }
@@ -47,15 +42,18 @@
     .codehilite .n, .codehilite .p, .codehilite .w {
         color: inherit; /* 让普通文本继承浅色 */
     }
-
-    /* 如果使用了亮色主题，mockup-code 的深色背景可能不合适，这里可以微调 */
-    /* 例如：如果 .codehilite 背景接近白色，我们可以反转 mockup-code 的颜色，或者保持深色终端风格 */
-    /* 目前保持默认，让 mockup-code 看起来像个终端窗口 */
     
-    /* 深色模式适配 (Dark Mode Adaptation) - 仅当未选择深色主题时微调 */
-    /* 由于现在支持动态主题，这里不再强制覆盖背景，而是让 CSS 文件决定 */
+    /* 深色模式适配 (Dark Mode Adaptation) */
     [data-theme='dark'] .codehilite {
         border-color: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Mermaid 图表居中 */
+    .mermaid {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 2rem;
+        background: transparent !important;
     }
 </style>
 {% endblock %}
@@ -136,7 +134,8 @@
             <!-- 正文内容 (Content Body) -->
             <div class="bg-base-100 p-8 md:p-12 rounded-3xl shadow-sm border border-base-content/5 relative group/article overflow-hidden">
                 {% include 'components/inspira/border_beam.html' with duration='12' rx='24px' %}
-                {{ post.content|markdown|safe }}
+                <div id="post-content" class="min-h-[200px]"></div>
+                {{ post.content|json_script:"post-content-data" }}
             </div>
             
             <!-- 标签与分享 (Tags & Share) -->
@@ -457,6 +456,7 @@
     </div>
 </div>
 
+<script src="{% static 'js/viewer.js' %}"></script>
 <script>
     /**
      * 回复评论 (Reply to a comment)
@@ -480,54 +480,143 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // --- 自动生成目录 (Auto-generate TOC) ---
-        const article = document.querySelector('article');
-        const headings = article.querySelectorAll('h2, h3');
-        const toc = document.getElementById('toc');
-        
-        if (headings.length === 0) {
-            // 如果没有标题，隐藏目录卡片
-            if(toc) toc.closest('.card').style.display = 'none';
-        } else {
-            headings.forEach((heading, index) => {
-                const id = `heading-${index}`;
-                heading.id = id;
-                heading.classList.add('scroll-mt-24'); // 添加滚动偏移 (Add scroll margin)
-                
-                const link = document.createElement('a');
-                link.href = `#${id}`;
-                link.textContent = heading.textContent;
-                link.className = 'block py-1.5 pl-3 border-l-2 border-base-content/10 hover:border-primary hover:text-primary transition-all duration-200 text-base-content/60 text-xs truncate';
-                if (heading.tagName === 'H3') link.classList.add('ml-4');
-                
-                link.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    document.getElementById(id).scrollIntoView({behavior: 'smooth'});
-                });
-                
-                toc.appendChild(link);
-            });
-            
-            // --- 滚动监听 (ScrollSpy) ---
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const id = entry.target.id;
-                        document.querySelectorAll('#toc a').forEach(link => {
-                            link.classList.remove('border-primary', 'text-primary', 'font-medium', 'bg-primary/5');
-                            link.classList.add('border-base-content/10', 'text-base-content/60');
-                            
-                            if (link.getAttribute('href') === `#${id}`) {
-                                link.classList.remove('border-base-content/10', 'text-base-content/60');
-                                link.classList.add('border-primary', 'text-primary', 'font-medium', 'bg-primary/5');
-                            }
-                        });
-                    }
-                });
-            }, { rootMargin: '-100px 0px -66%' });
-            
-            headings.forEach(heading => observer.observe(heading));
+        // --- 初始化 ByteMD Viewer (Init ByteMD Viewer) ---
+        const contentData = document.getElementById('post-content-data');
+        if (contentData) {
+            try {
+                const content = JSON.parse(contentData.textContent);
+                if (window.initByteMDViewer) {
+                    window.initByteMDViewer('post-content', content);
+                } else {
+                    console.error('ByteMD Viewer script not loaded.');
+                }
+            } catch (e) {
+                console.error('Failed to parse post content:', e);
+            }
         }
+
+        // --- 自动生成目录 (Auto-generate TOC) ---
+        // 使用 setTimeout 确保 Viewer 渲染完成后再生成目录
+        setTimeout(() => {
+            const article = document.querySelector('article');
+            const headings = article.querySelectorAll('h2, h3');
+            const toc = document.getElementById('toc');
+            
+            if (headings.length === 0) {
+                // 如果没有标题，隐藏目录卡片
+                if(toc) toc.closest('.card').style.display = 'none';
+            } else {
+                headings.forEach((heading, index) => {
+                    const id = `heading-${index}`;
+                    heading.id = id;
+                    heading.classList.add('scroll-mt-24'); // 添加滚动偏移 (Add scroll margin)
+                    
+                    const link = document.createElement('a');
+                    link.href = `#${id}`;
+                    link.textContent = heading.textContent;
+                    link.className = 'block py-1.5 pl-3 border-l-2 border-base-content/10 hover:border-primary hover:text-primary transition-all duration-200 text-base-content/60 text-xs truncate';
+                    if (heading.tagName === 'H3') link.classList.add('ml-4');
+                    
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        document.getElementById(id).scrollIntoView({behavior: 'smooth'});
+                    });
+                    
+                    toc.appendChild(link);
+                });
+                
+                // --- 滚动监听 (ScrollSpy) ---
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            const id = entry.target.id;
+                            document.querySelectorAll('#toc a').forEach(link => {
+                                link.classList.remove('border-primary', 'text-primary', 'font-medium', 'bg-primary/5');
+                                link.classList.add('border-base-content/10', 'text-base-content/60');
+                                
+                                if (link.getAttribute('href') === `#${id}`) {
+                                    link.classList.remove('border-base-content/10', 'text-base-content/60');
+                                    link.classList.add('border-primary', 'text-primary', 'font-medium', 'bg-primary/5');
+                                }
+                            });
+                        }
+                    });
+                }, { rootMargin: '-100px 0px -66%' });
+                
+                headings.forEach(heading => observer.observe(heading));
+            }
+        }, 100); // 100ms 延迟，确保 Viewer 渲染完成
     });
+</script>
+
+<!-- Mermaid 图表渲染 -->
+<script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    
+    async function initMermaid() {
+        const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
+        mermaid.initialize({ 
+            startOnLoad: false, // 手动加载
+            theme: theme,
+            securityLevel: 'loose',
+            fontFamily: 'inherit'
+        });
+
+        // 查找所有 mermaid 代码块
+        // Python-Markdown 可能生成:
+        // 1. <code class="language-mermaid">...</code>
+        // 2. <div class="codehilite"><pre>... (if pygments fails)</pre></div>
+        // 我们主要关注 class="language-mermaid"
+        const mermaidCodes = document.querySelectorAll('code.language-mermaid');
+        
+        for (const code of mermaidCodes) {
+            // 获取纯文本内容 (去除 Pygments 可能添加的 span)
+            const graphDefinition = code.textContent;
+            
+            // 创建新的 div 容器
+            const div = document.createElement('div');
+            div.classList.add('mermaid');
+            div.textContent = graphDefinition;
+            
+            // 替换整个 pre 标签 (或者 codehilite 容器)
+            const pre = code.parentElement; // <pre>
+            if (pre.tagName === 'PRE') {
+                // 检查是否有 .codehilite 父容器 (由 markdown_extras.py 生成)
+                // .mockup-code .codehilite -> pre -> code
+                // 或者 .codehilite -> pre -> code
+                let targetToReplace = pre;
+                const parent = pre.parentElement;
+                if (parent && (parent.classList.contains('codehilite') || parent.classList.contains('mockup-code'))) {
+                    targetToReplace = parent;
+                }
+                
+                targetToReplace.replaceWith(div);
+            } else {
+                code.replaceWith(div);
+            }
+        }
+        
+        // 运行 Mermaid
+        await mermaid.run({
+            nodes: document.querySelectorAll('.mermaid')
+        });
+    }
+    
+    // 确保 DOM 加载完成后执行
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMermaid);
+    } else {
+        initMermaid();
+    }
+    
+    // 监听主题切换事件
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.attributeName === 'data-theme') {
+                location.reload(); 
+            }
+        });
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
 </script>
 {% endblock %}

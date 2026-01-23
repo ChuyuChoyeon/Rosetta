@@ -111,7 +111,7 @@
         <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='page' %}">
             {% csrf_token %}
             <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
-                <table class="table table-zebra w-full">
+                <table class="table table-zebra table-pin-rows w-full">
                     <!-- Head -->
                     <thead class="bg-base-200 text-base-content sticky top-0 z-30">
                         <tr>

@@ -13,7 +13,7 @@
 
 {% captureas card_content %}
     <div class="p-0">
-        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-30">
+        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
                 <div class="p-2 bg-secondary/10 rounded-lg">
                     <span class="material-symbols-outlined text-secondary">groups</span>
@@ -33,9 +33,9 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto min-h-[300px]">
-            <table class="table table-sm w-full">
-                <thead class="bg-base-200/50 text-base-content/60 font-medium">
+        <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
+            <table class="table table-sm w-full table-pin-rows">
+                <thead class="bg-base-200/50 text-base-content/60 font-medium sticky top-0 z-30">
                     <tr>
                         <th class="w-16 pl-4">ID</th>
                         <th>名称</th>
@@ -107,10 +107,8 @@
     </div>
 {% endcaptureas %}
 
-{% with slot_content=card_content extra_classes="w-full" %}
-    <div class="w-full">
-        {{ card_content }}
-    </div>
-{% endwith %}
+<div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+    {{ card_content }}
+</div>
 
 {% endblock %}

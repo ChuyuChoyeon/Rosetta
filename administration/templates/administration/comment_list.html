@@ -28,10 +28,38 @@
             </div>
 
             <div class="modal-action">
-                <form method="dialog">
-                    <button class="btn btn-ghost">取消</button>
-                </form>
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('comment_edit_modal').close()">取消</button>
                 <button type="submit" class="btn btn-primary shadow-lg shadow-primary/20">保存更改</button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<!-- Comment Reply Modal -->
+<dialog id="comment_reply_modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">reply</span>
+            回复评论
+        </h3>
+        <div class="bg-base-200 p-3 rounded-lg mb-4 text-sm opacity-70 italic border-l-4 border-primary" id="reply_parent_content">
+            <!-- Parent Content -->
+        </div>
+        <form method="post" id="comment_reply_form">
+            {% csrf_token %}
+            <div class="form-control w-full mb-4">
+                <label class="label">
+                    <span class="label-text font-medium">回复内容</span>
+                </label>
+                <textarea name="content" class="textarea textarea-bordered h-32 focus:textarea-primary transition-all" required placeholder="输入你的回复..."></textarea>
+            </div>
+            
+            <div class="modal-action">
+                <button type="button" class="btn btn-ghost" onclick="document.getElementById('comment_reply_modal').close()">取消</button>
+                <button type="submit" class="btn btn-primary shadow-lg shadow-primary/20">发送回复</button>
             </div>
         </form>
     </div>
@@ -53,6 +81,17 @@
         
         modal.showModal();
     }
+
+    function openReplyModal(pk, parentContent) {
+        const modal = document.getElementById('comment_reply_modal');
+        const form = document.getElementById('comment_reply_form');
+        const parentContentDiv = document.getElementById('reply_parent_content');
+        
+        form.action = `/administration/comments/${pk}/reply/`;
+        parentContentDiv.textContent = parentContent.length > 100 ? parentContent.substring(0, 100) + '...' : parentContent;
+        
+        modal.showModal();
+    }
 </script>
 {% endblock %}
 
@@ -64,32 +103,73 @@
     </ul>
 </div>
 
-{% captureas card_content %}
-    <div class="p-0">
-        <!-- Card Title & Search -->
-        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4 sticky top-0 z-30">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-warning/10 rounded-lg">
-                    <span class="material-symbols-outlined text-warning">comment</span>
-                </div>
-                <div>
-                    <h2 class="font-bold text-base">评论列表</h2>
-                    <p class="text-xs text-base-content/60">管理用户发表的评论</p>
-                </div>
+<!-- Stats Overview -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <div class="stats shadow bg-base-100 border border-base-content/5">
+        <div class="stat">
+            <div class="stat-figure text-primary">
+                <span class="material-symbols-outlined text-3xl">comment</span>
             </div>
-            
-            <div class="flex items-center gap-2 w-full sm:w-auto">
-                <div class="join w-full sm:w-auto">
+            <div class="stat-title">总评论数</div>
+            <div class="stat-value text-primary">{{ total_count }}</div>
+            <div class="stat-desc">所有评论总和</div>
+        </div>
+    </div>
+    
+    <div class="stats shadow bg-base-100 border border-base-content/5">
+        <div class="stat">
+            <div class="stat-figure text-success">
+                <span class="material-symbols-outlined text-3xl">check_circle</span>
+            </div>
+            <div class="stat-title">已发布</div>
+            <div class="stat-value text-success">{{ active_count }}</div>
+            <div class="stat-desc">前台可见的评论</div>
+        </div>
+    </div>
+    
+    <div class="stats shadow bg-base-100 border border-base-content/5">
+        <div class="stat">
+            <div class="stat-figure text-warning">
+                <span class="material-symbols-outlined text-3xl">pending</span>
+            </div>
+            <div class="stat-title">待审核</div>
+            <div class="stat-value text-warning">{{ pending_count }}</div>
+            <div class="stat-desc">需要管理员处理</div>
+        </div>
+    </div>
+</div>
+
+<div class="card bg-base-100 shadow-sm border border-base-content/5">
+    <div class="card-body p-0">
+        <!-- Toolbar -->
+        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col lg:flex-row justify-between items-center gap-4 sticky top-0 z-30 rounded-t-2xl">
+            <!-- Left: Filter Tabs -->
+            <div class="tabs tabs-boxed bg-base-200/50 p-1 gap-1">
+                <a href="{% url 'administration:comment_list' %}" class="tab tab-sm {% if not request.GET.status %}tab-active bg-white shadow-sm text-base-content font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">全部</a>
+                <a href="{% url 'administration:comment_list' %}?status=pending" class="tab tab-sm {% if request.GET.status == 'pending' %}tab-active bg-warning text-warning-content shadow-sm font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">
+                    待审核
+                    {% if pending_count > 0 %}
+                    <span class="badge badge-xs badge-ghost ml-1">{{ pending_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{% url 'administration:comment_list' %}?status=active" class="tab tab-sm {% if request.GET.status == 'active' %}tab-active bg-success text-success-content shadow-sm font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">已发布</a>
+            </div>
+
+            <!-- Right: Search & Actions -->
+            <div class="flex items-center gap-2 w-full lg:w-auto">
+                <!-- Search -->
+                <form action="." method="get" class="join w-full lg:w-auto">
                     {% if request.GET.status %}<input type="hidden" name="status" value="{{ request.GET.status }}">{% endif %}
-                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索评论..." class="input input-sm input-bordered join-item w-full sm:w-64 focus:input-primary transition-all" />
-                    <button type="submit" class="btn btn-sm btn-ghost join-item pointer-events-none border border-base-300">
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索评论内容..." class="input input-sm input-bordered join-item w-full lg:w-64 focus:input-primary transition-all" />
+                    <button type="submit" class="btn btn-sm btn-ghost join-item border border-base-300 bg-base-100">
                         <span class="material-symbols-outlined text-base-content/50">search</span>
                     </button>
-                </div>
+                </form>
 
+                <!-- More Actions Dropdown -->
                 <div class="dropdown dropdown-end">
                     <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal">
-                        更多
+                        操作
                         <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200">
@@ -108,97 +188,60 @@
                     </ul>
                 </div>
             </div>
-        </div>
 
-        <!-- Filter Tabs -->
-        <div class="px-4 py-2 border-b border-base-200 bg-base-100/30">
-            <div class="tabs tabs-boxed bg-transparent p-0 gap-2">
-                <a href="{% url 'administration:comment_list' %}" class="tab tab-sm {% if not request.GET.status %}tab-active bg-primary text-primary-content shadow-sm{% else %}bg-base-200 hover:bg-base-300{% endif %} rounded-lg transition-all">全部</a>
-                <a href="{% url 'administration:comment_list' %}?status=pending" class="tab tab-sm {% if request.GET.status == 'pending' %}tab-active bg-warning text-warning-content shadow-sm{% else %}bg-base-200 hover:bg-base-300{% endif %} rounded-lg transition-all">待审核</a>
-                <a href="{% url 'administration:comment_list' %}?status=active" class="tab tab-sm {% if request.GET.status == 'active' %}tab-active bg-success text-success-content shadow-sm{% else %}bg-base-200 hover:bg-base-300{% endif %} rounded-lg transition-all">已发布</a>
+            <!-- Bulk Actions (Dynamic Overlay) -->
+            <div id="bulk-actions" class="absolute inset-0 bg-base-100 z-40 hidden flex items-center justify-between px-4 animate-in fade-in zoom-in duration-200 rounded-t-2xl">
+                <div class="flex items-center gap-3">
+                    <button onclick="updateBulkToolbar()" class="btn btn-sm btn-circle btn-ghost">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                    <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
+                </div>
+                <div class="join">
+                    <button onclick="submitBulkAction('active')" class="btn btn-sm btn-success join-item text-white gap-2">
+                        <span class="material-symbols-outlined text-[18px]">check_circle</span> 发布
+                    </button>
+                    <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-warning join-item text-white gap-2">
+                        <span class="material-symbols-outlined text-[18px]">pending</span> 待审
+                    </button>
+                    <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-error join-item text-white gap-2">
+                        <span class="material-symbols-outlined text-[18px]">delete</span> 删除
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Bulk Actions Toolbar -->
-        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
-            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
-            <div class="flex gap-2">
-                <button onclick="submitBulkAction('active')" class="btn btn-xs btn-primary gap-1">
-                    <span class="material-symbols-outlined text-[16px]">check_circle</span> 发布
-                </button>
-                <button onclick="submitBulkAction('inactive')" class="btn btn-xs btn-neutral gap-1">
-                    <span class="material-symbols-outlined text-[16px]">pending</span> 待审
-                </button>
-                <button onclick="submitBulkAction('export_json')" class="btn btn-xs btn-ghost gap-1 hover:bg-base-content/10">
-                    <span class="material-symbols-outlined text-[16px]">download</span> 导出
-                </button>
-                <div class="divider divider-horizontal mx-0 my-1"></div>
-                <button onclick="submitBulkAction('delete')" class="btn btn-xs btn-ghost text-error hover:bg-error/10 gap-1">
-                    <span class="material-symbols-outlined text-[16px]">delete</span> 删除
-                </button>
-            </div>
-        </div>
-
+        <!-- Table -->
         <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='comment' %}">
             {% csrf_token %}
-            <div class="overflow-x-auto min-h-[400px]">
-                <table class="table table-sm table-pin-rows w-full">
+            <div class="overflow-x-auto min-h-[500px]">
+                <table class="table table-pin-rows w-full">
                     <!-- Head -->
-                    <thead class="bg-base-200/50 text-base-content/60 font-medium sticky top-0 z-30">
+                    <thead class="bg-base-200/30 text-base-content/60 font-medium">
                         <tr>
-                            <th class="w-10 pl-4">
+                            <th class="w-10 pl-6">
                                 <label>
                                     <input type="checkbox" class="checkbox checkbox-xs rounded-sm" onclick="toggleAll(this)" />
                                 </label>
                             </th>
-                            <th class="w-12">ID</th>
-                            <th class="w-32">
-                                <a href="?sort=user__username&order={% if request.GET.sort == 'user__username' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
-                                    作者
-                                    {% if request.GET.sort == 'user__username' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="max-w-[200px]">内容</th>
-                            <th class="min-w-[150px]">
-                                <a href="?sort=post__title&order={% if request.GET.sort == 'post__title' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
-                                    文章
-                                    {% if request.GET.sort == 'post__title' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="w-24 text-center">
-                                <a href="?sort=active&order={% if request.GET.sort == 'active' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors justify-center">
-                                    状态
-                                    {% if request.GET.sort == 'active' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="w-32 text-center">
-                                <a href="?sort=created_at&order={% if request.GET.sort == 'created_at' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors justify-center">
-                                    时间
-                                    {% if request.GET.sort == 'created_at' %}
-                                        <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
-                                    {% endif %}
-                                </a>
-                            </th>
-                            <th class="w-24 text-center">操作</th>
+                            <th class="w-16">ID</th>
+                            <th>用户 / 内容</th>
+                            <th class="w-48 text-right">文章 / 时间</th>
+                            <th class="w-24 text-center">状态</th>
+                            <th class="w-24 text-center pr-6">操作</th>
                         </tr>
                     </thead>
-                <!-- Body (HTMX Target) -->
-                <tbody id="comment-list-body" class="divide-y divide-base-200/50">
-                    {% include "administration/partials/comment_list_rows.html" %}
-                </tbody>
+                    <!-- Body (HTMX Target) -->
+                    <tbody id="comment-list-body" class="divide-y divide-base-200/50">
+                        {% include "administration/partials/comment_list_rows.html" %}
+                    </tbody>
                 </table>
             </div>
         </form>
         
         <!-- Pagination -->
         {% if is_paginated %}
-        <div class="p-4 border-t border-base-200 flex justify-center bg-base-100/30">
+        <div class="p-4 border-t border-base-200 flex justify-center bg-base-100/30 rounded-b-2xl">
             <div class="join">
                 {% if page_obj.has_previous %}
                 <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-xs btn-outline">«</a>
@@ -217,9 +260,6 @@
         </div>
         {% endif %}
     </div>
-{% endcaptureas %}
-<div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-    {{ card_content }}
 </div>
 
 <!-- Import Modal -->

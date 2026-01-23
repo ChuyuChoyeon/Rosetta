@@ -45,10 +45,10 @@
     <td class="text-center font-mono text-xs opacity-60">{{ link.order }}</td>
     <td class="text-center">
         <div class="join">
-            <a href="{% url 'administration:friendlink_edit' link.pk %}" class="btn btn-ghost btn-xs btn-square join-item text-base-content/60 hover:text-primary hover:bg-primary/10" title="编辑">
+            <a href="{% url 'administration:friendlink_edit' link.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
                 <span class="material-symbols-outlined text-base">edit</span>
             </a>
-            <button onclick="confirmDelete('{% url 'administration:friendlink_delete' link.pk %}', '确定要删除友情链接《{{ link.name|escapejs }}》吗？')" class="btn btn-ghost btn-xs btn-square join-item text-error hover:bg-error/10" title="删除">
+            <button onclick="confirmDelete('{% url 'administration:friendlink_delete' link.pk %}', '确定要删除友情链接《{{ link.name|escapejs }}》吗？')" class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" data-tip="删除">
                 <span class="material-symbols-outlined text-base">delete</span>
             </button>
         </div>

@@ -27,19 +27,19 @@
     <td class="text-sm opacity-70">{{ page.created_at|date:"Y-m-d" }}</td>
     <td>
         <div class="join">
-            <a href="/{{ page.slug }}/" target="_blank" class="btn btn-ghost btn-xs join-item tooltip" data-tip="查看">
+            <a href="/{{ page.slug }}/" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="查看">
                 <span class="material-symbols-outlined text-base">visibility</span>
             </a>
-            <a href="{% url 'administration:page_edit' page.pk %}" class="btn btn-ghost btn-xs join-item tooltip" data-tip="编辑">
+            <a href="{% url 'administration:page_edit' page.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
                 <span class="material-symbols-outlined text-base">edit</span>
             </a>
             <form action="{% url 'administration:page_duplicate' page.pk %}" method="post" class="inline" onsubmit="return confirm('确定要复制这个页面吗？');">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip" data-tip="复制">
+                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="复制">
                     <span class="material-symbols-outlined text-base">content_copy</span>
                 </button>
             </form>
-            <button onclick="confirmDelete('{% url 'administration:page_delete' page.pk %}', '确定要删除页面《{{ page.title|escapejs }}》吗？')" class="btn btn-ghost btn-xs join-item text-error tooltip" data-tip="删除">
+            <button onclick="confirmDelete('{% url 'administration:page_delete' page.pk %}', '确定要删除页面《{{ page.title|escapejs }}》吗？')" class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" data-tip="删除">
                 <span class="material-symbols-outlined text-base">delete</span>
             </button>
         </div>
