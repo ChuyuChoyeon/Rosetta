@@ -96,3 +96,5 @@ logs/
 # UV Package Manager
 uv.lock
 .env.example
+core/migrations/*
+*/migrations/*
