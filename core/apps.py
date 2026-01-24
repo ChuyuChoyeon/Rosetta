@@ -11,10 +11,8 @@ class CoreConfig(AppConfig):
         from django.utils.functional import SimpleLazyObject
         from constance import config
 
-        # Use SimpleLazyObject to dynamically fetch titles from Constance
-        # This prevents database access during startup while allowing dynamic changes
-        # Update Django Admin properties
-        # admin.site.site_title = SimpleLazyObject(lambda: config.UNFOLD_SITE_TITLE)
-        # admin.site.site_header = SimpleLazyObject(lambda: config.UNFOLD_SITE_HEADER)
-        # admin.site.index_title = SimpleLazyObject(lambda: config.UNFOLD_SITE_INDEX_TITLE)
-        pass
+        admin.site.site_title = SimpleLazyObject(
+            lambda: f"{config.SITE_NAME}{config.SITE_ADMIN_SUFFIX}"
+        )
+        admin.site.site_header = SimpleLazyObject(lambda: config.SITE_HEADER)
+        admin.site.index_title = SimpleLazyObject(lambda: config.ADMIN_NAVBAR_TITLE)

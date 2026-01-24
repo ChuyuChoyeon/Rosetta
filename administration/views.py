@@ -1,5 +1,5 @@
 from typing import Any, Dict, List
-from django.db.models import QuerySet, Sum
+from django.db.models import QuerySet, Sum, Q
 from django.http import HttpRequest, HttpResponseRedirect, JsonResponse
 from django.views import View
 from django.views.generic import (
@@ -13,9 +13,9 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth import get_user_model
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.conf import settings
 from blog.models import Post, Comment, Category, Tag, PostViewHistory
 from core.models import Page, Navigation, FriendLink, SearchPlaceholder
-from django.conf import settings
 from django import get_version
 import platform
 from .forms import (
@@ -39,7 +39,6 @@ import sys
 from users.models import UserTitle
 from django.contrib.auth.models import Group
 from django.contrib.admin.models import LogEntry
-from django.conf import settings
 import os
 import json
 from django.core.serializers.json import DjangoJSONEncoder
@@ -68,6 +67,13 @@ class SuperuserRequiredMixin(UserPassesTestMixin):
         return self.request.user.is_superuser
 
 
+class DebugToolRequiredMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
+            raise Http404("Not found")
+        return super().dispatch(request, *args, **kwargs)
+
+
 class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     """
     管理后台首页视图
@@ -84,9 +90,12 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         today = timezone.now()
         last_month = today - timedelta(days=30)
 
-        # 文章数据
-        total_posts = Post.objects.count()
-        posts_last_month = Post.objects.filter(created_at__gte=last_month).count()
+        post_counts = Post.objects.aggregate(
+            total=Count("id"),
+            last_month=Count("id", filter=Q(created_at__gte=last_month)),
+        )
+        total_posts = post_counts["total"] or 0
+        posts_last_month = post_counts["last_month"] or 0
 
         # 计算增长率 (净增量 / 上期总量)
         total_prev = total_posts - posts_last_month
@@ -100,22 +109,32 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         context["post_growth"] = round(post_growth, 1)
 
         # 评论数据
-        total_comments = Comment.objects.count()
-        pending_comments = Comment.objects.filter(active=False).count()
+        comment_counts = Comment.objects.aggregate(
+            total=Count("id"),
+            pending=Count("id", filter=Q(active=False)),
+            active=Count("id", filter=Q(active=True)),
+        )
+        total_comments = comment_counts["total"] or 0
+        pending_comments = comment_counts["pending"] or 0
         context["total_comments"] = total_comments
         context["pending_comments"] = pending_comments
 
         # 2. 图表数据 (Charts Data)
 
         # 评论状态分布 (饼图)
-        active_comments = Comment.objects.filter(active=True).count()
+        active_comments = comment_counts["active"] or 0
         inactive_comments = pending_comments
         context["comment_status_data"] = [active_comments, inactive_comments]
 
         # 用户角色分布 (环形图)
-        superusers = User.objects.filter(is_superuser=True).count()
-        staff = User.objects.filter(is_staff=True, is_superuser=False).count()
-        normal_users = User.objects.filter(is_staff=False).count()
+        user_counts = User.objects.aggregate(
+            superusers=Count("id", filter=Q(is_superuser=True)),
+            staff=Count("id", filter=Q(is_staff=True, is_superuser=False)),
+            normal=Count("id", filter=Q(is_staff=False)),
+        )
+        superusers = user_counts["superusers"] or 0
+        staff = user_counts["staff"] or 0
+        normal_users = user_counts["normal"] or 0
         context["user_role_data"] = [superusers, staff, normal_users]
 
         # 评论趋势 (折线图) - 最近30天
@@ -140,7 +159,7 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         context["trend_counts"] = counts
 
         # 热门文章 Top 5 (柱状图)
-        top_posts = Post.objects.order_by("-views")[:5]
+        top_posts = list(Post.objects.only("id", "title", "views").order_by("-views")[:5])
         context["top_posts"] = top_posts
         context["top_posts_labels"] = [
             p.title[:10] + "..." if len(p.title) > 10 else p.title for p in top_posts
@@ -216,10 +235,12 @@ class BaseListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
     def get_ordering(self):
         sort_by = self.request.GET.get("sort")
         if sort_by:
-            order = self.request.GET.get("order", "asc")
-            if order == "desc":
-                return f"-{sort_by}"
-            return sort_by
+            allowed_fields = {field.name for field in self.model._meta.fields}
+            if sort_by in allowed_fields:
+                order = self.request.GET.get("order", "asc")
+                if order == "desc":
+                    return f"-{sort_by}"
+                return sort_by
         return self.ordering
 
     def get_template_names(self) -> List[str]:
@@ -1359,7 +1380,7 @@ class LogEntryExportView(LoginRequiredMixin, StaffRequiredMixin, View):
         logs = LogEntry.objects.select_related("user", "content_type").order_by(
             "-action_time"
         )
-        for log in logs:
+        for log in logs.iterator():
             writer.writerow(
                 [
                     log.action_time,
@@ -1393,11 +1414,12 @@ class LogFileListView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         if log_dir.exists():
             for f in log_dir.iterdir():
                 if f.is_file() and (f.suffix == ".log" or f.suffix == ".zip"):
+                    stat = f.stat()
                     files.append(
                         {
                             "name": f.name,
-                            "size": f.stat().st_size,
-                            "mtime": datetime.fromtimestamp(f.stat().st_mtime),
+                            "size": stat.st_size,
+                            "mtime": datetime.fromtimestamp(stat.st_mtime),
                             "path": str(f),
                         }
                     )
@@ -1804,7 +1826,9 @@ except ImportError:
     Faker = None
 
 
-class DebugDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+class DebugDashboardView(
+    DebugToolRequiredMixin, LoginRequiredMixin, StaffRequiredMixin, TemplateView
+):
     """
     调试仪表盘视图
 
@@ -2006,7 +2030,7 @@ class DebugDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 from core.services import generate_mock_data
 
 
-class DebugMockView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+class DebugMockView(DebugToolRequiredMixin, LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     """
     Mock 数据生成视图
 
@@ -2065,7 +2089,9 @@ class DebugMockView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         return self.get(request, *args, **kwargs)
 
 
-class DebugCacheView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+class DebugCacheView(
+    DebugToolRequiredMixin, LoginRequiredMixin, StaffRequiredMixin, TemplateView
+):
     """
     缓存调试视图
 
@@ -2086,7 +2112,9 @@ class DebugCacheView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         return self.get(request, *args, **kwargs)
 
 
-class DebugEmailView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+class DebugEmailView(
+    DebugToolRequiredMixin, LoginRequiredMixin, StaffRequiredMixin, TemplateView
+):
     """
     邮件发送调试视图
 
@@ -2251,7 +2279,9 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         return self.get(request, *args, **kwargs)
 
 
-class DebugUITestView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+class DebugUITestView(
+    DebugToolRequiredMixin, LoginRequiredMixin, StaffRequiredMixin, TemplateView
+):
     """
     UI 组件测试视图
 
@@ -2261,7 +2291,9 @@ class DebugUITestView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     template_name = "administration/debug/ui_test.html"
 
 
-class DebugPermissionView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+class DebugPermissionView(
+    DebugToolRequiredMixin, LoginRequiredMixin, StaffRequiredMixin, TemplateView
+):
     """
     权限调试视图
 

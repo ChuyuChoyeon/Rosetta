@@ -1,4 +1,6 @@
 from django.shortcuts import render, get_object_or_404, redirect
+from django.conf import settings
+from django.core.cache import cache
 from django.utils import timezone
 from django.views.generic import ListView, DetailView
 from django.db.models import Q, Count
@@ -29,23 +31,43 @@ class SidebarContextMixin:
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # 获取侧边栏数据
-        context["sidebar_tags"] = (
-            Tag.objects.filter(is_active=True)
-            .annotate(count=Count("posts"))
-            .order_by("-count")[:30]
+        ttl = getattr(settings, "SIDEBAR_CACHE_TTL", 300)
+
+        def load_cached(key, builder):
+            data = cache.get(key)
+            if data is None:
+                data = builder()
+                cache.set(key, data, ttl)
+            return data
+
+        context["sidebar_tags"] = load_cached(
+            "sidebar:tags",
+            lambda: list(
+                Tag.objects.filter(is_active=True)
+                .annotate(count=Count("posts"))
+                .order_by("-count")[:30]
+            ),
         )
-        context["sidebar_comments"] = (
-            Comment.objects.filter(active=True)
-            .select_related("user", "post")
-            .order_by("-created_at")[:5]
+        context["sidebar_comments"] = load_cached(
+            "sidebar:comments",
+            lambda: list(
+                Comment.objects.filter(active=True)
+                .select_related("user", "post")
+                .order_by("-created_at")[:5]
+            ),
         )
-        context["sidebar_popular_posts"] = Post.objects.filter(
-            status="published"
-        ).order_by("-views")[:5]
-        context["sidebar_categories"] = Category.objects.annotate(
-            count=Count("posts")
-        ).order_by("-count")[:10]
+        context["sidebar_popular_posts"] = load_cached(
+            "sidebar:popular_posts",
+            lambda: list(
+                Post.objects.filter(status="published").order_by("-views")[:5]
+            ),
+        )
+        context["sidebar_categories"] = load_cached(
+            "sidebar:categories",
+            lambda: list(
+                Category.objects.annotate(count=Count("posts")).order_by("-count")[:10]
+            ),
+        )
         return context
 
 
@@ -77,7 +99,12 @@ class ArchiveView(SidebarContextMixin, ListView):
     model = Post
     template_name = "blog/archive.html"
     context_object_name = "posts"
-    queryset = Post.objects.filter(status="published").order_by("-created_at")
+    queryset = (
+        Post.objects.filter(status="published")
+        .select_related("author", "category")
+        .prefetch_related("tags")
+        .order_by("-created_at")
+    )
     paginate_by = 100  # 归档页显示更多文章，便于快速浏览
 
 
@@ -92,9 +119,24 @@ class PostDetailView(DetailView):
     template_name = "blog/post_detail.html"
     context_object_name = "post"
 
+    def get_queryset(self):
+        return (
+            Post.objects.select_related("author", "category")
+            .prefetch_related("tags")
+            .all()
+        )
+
     def get_context_data(self, **kwargs):
         """添加评论、评论表单和 Meta 信息到上下文"""
         context = super().get_context_data(**kwargs)
+        ttl = getattr(settings, "SIDEBAR_CACHE_TTL", 300)
+
+        def load_cached(key, builder):
+            data = cache.get(key)
+            if data is None:
+                data = builder()
+                cache.set(key, data, ttl)
+            return data
 
         # 预加载回复以避免模板中的 N+1 查询问题
         # 注意：只获取顶级评论，子回复通过 prefetch_related 加载
@@ -122,45 +164,49 @@ class PostDetailView(DetailView):
         # 2. 查找包含这些标签的其他文章
         # 3. 按匹配标签的数量降序排序
         # 4. 取前 3 篇
-        post_tags_ids = self.object.tags.values_list("id", flat=True)
-        related_posts = (
-            Post.objects.filter(tags__in=post_tags_ids, status="published")
-            .exclude(id=self.object.id)
-            .annotate(same_tags=Count("tags"))
-            .order_by("-same_tags", "-created_at")[:3]
+        post_tags_ids = list(self.object.tags.values_list("id", flat=True))
+        related_posts = load_cached(
+            f"post:{self.object.id}:related",
+            lambda: list(
+                Post.objects.filter(tags__in=post_tags_ids, status="published")
+                .exclude(id=self.object.id)
+                .annotate(same_tags=Count("tags"))
+                .order_by("-same_tags", "-created_at")[:3]
+            ),
         )
 
         # 如果相关文章不足 3 篇，补充同分类下的最新文章
-        if related_posts.count() < 3 and self.object.category:
-            remaining_count = 3 - related_posts.count()
-            category_posts = (
+        if len(related_posts) < 3 and self.object.category:
+            remaining_count = 3 - len(related_posts)
+            category_posts = list(
                 Post.objects.filter(category=self.object.category, status="published")
                 .exclude(id=self.object.id)
                 .exclude(id__in=[p.id for p in related_posts])
                 .order_by("-created_at")[:remaining_count]
             )
 
-            # 合并查询集 (转换为列表)
-            related_posts = list(related_posts) + list(category_posts)
+            related_posts = related_posts + category_posts
 
         context["related_posts"] = related_posts
 
         # 上一篇和下一篇 (Previous & Next Post)
         # 仅获取已发布的文章，且按时间排序
-        context["previous_post"] = (
-            Post.objects.filter(
+        context["previous_post"] = load_cached(
+            f"post:{self.object.id}:previous",
+            lambda: Post.objects.filter(
                 status="published", created_at__lt=self.object.created_at
             )
             .order_by("-created_at")
-            .first()
+            .first(),
         )
 
-        context["next_post"] = (
-            Post.objects.filter(
+        context["next_post"] = load_cached(
+            f"post:{self.object.id}:next",
+            lambda: Post.objects.filter(
                 status="published", created_at__gt=self.object.created_at
             )
             .order_by("created_at")
-            .first()
+            .first(),
         )
 
         return context
@@ -168,24 +214,30 @@ class PostDetailView(DetailView):
     def get_meta_data(self):
         """生成页面 Meta 数据用于 SEO"""
         post = self.object
+        ttl = getattr(settings, "SIDEBAR_CACHE_TTL", 300)
+        cache_key = f"post:{post.id}:{int(post.updated_at.timestamp())}:meta_desc"
+        description = cache.get(cache_key)
 
         # 处理描述：优先使用摘要，否则截取内容并去除 Markdown/HTML 标签
-        description = post.excerpt
         if not description:
-            from django.utils.html import strip_tags
-            import markdown
+            description = post.excerpt
+            if not description:
+                from django.utils.html import strip_tags
+                import markdown
 
-            # 先渲染成 HTML 去除 Markdown 符号，再去除 HTML 标签
-            html_content = markdown.markdown(post.content)
-            text_content = strip_tags(html_content)
-            description = (
-                text_content[:150] + "..." if len(text_content) > 150 else text_content
-            )
+                html_content = markdown.markdown(post.content)
+                text_content = strip_tags(html_content)
+                description = (
+                    text_content[:150] + "..."
+                    if len(text_content) > 150
+                    else text_content
+                )
+            cache.set(cache_key, description, ttl)
 
         return Meta(
             title=post.title,
             description=description,
-            keywords=[tag.name for tag in post.tags.all()],
+            keywords=list(post.tags.values_list("name", flat=True)),
             image=post.cover_image.url if post.cover_image else None,
             url=self.request.build_absolute_uri(),
             object_type="article",
@@ -387,27 +439,32 @@ class SearchView(SidebarContextMixin, ListView):
 
     def get_queryset(self):
         """根据查询参数过滤文章"""
-        query = self.request.GET.get("q")
-        if query:
-            try:
-                from watson import search as watson
+        query = self.request.GET.get("q") or ""
+        query = re.sub(r"\s+", " ", query).strip()
+        if not query:
+            return Post.objects.none()
 
-                return watson.filter(Post.objects.filter(status="published"), query)
-            except ImportError:
-                # 降级方案：如果未安装/配置 Watson，则使用基础的包含查询
-                return (
-                    Post.objects.filter(
-                        Q(title__icontains=query) | Q(content__icontains=query),
-                        status="published",
-                    )
-                    .select_related("author", "category")
-                    .prefetch_related("tags")
-                )
-        return Post.objects.none()
+        published_posts = (
+            Post.objects.filter(status="published")
+            .select_related("author", "category")
+            .prefetch_related("tags")
+        )
+        try:
+            from watson import search as watson
+
+            results = watson.filter(published_posts, query)
+            if results:
+                return results
+        except Exception:
+            pass
+
+        return published_posts.filter(
+            Q(title__icontains=query) | Q(content__icontains=query)
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["query"] = self.request.GET.get("q")
+        context["query"] = (self.request.GET.get("q") or "").strip()
         return context
 
 

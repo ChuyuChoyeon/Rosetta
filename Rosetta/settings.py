@@ -21,7 +21,6 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 env = environ.Env()
 
 # 读取 .env 文件
-# 在 1Panel/Docker 部署中，环境变量通常直接注入容器，.env 文件可能不存在。
 # 为了兼容本地开发和容器部署，我们尝试读取但忽略错误。
 env.read_env(BASE_DIR / ".env")
 
@@ -31,6 +30,7 @@ env.read_env(BASE_DIR / ".env")
 # 警告：DEBUG 必须由环境变量控制。
 # 默认开启 (Safe for Dev)，但生产环境必须显式设置为 False。
 DEBUG = env.bool("DEBUG", default=True)
+DEBUG_TOOL_ENABLED = env.bool("DEBUG_TOOL_ENABLED", default=DEBUG)
 
 # ------------------------------------------------------------------------------
 # 安全配置 (Security)
@@ -96,10 +96,7 @@ else:
     # 生产环境：强制使用 Redis
     # 格式: redis://:password@host:port/db
     if not env("REDIS_URL", default=None):
-        # 如果未提供 REDIS_URL，可以选择报错或回退，这里建议报错以强制最佳实践
-        # 但为了灵活性，如果确实没有 Redis，可以回退到 Database Backend (不推荐)
-        # 这里我们遵循"严格"原则，假设生产环境应当有 Redis
-        pass
+        raise RuntimeError("REDIS_URL 未配置，生产环境必须启用 Redis")
 
     CACHES = {"default": env.cache("REDIS_URL")}
 
@@ -114,6 +111,7 @@ else:
     # Redis 连接池配置
     CONSTANCE_REDIS_CONNECTION_CLASS = "core.utils.ConstanceRedisConnection"
 
+SIDEBAR_CACHE_TTL = env.int("SIDEBAR_CACHE_TTL", default=300)
 
 # ------------------------------------------------------------------------------
 # 应用注册 (Installed Apps)
@@ -197,6 +195,17 @@ TEMPLATES = [
         },
     },
 ]
+if not DEBUG:
+    TEMPLATES[0]["APP_DIRS"] = False
+    TEMPLATES[0]["OPTIONS"]["loaders"] = [
+        (
+            "django.template.loaders.cached.Loader",
+            [
+                "django.template.loaders.filesystem.Loader",
+                "django.template.loaders.app_directories.Loader",
+            ],
+        )
+    ]
 
 # ------------------------------------------------------------------------------
 # 认证与用户 (Auth)
@@ -214,6 +223,8 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
+
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"

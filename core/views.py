@@ -9,7 +9,7 @@ from faker import Faker
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.cache import cache
 from django.core.files.storage import default_storage
 from django.core.mail import send_mail
@@ -19,7 +19,6 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import DetailView
 
@@ -41,15 +40,16 @@ def robots_txt(request):
 
 
 @require_POST
-@csrf_exempt
 def upload_image(request):
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Unauthorized"}, status=403)
-
     if "image" not in request.FILES:
         return JsonResponse({"error": "No image provided"}, status=400)
 
     image = request.FILES["image"]
+    content_type = image.content_type or ""
+    if not content_type.startswith("image/"):
+        return JsonResponse({"error": "Invalid image type"}, status=400)
     ext = os.path.splitext(image.name)[1]
     filename = f"uploads/{uuid.uuid4().hex}{ext}"
 
@@ -105,6 +105,9 @@ def admin_debug(request):
     提供 Mock 数据生成、缓存清理和邮件测试功能。
     仅限管理员访问。
     """
+    if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
+        return JsonResponse({"error": "Not found"}, status=404)
+
     User = get_user_model()
 
     if request.method == "POST":
@@ -221,6 +224,9 @@ def debug_api_stats(request):
 
     包括用户、分类、文章、评论数量和数据库连接状态。
     """
+    if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
+        return JsonResponse({"error": "Not found"}, status=404)
+
     User = get_user_model()
     try:
         connection.ensure_connection()
@@ -248,6 +254,9 @@ def debug_api_system(request):
 
     包括 Python/Django 版本、已安装应用、中间件以及资源使用情况（CPU、内存、磁盘）。
     """
+    if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
+        return JsonResponse({"error": "Not found"}, status=404)
+
     installed_apps = list(getattr(settings, "INSTALLED_APPS", []))
     third_party = [
         app
@@ -309,6 +318,9 @@ def debug_api_migrations(request):
     """
     调试 API：返回待执行的数据库迁移列表。
     """
+    if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
+        return JsonResponse({"error": "Not found"}, status=404)
+
     try:
         from django.db.migrations.executor import MigrationExecutor
 
@@ -332,6 +344,9 @@ def debug_execute_command(request):
 
     出于安全考虑，仅支持白名单内的命令。
     """
+    if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
+        return JsonResponse({"error": "Not found"}, status=404)
+
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
 

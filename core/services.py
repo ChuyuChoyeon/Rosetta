@@ -290,9 +290,16 @@ class MockDataGenerator:
         created_comments = []
         print(f"正在生成 {count} 条评论...")
 
-        for _ in range(count):
-            user = random.choice(users)
+        for idx in range(count):
             post = random.choice(posts)
+            if len(users) > 1 and post.author in users:
+                if idx == 0:
+                    eligible_users = [u for u in users if u != post.author]
+                    user = random.choice(eligible_users)
+                else:
+                    user = random.choice(users)
+            else:
+                user = random.choice(users)
 
             parent = None
             existing_comments = list(post.comments.all())

@@ -83,15 +83,17 @@ class UpdateThemeView(LoginRequiredMixin, View):
 
     def post(self, request):
         try:
-            data = json.loads(request.body)
+            data = json.loads(request.body or "{}")
             theme = data.get("theme")
             if theme:
-                preference, created = UserPreference.objects.get_or_create(
-                    user=request.user
+                UserPreference.objects.update_or_create(
+                    user=request.user, defaults={"theme": theme}
                 )
-                preference.theme = theme
-                preference.save()
                 return JsonResponse({"status": "success"})
+        except json.JSONDecodeError:
+            return JsonResponse(
+                {"status": "error", "message": "Invalid JSON"}, status=400
+            )
         except Exception as e:
             return JsonResponse(
                 {"status": "error", "message": str(e)},
@@ -133,7 +135,9 @@ class UnifiedProfileView(View):
         - 否则返回 None。
         """
         if username:
-            return get_object_or_404(User, username=username)
+            return get_object_or_404(
+                User.objects.select_related("preference"), username=username
+            )
         # 如果未提供 username 且用户已登录，则默认为当前用户
         if self.request.user.is_authenticated:
             return self.request.user
@@ -154,12 +158,9 @@ class UnifiedProfileView(View):
         is_me = request.user.is_authenticated and request.user == profile_user
         is_staff = request.user.is_authenticated and request.user.is_staff
 
-        # 确保偏好设置存在
-        if not hasattr(profile_user, "preference"):
-            UserPreference.objects.create(user=profile_user)
-            profile_user.refresh_from_db()
-
-        is_public = profile_user.preference.public_profile
+        preference, _ = UserPreference.objects.get_or_create(user=profile_user)
+        profile_user.preference = preference
+        is_public = preference.public_profile
         is_private_profile = False
 
         if not (is_me or is_staff or is_public):
@@ -225,13 +226,8 @@ class UnifiedProfileView(View):
                 )
 
             elif active_tab == "settings":
-                # 确保 UserPreference 存在，若不存在则创建
-                if not hasattr(request.user, "preference"):
-                    UserPreference.objects.create(user=request.user)
-                    request.user.refresh_from_db()
-
                 context["preference_form"] = UserPreferenceForm(
-                    instance=request.user.preference
+                    instance=preference
                 )
 
         # HTMX 请求支持 (局部刷新内容区域)
