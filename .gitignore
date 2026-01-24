@@ -98,3 +98,4 @@ uv.lock
 .env.example
 core/migrations/*
 */migrations/*
+theme/static_src/package-lock.json
