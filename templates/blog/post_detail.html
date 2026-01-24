@@ -229,6 +229,7 @@
                     <div class="badge badge-neutral">{{ comments.count }}</div>
                 </div>
                 
+                {% if config.ENABLE_COMMENTS %}
                 <!-- 评论表单 (Comment Form) -->
                 <div class="bg-base-100 p-6 md:p-8 rounded-2xl border border-base-content/10 shadow-sm mb-12" id="comment-form">
                     <h3 class="font-bold text-lg mb-4">发表你的观点</h3>
@@ -272,6 +273,15 @@
                     </div>
                     {% endif %}
                 </div>
+                {% else %}
+                <div class="alert bg-base-200 border-none rounded-xl flex items-center gap-4 mb-12">
+                    <span class="material-symbols-outlined text-3xl opacity-50">comments_disabled</span>
+                    <div>
+                        <h3 class="font-bold">评论已关闭</h3>
+                        <div class="text-sm opacity-70">管理员已暂时关闭评论功能。</div>
+                    </div>
+                </div>
+                {% endif %}
 
                 <!-- 评论列表 (Comment List) -->
                 <div class="space-y-6">

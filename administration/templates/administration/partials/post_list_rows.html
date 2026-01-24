@@ -100,15 +100,12 @@
             <a href="{% url 'administration:post_edit' post.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
                 <span class="material-symbols-outlined text-base">edit</span>
             </a>
-            <form action="{% url 'administration:post_duplicate' post.pk %}" method="post" class="inline" onsubmit="return confirm('确定要复制这篇文章吗？');">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="复制">
-                    <span class="material-symbols-outlined text-base">content_copy</span>
-                </button>
-            </form>
-            <a href="{% url 'administration:post_delete' post.pk %}" class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" data-tip="删除">
+            <button type="button" onclick="confirmDelete('{% url 'administration:post_duplicate' post.pk %}', '确定要复制这篇文章吗？')" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="复制">
+                <span class="material-symbols-outlined text-base">content_copy</span>
+            </button>
+            <button type="button" onclick="confirmDelete('{% url 'administration:post_delete' post.pk %}', '确定要删除文章《{{ post.title|escapejs }}》吗？')" class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" data-tip="删除">
                 <span class="material-symbols-outlined text-base">delete</span>
-            </a>
+            </button>
         </div>
     </td>
 </tr>

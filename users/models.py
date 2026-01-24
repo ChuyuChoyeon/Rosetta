@@ -11,7 +11,7 @@ from core.validators import validate_image_file
 class UserTitle(models.Model):
     """
     用户称号模型
-    
+
     用于给用户设置专属称号，如"VIP"、"贡献者"、"管理员"等。
     包含名称、颜色样式、图标和描述。
     """
@@ -24,7 +24,12 @@ class UserTitle(models.Model):
     )
 
     name = models.CharField("称号名称", max_length=50)
-    color = models.CharField("颜色风格", max_length=20, choices=COLOR_CHOICES, default="primary")
+    color = models.CharField(
+        "颜色风格",
+        max_length=20,
+        choices=COLOR_CHOICES,
+        default="primary",
+    )
     icon = models.TextField("图标SVG", blank=True, help_text="SVG图标代码")
     description = models.CharField("称号说明", max_length=200, blank=True)
 
@@ -39,7 +44,7 @@ class UserTitle(models.Model):
 class User(AbstractUser):
     """
     自定义用户模型
-    
+
     扩展了Django默认的AbstractUser，添加了以下增强字段：
     - 头像 (avatar)
     - 封面图 (cover_image)
@@ -50,11 +55,11 @@ class User(AbstractUser):
     """
 
     avatar = models.ImageField(
-        "头像", 
-        upload_to="avatars/", 
-        blank=True, 
+        "头像",
+        upload_to="avatars/",
+        blank=True,
         null=True,
-        validators=[validate_image_file]
+        validators=[validate_image_file],
     )
     cover_image = models.ImageField(
         "封面图",
@@ -62,22 +67,22 @@ class User(AbstractUser):
         blank=True,
         null=True,
         help_text="建议尺寸 800x200 像素",
-        validators=[validate_image_file]
+        validators=[validate_image_file],
     )
     nickname = models.CharField("昵称", max_length=50, blank=True)
     bio = models.TextField("个人简介", blank=True, max_length=500)
     website = models.URLField("个人网站", blank=True)
     github = models.URLField("GitHub", blank=True)
-    
+
     title = models.ForeignKey(
-        UserTitle, 
-        on_delete=models.SET_NULL, 
-        blank=True, 
-        null=True, 
-        related_name="users", 
-        verbose_name="称号"
+        UserTitle,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True,
+        related_name="users",
+        verbose_name="称号",
     )
-    
+
     is_banned = models.BooleanField(
         "是否封禁",
         default=False,
@@ -95,7 +100,7 @@ class User(AbstractUser):
     def get_avatar_url(self):
         """
         获取用户头像URL
-        
+
         如果用户未上传头像，则返回默认的 SVG 头像。
         """
         if self.avatar and hasattr(self.avatar, "url"):
@@ -106,7 +111,7 @@ class User(AbstractUser):
     def unread_notification_count(self):
         """
         获取用户未读通知的数量
-        
+
         用于在导航栏或其他位置显示未读消息红点。
         """
         return self.user_notifications.filter(is_read=False).count()
@@ -123,7 +128,7 @@ class User(AbstractUser):
 class UserPreference(models.Model):
     """
     用户偏好设置模型
-    
+
     存储用户特定的界面和隐私设置，与 User 模型一对一关联。
     包含：
     - 公开资料设置
@@ -136,13 +141,21 @@ class UserPreference(models.Model):
     )
 
     user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name="preference", verbose_name="用户"
+        User,
+        on_delete=models.CASCADE,
+        related_name="preference",
+        verbose_name="用户",
     )
     public_profile = models.BooleanField(
-        "公开资料", default=True, help_text="允许其他人查看您的个人资料和浏览历史"
+        "公开资料",
+        default=True,
+        help_text="允许其他人查看您的个人资料和浏览历史",
     )
     theme = models.CharField(
-        "主题偏好", max_length=20, choices=THEME_CHOICES, default="light"
+        "主题偏好",
+        max_length=20,
+        choices=THEME_CHOICES,
+        default="light",
     )
 
     class Meta:
@@ -156,10 +169,10 @@ class UserPreference(models.Model):
 class Notification(models.Model):
     """
     系统通知模型
-    
+
     用于存储用户收到的各种通知消息。
     使用 GenericForeignKey 实现多态关联，可以关联到任意模型对象（如文章、评论、点赞等）。
-    
+
     字段说明:
     - recipient: 接收通知的用户
     - actor: 触发通知的用户

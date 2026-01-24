@@ -10,6 +10,7 @@ User = get_user_model()
 def api_client():
     return APIClient()
 
+
 @pytest.fixture
 def user(db):
     return User.objects.create_user(
@@ -18,6 +19,7 @@ def user(db):
         password="password123",
         nickname="Test User"
     )
+
 
 @pytest.fixture
 def admin_user(db):
@@ -28,13 +30,16 @@ def admin_user(db):
         nickname="Admin User"
     )
 
+
 @pytest.fixture
 def category(db):
     return Category.objects.create(name="Test Category", slug="test-category")
 
+
 @pytest.fixture
 def tag(db):
     return Tag.objects.create(name="Test Tag", slug="test-tag")
+
 
 @pytest.fixture
 def post(db, user, category, tag):
@@ -48,6 +53,7 @@ def post(db, user, category, tag):
     )
     post.tags.add(tag)
     return post
+
 
 @pytest.fixture
 def page(db):

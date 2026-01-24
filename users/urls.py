@@ -20,7 +20,11 @@ urlpatterns = [
     # --- 认证相关 ---
     path("register/", RegisterView.as_view(), name="register"),
     path("login/", CustomLoginView.as_view(), name="login"),
-    path("logout/", LogoutView.as_view(next_page="users:login"), name="logout"),
+    path(
+        "logout/",
+        LogoutView.as_view(next_page="users:login"),
+        name="logout",
+    ),
 
     # --- 个人资料相关 ---
     # 当前登录用户的个人资料页 (重定向到带 username 的 URL 或显示当前用户)
@@ -51,10 +55,20 @@ urlpatterns = [
     # --- 账户安全 ---
     # 修改密码
     path(
-        "password-change/", CustomPasswordChangeView.as_view(), name="password_change"
+        "password-change/",
+        CustomPasswordChangeView.as_view(),
+        name="password_change",
     ),
 
     # --- API 接口 (JWT) ---
-    path("api/token/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
-    path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path(
+        "api/token/",
+        TokenObtainPairView.as_view(),
+        name="token_obtain_pair",
+    ),
+    path(
+        "api/token/refresh/",
+        TokenRefreshView.as_view(),
+        name="token_refresh",
+    ),
 ]

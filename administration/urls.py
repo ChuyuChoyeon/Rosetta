@@ -31,6 +31,8 @@ urlpatterns = [
         views.CategoryDeleteView.as_view(),
         name="category_delete",
     ),
+    path("categories/export/", views.CategoryExportView.as_view(), name="category_export"),
+    path("categories/import/", views.CategoryImportView.as_view(), name="category_import"),
     
     # 标签管理 (Tags)
     path("tags/", views.TagListView.as_view(), name="tag_list"),
@@ -82,6 +84,8 @@ urlpatterns = [
         views.NavigationDeleteView.as_view(),
         name="navigation_delete",
     ),
+    path("navigation/export/", views.NavigationExportView.as_view(), name="navigation_export"),
+    path("navigation/import/", views.NavigationImportView.as_view(), name="navigation_import"),
     
     # 友情链接管理 (FriendLinks)
     path("friendlinks/", views.FriendLinkListView.as_view(), name="friendlink_list"),
@@ -100,6 +104,8 @@ urlpatterns = [
         views.FriendLinkDeleteView.as_view(),
         name="friendlink_delete",
     ),
+    path("friendlinks/export/", views.FriendLinkExportView.as_view(), name="friendlink_export"),
+    path("friendlinks/import/", views.FriendLinkImportView.as_view(), name="friendlink_import"),
 
     # 搜索占位符管理 (Search Placeholders)
     path("placeholders/", views.SearchPlaceholderListView.as_view(), name="searchplaceholder_list"),
@@ -118,12 +124,16 @@ urlpatterns = [
         views.SearchPlaceholderDeleteView.as_view(),
         name="searchplaceholder_delete",
     ),
+    path("placeholders/export/", views.SearchPlaceholderExportView.as_view(), name="searchplaceholder_export"),
+    path("placeholders/import/", views.SearchPlaceholderImportView.as_view(), name="searchplaceholder_import"),
     
     # --- User Management (用户管理) ---
     path("users/", views.UserListView.as_view(), name="user_list"),
     path("users/create/", views.UserCreateView.as_view(), name="user_create"),
     path("users/<int:pk>/edit/", views.UserUpdateView.as_view(), name="user_edit"),
     path("users/<int:pk>/delete/", views.UserDeleteView.as_view(), name="user_delete"),
+    path("users/export/", views.UserExportView.as_view(), name="user_export"),
+    path("users/import/", views.UserImportView.as_view(), name="user_import"),
     
     # 用户称号管理 (User Titles)
     path("titles/", views.UserTitleListView.as_view(), name="usertitle_list"),
@@ -159,6 +169,8 @@ urlpatterns = [
     
     # 调试工具 (Debug)
     path("debug/", views.DebugDashboardView.as_view(), name="debug"),
+    path("debug/ui-test/", views.DebugUITestView.as_view(), name="debug_ui_test"),
+    path("debug/permission/", views.DebugPermissionView.as_view(), name="debug_permission"),
     path("debug/mock/", views.DebugMockView.as_view(), name="debug_mock"),
     path("debug/cache/", views.DebugCacheView.as_view(), name="debug_cache"),
     path("debug/email/", views.DebugEmailView.as_view(), name="debug_email"),

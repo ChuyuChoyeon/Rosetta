@@ -92,6 +92,33 @@
         
         modal.showModal();
     }
+
+    function submitBulkAction(action) {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+            showGlobalAlert('请至少选择一项进行操作');
+            return;
+        }
+
+        let actionName = '批量操作';
+        if (action === 'delete') actionName = '批量删除';
+        else if (action === 'active') actionName = '批量发布';
+        else if (action === 'inactive') actionName = '批量待审';
+
+        showConfirmModal(
+            actionName,
+            `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+            () => {
+                const form = document.getElementById('bulk-form');
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = action;
+                form.appendChild(actionInput);
+                form.submit();
+            }
+        );
+    }
 </script>
 {% endblock %}
 
@@ -144,15 +171,15 @@
         <!-- Toolbar -->
         <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col lg:flex-row justify-between items-center gap-4 sticky top-0 z-30 rounded-t-2xl">
             <!-- Left: Filter Tabs -->
-            <div class="tabs tabs-boxed bg-base-200/50 p-1 gap-1">
-                <a href="{% url 'administration:comment_list' %}" class="tab tab-sm {% if not request.GET.status %}tab-active bg-white shadow-sm text-base-content font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">全部</a>
-                <a href="{% url 'administration:comment_list' %}?status=pending" class="tab tab-sm {% if request.GET.status == 'pending' %}tab-active bg-warning text-warning-content shadow-sm font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">
+            <div class="tabs tabs-boxed bg-base-200/50 p-1 gap-1 flex-nowrap overflow-x-auto w-full lg:w-auto justify-start scrollbar-hide">
+                <a href="{% url 'administration:comment_list' %}" class="tab tab-sm whitespace-nowrap shrink-0 {% if not request.GET.status %}tab-active bg-white shadow-sm text-base-content font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">全部</a>
+                <a href="{% url 'administration:comment_list' %}?status=pending" class="tab tab-sm whitespace-nowrap shrink-0 {% if request.GET.status == 'pending' %}tab-active bg-warning text-warning-content shadow-sm font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">
                     待审核
                     {% if pending_count > 0 %}
                     <span class="badge badge-xs badge-ghost ml-1">{{ pending_count }}</span>
                     {% endif %}
                 </a>
-                <a href="{% url 'administration:comment_list' %}?status=active" class="tab tab-sm {% if request.GET.status == 'active' %}tab-active bg-success text-success-content shadow-sm font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">已发布</a>
+                <a href="{% url 'administration:comment_list' %}?status=active" class="tab tab-sm whitespace-nowrap shrink-0 {% if request.GET.status == 'active' %}tab-active bg-success text-success-content shadow-sm font-bold{% else %}hover:bg-base-200/50{% endif %} rounded-lg transition-all">已发布</a>
             </div>
 
             <!-- Right: Search & Actions -->
@@ -192,13 +219,13 @@
                     <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
                 </div>
                 <div class="join">
-                    <button onclick="submitBulkAction('active')" class="btn btn-sm btn-success join-item text-white gap-2">
+                    <button type="button" onclick="submitBulkAction('active')" class="btn btn-sm btn-success join-item text-white gap-2">
                         <span class="material-symbols-outlined text-[18px]">check_circle</span> 发布
                     </button>
-                    <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-warning join-item text-white gap-2">
+                    <button type="button" onclick="submitBulkAction('inactive')" class="btn btn-sm btn-warning join-item text-white gap-2">
                         <span class="material-symbols-outlined text-[18px]">pending</span> 待审
                     </button>
-                    <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-error join-item text-white gap-2">
+                    <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error join-item text-white gap-2">
                         <span class="material-symbols-outlined text-[18px]">delete</span> 删除
                     </button>
                 </div>
@@ -221,7 +248,7 @@
                             <th class="w-16 font-mono hidden md:table-cell">ID</th>
                             <th>用户 / 内容</th>
                             <th class="w-48 text-right hidden lg:table-cell">文章 / 时间</th>
-                            <th class="w-24 text-center hidden sm:table-cell">状态</th>
+                            <th class="w-32 text-center hidden sm:table-cell whitespace-nowrap">状态</th>
                             <th class="w-24 text-center pr-6 rounded-tr-2xl">操作</th>
                         </tr>
                     </thead>

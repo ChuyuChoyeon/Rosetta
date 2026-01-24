@@ -1,7 +1,61 @@
 {% extends "administration/base.html" %}
 {% load capture_tags %}
 
-{% block title %}用户管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}用户管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}<!-- Import Modal -->
+<dialog id="import_modal" class="modal">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">file_upload</span>
+        导入用户数据 (JSON)
+    </h3>
+    <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
+    <form action="{% url 'administration:user_import' %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="file" name="json_file" class="file-input file-input-bordered w-full mb-6" accept=".json" required />
+        <div class="modal-action">
+            <button type="button" class="btn btn-ghost" onclick="import_modal.close()">取消</button>
+            <button type="submit" class="btn btn-primary">开始导入</button>
+        </div>
+    </form>
+  </div>
+  <form method="dialog" class="modal-backdrop">
+    <button>close</button>
+  </form>
+</dialog>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function submitBulkAction(action) {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+            showGlobalAlert('请至少选择一项进行操作');
+            return;
+        }
+
+        let actionName = '批量操作';
+        if (action === 'delete') actionName = '批量删除';
+        else if (action === 'active') actionName = '批量启用';
+        else if (action === 'inactive') actionName = '批量禁用';
+        else if (action === 'set_staff') actionName = '批量设为管理员';
+        else if (action === 'remove_staff') actionName = '批量取消管理员';
+
+        showConfirmModal(
+            actionName,
+            `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+            () => {
+                const form = document.getElementById('bulk-form');
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = action;
+                form.appendChild(actionInput);
+                form.submit();
+            }
+        );
+    }
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="text-sm breadcrumbs mb-4">
@@ -84,7 +138,7 @@
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-200">
                         <li>
-                            <a href="{% url 'administration:export_all' 'user' %}" target="_blank" class="gap-3">
+                            <a href="{% url 'administration:user_export' %}" target="_blank" class="gap-3">
                                 <span class="material-symbols-outlined text-base-content/70">file_download</span>
                                 导出全部 (JSON)
                             </a>
@@ -108,19 +162,19 @@
                     <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
                 </div>
                 <div class="join">
-                    <button onclick="submitBulkAction('active')" class="btn btn-sm btn-success gap-1 text-white join-item">
+                    <button type="button" onclick="submitBulkAction('active')" class="btn btn-sm btn-success gap-1 text-white join-item">
                         <span class="material-symbols-outlined text-[16px]">person_check</span> 启用
                     </button>
-                    <button onclick="submitBulkAction('inactive')" class="btn btn-sm btn-warning gap-1 join-item">
+                    <button type="button" onclick="submitBulkAction('inactive')" class="btn btn-sm btn-warning gap-1 join-item">
                         <span class="material-symbols-outlined text-[16px]">person_off</span> 禁用
                     </button>
-                    <button onclick="submitBulkAction('set_staff')" class="btn btn-sm btn-info gap-1 text-white join-item">
+                    <button type="button" onclick="submitBulkAction('set_staff')" class="btn btn-sm btn-info gap-1 text-white join-item">
                         <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span> 设为管理
                     </button>
-                    <button onclick="submitBulkAction('remove_staff')" class="btn btn-sm btn-ghost gap-1 hover:bg-base-content/10 join-item">
+                    <button type="button" onclick="submitBulkAction('remove_staff')" class="btn btn-sm btn-ghost gap-1 hover:bg-base-content/10 join-item">
                         <span class="material-symbols-outlined text-[16px]">person</span> 取消管理
                     </button>
-                    <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1 join-item">
+                    <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1 join-item">
                         <span class="material-symbols-outlined text-[16px]">delete</span> 删除
                     </button>
                 </div>
@@ -210,7 +264,7 @@
         导入数据 (JSON)
     </h3>
     <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
-    <form action="{% url 'administration:import_json' 'user' %}" method="post" enctype="multipart/form-data">
+    <form action="{% url 'administration:user_import' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="file" name="json_file" class="file-input file-input-bordered w-full mb-6" accept=".json" required />
         <div class="modal-action">

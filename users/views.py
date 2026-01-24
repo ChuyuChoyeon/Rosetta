@@ -1,23 +1,24 @@
 import json
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.generic import CreateView, UpdateView, View, DetailView
-from django.urls import reverse_lazy
-from django.contrib.auth.views import LoginView, PasswordChangeView
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
-from django.http import JsonResponse, HttpResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.views import LoginView, PasswordChangeView
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse_lazy
+from django.views.generic import CreateView, View
 from .forms import RegisterForm, UserPreferenceForm, UserProfileForm
 from .models import User, UserPreference, Notification
 from blog.models import PostViewHistory, Comment, Post
+from constance import config
 
 
 class RegisterView(CreateView):
     """
     用户注册视图
-    
+
     处理新用户的注册流程。
     继承自 CreateView，使用自定义的 RegisterForm。
-    
+
     流程:
     1. 展示包含验证码的注册表单。
     2. 验证用户提交的信息（用户名、密码、邮箱、验证码）。
@@ -29,6 +30,12 @@ class RegisterView(CreateView):
     template_name = "users/register.html"
     success_url = reverse_lazy("users:login")
 
+    def dispatch(self, request, *args, **kwargs):
+        if not getattr(config, "ENABLE_REGISTRATION", True):
+            messages.warning(request, "本站目前暂停开放注册。")
+            return redirect("home")
+        return super().dispatch(request, *args, **kwargs)
+
     def form_valid(self, form):
         messages.success(self.request, "注册成功，请登录")
         return super().form_valid(form)
@@ -37,9 +44,9 @@ class RegisterView(CreateView):
 class CustomLoginView(LoginView):
     """
     自定义登录视图
-    
+
     继承自 Django 内置 LoginView。
-    
+
     特性:
     - 使用自定义模板 users/login.html。
     - 若用户已登录，访问此页面会自动重定向到首页 (redirect_authenticated_user=True)。
@@ -59,12 +66,12 @@ class CustomLoginView(LoginView):
 class UpdateThemeView(LoginRequiredMixin, View):
     """
     更新主题视图 (AJAX)
-    
+
     处理前端通过 Fetch API 发送的主题切换请求。
-    
+
     请求方式: POST
     数据格式: JSON {"theme": "theme_name"}
-    
+
     功能:
     1. 解析请求体中的 JSON 数据。
     2. 获取或创建当前用户的 UserPreference 对象。
@@ -83,7 +90,10 @@ class UpdateThemeView(LoginRequiredMixin, View):
                 preference.save()
                 return JsonResponse({"status": "success"})
         except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)}, status=400)
+            return JsonResponse(
+                {"status": "error", "message": str(e)},
+                status=400,
+            )
         return JsonResponse(
             {"status": "error", "message": "Invalid request"}, status=400
         )
@@ -92,10 +102,10 @@ class UpdateThemeView(LoginRequiredMixin, View):
 class UnifiedProfileView(View):
     """
     统一用户个人资料视图
-    
+
     这是一个功能丰富的复合视图，用于处理用户个人主页的所有交互。
     支持查看他人资料和管理自己的资料。
-    
+
     功能模块:
     1. **资料展示**: 显示用户头像、封面、简介、统计数据等。
     2. **Tab 切换**:
@@ -112,7 +122,7 @@ class UnifiedProfileView(View):
     def get_object(self, username=None):
         """
         获取目标用户对象
-        
+
         策略:
         - 如果 URL 中提供了 username，则查找对应用户（查看他人）。
         - 如果未提供 username 且当前用户已登录，则返回当前用户（查看自己）。
@@ -139,12 +149,12 @@ class UnifiedProfileView(View):
         # 4. 否则，标记为私密模式
         is_me = request.user.is_authenticated and request.user == profile_user
         is_staff = request.user.is_authenticated and request.user.is_staff
-        
+
         # 确保偏好设置存在
         if not hasattr(profile_user, "preference"):
             UserPreference.objects.create(user=profile_user)
             profile_user.refresh_from_db()
-            
+
         is_public = profile_user.preference.public_profile
         is_private_profile = False
 
@@ -171,7 +181,10 @@ class UnifiedProfileView(View):
             # Tab Data Loading
             if active_tab == "articles":
                 context["posts"] = (
-                    Post.objects.filter(author=profile_user, status="published")
+                    Post.objects.filter(
+                        author=profile_user,
+                        status="published",
+                    )
                     .select_related("category")
                     .prefetch_related("tags")
                     .order_by("-created_at")[:20]
@@ -212,14 +225,18 @@ class UnifiedProfileView(View):
                 if not hasattr(request.user, "preference"):
                     UserPreference.objects.create(user=request.user)
                     request.user.refresh_from_db()
-                
+
                 context["preference_form"] = UserPreferenceForm(
                     instance=request.user.preference
                 )
 
         # HTMX 请求支持 (局部刷新内容区域)
         if request.headers.get("HX-Request"):
-            return render(request, "users/includes/profile_content.html", context)
+            return render(
+                request,
+                "users/includes/profile_content.html",
+                context,
+            )
 
         return render(request, self.template_name, context)
 
@@ -232,7 +249,15 @@ class UnifiedProfileView(View):
         # 权限检查：只能编辑自己的资料
         if profile_user != request.user:
             messages.error(request, "您只能编辑自己的资料")
-            return redirect("users:user_public_profile", username=profile_user.username)
+            return redirect(
+                "users:user_public_profile",
+                username=profile_user.username,
+            )
+
+        profile_url = reverse_lazy(
+            "users:user_public_profile",
+            kwargs={"username": request.user.username},
+        )
 
         # --- 处理偏好设置更新 ---
         if "save_preferences" in request.POST:
@@ -244,9 +269,7 @@ class UnifiedProfileView(View):
                 messages.success(request, "偏好设置已更新")
             else:
                 messages.error(request, "偏好设置更新失败")
-            return redirect(
-                f"{reverse_lazy('users:user_public_profile', kwargs={'username': request.user.username})}?tab=settings"
-            )
+            return redirect(f"{profile_url}?tab=settings")
 
         # --- 处理个人资料更新 (头像、封面、基本信息) ---
         form = UserProfileForm(request.POST, request.FILES, instance=request.user)
@@ -262,14 +285,14 @@ class UnifiedProfileView(View):
             return redirect(next_url)
 
         return redirect(
-            f"{reverse_lazy('users:user_public_profile', kwargs={'username': request.user.username})}?tab=info"
+            f"{profile_url}?tab=info"
         )
 
 
 class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     """
     自定义密码修改视图
-    
+
     继承自 PasswordChangeView。
     修改成功后重定向到个人资料页。
     """
@@ -284,18 +307,22 @@ class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
 class MarkNotificationReadView(LoginRequiredMixin, View):
     """
     标记通知为已读
-    
+
     支持 POST 和 GET 请求（为了方便某些场景下的直接链接访问，但建议使用 POST）。
     HTMX 支持：如果请求来自 HTMX，则返回空响应以支持前端移除元素或更新状态。
     """
     def action(self, request, pk):
-        notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
+        notification = get_object_or_404(
+            Notification,
+            pk=pk,
+            recipient=request.user,
+        )
         notification.is_read = True
         notification.save()
 
         # 如果是 HTMX 请求，返回空响应或更新后的 HTML
         if request.headers.get("HX-Request"):
-            return HttpResponse("") # 简单移除按钮或更新状态
+            return HttpResponse("")
 
         next_url = request.GET.get("next")
         if next_url:
@@ -312,14 +339,18 @@ class MarkNotificationReadView(LoginRequiredMixin, View):
 class DeleteNotificationView(LoginRequiredMixin, View):
     """
     删除通知
-    
+
     物理删除 Notification 对象。
     支持 DELETE (RESTful) 和 POST (表单) 请求。
     """
     def action(self, request, pk):
-        notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
+        notification = get_object_or_404(
+            Notification,
+            pk=pk,
+            recipient=request.user,
+        )
         notification.delete()
-        
+
         # 如果是 HTMX 请求，返回空响应让前端移除元素
         if request.headers.get("HX-Request"):
             return HttpResponse("")

@@ -85,13 +85,13 @@
         <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
             <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
             <div class="flex gap-2">
-                <button onclick="submitBulkAction('published')" class="btn btn-sm btn-primary gap-2">
+                <button type="button" onclick="submitBulkAction('published')" class="btn btn-sm btn-primary gap-2">
                     <span class="material-symbols-outlined text-[18px]">check_circle</span> 发布
                 </button>
-                <button onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral gap-2">
+                <button type="button" onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral gap-2">
                     <span class="material-symbols-outlined text-[18px]">drafts</span> 草稿
                 </button>
-                <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1">
+                <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1">
                     <span class="material-symbols-outlined text-[16px]">delete</span> 删除
                 </button>
             </div>
@@ -155,4 +155,53 @@
 <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
     {{ card_content }}
 </div>
+
+<script>
+    function toggleAll(source) {
+        const checkboxes = document.querySelectorAll('.row-checkbox');
+        checkboxes.forEach(cb => cb.checked = source.checked);
+        updateBulkToolbar();
+    }
+
+    function updateBulkToolbar() {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        const count = checkedBoxes.length;
+        const toolbar = document.getElementById('bulk-actions');
+        const countSpan = document.getElementById('selected-count');
+        
+        if (count > 0) {
+            toolbar.classList.remove('hidden');
+            countSpan.textContent = count;
+        } else {
+            toolbar.classList.add('hidden');
+        }
+    }
+
+    function submitBulkAction(action) {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+            showGlobalAlert('请至少选择一项进行操作');
+            return;
+        }
+
+        let actionName = '批量操作';
+        if (action === 'delete') actionName = '批量删除';
+        else if (action === 'published') actionName = '批量发布';
+        else if (action === 'draft') actionName = '批量设为草稿';
+
+        showConfirmModal(
+            actionName,
+            `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+            () => {
+                const form = document.getElementById('bulk-form');
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = action;
+                form.appendChild(actionInput);
+                form.submit();
+            }
+        );
+    }
+</script>
 {% endblock %}

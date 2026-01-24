@@ -7,7 +7,7 @@ from .models import User, UserPreference
 class RegisterForm(UserCreationForm):
     """
     用户注册表单
-    
+
     继承自 UserCreationForm，添加了以下字段：
     - nickname: 昵称
     - email: 邮箱 (具有唯一性验证)
@@ -34,7 +34,7 @@ class RegisterForm(UserCreationForm):
 class UserPreferenceForm(forms.ModelForm):
     """
     用户偏好设置表单
-    
+
     用于更新 UserPreference 模型。
     字段:
     - public_profile: 是否公开个人资料
@@ -45,17 +45,19 @@ class UserPreferenceForm(forms.ModelForm):
         fields = ["public_profile", "theme"]
         widgets = {
             "theme": forms.RadioSelect(attrs={"class": "radio"}),
-            "public_profile": forms.CheckboxInput(attrs={"class": "toggle toggle-primary"}),
+            "public_profile": forms.CheckboxInput(
+                attrs={"class": "toggle toggle-primary"}
+            ),
         }
 
 
 class UserProfileForm(forms.ModelForm):
     """
     用户个人资料表单
-    
+
     用于更新 User 模型的基本信息。
     字段包括: 头像、封面、昵称、简介、个人网站、GitHub、邮箱。
-    
+
     使用了 DaisyUI 样式的 Widget。
     """
     class Meta:
@@ -79,8 +81,16 @@ class UserProfileForm(forms.ModelForm):
             "bio": forms.Textarea(
                 attrs={"class": "textarea textarea-bordered h-24 w-full"}
             ),
-            "nickname": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
-            "website": forms.URLInput(attrs={"class": "input input-bordered w-full"}),
-            "github": forms.URLInput(attrs={"class": "input input-bordered w-full"}),
-            "email": forms.EmailInput(attrs={"class": "input input-bordered w-full"}),
+            "nickname": forms.TextInput(
+                attrs={"class": "input input-bordered w-full"}
+            ),
+            "website": forms.URLInput(
+                attrs={"class": "input input-bordered w-full"}
+            ),
+            "github": forms.URLInput(
+                attrs={"class": "input input-bordered w-full"}
+            ),
+            "email": forms.EmailInput(
+                attrs={"class": "input input-bordered w-full"}
+            ),
         }

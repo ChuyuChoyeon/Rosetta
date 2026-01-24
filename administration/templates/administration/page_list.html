@@ -81,10 +81,10 @@
         
         <!-- Filter Tabs -->
         <div class="px-4 py-2 border-b border-base-200 bg-base-100">
-            <div class="tabs tabs-boxed bg-transparent p-0 gap-2">
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}{% endif %}" class="tab tab-sm {% if not request.GET.status %}tab-active bg-primary text-primary-content{% else %}bg-base-200{% endif %} rounded-btn">全部</a>
-                <a href="?status=published{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="tab tab-sm {% if request.GET.status == 'published' %}tab-active bg-success text-success-content{% else %}bg-base-200{% endif %} rounded-btn">已发布</a>
-                <a href="?status=draft{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="tab tab-sm {% if request.GET.status == 'draft' %}tab-active bg-neutral text-neutral-content{% else %}bg-base-200{% endif %} rounded-btn">草稿</a>
+            <div class="tabs tabs-boxed bg-transparent p-0 gap-2 flex-nowrap overflow-x-auto w-full justify-start scrollbar-hide">
+                <a href="?{% if request.GET.q %}q={{ request.GET.q }}{% endif %}" class="tab tab-sm whitespace-nowrap shrink-0 {% if not request.GET.status %}tab-active bg-primary text-primary-content{% else %}bg-base-200{% endif %} rounded-btn">全部</a>
+                <a href="?status=published{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="tab tab-sm whitespace-nowrap shrink-0 {% if request.GET.status == 'published' %}tab-active bg-success text-success-content{% else %}bg-base-200{% endif %} rounded-btn">已发布</a>
+                <a href="?status=draft{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="tab tab-sm whitespace-nowrap shrink-0 {% if request.GET.status == 'draft' %}tab-active bg-neutral text-neutral-content{% else %}bg-base-200{% endif %} rounded-btn">草稿</a>
             </div>
         </div>
         
@@ -92,18 +92,14 @@
         <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
             <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
             <div class="flex gap-2">
-                <button onclick="submitBulkAction('published')" class="btn btn-sm btn-primary gap-2">
+                <button type="button" onclick="submitBulkAction('published')" class="btn btn-sm btn-primary gap-2">
                     <span class="material-symbols-outlined text-[18px]">check_circle</span> 修改成发布
                 </button>
-                <button onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral gap-2">
+                <button type="button" onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral gap-2">
                     <span class="material-symbols-outlined text-[18px]">drafts</span> 修改成草稿
                 </button>
-                <button onclick="submitBulkAction('export_json')" class="btn btn-sm btn-ghost gap-2 hover:bg-base-content/10">
-                    <span class="material-symbols-outlined text-[18px]">download</span> 导出
-                </button>
-                <div class="divider divider-horizontal mx-0 my-1"></div>
-                <button onclick="submitBulkAction('delete')" class="btn btn-sm btn-ghost text-error hover:bg-error/10 gap-2">
-                    <span class="material-symbols-outlined text-[18px]">delete</span> 删除
+                <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1">
+                    <span class="material-symbols-outlined text-[16px]">delete</span> 删除
                 </button>
             </div>
         </div>
@@ -123,7 +119,7 @@
                             <th class="w-16 font-mono hidden md:table-cell">ID</th>
                             <th>标题</th>
                             <th class="hidden lg:table-cell">Slug</th>
-                            <th class="w-24 text-center hidden sm:table-cell">状态</th>
+                            <th class="w-32 text-center hidden sm:table-cell whitespace-nowrap">状态</th>
                             <th class="w-32 hidden lg:table-cell">创建时间</th>
                             <th class="w-24 text-center pr-6 rounded-tr-2xl">操作</th>
                         </tr>
@@ -161,4 +157,34 @@
 <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
     {{ card_content }}
 </div>
+
+<script>
+    function submitBulkAction(action) {
+        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+        if (checkedBoxes.length === 0) {
+            showGlobalAlert('请至少选择一项进行操作');
+            return;
+        }
+
+        let actionName = '批量操作';
+        if (action === 'delete') actionName = '批量删除';
+        else if (action === 'published') actionName = '批量发布';
+        else if (action === 'draft') actionName = '批量转草稿';
+        else if (action === 'export_json') actionName = '批量导出';
+
+        showConfirmModal(
+            actionName,
+            `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+            () => {
+                const form = document.getElementById('bulk-form');
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = action;
+                form.appendChild(actionInput);
+                form.submit();
+            }
+        );
+    }
+</script>
 {% endblock %}

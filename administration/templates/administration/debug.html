@@ -4,33 +4,60 @@
 {% block debug_title %}概览{% endblock %}
 
 {% block debug_content %}
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- System Status -->
-    {% captureas system_status_card %}
-    <div class="p-6">
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Database Status -->
+    {% captureas db_status_card %}
+    <div class="h-full p-6 flex flex-col justify-between">
+        <h2 class="card-title text-base mb-4">
+            <span class="material-symbols-outlined text-secondary">database</span>
+            数据库连接
+        </h2>
+        <div class="flex items-center gap-4">
+            {% if db_ok %}
+                <div class="radial-progress text-success" style="--value:100; --size:3rem;">100%</div>
+                <div>
+                    <div class="font-bold text-success">正常 (Connected)</div>
+                    <div class="text-xs opacity-50">Latency: < 1ms</div>
+                </div>
+            {% else %}
+                <div class="radial-progress text-error" style="--value:100; --size:3rem;">!</div>
+                <div>
+                    <div class="font-bold text-error">异常 (Error)</div>
+                    <div class="text-xs opacity-50">Check settings</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endcaptureas %}
+    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
+        {{ db_status_card }}
+    </div>
+
+    <!-- System Info -->
+    {% captureas system_info_card %}
+    <div class="h-full p-6 flex flex-col justify-between">
         <h2 class="card-title text-base mb-4">
             <span class="material-symbols-outlined text-info">dns</span>
-            系统状态
+            系统环境
         </h2>
-        <div class="stats stats-vertical shadow w-full">
-            <div class="stat">
-                <div class="stat-title">数据库连接</div>
-                <div class="stat-value text-lg {% if db_ok %}text-success{% else %}text-error{% endif %}">
-                    {% if db_ok %}正常{% else %}异常{% endif %}
-                </div>
-                <div class="stat-desc">Default Database</div>
+        <div class="flex flex-col gap-2 text-sm">
+            <div class="flex justify-between items-center border-b border-base-content/5 pb-2">
+                <span class="opacity-70">Python</span>
+                <span class="font-mono font-bold">{{ system_info.python_version }}</span>
             </div>
-            <div class="stat">
-                <div class="stat-title">Debug 模式</div>
-                <div class="stat-value text-lg {% if debug_mode %}text-warning{% else %}text-success{% endif %}">
-                    {{ debug_mode|yesno:"开启,关闭" }}
-                </div>
+            <div class="flex justify-between items-center border-b border-base-content/5 pb-2">
+                <span class="opacity-70">Django</span>
+                <span class="font-mono font-bold">{{ system_info.django_version }}</span>
+            </div>
+            <div class="flex justify-between items-center pt-1">
+                <span class="opacity-70">OS</span>
+                <span class="font-mono font-bold truncate max-w-[120px] text-xs" title="{{ system_info.platform }}">{{ system_info.platform }}</span>
             </div>
         </div>
     </div>
     {% endcaptureas %}
     <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-        {{ system_status_card }}
+        {{ system_info_card }}
     </div>
 
     <!-- Data Counts -->
@@ -62,7 +89,7 @@
 
     <!-- URL Patterns -->
     {% captureas url_patterns_card %}
-    <div class="p-0 flex flex-col h-full col-span-1 md:col-span-2">
+    <div class="p-0 flex flex-col h-full col-span-1 md:col-span-2 lg:col-span-3">
         <div class="p-6 pb-2 border-b border-base-200">
             <h2 class="card-title flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">link</span>
@@ -102,12 +129,12 @@
                             {% endif %}
                         </td>
                         <td class="text-right pr-6 align-middle">
-                            {% if pattern.has_args %}
+                            {% if not pattern.sample_url %}
                                 <button class="btn btn-xs btn-disabled btn-ghost opacity-50" title="带参数路由无法直接访问">
                                     <span class="material-symbols-outlined text-base">link_off</span>
                                 </button>
                             {% else %}
-                                <a href="{% url pattern.name %}" target="_blank" class="btn btn-xs btn-ghost text-primary" title="访问">
+                                <a href="{{ pattern.sample_url }}" target="_blank" class="btn btn-xs btn-ghost text-primary" title="访问">
                                     <span class="material-symbols-outlined text-base">open_in_new</span>
                                 </a>
                             {% endif %}

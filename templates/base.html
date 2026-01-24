@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
-    <title>{% block title %}{{ config.SITE_NAME.value|default:"Rosetta Blog" }}{% endblock %}</title>
+    <title>{% block title %}{{ config.SITE_NAME|default:"Rosetta Blog" }}{% endblock %}</title>
     <link rel="shortcut icon" href="{{ config.SITE_FAVICON|default:'/static/core/img/favicon.ico' }}">
     <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="{% url 'post_feed' %}">
     
@@ -242,5 +242,9 @@
             document.getElementById("readingProgress").style.width = scrolled + "%";
         };
     </script>
+
+    {% if config.EXTRA_FOOTER_CODE %}
+    {{ config.EXTRA_FOOTER_CODE|safe }}
+    {% endif %}
 </body>
 </html>

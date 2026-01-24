@@ -91,7 +91,7 @@
                     <span class="material-symbols-outlined text-sm">refresh</span>
                     <span class="hidden sm:inline">刷新</span>
                 </a>
-                <a href="{% url 'administration:logfile_download' current_file %}" class="btn btn-sm btn-outline gap-2">
+                <a href="{% url 'administration:logfile_download' current_file %}" class="btn btn-sm btn-outline gap-2" hx-boost="false" download>
                     <span class="material-symbols-outlined text-sm">download</span>
                     <span class="hidden sm:inline">下载</span>
                 </a>
@@ -142,8 +142,9 @@
             <span class="text-xs opacity-70 mt-2 block">此操作不可恢复，请谨慎操作。</span>
         </p>
         <div class="modal-action">
-            <form method="post" action="{% url 'administration:logfile_clear' current_file %}">
+            <form method="post" action="{% url 'administration:logfile_delete' current_file %}">
                 {% csrf_token %}
+                <input type="hidden" name="action" value="clear">
                 <button type="button" class="btn" onclick="clear_log_modal.close()">取消</button>
                 <button type="submit" class="btn btn-error">确定清空</button>
             </form>

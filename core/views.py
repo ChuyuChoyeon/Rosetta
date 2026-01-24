@@ -1,36 +1,32 @@
-from django.db import connection
-from django.contrib import messages
-from django.contrib.auth.decorators import user_passes_test
-from django.contrib.auth import get_user_model
-from django.http import JsonResponse
-from django.shortcuts import redirect, render
-from django.urls import reverse
-from django.db import transaction
-from django.views.generic import DetailView
-from django.conf import settings
-from django.core.mail import send_mail
-from django.core.cache import cache
-from django.core.management import call_command
-from django.utils import timezone
-from io import StringIO
+import os
 import platform
+import uuid
+from io import StringIO
+
 import django
-import random
-import string
 import psutil
 from faker import Faker
-from .models import Page
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import user_passes_test
+from django.core.cache import cache
+from django.core.files.storage import default_storage
+from django.core.mail import send_mail
+from django.core.management import call_command
+from django.db import connection
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
+from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_GET, require_POST
+from django.views.generic import DetailView
+
 from blog.models import Category, Comment, Post
 from core.services import generate_mock_data
+from .models import Page
 
-
-from django.views.decorators.http import require_GET, require_POST
-from django.views.decorators.csrf import csrf_exempt
-from django.http import HttpResponse, JsonResponse
-from django.core.files.storage import default_storage
-import os
-import uuid
-from django.conf import settings
 
 @require_GET
 def robots_txt(request):
@@ -47,24 +43,25 @@ def robots_txt(request):
 @csrf_exempt
 def upload_image(request):
     if not request.user.is_authenticated:
-        return JsonResponse({'error': 'Unauthorized'}, status=403)
+        return JsonResponse({"error": "Unauthorized"}, status=403)
 
-    if 'image' not in request.FILES:
-        return JsonResponse({'error': 'No image provided'}, status=400)
-    
-    image = request.FILES['image']
+    if "image" not in request.FILES:
+        return JsonResponse({"error": "No image provided"}, status=400)
+
+    image = request.FILES["image"]
     ext = os.path.splitext(image.name)[1]
     filename = f"uploads/{uuid.uuid4().hex}{ext}"
-    
+
     file_path = default_storage.save(filename, image)
     file_url = default_storage.url(file_path)
-    
-    return JsonResponse({'url': file_url})
+
+    return JsonResponse({"url": file_url})
+
 
 class PageView(DetailView):
     """
     单页面视图
-    
+
     用于展示关于页、联系页等静态内容页面。
     """
     model = Page
@@ -78,7 +75,7 @@ class PageView(DetailView):
 def health_check(request):
     """
     健康检查接口
-    
+
     用于监控系统状态，检查数据库连接是否正常。
     通常由负载均衡器或监控服务调用。
     """
@@ -102,7 +99,7 @@ def health_check(request):
 def admin_debug(request):
     """
     调试工具视图
-    
+
     提供 Mock 数据生成、缓存清理和邮件测试功能。
     仅限管理员访问。
     """
@@ -135,7 +132,12 @@ def admin_debug(request):
 
             messages.success(
                 request,
-                f"已生成 mock 数据：用户 {created['users']}、分类 {created['categories']}、标签 {created['tags']}、文章 {created['posts']}、评论 {created['comments']}",
+                (
+                    "已生成 mock 数据：用户 "
+                    f"{created['users']}、分类 {created['categories']}、"
+                    f"标签 {created['tags']}、文章 {created['posts']}、"
+                    f"评论 {created['comments']}"
+                ),
             )
             return redirect(reverse("administration:debug"))
 
@@ -152,9 +154,14 @@ def admin_debug(request):
         elif action == "test_email":
             try:
                 fake = Faker("zh_CN")
+                message = (
+                    "这是一封测试邮件。\n\n"
+                    f"时间: {timezone.now()}\n"
+                    f"随机内容: {fake.text()}"
+                )
                 send_mail(
                     subject="Rosetta 邮件测试",
-                    message=f"这是一封测试邮件。\n\n时间: {timezone.now()}\n随机内容: {fake.text()}",
+                    message=message,
                     from_email=settings.DEFAULT_FROM_EMAIL,
                     recipient_list=[request.user.email],
                     fail_silently=False,
@@ -209,7 +216,7 @@ def admin_debug(request):
 def debug_api_stats(request):
     """
     调试 API：返回系统统计数据
-    
+
     包括用户、分类、文章、评论数量和数据库连接状态。
     """
     User = get_user_model()
@@ -236,7 +243,7 @@ def debug_api_stats(request):
 def debug_api_system(request):
     """
     调试 API：返回系统环境信息
-    
+
     包括 Python/Django 版本、已安装应用、中间件以及资源使用情况（CPU、内存、磁盘）。
     """
     installed_apps = list(getattr(settings, "INSTALLED_APPS", []))
@@ -320,14 +327,14 @@ def debug_api_migrations(request):
 def debug_execute_command(request):
     """
     调试 API：执行受限的 Django 管理命令。
-    
+
     出于安全考虑，仅支持白名单内的命令。
     """
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
 
     command = request.POST.get("command")
-    
+
     # 安全白名单：仅允许执行以下无害或只读命令
     ALLOWED_COMMANDS = {
         "check": ["--deploy", "--fail-level", "WARNING"],
@@ -343,20 +350,25 @@ def debug_execute_command(request):
     # 目前忽略用户传递的参数，强制使用白名单中的安全参数
     # 避免命令注入风险
     safe_args = ALLOWED_COMMANDS[command]
-    
+
     out = StringIO()
     err = StringIO()
-    
+
     try:
         call_command(command, *safe_args, stdout=out, stderr=err)
-        return JsonResponse({
-            "status": "success",
-            "output": out.getvalue(),
-            "error": err.getvalue()
-        })
+        return JsonResponse(
+            {
+                "status": "success",
+                "output": out.getvalue(),
+                "error": err.getvalue(),
+            }
+        )
     except Exception as e:
-        return JsonResponse({
-            "status": "error",
-            "output": out.getvalue(),
-            "error": str(e)
-        }, status=500)
+        return JsonResponse(
+            {
+                "status": "error",
+                "output": out.getvalue(),
+                "error": str(e),
+            },
+            status=500,
+        )

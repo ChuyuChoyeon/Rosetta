@@ -50,7 +50,7 @@
         <div id="bulk-actions" class="hidden bg-neutral text-neutral-content px-4 py-2 flex justify-between items-center text-sm transition-all duration-300">
             <span id="selected-count">已选择 0 项</span>
             <div class="flex gap-2">
-                <button onclick="submitBulkAction('delete')" class="btn btn-xs btn-error btn-outline">批量删除</button>
+                <button type="button" onclick="submitBulkAction('delete')" class="btn btn-xs btn-error btn-outline">批量删除</button>
             </div>
         </div>
 
@@ -135,10 +135,8 @@
 </dialog>
 
 <!-- Bulk Actions Form -->
-<form id="bulk-action-form" method="post" action="{% url 'administration:usertitle_delete' 0 %}" style="display:none;">
+<form id="bulk-action-form" method="post" style="display:none;">
     {% csrf_token %}
-    <input type="hidden" name="action" id="bulk-action-input">
-    <input type="hidden" name="ids" id="bulk-ids-input">
 </form>
 
 <script>
@@ -163,21 +161,43 @@
     }
 
     function submitBulkAction(action) {
-        if (!confirm('确定要执行此批量操作吗？')) return;
-        
         const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-        const ids = Array.from(checkedBoxes).map(cb => cb.value).join(',');
-        
-        if (!ids) {
-            alert('请至少选择一项');
+        if (checkedBoxes.length === 0) {
+            showGlobalAlert('请至少选择一项进行操作');
             return;
         }
 
-        const form = document.getElementById('bulk-action-form');
-        document.getElementById('bulk-action-input').value = action;
-        document.getElementById('bulk-ids-input').value = ids;
-        // form.submit(); 
-        alert("批量操作暂未实现 (需后端支持)");
+        let actionName = '批量操作';
+        if (action === 'delete') actionName = '批量删除';
+
+        showConfirmModal(
+            actionName,
+            `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+            () => {
+                const form = document.getElementById('bulk-action-form');
+                // 保留 CSRF token
+                const csrfToken = form.querySelector('input[name="csrfmiddlewaretoken"]');
+                form.innerHTML = '';
+                form.appendChild(csrfToken);
+                
+                const actionInput = document.createElement('input');
+                actionInput.type = 'hidden';
+                actionInput.name = 'action';
+                actionInput.value = action;
+                form.appendChild(actionInput);
+                
+                checkedBoxes.forEach(cb => {
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'selected_ids';
+                    input.value = cb.value;
+                    form.appendChild(input);
+                });
+                
+                form.action = "{% url 'administration:bulk_action' 'usertitle' %}";
+                form.submit();
+            }
+        );
     }
 </script>
 {% endblock %}

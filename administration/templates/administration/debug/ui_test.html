@@ -1,0 +1,133 @@
+{% extends "administration/debug/base_debug.html" %}
+{% load capture_tags %}
+
+{% block debug_title %}UI 组件测试{% endblock %}
+
+{% block debug_content %}
+<div class="space-y-8">
+    <!-- Typography -->
+    <section>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">排版 (Typography)</h2>
+        <div class="p-6 bg-base-100 rounded-xl border border-base-content/10">
+            <h1 class="text-4xl font-bold mb-2">Heading 1</h1>
+            <h2 class="text-3xl font-bold mb-2">Heading 2</h2>
+            <h3 class="text-2xl font-bold mb-2">Heading 3</h3>
+            <h4 class="text-xl font-bold mb-2">Heading 4</h4>
+            <p class="mb-4">Standard paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+            <p class="text-sm opacity-70">Small text with opacity.</p>
+            <p class="text-xs opacity-50">Extra small text.</p>
+            <div class="mt-4">
+                <span class="link link-primary">Primary Link</span>
+                <span class="link link-secondary ml-4">Secondary Link</span>
+                <span class="link link-accent ml-4">Accent Link</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Buttons -->
+    <section>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">按钮 (Buttons)</h2>
+        <div class="p-6 bg-base-100 rounded-xl border border-base-content/10 space-y-4">
+            <div class="flex flex-wrap gap-2">
+                <button class="btn">Default</button>
+                <button class="btn btn-primary">Primary</button>
+                <button class="btn btn-secondary">Secondary</button>
+                <button class="btn btn-accent">Accent</button>
+                <button class="btn btn-info">Info</button>
+                <button class="btn btn-success">Success</button>
+                <button class="btn btn-warning">Warning</button>
+                <button class="btn btn-error">Error</button>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                <button class="btn btn-outline">Outline</button>
+                <button class="btn btn-outline btn-primary">Primary</button>
+                <button class="btn btn-outline btn-secondary">Secondary</button>
+                <button class="btn btn-ghost">Ghost</button>
+                <button class="btn btn-link">Link</button>
+            </div>
+            <div class="flex flex-wrap gap-2 items-center">
+                <button class="btn btn-lg">Large</button>
+                <button class="btn">Normal</button>
+                <button class="btn btn-sm">Small</button>
+                <button class="btn btn-xs">Tiny</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Alerts -->
+    <section>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">警告框 (Alerts)</h2>
+        <div class="flex flex-col gap-4">
+            <div class="alert alert-info">
+                <span class="material-symbols-outlined">info</span>
+                <span>New software update available.</span>
+            </div>
+            <div class="alert alert-success">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span>Your purchase has been confirmed!</span>
+            </div>
+            <div class="alert alert-warning">
+                <span class="material-symbols-outlined">warning</span>
+                <span>Warning: Invalid email address!</span>
+            </div>
+            <div class="alert alert-error">
+                <span class="material-symbols-outlined">error</span>
+                <span>Error! Task failed successfully.</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Badges -->
+    <section>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">徽章 (Badges)</h2>
+        <div class="p-6 bg-base-100 rounded-xl border border-base-content/10">
+            <div class="flex gap-2">
+                <div class="badge">Default</div>
+                <div class="badge badge-neutral">Neutral</div>
+                <div class="badge badge-primary">Primary</div>
+                <div class="badge badge-secondary">Secondary</div>
+                <div class="badge badge-accent">Accent</div>
+                <div class="badge badge-ghost">Ghost</div>
+            </div>
+            <div class="flex gap-2 mt-4">
+                <div class="badge badge-outline">Default</div>
+                <div class="badge badge-primary badge-outline">Primary</div>
+                <div class="badge badge-secondary badge-outline">Secondary</div>
+                <div class="badge badge-accent badge-outline">Accent</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Form Inputs -->
+    <section>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">表单 (Forms)</h2>
+        <div class="p-6 bg-base-100 rounded-xl border border-base-content/10 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="form-control w-full">
+                <label class="label"><span class="label-text">Text Input</span></label>
+                <input type="text" placeholder="Type here" class="input input-bordered w-full" />
+            </div>
+            <div class="form-control w-full">
+                <label class="label"><span class="label-text">Select</span></label>
+                <select class="select select-bordered">
+                    <option disabled selected>Pick one</option>
+                    <option>Star Wars</option>
+                    <option>Harry Potter</option>
+                    <option>Lord of the Rings</option>
+                </select>
+            </div>
+            <div class="form-control w-full">
+                <label class="label"><span class="label-text">Checkbox</span></label>
+                <input type="checkbox" class="checkbox" checked />
+            </div>
+            <div class="form-control w-full">
+                <label class="label"><span class="label-text">Toggle</span></label>
+                <input type="checkbox" class="toggle" checked />
+            </div>
+            <div class="form-control w-full">
+                <label class="label"><span class="label-text">Range</span></label>
+                <input type="range" min="0" max="100" value="40" class="range" />
+            </div>
+        </div>
+    </section>
+</div>
+{% endblock %}

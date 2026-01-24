@@ -30,6 +30,14 @@
             <span class="material-symbols-outlined text-lg mr-2">dashboard</span>
             概览
         </a>
+        <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug_ui_test' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug_ui_test' %}">
+            <span class="material-symbols-outlined text-lg mr-2">palette</span>
+            UI 测试
+        </a>
+        <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug_permission' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug_permission' %}">
+            <span class="material-symbols-outlined text-lg mr-2">verified_user</span>
+            权限检查
+        </a>
         <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug_mock' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug_mock' %}">
             <span class="material-symbols-outlined text-lg mr-2">science</span>
             Mock 数据

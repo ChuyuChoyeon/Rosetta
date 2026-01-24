@@ -1,6 +1,13 @@
 import pytest
-from core.models import Page, Navigation, FriendLink, SearchPlaceholder, Notification
 from django.urls import reverse
+
+from core.models import (
+    FriendLink,
+    Navigation,
+    Notification,
+    Page,
+    SearchPlaceholder,
+)
 
 @pytest.mark.django_db
 class TestCoreModels:
@@ -27,10 +34,11 @@ class TestCoreModels:
         notif = Notification.objects.create(
             user=user,
             title="Welcome",
-            message="Welcome to Rosetta"
+            message="Welcome to Rosetta",
         )
         assert str(notif) == "Welcome"
         assert notif.is_read is False
+
 
 @pytest.mark.django_db
 class TestCoreViews:
@@ -47,11 +55,11 @@ class TestCoreViews:
 
     def test_rosetta_intro_removed(self, client):
         # Verify that the rosetta intro page is indeed gone (404)
-        # Note: In Django, if URL is removed, reverse will fail. 
-        # So we check by manual path or expect NoReverseMatch if we try to reverse it.
+        # Note: In Django, if URL is removed, reverse will fail.
+        # So we check by manual path or expect NoReverseMatch if we try it.
         try:
             url = reverse("rosetta_intro")
             response = client.get(url)
             assert response.status_code == 404
         except Exception:
-            pass # Good, url name not found
+            pass  # Good, url name not found

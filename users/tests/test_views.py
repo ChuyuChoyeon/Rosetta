@@ -68,7 +68,8 @@ class UserTests(TestCase):
 
     def test_login_success(self):
         response = self.client.post(
-            self.login_url, {"username": "existing", "password": "ComplexPassword123!"}
+            self.login_url,
+            {"username": "existing", "password": "ComplexPassword123!"},
         )
         self.assertEqual(response.status_code, 302)
         self.assertTrue(response.wsgi_request.user.is_authenticated)
@@ -87,7 +88,10 @@ class UserTests(TestCase):
         self.client.force_login(self.existing_user)
         response = self.client.get(self.profile_url, HTTP_HX_REQUEST="true")
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "users/includes/profile_content.html")
+        self.assertTemplateUsed(
+            response,
+            "users/includes/profile_content.html",
+        )
 
     def test_profile_view_tabs(self):
         self.client.force_login(self.existing_user)
@@ -113,7 +117,11 @@ class UserTests(TestCase):
         if not hasattr(self.existing_user, "preference"):
             UserPreference.objects.create(user=self.existing_user)
 
-        data = {"save_preferences": "true", "theme": "dark", "public_profile": True}
+        data = {
+            "save_preferences": "true",
+            "theme": "dark",
+            "public_profile": True,
+        }
         response = self.client.post(self.profile_url + "?tab=settings", data)
         self.assertEqual(response.status_code, 302)
         self.existing_user.preference.refresh_from_db()
@@ -179,7 +187,10 @@ class UserTests(TestCase):
 
         self.client.force_login(self.existing_user)
         response = self.client.get(
-            reverse("users:mark_notification_read", kwargs={"pk": notification.pk})
+            reverse(
+                "users:mark_notification_read",
+                kwargs={"pk": notification.pk},
+            )
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("users:profile"))
@@ -202,8 +213,11 @@ class UserTests(TestCase):
 
         self.client.force_login(self.existing_user)
         response = self.client.get(
-            reverse("users:mark_notification_read", kwargs={"pk": notification.pk})
-            + "?next=/"
+            reverse(
+                "users:mark_notification_read",
+                kwargs={"pk": notification.pk},
+            )
+            + "?next=/",
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "/")
@@ -225,7 +239,10 @@ class UserTests(TestCase):
 
         self.client.force_login(self.existing_user)
         response = self.client.get(
-            reverse("users:mark_notification_read", kwargs={"pk": notification.pk})
+            reverse(
+                "users:mark_notification_read",
+                kwargs={"pk": notification.pk},
+            )
         )
         self.assertEqual(response.status_code, 404)
 
@@ -243,11 +260,16 @@ class UserTests(TestCase):
 
         self.client.force_login(self.existing_user)
         response = self.client.post(
-            reverse("users:delete_notification", kwargs={"pk": notification.pk})
+            reverse(
+                "users:delete_notification",
+                kwargs={"pk": notification.pk},
+            )
         )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, reverse("users:profile"))
-        self.assertFalse(Notification.objects.filter(pk=notification.pk).exists())
+        self.assertFalse(
+            Notification.objects.filter(pk=notification.pk).exists()
+        )
 
     def test_delete_notification_forbidden(self):
         actor = User.objects.create_user(
@@ -266,7 +288,10 @@ class UserTests(TestCase):
 
         self.client.force_login(self.existing_user)
         response = self.client.post(
-            reverse("users:delete_notification", kwargs={"pk": notification.pk})
+            reverse(
+                "users:delete_notification",
+                kwargs={"pk": notification.pk},
+            )
         )
         self.assertEqual(response.status_code, 404)
 
@@ -297,13 +322,19 @@ class UserTests(TestCase):
         )
         response = self.client.post(url, {})
         self.assertEqual(response.status_code, 302)
-        self.assertTrue(response.url.startswith(reverse("users:login")))
+        self.assertTrue(
+            response.url.startswith(reverse("users:login"))
+        )
 
     def test_profile_post_other_user(self):
-        other_user = User.objects.create_user(username="other", password="password")
+        other_user = User.objects.create_user(
+            username="other",
+            password="password",
+        )
         self.client.force_login(self.existing_user)
         url = reverse(
-            "users:user_public_profile", kwargs={"username": other_user.username}
+            "users:user_public_profile",
+            kwargs={"username": other_user.username},
         )
         response = self.client.post(url, {})
         self.assertEqual(response.status_code, 302)
@@ -318,7 +349,10 @@ class UserTests(TestCase):
             "save_preferences": "true",
             "theme": "invalid_theme_choice",
         }
-        response = self.client.post(self.profile_url + "?tab=settings", data)
+        response = self.client.post(
+            self.profile_url + "?tab=settings",
+            data,
+        )
         self.assertEqual(response.status_code, 302)
 
     def test_profile_update_invalid(self):
@@ -332,7 +366,13 @@ class UserTests(TestCase):
 
     def test_profile_update_next_url(self):
         self.client.force_login(self.existing_user)
-        data = {"nickname": "Updated Nick", "email": "valid@example.com"}
-        response = self.client.post(self.profile_url + "?next=/dashboard/", data)
+        data = {
+            "nickname": "Updated Nick",
+            "email": "valid@example.com",
+        }
+        response = self.client.post(
+            self.profile_url + "?next=/dashboard/",
+            data,
+        )
         self.assertEqual(response.status_code, 302)
         self.assertEqual(response.url, "/dashboard/")

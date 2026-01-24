@@ -382,13 +382,28 @@ class BaseDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
     基础删除视图混入类
     
     提供通用的对象删除确认功能。
-    删除成功后显示消息提示。
+    支持标准 POST 删除和 HTMX 删除。
     """
     template_name = "administration/generic_confirm_delete.html"
 
     def form_valid(self, form):
+        success_url = self.get_success_url()
+        self.object.delete()
+        
+        # HTMX Support
+        if self.request.headers.get("HX-Request"):
+            # 返回空内容以移除行，并触发 Toast 消息
+            response = HttpResponse("")
+            response["HX-Trigger"] = json.dumps({
+                "showToast": {
+                    "message": f"{self.model._meta.verbose_name} 删除成功",
+                    "type": "success"
+                }
+            })
+            return response
+            
         messages.success(self.request, f"{self.model._meta.verbose_name} 删除成功")
-        return super().form_valid(form)
+        return HttpResponseRedirect(success_url)
 
 
 from django.shortcuts import get_object_or_404, redirect
@@ -554,6 +569,21 @@ class CategoryUpdateView(BaseUpdateView):
 class CategoryDeleteView(BaseDeleteView):
     """
     分类删除视图
+    """
+    model = Category
+    success_url = reverse_lazy("administration:category_list")
+
+
+class CategoryExportView(BaseExportView):
+    """
+    分类导出视图
+    """
+    model = Category
+
+
+class CategoryImportView(BaseImportView):
+    """
+    分类导入视图
     """
     model = Category
     success_url = reverse_lazy("administration:category_list")
@@ -842,7 +872,22 @@ class NavigationUpdateView(BaseUpdateView):
 
 class NavigationDeleteView(BaseDeleteView):
     """
-    导航菜单删除视图
+    导航删除视图
+    """
+    model = Navigation
+    success_url = reverse_lazy("administration:navigation_list")
+
+
+class NavigationExportView(BaseExportView):
+    """
+    导航导出视图
+    """
+    model = Navigation
+
+
+class NavigationImportView(BaseImportView):
+    """
+    导航导入视图
     """
     model = Navigation
     success_url = reverse_lazy("administration:navigation_list")
@@ -1492,6 +1537,9 @@ class ExportAllView(LoginRequiredMixin, StaffRequiredMixin, View):
             if not model_cls:
                 if model.lower() == "user":
                     model_cls = User
+                elif model.lower() == "usertitle":
+                    from users.models import UserTitle
+                    model_cls = UserTitle
                 elif model.lower() == "group":
                     model_cls = Group
                 elif model.lower() == "logentry":
@@ -1548,6 +1596,9 @@ class ImportJsonView(LoginRequiredMixin, StaffRequiredMixin, View):
             if not model_cls:
                 if model.lower() == "user":
                     model_cls = User
+                elif model.lower() == "usertitle":
+                    from users.models import UserTitle
+                    model_cls = UserTitle
                 elif model.lower() == "group":
                     model_cls = Group
                 elif model.lower() == "logentry":
@@ -1609,6 +1660,9 @@ from django.urls import get_resolver, reverse
 from django.db import connection
 from django.apps import apps
 import re
+import sys
+import platform
+import django
 
 try:
     from faker import Faker
@@ -1623,6 +1677,7 @@ class DebugDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     - 数据库连接状态
     - 关键对象数量统计
     - 系统所有 URL 模式列表 (前 50 条)
+    - 系统环境信息 (Python/Django 版本)
     """
     template_name = "administration/debug.html"
 
@@ -1631,6 +1686,15 @@ class DebugDashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         
         # 显式添加 debug_mode 到上下文
         context['debug_mode'] = settings.DEBUG
+
+        # 系统环境信息
+        context['system_info'] = {
+            'python_version': sys.version.split()[0],
+            'django_version': django.get_version(),
+            'platform': platform.platform(),
+            'server_time': timezone.now(),
+            'base_dir': settings.BASE_DIR,
+        }
 
         # 数据库连接检查
         try:
@@ -2021,3 +2085,35 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
                     
         messages.success(request, "设置已保存")
         return self.get(request, *args, **kwargs)
+
+
+class DebugUITestView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+    """
+    UI 组件测试视图
+    
+    展示常用 UI 组件以测试主题一致性。
+    """
+    template_name = "administration/debug/ui_test.html"
+
+
+class DebugPermissionView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+    """
+    权限调试视图
+    
+    检查指定用户的权限详情。
+    """
+    template_name = "administration/debug/permission.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        username = self.request.GET.get("username")
+        if username:
+            try:
+                target_user = User.objects.get(username=username)
+                context["target_user"] = target_user
+                context["user_permissions"] = sorted(list(target_user.get_all_permissions()))
+                context["group_permissions"] = sorted(list(target_user.get_group_permissions()))
+                context["groups"] = target_user.groups.all()
+            except User.DoesNotExist:
+                context["error"] = f"用户 '{username}' 不存在"
+        return context
