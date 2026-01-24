@@ -112,7 +112,7 @@ else:
     CONSTANCE_REDIS_CONNECTION = env("REDIS_URL")
     CONSTANCE_REDIS_PREFIX = "rosetta_config:"
     # Redis 连接池配置
-    CONSTANCE_REDIS_CONNECTION_CLASS = 'django_redis.client.DefaultClient'
+    CONSTANCE_REDIS_CONNECTION_CLASS = 'core.utils.ConstanceRedisConnection'
 
 
 # ------------------------------------------------------------------------------

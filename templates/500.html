@@ -1,36 +1,87 @@
-{% extends "base.html" %}
-
-{% block title %}服务器错误 - 500{% endblock %}
-
-{% block content %}
-<div class="hero min-h-screen bg-base-200">
-  <div class="hero-content text-center py-20">
-    <div class="max-w-2xl">
-      <div class="mb-12 relative inline-block">
-          <div class="leading-none font-black text-secondary/20 select-none" style="font-size: 15rem; color: oklch(var(--s) / 0.2);">500</div>
-          <div class="absolute inset-0 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-40 w-40 text-secondary animate-pulse drop-shadow-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>服务器错误 - 500</title>
+    <link rel="shortcut icon" href="{% static 'core/img/favicon.ico' %}">
+    
+    <!-- Google 字体 -->
+    <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">
+    
+    <!-- Material Symbols -->
+    <style>
+        @font-face {
+            font-family: 'Material Symbols Outlined';
+            font-style: normal;
+            font-weight: 100 700;
+            font-display: swap;
+            src: url("{% static 'theme/fonts/MaterialSymbolsOutlined.woff2' %}") format('woff2');
+        }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-style: normal;
+            font-weight: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+    </style>
+    
+    {% tailwind_css %}
+</head>
+<body class="min-h-screen flex flex-col font-sans text-base-content bg-base-200">
+    <div class="hero min-h-screen">
+      <div class="hero-content text-center py-20">
+        <div class="max-w-2xl">
+          <div class="mb-12 relative inline-block">
+              <div class="leading-none font-black text-secondary/20 select-none" style="font-size: 15rem; color: oklch(var(--s) / 0.2);">500</div>
+              <div class="absolute inset-0 flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-40 w-40 text-secondary animate-pulse drop-shadow-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+              </div>
           </div>
-      </div>
 
-      <h1 class="text-5xl font-bold mb-8 tracking-tight">服务器出错了</h1>
-      <p class="py-6 text-base-content/60 text-xl leading-relaxed max-w-lg mx-auto">
-        抱歉，服务器遇到了一些问题。
-        <br>
-        我们的技术团队已收到自动通知，正在努力修复。
-      </p>
-      
-      <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
-          <a href="/" class="btn btn-primary btn-lg px-10 shadow-lg hover:shadow-xl transition-all">返回首页</a>
-          <button onclick="location.reload()" class="btn btn-outline btn-lg px-10">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-              刷新页面
-          </button>
+          <h1 class="text-5xl font-bold mb-8 tracking-tight">服务器出错了</h1>
+          <p class="py-6 text-base-content/60 text-xl leading-relaxed max-w-lg mx-auto">
+            抱歉，服务器遇到了一些问题。
+            <br>
+            我们的技术团队已收到自动通知，正在努力修复。
+          </p>
+          
+          <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
+              <a href="/" class="btn btn-primary btn-lg px-10 shadow-lg hover:shadow-xl transition-all">返回首页</a>
+              <button onclick="location.reload()" class="btn btn-outline btn-lg px-10">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+                  刷新页面
+              </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-</div>
-{% endblock %}
+    
+    <!-- Theme initialization script (simplified) -->
+    <script>
+        (function() {
+            try {
+                var localTheme = localStorage.getItem('theme');
+                var theme = localTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+                if (['dark'].includes(theme)) {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) {}
+        })();
+    </script>
+</body>
+</html>

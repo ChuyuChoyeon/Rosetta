@@ -29,3 +29,16 @@ def generate_unique_slug(model_class, source_text, slug_field="slug", allow_unic
         n += 1
         
     return unique_slug
+
+
+class ConstanceRedisConnection:
+    """
+    Helper class to provide a Redis connection for django-constance
+    reusing the django-redis connection pool.
+    
+    django-constance expects a class that can be instantiated with no arguments
+    and returns a redis client.
+    """
+    def __new__(cls):
+        from django_redis import get_redis_connection
+        return get_redis_connection("default")
