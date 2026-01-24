@@ -3,7 +3,11 @@ import django.db.models.deletion
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
-from core.utils import generate_unique_slug
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
+from django.db.models.signals import post_save, post_delete, m2m_changed
+from django.dispatch import receiver
+from core.utils import generate_unique_slug, schedule_post_image_processing
 from core.validators import validate_image_file
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
@@ -274,3 +278,64 @@ class PostViewHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.username} 浏览了 {self.post.title}"
+
+
+def _delete_pattern(pattern):
+    delete_pattern = getattr(cache, "delete_pattern", None)
+    if callable(delete_pattern):
+        delete_pattern(pattern)
+    else:
+        cache.clear()
+
+
+def _clear_sidebar_cache():
+    cache.delete("sidebar:tags")
+    cache.delete("sidebar:comments")
+    cache.delete("sidebar:popular_posts")
+    cache.delete("sidebar:categories")
+    cache.delete(make_template_fragment_key("sidebar_tags"))
+    cache.delete(make_template_fragment_key("sidebar_comments"))
+    cache.delete(make_template_fragment_key("sidebar_popular_posts"))
+
+
+@receiver([post_save, post_delete], sender=Comment)
+def _invalidate_comment_sidebar_cache(sender, instance, **kwargs):
+    cache.delete("sidebar:comments")
+    cache.delete(make_template_fragment_key("sidebar_comments"))
+
+
+@receiver([post_save, post_delete], sender=Tag)
+def _invalidate_tag_sidebar_cache(sender, instance, **kwargs):
+    cache.delete("sidebar:tags")
+    cache.delete(make_template_fragment_key("sidebar_tags"))
+    _delete_pattern("post:*:related")
+    _delete_pattern("post:*:meta_desc")
+
+
+@receiver([post_save, post_delete], sender=Category)
+def _invalidate_category_sidebar_cache(sender, instance, **kwargs):
+    cache.delete("sidebar:categories")
+
+
+@receiver([post_save, post_delete], sender=Post)
+def _invalidate_post_cache(sender, instance, **kwargs):
+    _clear_sidebar_cache()
+    cache.delete(f"post:{instance.id}:related")
+    cache.delete(f"post:{instance.id}:previous")
+    cache.delete(f"post:{instance.id}:next")
+    cache.delete(f"post:{instance.id}:meta_desc")
+    _delete_pattern("post:*:previous")
+    _delete_pattern("post:*:next")
+    _delete_pattern("post:*:related")
+    if kwargs.get("signal") == post_save and instance.cover_image:
+        schedule_post_image_processing(instance.id)
+
+
+@receiver(m2m_changed, sender=Post.tags.through)
+def _invalidate_post_tags_cache(sender, instance, action, **kwargs):
+    if action in {"post_add", "post_remove", "post_clear"}:
+        cache.delete(f"post:{instance.id}:related")
+        cache.delete(f"post:{instance.id}:meta_desc")
+        cache.delete("sidebar:tags")
+        cache.delete(make_template_fragment_key("sidebar_tags"))
+        _delete_pattern("post:*:related")

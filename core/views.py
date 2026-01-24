@@ -25,6 +25,8 @@ from django.views.generic import DetailView
 from blog.models import Category, Comment, Post
 from core.services import generate_mock_data
 from .models import Page
+from constance import config
+from meta.views import Meta
 
 
 @require_GET
@@ -72,6 +74,34 @@ class PageView(DetailView):
 
     def get_queryset(self):
         return Page.objects.filter(status="published").order_by("-created_at")
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        site_desc = getattr(config, "SITE_DESCRIPTION", "")
+        site_keywords = getattr(config, "SITE_KEYWORDS", "")
+        keywords = [
+            item.strip() for item in str(site_keywords).split(",") if item.strip()
+        ]
+        page = self.object
+        description = site_desc
+        if page and page.content:
+            from django.utils.html import strip_tags
+            import markdown
+
+            text = strip_tags(markdown.markdown(page.content))
+            if text:
+                description = text[:150] + "..." if len(text) > 150 else text
+        if page and page.title:
+            keywords = keywords + [page.title]
+        context["meta"] = Meta(
+            title=f"{site_name} - {page.title}",
+            description=description or "",
+            keywords=keywords,
+            url=self.request.build_absolute_uri(),
+            object_type="article",
+        )
+        return context
 
 
 def health_check(request):

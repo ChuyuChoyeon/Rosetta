@@ -43,6 +43,8 @@ import os
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, Http404
+from core.utils import trigger_watson_rebuild_async, queue_post_images_async
+import uuid
 
 User = get_user_model()
 
@@ -2252,9 +2254,68 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             )
 
         context["fieldsets"] = fieldsets
+        latest_task_key = cache.get("watson:rebuild:latest")
+        watson_status = cache.get(latest_task_key) if latest_task_key else None
+        context["watson_rebuild_status"] = (
+            watson_status.get("status") if watson_status else "idle"
+        )
+        context["watson_rebuild_updated_at"] = (
+            watson_status.get("updated_at") if watson_status else ""
+        )
+        latest_image_key = cache.get("image:queue:latest")
+        image_status = cache.get(latest_image_key) if latest_image_key else None
+        context["image_queue_status"] = (
+            image_status.get("status") if image_status else "idle"
+        )
+        context["image_queue_updated_at"] = (
+            image_status.get("updated_at") if image_status else ""
+        )
+        context["image_queue_queued"] = (
+            image_status.get("queued") if image_status else 0
+        )
+        context["image_queue_delay"] = (
+            image_status.get("delay")
+            if image_status
+            else getattr(settings, "IMAGE_PROCESSING_DELAY", 120)
+        )
+        context["cover_image_count"] = (
+            Post.objects.filter(cover_image__isnull=False)
+            .exclude(cover_image="")
+            .count()
+        )
         return context
 
     def post(self, request, *args, **kwargs):
+        action = request.POST.get("action")
+        if action == "rebuild_watson":
+            result = trigger_watson_rebuild_async()
+            if result["accepted"]:
+                messages.success(request, "搜索索引重建已开始")
+            else:
+                messages.info(request, "已有重建任务在执行，请稍后再试")
+            return self.get(request, *args, **kwargs)
+
+        if action == "queue_images":
+            try:
+                limit = max(1, int(request.POST.get("limit") or 20))
+                delay = max(
+                    0,
+                    int(
+                        request.POST.get("delay")
+                        or getattr(settings, "IMAGE_PROCESSING_DELAY", 120)
+                    ),
+                )
+            except (TypeError, ValueError):
+                messages.error(request, "参数不合法，请检查输入")
+                return self.get(request, *args, **kwargs)
+
+            result = queue_post_images_async(limit=limit, delay_seconds=delay)
+            if result["accepted"]:
+                messages.success(request, "图片处理队列已开始")
+            else:
+                messages.info(request, "已有图片处理任务在执行，请稍后再试")
+            return self.get(request, *args, **kwargs)
+
         # 保存设置
         if hasattr(django_settings, "CONSTANCE_CONFIG"):
             for key in django_settings.CONSTANCE_CONFIG.keys():

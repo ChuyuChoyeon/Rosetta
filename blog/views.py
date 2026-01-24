@@ -16,6 +16,25 @@ import re
 from meta.views import Meta
 from .services import create_comment
 from .schemas import CommentCreateSchema
+from constance import config
+
+
+def _parse_keywords(value):
+    if not value:
+        return []
+    if isinstance(value, (list, tuple)):
+        return list(value)
+    return [item.strip() for item in str(value).split(",") if item.strip()]
+
+
+def _build_meta(title, request, description=None, keywords=None, object_type="website"):
+    return Meta(
+        title=title,
+        description=description or "",
+        keywords=keywords or [],
+        url=request.build_absolute_uri(),
+        object_type=object_type,
+    )
 
 
 class SidebarContextMixin:
@@ -32,6 +51,7 @@ class SidebarContextMixin:
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         ttl = getattr(settings, "SIDEBAR_CACHE_TTL", 300)
+        context["sidebar_cache_ttl"] = ttl
 
         def load_cached(key, builder):
             data = cache.get(key)
@@ -88,6 +108,16 @@ class HomeView(SidebarContextMixin, ListView):
         .prefetch_related("tags")
     )
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        site_desc = getattr(config, "SITE_DESCRIPTION", "")
+        site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        context["meta"] = _build_meta(
+            f"{site_name} - 首页", self.request, site_desc, site_keywords
+        )
+        return context
+
 
 class ArchiveView(SidebarContextMixin, ListView):
     """
@@ -106,6 +136,16 @@ class ArchiveView(SidebarContextMixin, ListView):
         .order_by("-created_at")
     )
     paginate_by = 100  # 归档页显示更多文章，便于快速浏览
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        site_desc = getattr(config, "SITE_DESCRIPTION", "")
+        site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        context["meta"] = _build_meta(
+            f"{site_name} - 归档", self.request, site_desc, site_keywords
+        )
+        return context
 
 
 class PostDetailView(DetailView):
@@ -130,6 +170,7 @@ class PostDetailView(DetailView):
         """添加评论、评论表单和 Meta 信息到上下文"""
         context = super().get_context_data(**kwargs)
         ttl = getattr(settings, "SIDEBAR_CACHE_TTL", 300)
+        context["sidebar_cache_ttl"] = ttl
 
         def load_cached(key, builder):
             data = cache.get(key)
@@ -215,7 +256,7 @@ class PostDetailView(DetailView):
         """生成页面 Meta 数据用于 SEO"""
         post = self.object
         ttl = getattr(settings, "SIDEBAR_CACHE_TTL", 300)
-        cache_key = f"post:{post.id}:{int(post.updated_at.timestamp())}:meta_desc"
+        cache_key = f"post:{post.id}:meta_desc"
         description = cache.get(cache_key)
 
         # 处理描述：优先使用摘要，否则截取内容并去除 Markdown/HTML 标签
@@ -349,6 +390,16 @@ class CategoryListView(ListView):
     context_object_name = "categories"
     queryset = Category.objects.order_by("name")
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        site_desc = getattr(config, "SITE_DESCRIPTION", "")
+        site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        context["meta"] = _build_meta(
+            f"{site_name} - 分类", self.request, site_desc, site_keywords
+        )
+        return context
+
 
 class TagListView(ListView):
     """
@@ -367,6 +418,16 @@ class TagListView(ListView):
             .annotate(count=Count("posts"))
             .order_by("-count", "name")
         )
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        site_desc = getattr(config, "SITE_DESCRIPTION", "")
+        site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        context["meta"] = _build_meta(
+            f"{site_name} - 标签", self.request, site_desc, site_keywords
+        )
+        return context
 
 
 class PostByCategoryView(SidebarContextMixin, ListView):
@@ -395,6 +456,16 @@ class PostByCategoryView(SidebarContextMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["title"] = f"分类: {self.category.name}"
         context["category"] = self.category
+        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        site_desc = getattr(config, "SITE_DESCRIPTION", "")
+        site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        keywords = site_keywords + [self.category.name]
+        context["meta"] = _build_meta(
+            f"{site_name} - 分类: {self.category.name}",
+            self.request,
+            site_desc,
+            keywords,
+        )
         return context
 
 
@@ -422,6 +493,16 @@ class PostByTagView(SidebarContextMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["title"] = f"标签: {self.tag.name}"
         context["tag"] = self.tag
+        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        site_desc = getattr(config, "SITE_DESCRIPTION", "")
+        site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        keywords = site_keywords + [self.tag.name]
+        context["meta"] = _build_meta(
+            f"{site_name} - 标签: {self.tag.name}",
+            self.request,
+            site_desc,
+            keywords,
+        )
         return context
 
 
@@ -464,7 +545,17 @@ class SearchView(SidebarContextMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["query"] = (self.request.GET.get("q") or "").strip()
+        query = (self.request.GET.get("q") or "").strip()
+        context["query"] = query
+        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        site_desc = getattr(config, "SITE_DESCRIPTION", "")
+        site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        description = site_desc
+        if query:
+            description = f"{site_desc} 搜索：{query}" if site_desc else f"搜索：{query}"
+        context["meta"] = _build_meta(
+            f"{site_name} - 搜索", self.request, description, site_keywords
+        )
         return context
 
 

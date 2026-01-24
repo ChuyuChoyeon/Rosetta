@@ -1,6 +1,10 @@
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils.text import slugify
+from django.core.cache import cache
+from django.core.cache.utils import make_template_fragment_key
+from django.db.models.signals import post_save, post_delete
+from django.dispatch import receiver
 from core.utils import generate_unique_slug
 
 
@@ -150,3 +154,26 @@ class Notification(models.Model):
 
     def __str__(self):
         return self.title
+
+
+def _clear_site_cache():
+    cache.delete("site:friend_links")
+    cache.delete("site:navigations")
+    cache.delete("site:search_placeholders")
+    cache.delete(make_template_fragment_key("sidebar_friend_links"))
+    cache.delete(make_template_fragment_key("sidebar_search"))
+
+
+@receiver([post_save, post_delete], sender=FriendLink)
+def _invalidate_friendlink_cache(sender, instance, **kwargs):
+    _clear_site_cache()
+
+
+@receiver([post_save, post_delete], sender=Navigation)
+def _invalidate_navigation_cache(sender, instance, **kwargs):
+    _clear_site_cache()
+
+
+@receiver([post_save, post_delete], sender=SearchPlaceholder)
+def _invalidate_searchplaceholder_cache(sender, instance, **kwargs):
+    _clear_site_cache()

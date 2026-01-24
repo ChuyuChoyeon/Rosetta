@@ -2,6 +2,8 @@ from django.shortcuts import render
 from django.conf import settings
 from django.urls import reverse
 from constance import config
+from django.core.cache import cache
+import time
 
 
 class MaintenanceMiddleware:
@@ -41,3 +43,58 @@ class MaintenanceMiddleware:
 
         # 4. 其他请求拦截并显示维护页面
         return render(request, "maintenance.html", status=503)
+
+
+class RateLimitMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        if not getattr(settings, "RATE_LIMIT_ENABLED", False):
+            return self.get_response(request)
+
+        rules = getattr(settings, "RATE_LIMIT_RULES", [])
+        if not rules:
+            return self.get_response(request)
+
+        method = request.method.upper()
+        path = request.path
+        ip = self._get_client_ip(request)
+        now = int(time.time())
+
+        for rule in rules:
+            if method not in rule.get("methods", []):
+                continue
+            prefix = rule.get("path_prefix")
+            if prefix and not path.startswith(prefix):
+                continue
+            window = int(rule.get("window", 60))
+            limit = int(rule.get("limit", 10))
+            bucket = now // window
+            key = f"ratelimit:{rule.get('name','default')}:{ip}:{bucket}"
+            if cache.add(key, 0, window):
+                count = 1
+                cache.incr(key)
+            else:
+                count = cache.incr(key)
+            if count > limit:
+                return self._rate_limited_response(request, window)
+
+        return self.get_response(request)
+
+    def _rate_limited_response(self, request, window):
+        if "application/json" in (request.headers.get("Accept") or ""):
+            from django.http import JsonResponse
+
+            return JsonResponse(
+                {"error": "rate_limited", "retry_after": window}, status=429
+            )
+        from django.http import HttpResponse
+
+        return HttpResponse("请求过于频繁，请稍后再试。", status=429)
+
+    def _get_client_ip(self, request):
+        forwarded = request.META.get("HTTP_X_FORWARDED_FOR")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        return request.META.get("REMOTE_ADDR") or "unknown"

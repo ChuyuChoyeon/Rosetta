@@ -112,6 +112,19 @@ else:
     CONSTANCE_REDIS_CONNECTION_CLASS = "core.utils.ConstanceRedisConnection"
 
 SIDEBAR_CACHE_TTL = env.int("SIDEBAR_CACHE_TTL", default=300)
+SITE_SETTINGS_CACHE_TTL = env.int("SITE_SETTINGS_CACHE_TTL", default=300)
+IMAGE_PROCESSING_DELAY = env.int("IMAGE_PROCESSING_DELAY", default=120)
+IMAGE_QUEUE_STATUS_TTL = env.int("IMAGE_QUEUE_STATUS_TTL", default=86400)
+IMAGE_QUEUE_LOCK_TTL = env.int("IMAGE_QUEUE_LOCK_TTL", default=3600)
+WATSON_REBUILD_STATUS_TTL = env.int("WATSON_REBUILD_STATUS_TTL", default=86400)
+WATSON_REBUILD_LOCK_TTL = env.int("WATSON_REBUILD_LOCK_TTL", default=3600)
+
+CELERY_BROKER_URL = env("REDIS_URL", default="memory://")
+CELERY_RESULT_BACKEND = env("REDIS_URL", default="cache+memory://")
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
+CELERY_RESULT_SERIALIZER = "json"
+CELERY_TIMEZONE = "Asia/Shanghai"
 
 # ------------------------------------------------------------------------------
 # 应用注册 (Installed Apps)
@@ -154,6 +167,7 @@ INSTALLED_APPS = [
 # ------------------------------------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "core.middleware.RateLimitMiddleware",
     "core.logging.RequestIDMiddleware",  # 请求 ID
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -287,6 +301,24 @@ if not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+RATE_LIMIT_ENABLED = env.bool("RATE_LIMIT_ENABLED", default=True)
+RATE_LIMIT_RULES = [
+    {
+        "name": "login",
+        "path_prefix": "/users/login/",
+        "methods": ["POST"],
+        "limit": 5,
+        "window": 300,
+    },
+    {
+        "name": "comment",
+        "path_prefix": "/post/",
+        "methods": ["POST"],
+        "limit": 10,
+        "window": 300,
+    },
+]
 
 # ------------------------------------------------------------------------------
 # 第三方组件 (Third Party)

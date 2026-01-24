@@ -1,6 +1,7 @@
 <div class="space-y-8">
     <!-- Search Widget -->
-    {% load capture_tags %}
+    {% load capture_tags cache %}
+    {% cache sidebar_cache_ttl "sidebar_search" %}
     {% captureas search_card %}
         <div class="p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
@@ -14,9 +15,11 @@
     <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
         {{ search_card }}
     </div>
+    {% endcache %}
 
     <!-- Popular Posts -->
     {% if sidebar_popular_posts %}
+    {% cache sidebar_cache_ttl "sidebar_popular_posts" %}
     {% captureas popular_card %}
         <div class="p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
@@ -50,10 +53,12 @@
     <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
         {{ popular_card }}
     </div>
+    {% endcache %}
     {% endif %}
 
     <!-- Tag Cloud -->
     {% if sidebar_tags %}
+    {% cache sidebar_cache_ttl "sidebar_tags" %}
     {% captureas tags_card %}
         <div class="p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
@@ -82,10 +87,12 @@
     <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
         {{ tags_card }}
     </div>
+    {% endcache %}
     {% endif %}
 
     <!-- Recent Comments -->
     {% if sidebar_comments %}
+    {% cache sidebar_cache_ttl "sidebar_comments" %}
     {% captureas comments_card %}
         <div class="p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
@@ -117,10 +124,12 @@
     <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
         {{ comments_card }}
     </div>
+    {% endcache %}
     {% endif %}
 
     <!-- Friend Links -->
     {% if friend_links %}
+    {% cache sidebar_cache_ttl "sidebar_friend_links" %}
     {% captureas links_card %}
         <div class="p-5">
             <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
@@ -156,5 +165,6 @@
     <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
         {{ links_card }}
     </div>
+    {% endcache %}
     {% endif %}
 </div>
