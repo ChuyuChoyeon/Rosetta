@@ -17,6 +17,7 @@ fi
 
 # 收集静态文件
 echo "🎨 正在收集静态文件..."
+python manage.py tailwind build
 python manage.py collectstatic --noinput
 
 # 应用数据库迁移
