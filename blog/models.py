@@ -18,8 +18,15 @@ class Category(models.Model):
     name = models.CharField("名称", max_length=100)
     slug = models.SlugField("别名", unique=True, blank=True)
     description = models.TextField("描述", blank=True)
-    icon = models.CharField("图标", max_length=50, blank=True, help_text="Material Symbols 图标代码")
-    color = models.CharField("颜色", max_length=20, default="primary", help_text="Tailwind 颜色类名 (如 primary, secondary)")
+    icon = models.CharField(
+        "图标", max_length=50, blank=True, help_text="Material Symbols 图标代码"
+    )
+    color = models.CharField(
+        "颜色",
+        max_length=20,
+        default="primary",
+        help_text="Tailwind 颜色类名 (如 primary, secondary)",
+    )
 
     class Meta:
         verbose_name = "分类"
@@ -41,6 +48,7 @@ class Tag(models.Model):
     用于对文章进行灵活标记和分类。
     包含颜色配置，用于前端展示。
     """
+
     COLOR_CHOICES = (
         ("primary", "主色 (Indigo)"),
         ("secondary", "次色 (Pink)"),
@@ -73,6 +81,7 @@ class Tag(models.Model):
 
 from django.contrib.auth.hashers import make_password, check_password
 
+
 class Post(models.Model):
     """
     博客文章核心模型
@@ -96,11 +105,11 @@ class Post(models.Model):
     content = models.TextField("内容")
     excerpt = models.TextField("摘要", blank=True, max_length=500)
     cover_image = models.ImageField(
-        "封面图", 
-        upload_to="posts/", 
-        blank=True, 
+        "封面图",
+        upload_to="posts/",
+        blank=True,
         null=True,
-        validators=[validate_image_file]
+        validators=[validate_image_file],
     )
 
     # ImageKit Thumbnails (自动生成缩略图)
@@ -150,22 +159,22 @@ class Post(models.Model):
         """
         import re
         import math
-        
+
         # 移除 HTML 标签 (如果 content 已经是 Markdown 还没渲染 HTML，则直接计算)
         # 这里假设 content 是 Markdown 源码
         text = self.content
-        
+
         # 简单统计：中文算 1 个字，英文单词算 1 个字
         # 1. 匹配中文字符
-        chinese_char_count = len(re.findall(r'[\u4e00-\u9fa5]', text))
-        
+        chinese_char_count = len(re.findall(r"[\u4e00-\u9fa5]", text))
+
         # 2. 匹配英文单词 (简单的空格分割，移除标点)
-        english_words = re.findall(r'[a-zA-Z0-9]+', text)
+        english_words = re.findall(r"[a-zA-Z0-9]+", text)
         english_word_count = len(english_words)
-        
+
         # 计算总分钟数
         minutes = (chinese_char_count / 300) + (english_word_count / 150)
-        
+
         return math.ceil(minutes) if minutes > 0 else 1
 
     class Meta:
@@ -173,7 +182,7 @@ class Post(models.Model):
         verbose_name = "文章"
         verbose_name_plural = verbose_name
         indexes = [
-            models.Index(fields=['status', 'created_at']),
+            models.Index(fields=["status", "created_at"]),
         ]
 
     def set_password(self, raw_password):
@@ -196,6 +205,7 @@ class Post(models.Model):
     def get_absolute_url(self):
         """获取文章详情页的绝对 URL"""
         from django.urls import reverse
+
         return reverse("post_detail", kwargs={"slug": self.slug})
 
 
@@ -234,7 +244,7 @@ class Comment(models.Model):
     @property
     def active_replies(self):
         """获取当前评论下所有可见的回复"""
-        if hasattr(self, 'active_replies_list'):
+        if hasattr(self, "active_replies_list"):
             return self.active_replies_list
         return self.replies.filter(active=True)
 
@@ -264,6 +274,3 @@ class PostViewHistory(models.Model):
 
     def __str__(self):
         return f"{self.user.username} 浏览了 {self.post.title}"
-
-
-

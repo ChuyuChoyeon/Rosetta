@@ -40,12 +40,12 @@
 </head>
 <body class="min-h-screen flex flex-col font-sans text-base-content bg-base-200">
     <div class="hero min-h-screen">
-      <div class="hero-content text-center py-20">
+      <div class="hero-content text-center py-20 px-4">
         <div class="max-w-2xl">
           <div class="mb-12 relative inline-block">
-              <div class="leading-none font-black text-secondary/20 select-none" style="font-size: 15rem; color: oklch(var(--s) / 0.2);">500</div>
+              <div class="leading-none font-black text-secondary/20 select-none text-[7rem] sm:text-[9rem] lg:text-[15rem]" style="color: oklch(var(--s) / 0.2);">500</div>
               <div class="absolute inset-0 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-40 w-40 text-secondary animate-pulse drop-shadow-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-36 w-36 sm:h-40 sm:w-40 text-secondary animate-pulse motion-reduce:animate-none drop-shadow-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                   </svg>
@@ -53,15 +53,15 @@
           </div>
 
           <h1 class="text-5xl font-bold mb-8 tracking-tight">服务器出错了</h1>
-          <p class="py-6 text-base-content/60 text-xl leading-relaxed max-w-lg mx-auto">
+          <p class="py-6 text-base-content/70 text-xl leading-relaxed max-w-lg mx-auto">
             抱歉，服务器遇到了一些问题。
             <br>
             我们的技术团队已收到自动通知，正在努力修复。
           </p>
           
           <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
-              <a href="/" class="btn btn-primary btn-lg px-10 shadow-lg hover:shadow-xl transition-all">返回首页</a>
-              <button onclick="location.reload()" class="btn btn-outline btn-lg px-10">
+              <a href="/" class="btn btn-primary btn-lg px-10 min-h-12 shadow-lg hover:shadow-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">返回首页</a>
+              <button onclick="location.reload()" class="btn btn-outline btn-lg px-10 min-h-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
                   刷新页面
               </button>

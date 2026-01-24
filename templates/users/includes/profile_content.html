@@ -1,4 +1,4 @@
-{% load static %}
+{% load static markdown_extras %}
 {% include 'users/includes/profile_tabs.html' %}
 
 <div id="profile-content-inner" class="fade-in">
@@ -17,7 +17,7 @@
     {% if posts %}
         <div class="flex flex-col gap-6">
             {% for post in posts %}
-            <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all border border-base-content/10 flex-col md:flex-row overflow-hidden md:h-40">
+            <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all border border-base-content/10 flex-col md:flex-row overflow-hidden md:min-h-[10rem]">
                 {% if post.cover_image %}
                 <figure class="w-full md:w-48 shrink-0 h-48 md:h-full overflow-hidden relative">
                     <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
@@ -27,7 +27,7 @@
                     <h3 class="card-title text-lg font-bold">
                         <a href="{{ post.get_absolute_url }}" class="hover:text-primary transition-colors line-clamp-1">{{ post.title }}</a>
                     </h3>
-                    <p class="text-sm text-base-content/70 line-clamp-2 mt-2">{{ post.excerpt|default:post.content|striptags|truncatechars:100 }}</p>
+                    <p class="text-sm text-base-content/70 line-clamp-2 mt-2 leading-relaxed min-h-[2.8rem]">{{ post.excerpt|default:post.content|markdown_text|truncatechars:100 }}</p>
                     <div class="flex items-center justify-between mt-auto pt-4 text-xs text-base-content/50">
                         <div class="flex items-center gap-3">
                             <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> {{ post.created_at|date:"Y-m-d" }}</span>

@@ -6,25 +6,22 @@ from .schemas import CommentCreateSchema, PostCreateSchema
 import re
 from typing import Optional
 
+
 def create_comment(post: Post, user: User, data: CommentCreateSchema) -> Comment:
     """
     创建评论并处理相关通知 (使用 Pydantic Schema)
-    
+
     Args:
         post: 评论所属的文章对象
         user: 评论发布者
         data: 包含评论内容和父评论 ID 的 Pydantic Schema
-        
+
     Returns:
         Comment: 创建的评论对象
     """
     with transaction.atomic():
-        comment = Comment(
-            post=post,
-            user=user,
-            content=data.content
-        )
-        
+        comment = Comment(post=post, user=user, content=data.content)
+
         parent_comment = None
         # 处理父评论（回复）
         if data.parent_id:
@@ -33,7 +30,7 @@ def create_comment(post: Post, user: User, data: CommentCreateSchema) -> Comment
                 comment.parent = parent_comment
             except Comment.DoesNotExist:
                 pass
-        
+
         comment.save()
 
         # 通知被回复的用户
@@ -59,17 +56,18 @@ def create_comment(post: Post, user: User, data: CommentCreateSchema) -> Comment
                     )
             except User.DoesNotExist:
                 pass
-                
+
         return comment
+
 
 def create_post_service(user: User, data: PostCreateSchema) -> Post:
     """
     创建文章服务
-    
+
     Args:
         user: 文章作者
         data: 包含文章信息的 Pydantic Schema
-        
+
     Returns:
         Post: 创建的文章对象
     """
@@ -79,20 +77,22 @@ def create_post_service(user: User, data: PostCreateSchema) -> Post:
             try:
                 category = Category.objects.get(id=data.category_id)
             except Category.DoesNotExist:
-                raise ValidationError(f"Category with id {data.category_id} does not exist")
-        
+                raise ValidationError(
+                    f"Category with id {data.category_id} does not exist"
+                )
+
         post = Post.objects.create(
             author=user,
             title=data.title,
             content=data.content,
             status=data.status,
-            category=category
+            category=category,
         )
-        
+
         # 处理标签
         if data.tags:
             for tag_name in data.tags:
                 tag, created = Tag.objects.get_or_create(name=tag_name)
                 post.tags.add(tag)
-        
+
         return post

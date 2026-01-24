@@ -4,27 +4,27 @@
 
 {% block content %}
 <div class="hero min-h-screen bg-base-200">
-  <div class="hero-content text-center py-20">
+  <div class="hero-content text-center py-20 px-4">
     <div class="max-w-2xl">
       <div class="mb-12 relative inline-block">
-          <div class="leading-none font-black text-secondary/20 select-none" style="font-size: 15rem; color: oklch(var(--s) / 0.2);">400</div>
+          <div class="leading-none font-black text-secondary/20 select-none text-[7rem] sm:text-[9rem] lg:text-[15rem]" style="color: oklch(var(--s) / 0.2);">400</div>
           <div class="absolute inset-0 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-40 w-40 text-secondary drop-shadow-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-36 w-36 sm:h-40 sm:w-40 text-secondary drop-shadow-xl" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
           </div>
       </div>
 
       <h1 class="text-5xl font-bold mb-8 tracking-tight">错误请求</h1>
-      <p class="py-6 text-base-content/60 text-xl leading-relaxed max-w-lg mx-auto">
+      <p class="py-6 text-base-content/70 text-xl leading-relaxed max-w-lg mx-auto">
         服务器无法理解您的请求。
         <br>
         这可能是由于无效的参数或请求格式错误导致的。
       </p>
       
       <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
-          <a href="/" class="btn btn-primary btn-lg px-10 shadow-lg hover:shadow-xl transition-all">返回首页</a>
-          <button onclick="history.back()" class="btn btn-outline btn-lg px-10">
+          <a href="/" class="btn btn-primary btn-lg px-10 min-h-12 shadow-lg hover:shadow-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">返回首页</a>
+          <button onclick="history.back()" class="btn btn-outline btn-lg px-10 min-h-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
               返回上一页
           </button>

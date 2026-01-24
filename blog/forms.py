@@ -7,6 +7,7 @@ class CommentForm(forms.ModelForm):
     评论表单
     用于用户提交评论内容。
     """
+
     class Meta:
         model = Comment
         fields = ["content"]

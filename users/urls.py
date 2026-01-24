@@ -25,7 +25,6 @@ urlpatterns = [
         LogoutView.as_view(next_page="users:login"),
         name="logout",
     ),
-
     # --- 个人资料相关 ---
     # 当前登录用户的个人资料页 (重定向到带 username 的 URL 或显示当前用户)
     path("profile/", UnifiedProfileView.as_view(), name="profile"),
@@ -35,7 +34,6 @@ urlpatterns = [
         UnifiedProfileView.as_view(),
         name="user_public_profile",
     ),
-
     # --- 功能性接口 (AJAX/HTMX) ---
     # 更新主题偏好 (AJAX)
     path("update-theme/", UpdateThemeView.as_view(), name="update_theme"),
@@ -51,7 +49,6 @@ urlpatterns = [
         DeleteNotificationView.as_view(),
         name="delete_notification",
     ),
-
     # --- 账户安全 ---
     # 修改密码
     path(
@@ -59,7 +56,6 @@ urlpatterns = [
         CustomPasswordChangeView.as_view(),
         name="password_change",
     ),
-
     # --- API 接口 (JWT) ---
     path(
         "api/token/",

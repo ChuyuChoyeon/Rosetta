@@ -15,6 +15,7 @@ class UserTitle(models.Model):
     用于给用户设置专属称号，如"VIP"、"贡献者"、"管理员"等。
     包含名称、颜色样式、图标和描述。
     """
+
     COLOR_CHOICES = (
         ("primary", "蓝色"),
         ("secondary", "紫色"),
@@ -122,6 +123,7 @@ class User(AbstractUser):
         获取用户所有文章的总阅读量
         """
         from django.db.models import Sum
+
         return self.posts.aggregate(total=Sum("views"))["total"] or 0
 
 

@@ -14,6 +14,7 @@ class RegisterForm(UserCreationForm):
     - avatar: 头像
     - captcha: 验证码 (防止机器人注册)
     """
+
     captcha = CaptchaField(label="验证码")
 
     class Meta(UserCreationForm.Meta):
@@ -40,6 +41,7 @@ class UserPreferenceForm(forms.ModelForm):
     - public_profile: 是否公开个人资料
     - theme: 界面主题选择 (Light/Dark)
     """
+
     class Meta:
         model = UserPreference
         fields = ["public_profile", "theme"]
@@ -60,6 +62,7 @@ class UserProfileForm(forms.ModelForm):
 
     使用了 DaisyUI 样式的 Widget。
     """
+
     class Meta:
         model = User
         fields = [
@@ -81,16 +84,8 @@ class UserProfileForm(forms.ModelForm):
             "bio": forms.Textarea(
                 attrs={"class": "textarea textarea-bordered h-24 w-full"}
             ),
-            "nickname": forms.TextInput(
-                attrs={"class": "input input-bordered w-full"}
-            ),
-            "website": forms.URLInput(
-                attrs={"class": "input input-bordered w-full"}
-            ),
-            "github": forms.URLInput(
-                attrs={"class": "input input-bordered w-full"}
-            ),
-            "email": forms.EmailInput(
-                attrs={"class": "input input-bordered w-full"}
-            ),
+            "nickname": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "website": forms.URLInput(attrs={"class": "input input-bordered w-full"}),
+            "github": forms.URLInput(attrs={"class": "input input-bordered w-full"}),
+            "email": forms.EmailInput(attrs={"class": "input input-bordered w-full"}),
         }

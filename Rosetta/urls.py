@@ -15,19 +15,17 @@ from django.conf.urls.static import static
 # ------------------------------------------------------------------------------
 urlpatterns = [
     # --- 管理后台 ---
-    path("admin/", include("administration.urls")), # 自定义管理后台，提供增强的仪表盘和功能
-    
+    path(
+        "admin/", include("administration.urls")
+    ),  # 自定义管理后台，提供增强的仪表盘和功能
     # --- 用户系统 ---
-    path("users/", include("users.urls")),          # 登录、注册、个人资料管理
-    
+    path("users/", include("users.urls")),  # 登录、注册、个人资料管理
     # --- 功能组件 ---
-    path("captcha/", include("captcha.urls")),      # 图形验证码生成与校验
-    
+    path("captcha/", include("captcha.urls")),  # 图形验证码生成与校验
     # --- 核心业务 ---
     # 注意：core 和 blog 的路由包含空路径 ""，应放在特定前缀路由之后
-    path("", include("core.urls")),                 # 首页、静态页、通用功能
-    path("", include("blog.urls")),                 # 博客文章、分类、标签检索
-    
+    path("", include("core.urls")),  # 首页、静态页、通用功能
+    path("", include("blog.urls")),  # 博客文章、分类、标签检索
     # --- SEO 支持 ---
     path("sitemap.xml", include("core.sitemaps")),  # 站点地图索引
 ]
@@ -42,7 +40,6 @@ if settings.DEBUG:
     urlpatterns += [
         # 浏览器自动刷新工具 (django-browser-reload)
         path("__reload__/", include("django_browser_reload.urls")),
-        
         # --- 错误页面预览 ---
         # 方便在开发环境下直接查看错误页面的样式
         path("test/404/", lambda request: render(request, "404.html")),
@@ -52,7 +49,7 @@ if settings.DEBUG:
         path("test/400/", lambda request: render(request, "400.html")),
         path("test/403_csrf/", lambda request: render(request, "403_csrf.html")),
     ]
-    
+
     # 本地静态文件与媒体文件服务
     # 生产环境通常由 Nginx 或 WhiteNoise 处理
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

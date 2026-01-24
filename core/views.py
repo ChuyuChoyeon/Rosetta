@@ -39,6 +39,7 @@ def robots_txt(request):
     ]
     return HttpResponse("\n".join(lines), content_type="text/plain")
 
+
 @require_POST
 @csrf_exempt
 def upload_image(request):
@@ -64,6 +65,7 @@ class PageView(DetailView):
 
     用于展示关于页、联系页等静态内容页面。
     """
+
     model = Page
     template_name = "core/page.html"
     context_object_name = "page"

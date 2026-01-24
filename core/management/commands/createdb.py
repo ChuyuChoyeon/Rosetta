@@ -9,10 +9,12 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         db_settings = settings.DATABASES["default"]
-        
+
         # Ensure we are using PostgreSQL
         if "postgresql" not in db_settings["ENGINE"]:
-            self.stdout.write(self.style.ERROR("This command only supports PostgreSQL."))
+            self.stdout.write(
+                self.style.ERROR("This command only supports PostgreSQL.")
+            )
             return
 
         dbname = db_settings["NAME"]
@@ -45,10 +47,16 @@ class Command(BaseCommand):
             if not exists:
                 self.stdout.write(f"Creating database '{dbname}'...")
                 # Use sql.Identifier to safely quote the database name
-                cursor.execute(sql.SQL("CREATE DATABASE {}").format(sql.Identifier(dbname)))
-                self.stdout.write(self.style.SUCCESS(f"Database '{dbname}' created successfully."))
+                cursor.execute(
+                    sql.SQL("CREATE DATABASE {}").format(sql.Identifier(dbname))
+                )
+                self.stdout.write(
+                    self.style.SUCCESS(f"Database '{dbname}' created successfully.")
+                )
             else:
-                self.stdout.write(self.style.SUCCESS(f"Database '{dbname}' already exists."))
+                self.stdout.write(
+                    self.style.SUCCESS(f"Database '{dbname}' already exists.")
+                )
 
             cursor.close()
             conn.close()

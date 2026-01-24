@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static capture_tags %}
+{% load static capture_tags markdown_extras %}
 
 {% block content %}
 <div x-data="{ 
@@ -113,7 +113,7 @@
                             {% endif %}
                         </div>
 
-                        <p class="text-base-content/70 text-sm line-clamp-3 mb-4">{{ post.content|striptags|truncatechars:100 }}</p>
+                        <p class="text-base-content/70 text-sm line-clamp-3 mb-4">{{ post.excerpt|default:post.content|markdown_text|truncatechars:100 }}</p>
                         
                         <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
                             <div class="flex items-center gap-3">

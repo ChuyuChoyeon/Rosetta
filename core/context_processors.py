@@ -11,9 +11,11 @@ def site_settings(request):
     themes = [
         {"id": code, "name": label} for code, label in UserPreference.THEME_CHOICES
     ]
-    
+
     # 获取启用的搜索占位符
-    placeholders = list(SearchPlaceholder.objects.filter(is_active=True).values_list('text', flat=True))
+    placeholders = list(
+        SearchPlaceholder.objects.filter(is_active=True).values_list("text", flat=True)
+    )
     if not placeholders:
         # 提供默认值，防止数据库为空时前端效果失效
         placeholders = ["搜索文章...", "搜索标签..."]

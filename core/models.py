@@ -9,6 +9,7 @@ class Page(models.Model):
     单页面模型
     用于创建关于页、联系页等独立页面，不属于博客文章流。
     """
+
     STATUS_CHOICES = (
         ("draft", "草稿"),
         ("published", "已发布"),
@@ -42,7 +43,10 @@ class SearchPlaceholder(models.Model):
     搜索框占位符模型
     用于管理前台搜索框的动态占位符文字。
     """
-    text = models.CharField("占位符文本", max_length=100, help_text="例如：搜索 Django...")
+
+    text = models.CharField(
+        "占位符文本", max_length=100, help_text="例如：搜索 Django..."
+    )
     is_active = models.BooleanField("是否启用", default=True)
     order = models.IntegerField("排序", default=0)
     created_at = models.DateTimeField("创建时间", auto_now_add=True)
@@ -61,6 +65,7 @@ class FriendLink(models.Model):
     友情链接模型
     用于在页脚或侧边栏显示合作伙伴链接。
     """
+
     name = models.CharField("网站名称", max_length=100)
     url = models.URLField("网站链接")
     description = models.CharField("描述", max_length=200, blank=True)
@@ -82,6 +87,7 @@ class Navigation(models.Model):
     导航菜单模型
     用于动态管理网站头部导航栏、底部链接等。
     """
+
     LOCATION_CHOICES = (
         ("header", "顶部导航"),
         ("footer", "底部链接"),
@@ -89,7 +95,9 @@ class Navigation(models.Model):
     )
     title = models.CharField("标题", max_length=100)
     url = models.CharField("URL", max_length=200)
-    location = models.CharField("位置", max_length=20, choices=LOCATION_CHOICES, default="header")
+    location = models.CharField(
+        "位置", max_length=20, choices=LOCATION_CHOICES, default="header"
+    )
     order = models.IntegerField("排序", default=0)
     is_active = models.BooleanField("是否显示", default=True)
 
@@ -107,6 +115,7 @@ class Notification(models.Model):
     系统通知模型
     用于向用户发送站内消息（评论回复、提及、系统通知等）。
     """
+
     LEVEL_CHOICES = (
         ("info", "信息"),
         ("success", "成功"),
@@ -126,7 +135,13 @@ class Notification(models.Model):
     )
     is_read = models.BooleanField("已读", default=False)
     created_at = models.DateTimeField("创建时间", auto_now_add=True)
-    link = models.CharField("链接", max_length=255, blank=True, null=True, help_text="可选，点击通知跳转的 URL")
+    link = models.CharField(
+        "链接",
+        max_length=255,
+        blank=True,
+        null=True,
+        help_text="可选，点击通知跳转的 URL",
+    )
 
     class Meta:
         verbose_name = "通知"

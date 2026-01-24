@@ -25,6 +25,7 @@ class RegisterView(CreateView):
     3. 创建新用户。
     4. 注册成功后重定向到登录页面，并显示成功消息。
     """
+
     model = User
     form_class = RegisterForm
     template_name = "users/register.html"
@@ -52,6 +53,7 @@ class CustomLoginView(LoginView):
     - 若用户已登录，访问此页面会自动重定向到首页 (redirect_authenticated_user=True)。
     - 增加封禁用户检查。
     """
+
     template_name = "users/login.html"
     redirect_authenticated_user = True
 
@@ -78,6 +80,7 @@ class UpdateThemeView(LoginRequiredMixin, View):
     3. 更新 theme 字段并保存。
     4. 返回 JSON 响应表示成功或失败。
     """
+
     def post(self, request):
         try:
             data = json.loads(request.body)
@@ -117,6 +120,7 @@ class UnifiedProfileView(View):
     3. **数据更新**: 处理资料修改、密码修改、偏好设置保存等 POST 请求。
     4. **HTMX 支持**: 针对 HTMX 请求仅返回部分 HTML 片段，实现无刷新切换 Tab。
     """
+
     template_name = "users/public_profile.html"
 
     def get_object(self, username=None):
@@ -284,9 +288,7 @@ class UnifiedProfileView(View):
         if next_url:
             return redirect(next_url)
 
-        return redirect(
-            f"{profile_url}?tab=info"
-        )
+        return redirect(f"{profile_url}?tab=info")
 
 
 class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
@@ -296,6 +298,7 @@ class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     继承自 PasswordChangeView。
     修改成功后重定向到个人资料页。
     """
+
     template_name = "users/password_change.html"
     success_url = reverse_lazy("users:profile")
 
@@ -311,6 +314,7 @@ class MarkNotificationReadView(LoginRequiredMixin, View):
     支持 POST 和 GET 请求（为了方便某些场景下的直接链接访问，但建议使用 POST）。
     HTMX 支持：如果请求来自 HTMX，则返回空响应以支持前端移除元素或更新状态。
     """
+
     def action(self, request, pk):
         notification = get_object_or_404(
             Notification,
@@ -343,6 +347,7 @@ class DeleteNotificationView(LoginRequiredMixin, View):
     物理删除 Notification 对象。
     支持 DELETE (RESTful) 和 POST (表单) 请求。
     """
+
     def action(self, request, pk):
         notification = get_object_or_404(
             Notification,

@@ -1,26 +1,30 @@
-
 import pytest
 from django.urls import reverse
-from django.contrib.auth import get_user_model
-from model_bakery import baker
-from blog.models import Post, Category, Tag, Comment
-from core.models import Page, Navigation, FriendLink
 
-User = get_user_model()
 
 @pytest.fixture
-def admin_data(client):
-    user = User.objects.create_superuser(username="admin", password="password")
+def admin_data(
+    client,
+    admin_user_factory,
+    post_factory,
+    category_factory,
+    tag_factory,
+    comment_factory,
+    page_factory,
+    navigation_factory,
+    friendlink_factory,
+):
+    user = admin_user_factory()
     client.force_login(user)
-    
-    post_obj = baker.make(Post, author=user)
-    category = baker.make(Category)
-    tag = baker.make(Tag)
-    comment = baker.make(Comment, post=post_obj, user=user)
-    page = baker.make(Page)
-    navigation = baker.make(Navigation)
-    friendlink = baker.make(FriendLink)
-    
+
+    post_obj = post_factory(author=user)
+    category = category_factory()
+    tag = tag_factory()
+    comment = comment_factory(post=post_obj, user=user)
+    page = page_factory()
+    navigation = navigation_factory()
+    friendlink = friendlink_factory()
+
     return {
         "post": post_obj,
         "category": category,
@@ -31,6 +35,7 @@ def admin_data(client):
         "friendlink": friendlink,
         "user": user,
     }
+
 
 @pytest.mark.django_db
 class TestAdministrationUrls:
@@ -44,7 +49,6 @@ class TestAdministrationUrls:
             ("administration:post_create", None),
             ("administration:post_edit", "post"),
             ("administration:post_delete", "post"),
-            
             # Category
             ("administration:category_list", None),
             ("administration:category_create", None),
@@ -87,16 +91,16 @@ class TestAdministrationUrls:
             kwargs["pk"] = admin_data[obj_key].pk
 
         url = reverse(url_name, kwargs=kwargs)
-        
+
         try:
             response = client.get(url)
         except Exception as e:
-             print(f"FAILED URL: {url} | Error: {e}")
-             raise e
+            print(f"FAILED URL: {url} | Error: {e}")
+            raise e
 
         if response.status_code != 200:
             print(f"FAILED URL: {url} | Status: {response.status_code}")
-            if hasattr(response, 'context') and response.context:
+            if hasattr(response, "context") and response.context:
                 print(f"Context keys: {list(response.context[0].keys())}")
             else:
                 print("No context available")

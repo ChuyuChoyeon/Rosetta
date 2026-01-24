@@ -19,27 +19,40 @@ from .schemas import CommentCreateSchema
 class SidebarContextMixin:
     """
     侧边栏数据混入类 (Mixin)
-    
+
     为视图提供侧边栏所需的上下文数据，包括：
     - 热门标签 (Top 30)
     - 最新评论 (Top 5)
     - 热门文章 (Top 5)
     - 热门分类 (Top 10)
     """
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # 获取侧边栏数据
-        context["sidebar_tags"] = Tag.objects.filter(is_active=True).annotate(count=Count('posts')).order_by('-count')[:30]
-        context["sidebar_comments"] = Comment.objects.filter(active=True).select_related('user', 'post').order_by('-created_at')[:5]
-        context["sidebar_popular_posts"] = Post.objects.filter(status='published').order_by('-views')[:5]
-        context["sidebar_categories"] = Category.objects.annotate(count=Count('posts')).order_by('-count')[:10]
+        context["sidebar_tags"] = (
+            Tag.objects.filter(is_active=True)
+            .annotate(count=Count("posts"))
+            .order_by("-count")[:30]
+        )
+        context["sidebar_comments"] = (
+            Comment.objects.filter(active=True)
+            .select_related("user", "post")
+            .order_by("-created_at")[:5]
+        )
+        context["sidebar_popular_posts"] = Post.objects.filter(
+            status="published"
+        ).order_by("-views")[:5]
+        context["sidebar_categories"] = Category.objects.annotate(
+            count=Count("posts")
+        ).order_by("-count")[:10]
         return context
 
 
 class HomeView(SidebarContextMixin, ListView):
     """
     博客首页视图
-    
+
     展示最新发布的文章列表，支持分页。
     """
 
@@ -57,9 +70,10 @@ class HomeView(SidebarContextMixin, ListView):
 class ArchiveView(SidebarContextMixin, ListView):
     """
     文章归档视图
-    
+
     按时间轴展示所有已发布文章。
     """
+
     model = Post
     template_name = "blog/archive.html"
     context_object_name = "posts"
@@ -70,7 +84,7 @@ class ArchiveView(SidebarContextMixin, ListView):
 class PostDetailView(DetailView):
     """
     文章详情视图
-    
+
     展示文章完整内容、评论区，并处理密码保护、阅读计数和评论提交。
     """
 
@@ -81,19 +95,22 @@ class PostDetailView(DetailView):
     def get_context_data(self, **kwargs):
         """添加评论、评论表单和 Meta 信息到上下文"""
         context = super().get_context_data(**kwargs)
-        
+
         # 预加载回复以避免模板中的 N+1 查询问题
         # 注意：只获取顶级评论，子回复通过 prefetch_related 加载
         from django.db.models import Prefetch
+
         replies_prefetch = Prefetch(
-            'replies',
-            queryset=Comment.objects.filter(active=True).select_related('user'),
-            to_attr='active_replies_list'
+            "replies",
+            queryset=Comment.objects.filter(active=True).select_related("user"),
+            to_attr="active_replies_list",
         )
-        context["comments"] = self.object.comments.filter(
-            active=True, parent__isnull=True
-        ).select_related("user").prefetch_related(replies_prefetch)
-        
+        context["comments"] = (
+            self.object.comments.filter(active=True, parent__isnull=True)
+            .select_related("user")
+            .prefetch_related(replies_prefetch)
+        )
+
         context["comment_form"] = CommentForm()
 
         # 生成 SEO Meta 数据
@@ -105,58 +122,65 @@ class PostDetailView(DetailView):
         # 2. 查找包含这些标签的其他文章
         # 3. 按匹配标签的数量降序排序
         # 4. 取前 3 篇
-        post_tags_ids = self.object.tags.values_list('id', flat=True)
-        related_posts = Post.objects.filter(
-            tags__in=post_tags_ids,
-            status='published'
-        ).exclude(id=self.object.id).annotate(
-            same_tags=Count('tags')
-        ).order_by('-same_tags', '-created_at')[:3]
-        
+        post_tags_ids = self.object.tags.values_list("id", flat=True)
+        related_posts = (
+            Post.objects.filter(tags__in=post_tags_ids, status="published")
+            .exclude(id=self.object.id)
+            .annotate(same_tags=Count("tags"))
+            .order_by("-same_tags", "-created_at")[:3]
+        )
+
         # 如果相关文章不足 3 篇，补充同分类下的最新文章
         if related_posts.count() < 3 and self.object.category:
             remaining_count = 3 - related_posts.count()
-            category_posts = Post.objects.filter(
-                category=self.object.category,
-                status='published'
-            ).exclude(
-                id=self.object.id
-            ).exclude(
-                id__in=[p.id for p in related_posts]
-            ).order_by('-created_at')[:remaining_count]
-            
+            category_posts = (
+                Post.objects.filter(category=self.object.category, status="published")
+                .exclude(id=self.object.id)
+                .exclude(id__in=[p.id for p in related_posts])
+                .order_by("-created_at")[:remaining_count]
+            )
+
             # 合并查询集 (转换为列表)
             related_posts = list(related_posts) + list(category_posts)
-            
+
         context["related_posts"] = related_posts
 
         # 上一篇和下一篇 (Previous & Next Post)
         # 仅获取已发布的文章，且按时间排序
-        context["previous_post"] = Post.objects.filter(
-            status='published',
-            created_at__lt=self.object.created_at
-        ).order_by('-created_at').first()
+        context["previous_post"] = (
+            Post.objects.filter(
+                status="published", created_at__lt=self.object.created_at
+            )
+            .order_by("-created_at")
+            .first()
+        )
 
-        context["next_post"] = Post.objects.filter(
-            status='published',
-            created_at__gt=self.object.created_at
-        ).order_by('created_at').first()
+        context["next_post"] = (
+            Post.objects.filter(
+                status="published", created_at__gt=self.object.created_at
+            )
+            .order_by("created_at")
+            .first()
+        )
 
         return context
 
     def get_meta_data(self):
         """生成页面 Meta 数据用于 SEO"""
         post = self.object
-        
+
         # 处理描述：优先使用摘要，否则截取内容并去除 Markdown/HTML 标签
         description = post.excerpt
         if not description:
             from django.utils.html import strip_tags
             import markdown
+
             # 先渲染成 HTML 去除 Markdown 符号，再去除 HTML 标签
             html_content = markdown.markdown(post.content)
             text_content = strip_tags(html_content)
-            description = text_content[:150] + "..." if len(text_content) > 150 else text_content
+            description = (
+                text_content[:150] + "..." if len(text_content) > 150 else text_content
+            )
 
         return Meta(
             title=post.title,
@@ -173,6 +197,7 @@ class PostDetailView(DetailView):
     def get(self, request, *args, **kwargs):
         """处理 GET 请求：文章展示、密码验证逻辑、阅读计数"""
         from django.db.models import F
+
         self.object = self.get_object()
 
         # 密码保护检查
@@ -189,8 +214,8 @@ class PostDetailView(DetailView):
 
         # 增加阅读量 (使用原子更新，避免竞态条件)
         # update_fields 避免副作用（如更新 updated_at）
-        Post.objects.filter(pk=self.object.pk).update(views=F('views') + 1)
-        self.object.refresh_from_db(fields=['views'])
+        Post.objects.filter(pk=self.object.pk).update(views=F("views") + 1)
+        self.object.refresh_from_db(fields=["views"])
 
         # 记录已登录用户的阅读历史
         if request.user.is_authenticated:
@@ -236,18 +261,18 @@ class PostDetailView(DetailView):
         if form.is_valid():
             if not request.user.is_authenticated:
                 return redirect("users:login")
-            
+
             try:
                 comment_data = CommentCreateSchema(
-                    content=form.cleaned_data['content'],
-                    parent_id=int(request.POST.get("parent_id")) if request.POST.get("parent_id") else None
+                    content=form.cleaned_data["content"],
+                    parent_id=(
+                        int(request.POST.get("parent_id"))
+                        if request.POST.get("parent_id")
+                        else None
+                    ),
                 )
-                
-                create_comment(
-                    post=self.object,
-                    user=request.user,
-                    data=comment_data
-                )
+
+                create_comment(post=self.object, user=request.user, data=comment_data)
 
                 messages.success(request, "您的评论已发布！")
                 return redirect("post_detail", slug=self.object.slug)
@@ -263,7 +288,7 @@ class PostDetailView(DetailView):
 class CategoryListView(ListView):
     """
     分类列表视图
-    
+
     展示所有文章分类。
     """
 
@@ -276,21 +301,26 @@ class CategoryListView(ListView):
 class TagListView(ListView):
     """
     标签列表视图
-    
+
     展示所有标签，支持按首字母分组或标签云展示。
     """
+
     model = Tag
     template_name = "blog/tag_list.html"
     context_object_name = "tags"
-    
+
     def get_queryset(self):
-        return Tag.objects.filter(is_active=True).annotate(count=Count('posts')).order_by('-count', 'name')
+        return (
+            Tag.objects.filter(is_active=True)
+            .annotate(count=Count("posts"))
+            .order_by("-count", "name")
+        )
 
 
 class PostByCategoryView(SidebarContextMixin, ListView):
     """
     分类文章列表视图
-    
+
     展示特定分类下的所有已发布文章。
     """
 
@@ -319,9 +349,10 @@ class PostByCategoryView(SidebarContextMixin, ListView):
 class PostByTagView(SidebarContextMixin, ListView):
     """
     标签文章列表视图
-    
+
     展示特定标签下的所有已发布文章。
     """
+
     model = Post
     template_name = "blog/post_list.html"
     context_object_name = "posts"
@@ -345,7 +376,7 @@ class PostByTagView(SidebarContextMixin, ListView):
 class SearchView(SidebarContextMixin, ListView):
     """
     搜索结果视图
-    
+
     支持全文搜索（如果安装了 django-watson）或简单的标题/内容匹配。
     """
 
@@ -385,12 +416,12 @@ class SearchView(SidebarContextMixin, ListView):
 def delete_comment(request, pk):
     """
     删除评论视图
-    
+
     仅限评论作者或管理员删除评论。
     支持 HTMX 请求，删除后在前端移除评论元素。
     """
     comment = get_object_or_404(Comment, pk=pk)
-    
+
     # 权限检查
     if request.user != comment.user and not request.user.is_staff:
         messages.error(request, "您没有权限删除此评论")
@@ -398,10 +429,10 @@ def delete_comment(request, pk):
 
     post_url = comment.post.get_absolute_url()
     comment.delete()
-    
+
     # HTMX 支持：返回空响应或触发前端事件
     if request.headers.get("HX-Request"):
         return HttpResponse("")
-        
+
     messages.success(request, "评论已删除")
     return redirect(post_url)

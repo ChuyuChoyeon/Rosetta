@@ -13,6 +13,7 @@ module.exports = {
     require('@tailwindcss/forms'),
     require('@tailwindcss/aspect-ratio'),
     require('@tailwindcss/container-queries'),
+    require('@tailwindcss/line-clamp'),
     require('tailwind-scrollbar'),
     require('tailwindcss-animate'),
     require('tailwindcss-animated'),

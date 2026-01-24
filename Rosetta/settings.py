@@ -38,7 +38,9 @@ DEBUG = env.bool("DEBUG", default=True)
 # 密钥配置
 if DEBUG:
     # 开发环境使用硬编码密钥，方便且无风险
-    SECRET_KEY = env("DJANGO_SECRET_KEY", default="django-insecure-dev-key-rosetta-local-dev-only")
+    SECRET_KEY = env(
+        "DJANGO_SECRET_KEY", default="django-insecure-dev-key-rosetta-local-dev-only"
+    )
 else:
     # 生产环境必须从环境变量获取，否则拒绝启动
     # 1Panel 设置：在应用配置 -> 环境变量中添加 DJANGO_SECRET_KEY
@@ -70,12 +72,12 @@ else:
     # 生产环境：强制使用 DATABASE_URL
     # 格式: postgres://user:password@host:port/dbname
     # 1Panel: 确保数据库容器与应用在同一网络，host 使用容器名或内部 IP
-    DATABASES = {
-        "default": env.db("DATABASE_URL")
-    }
-    
+    DATABASES = {"default": env.db("DATABASE_URL")}
+
     # 数据库连接优化 (针对 PostgreSQL/MySQL)
-    DATABASES["default"]["CONN_MAX_AGE"] = env.int("CONN_MAX_AGE", default=600)  # 保持连接 10 分钟
+    DATABASES["default"]["CONN_MAX_AGE"] = env.int(
+        "CONN_MAX_AGE", default=600
+    )  # 保持连接 10 分钟
     DATABASES["default"]["CONN_HEALTH_CHECKS"] = True  # 定期检查连接健康
 
 # ------------------------------------------------------------------------------
@@ -94,15 +96,13 @@ else:
     # 生产环境：强制使用 Redis
     # 格式: redis://:password@host:port/db
     if not env("REDIS_URL", default=None):
-         # 如果未提供 REDIS_URL，可以选择报错或回退，这里建议报错以强制最佳实践
-         # 但为了灵活性，如果确实没有 Redis，可以回退到 Database Backend (不推荐)
-         # 这里我们遵循"严格"原则，假设生产环境应当有 Redis
-         pass 
+        # 如果未提供 REDIS_URL，可以选择报错或回退，这里建议报错以强制最佳实践
+        # 但为了灵活性，如果确实没有 Redis，可以回退到 Database Backend (不推荐)
+        # 这里我们遵循"严格"原则，假设生产环境应当有 Redis
+        pass
 
-    CACHES = {
-        "default": env.cache("REDIS_URL")
-    }
-    
+    CACHES = {"default": env.cache("REDIS_URL")}
+
     # Session 使用缓存 (高性能)
     SESSION_ENGINE = "django.contrib.sessions.backends.cache"
     SESSION_CACHE_ALIAS = "default"
@@ -112,7 +112,7 @@ else:
     CONSTANCE_REDIS_CONNECTION = env("REDIS_URL")
     CONSTANCE_REDIS_PREFIX = "rosetta_config:"
     # Redis 连接池配置
-    CONSTANCE_REDIS_CONNECTION_CLASS = 'core.utils.ConstanceRedisConnection'
+    CONSTANCE_REDIS_CONNECTION_CLASS = "core.utils.ConstanceRedisConnection"
 
 
 # ------------------------------------------------------------------------------
@@ -120,8 +120,7 @@ else:
 # ------------------------------------------------------------------------------
 INSTALLED_APPS = [
     # --- 本地业务应用 ---
-    "administration",         # 自定义管理后台
-    
+    "administration",  # 自定义管理后台
     # --- Django 内置组件 ---
     "django.contrib.admin",
     "django.contrib.auth",
@@ -131,23 +130,21 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.contrib.sitemaps",
-    
     # --- 第三方扩展 ---
-    "guardian",               # 对象级权限控制
-    "tailwind",               # Tailwind CSS
-    "theme",                  # DaisyUI Theme
+    "guardian",  # 对象级权限控制
+    "tailwind",  # Tailwind CSS
+    "theme",  # DaisyUI Theme
     "django_browser_reload",  # 浏览器自动刷新 (Middleware handle logic)
-    "django_htmx",            # HTMX
-    "captcha",                # 验证码
-    "rest_framework",         # DRF
-    "rest_framework_simplejwt", # JWT
-    "imagekit",               # 图片处理
-    "watson",                 # 全文搜索
-    "meta",                   # SEO
-    "constance",              # 动态配置
-    "constance.backends.database", # 注册 Database Backend App (即使在 Redis 模式下保留也不影响，除非 strict)
-    "widget_tweaks",          # 表单渲染增强
-
+    "django_htmx",  # HTMX
+    "captcha",  # 验证码
+    "rest_framework",  # DRF
+    "rest_framework_simplejwt",  # JWT
+    "imagekit",  # 图片处理
+    "watson",  # 全文搜索
+    "meta",  # SEO
+    "constance",  # 动态配置
+    "constance.backends.database",  # 注册 Database Backend App (即使在 Redis 模式下保留也不影响，除非 strict)
+    "widget_tweaks",  # 表单渲染增强
     # --- 核心业务模块 ---
     "blog.apps.BlogConfig",
     "users.apps.UsersConfig",
@@ -159,7 +156,7 @@ INSTALLED_APPS = [
 # ------------------------------------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "core.logging.RequestIDMiddleware",                  # 请求 ID
+    "core.logging.RequestIDMiddleware",  # 请求 ID
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -210,7 +207,9 @@ AUTHENTICATION_BACKENDS = (
     "guardian.backends.ObjectPermissionBackend",
 )
 AUTH_PASSWORD_VALIDATORS = [
-    {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
+    {
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"
+    },
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
     {"NAME": "django.contrib.auth.password_validation.CommonPasswordValidator"},
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
@@ -268,11 +267,11 @@ if not DEBUG:
     # 前提：Nginx 配置了 SSL 并且正确转发了 Proto 头
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
     SECURE_SSL_REDIRECT = True
-    
+
     # Cookie 安全
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
-    
+
     # HSTS
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -283,7 +282,10 @@ if not DEBUG:
 # ------------------------------------------------------------------------------
 # Tailwind
 TAILWIND_APP_NAME = "theme"
-NPM_BIN_PATH = env("NPM_BIN_PATH", default=r"C:\Program Files\nodejs\npm.cmd" if os.name == 'nt' else "npm")
+NPM_BIN_PATH = env(
+    "NPM_BIN_PATH",
+    default=r"C:\Program Files\nodejs\npm.cmd" if os.name == "nt" else "npm",
+)
 
 # Sites
 SITE_ID = 1
@@ -323,10 +325,19 @@ CONSTANCE_CONFIG = {
     "SITE_HEADER": ("Rosetta Dashboard", "后台头部标题"),
     "SITE_ADMIN_SUFFIX": (" - Rosetta Dashboard", "后台页面标题后缀"),
     "ADMIN_NAVBAR_TITLE": ("Rosetta 管理后台", "后台导航栏标题"),
-    "DASHBOARD_WELCOME_TEXT": ("这里是您的站点概览，祝您有美好的一天。", "仪表盘欢迎语"),
-    "DASHBOARD_WELCOME_WORDS": ("['Creator', 'Admin', 'Master', 'Manager']", "仪表盘动态欢迎词 (Flip Words)"),
+    "DASHBOARD_WELCOME_TEXT": (
+        "这里是您的站点概览，祝您有美好的一天。",
+        "仪表盘欢迎语",
+    ),
+    "DASHBOARD_WELCOME_WORDS": (
+        "['Creator', 'Admin', 'Master', 'Manager']",
+        "仪表盘动态欢迎词 (Flip Words)",
+    ),
     "FOOTER_TEXT": ("© 2026 Rosetta Blog", "页脚版权文本"),
-    "FOOTER_SLOGAN": ("分享代码，记录生活。<br/>构建属于你的知识花园。", "页脚标语/简介"),
+    "FOOTER_SLOGAN": (
+        "分享代码，记录生活。<br/>构建属于你的知识花园。",
+        "页脚标语/简介",
+    ),
     "BEIAN_CODE": ("", "ICP 备案号"),
     "GITHUB_URL": ("", "GitHub 链接"),
     "X_URL": ("", "X 链接"),
@@ -348,11 +359,36 @@ CONSTANCE_CONFIG = {
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
-    "基本设置": ("SITE_NAME", "SITE_DESCRIPTION", "SITE_KEYWORDS", "SITE_AUTHOR", "SHOW_SITE_LOGO", "SITE_LOGO", "SITE_FAVICON", "FOOTER_SLOGAN", "FOOTER_TEXT", "BEIAN_CODE"),
+    "基本设置": (
+        "SITE_NAME",
+        "SITE_DESCRIPTION",
+        "SITE_KEYWORDS",
+        "SITE_AUTHOR",
+        "SHOW_SITE_LOGO",
+        "SITE_LOGO",
+        "SITE_FAVICON",
+        "FOOTER_SLOGAN",
+        "FOOTER_TEXT",
+        "BEIAN_CODE",
+    ),
     "外观设置": ("CODE_HIGHLIGHT_STYLE",),
-    "后台界面": ("SITE_HEADER", "SITE_ADMIN_SUFFIX", "ADMIN_NAVBAR_TITLE", "DASHBOARD_WELCOME_TEXT", "DASHBOARD_WELCOME_WORDS"),
+    "后台界面": (
+        "SITE_HEADER",
+        "SITE_ADMIN_SUFFIX",
+        "ADMIN_NAVBAR_TITLE",
+        "DASHBOARD_WELCOME_TEXT",
+        "DASHBOARD_WELCOME_WORDS",
+    ),
     "社交与联系": ("GITHUB_URL", "X_URL", "BILIBILI_URL", "CONTACT_EMAIL"),
-    "邮件服务": ("SMTP_HOST", "SMTP_PORT", "SMTP_USER", "SMTP_PASSWORD", "SMTP_USE_TLS", "SMTP_FROM_EMAIL", "ENABLE_EMAIL_NOTIFICATIONS"),
+    "邮件服务": (
+        "SMTP_HOST",
+        "SMTP_PORT",
+        "SMTP_USER",
+        "SMTP_PASSWORD",
+        "SMTP_USE_TLS",
+        "SMTP_FROM_EMAIL",
+        "ENABLE_EMAIL_NOTIFICATIONS",
+    ),
     "功能开关": ("MAINTENANCE_MODE", "ENABLE_COMMENTS", "ENABLE_REGISTRATION"),
     "自定义代码": ("EXTRA_HEAD_CODE", "EXTRA_FOOTER_CODE"),
 }
@@ -380,15 +416,24 @@ LOGGING = {
     "loggers": {
         "django": {"handlers": ["intercept"], "level": "INFO", "propagate": True},
         "uvicorn": {"handlers": ["intercept"], "level": "INFO", "propagate": True},
-        "uvicorn.access": {"handlers": ["intercept"], "level": "INFO", "propagate": True},
-        "django.db.backends": {"handlers": ["intercept"], "level": "WARNING", "propagate": False},
+        "uvicorn.access": {
+            "handlers": ["intercept"],
+            "level": "INFO",
+            "propagate": True,
+        },
+        "django.db.backends": {
+            "handlers": ["intercept"],
+            "level": "WARNING",
+            "propagate": False,
+        },
     },
 }
 
 # Loguru 配置
 from loguru import logger
-logger.remove() # 移除默认
-logger.configure(extra={"request_id": "-"}) # 默认 Context
+
+logger.remove()  # 移除默认
+logger.configure(extra={"request_id": "-"})  # 默认 Context
 
 LOG_FORMAT = (
     "<green>{time:YYYY-MM-DD HH:mm:ss.SSS}</green> | "
@@ -408,11 +453,31 @@ logger.level("CRITICAL", icon="🚨")
 
 if DEBUG:
     # 开发环境：全彩、详细堆栈
-    logger.add(sys.stderr, level="DEBUG", format=LOG_FORMAT, enqueue=True, backtrace=True, diagnose=True)
-    logger.add(LOG_DIR / "debug.log", level="DEBUG", format=LOG_FORMAT, rotation="50 MB", retention="7 days")
+    logger.add(
+        sys.stderr,
+        level="DEBUG",
+        format=LOG_FORMAT,
+        enqueue=True,
+        backtrace=True,
+        diagnose=True,
+    )
+    logger.add(
+        LOG_DIR / "debug.log",
+        level="DEBUG",
+        format=LOG_FORMAT,
+        rotation="50 MB",
+        retention="7 days",
+    )
 else:
     # 生产环境：标准错误输出 (供 Docker 采集)、JSON 文件日志
-    logger.add(sys.stderr, level="INFO", format=LOG_FORMAT, enqueue=True, backtrace=True, diagnose=False)
+    logger.add(
+        sys.stderr,
+        level="INFO",
+        format=LOG_FORMAT,
+        enqueue=True,
+        backtrace=True,
+        diagnose=False,
+    )
     logger.add(
         LOG_DIR / "rosetta.log",
         rotation="10 MB",
@@ -420,7 +485,7 @@ else:
         level="WARNING",
         compression="zip",
         enqueue=True,
-        serialize=True, # JSON 格式，方便 ELK/1Panel 分析
+        serialize=True,  # JSON 格式，方便 ELK/1Panel 分析
         backtrace=True,
         diagnose=False,
     )

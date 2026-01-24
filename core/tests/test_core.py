@@ -9,6 +9,7 @@ from core.models import (
     SearchPlaceholder,
 )
 
+
 @pytest.mark.django_db
 class TestCoreModels:
     def test_page_creation(self):
