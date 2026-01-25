@@ -35,6 +35,7 @@
         <a href="{% url 'administration:navigation_list' %}" class="tab tab-sm {% if not request.GET.location %}tab-active bg-base-100 shadow-sm text-base-content font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">全部</a>
         <a href="?location=header" class="tab tab-sm {% if request.GET.location == 'header' %}tab-active bg-primary text-primary-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">顶部</a>
         <a href="?location=footer" class="tab tab-sm {% if request.GET.location == 'footer' %}tab-active bg-secondary text-secondary-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">底部</a>
+        <a href="?location=sidebar" class="tab tab-sm {% if request.GET.location == 'sidebar' %}tab-active bg-accent text-accent-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">侧边栏</a>
     {% endcaptureas %}
 
     <!-- Bulk Actions -->
