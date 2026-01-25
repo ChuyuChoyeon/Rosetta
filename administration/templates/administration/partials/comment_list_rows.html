@@ -1,6 +1,6 @@
 {% for comment in comments %}
-<tr class="hover:bg-base-200/50 transition-colors duration-200 group">
-    <th class="pl-4">
+<tr class="hover">
+    <th class="pl-6">
         <label>
             <input type="checkbox" name="selected_ids" value="{{ comment.pk }}" class="checkbox checkbox-xs rounded-sm row-checkbox" onchange="updateBulkToolbar()" />
         </label>
@@ -9,7 +9,7 @@
     <td class="max-w-[300px]">
         <div class="flex items-start gap-3">
             <div class="avatar mt-1 shrink-0">
-                <div class="w-8 h-8 rounded-full ring ring-base-200 ring-offset-1 group-hover:ring-primary/20 transition-all">
+                <div class="w-8 h-8 rounded-full ring ring-base-200 ring-offset-1">
                     <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}" />
                 </div>
             </div>

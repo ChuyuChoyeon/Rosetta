@@ -16,20 +16,11 @@ class UserTitle(models.Model):
     包含名称、颜色样式、图标和描述。
     """
 
-    COLOR_CHOICES = (
-        ("primary", "蓝色"),
-        ("secondary", "紫色"),
-        ("success", "绿色"),
-        ("warning", "金色"),
-        ("error", "红色"),
-    )
-
     name = models.CharField("称号名称", max_length=50)
     color = models.CharField(
         "颜色风格",
         max_length=20,
-        choices=COLOR_CHOICES,
-        default="primary",
+        default="#3B82F6",
     )
     icon = models.TextField("图标SVG", blank=True, help_text="SVG图标代码")
     description = models.CharField("称号说明", max_length=200, blank=True)

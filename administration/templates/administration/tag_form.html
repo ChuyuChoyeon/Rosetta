@@ -1,149 +1,131 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
-{% load widget_tweaks %}
+{% load capture_tags widget_tweaks %}
 
 {% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
-<div class="text-sm breadcrumbs mb-4">
-    <ul>
-        <li><a href="{% url 'administration:index' %}">首页</a></li>
-        <li><a href="{% url 'administration:tag_list' %}">标签管理</a></li>
-        <li>{{ title|default:"编辑标签" }}</li>
-    </ul>
-</div>
+<!-- Header -->
+{% captureas header_actions %}
+{% endcaptureas %}
+
+{% include "administration/components/header.html" with title=title|default:"编辑标签" icon="tag" breadcrumbs=breadcrumbs actions=header_actions %}
 
 <form method="post" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     {% csrf_token %}
     
     <!-- Left Column: Main Content -->
     <div class="lg:col-span-2 space-y-6">
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-6">
-                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">edit_note</span>
-                    基本信息
-                </h2>
-                
-                {% if form.non_field_errors %}
-                <div class="alert alert-error mb-4 shadow-sm">
-                    <span class="material-symbols-outlined">error</span>
-                    <div class="flex flex-col">
-                        <span class="font-bold">表单错误</span>
-                        {% for error in form.non_field_errors %}
-                        <span class="text-sm">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Name Field -->
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-bold text-base">名称 <span class="text-error">*</span></span>
-                    </label>
-                    {% render_field form.name class="input input-bordered w-full focus:input-primary transition-all" placeholder="输入标签名称" %}
-                    {% if form.name.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
-                    </label>
-                    {% endif %}
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">这将是它在站点上显示的名字。</span>
-                    </label>
-                </div>
-
-                <!-- Slug Field -->
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-bold text-base">别名 (Slug)</span>
-                    </label>
-                    {% render_field form.slug class="input input-bordered w-full focus:input-primary transition-all font-mono" placeholder="输入URL别名" %}
-                    {% if form.slug.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
-                    </label>
-                    {% endif %}
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。</span>
-                    </label>
+        {% captureas main_content %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-error mb-4 shadow-sm">
+                <span class="material-symbols-outlined">error</span>
+                <div class="flex flex-col">
+                    <span class="font-bold">表单错误</span>
+                    {% for error in form.non_field_errors %}
+                    <span class="text-sm">{{ error }}</span>
+                    {% endfor %}
                 </div>
             </div>
-        </div>
+            {% endif %}
+
+            <!-- Name Field -->
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-bold text-base">名称 <span class="text-error">*</span></span>
+                </label>
+                {% render_field form.name class="input input-bordered w-full focus:input-primary transition-all" placeholder="输入标签名称" %}
+                {% if form.name.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
+                </label>
+                {% endif %}
+                <label class="label">
+                    <span class="label-text-alt text-base-content/60">这将是它在站点上显示的名字。</span>
+                </label>
+            </div>
+
+            <!-- Slug Field -->
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-bold text-base">别名 (Slug)</span>
+                </label>
+                {% render_field form.slug class="input input-bordered w-full focus:input-primary transition-all font-mono" placeholder="输入URL别名" %}
+                {% if form.slug.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
+                </label>
+                {% endif %}
+                <label class="label">
+                    <span class="label-text-alt text-base-content/60">“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。</span>
+                </label>
+            </div>
+        {% endcaptureas %}
+        {% include "administration/components/form_card.html" with title="基本信息" icon="edit_note" content=main_content %}
     </div>
 
     <!-- Right Column: Sidebar -->
     <div class="lg:col-span-1 space-y-6">
         <!-- Publish Box -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">发布</h3>
+        {% captureas publish_content %}
+            <div class="flex flex-col gap-3">
+                <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined">save</span>
+                    保存更改
+                </button>
                 
-                <div class="flex flex-col gap-3">
-                    <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
-                        <span class="material-symbols-outlined">save</span>
-                        保存更改
-                    </button>
-                    
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">保存并新增</button>
-                        <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">保存并继续</button>
-                    </div>
-
-                    {% if object %}
-                    <div class="divider my-1"></div>
-                    <div class="flex justify-between items-center">
-                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">取消</a>
-                        <button type="button" onclick="confirmDelete('{% url 'administration:tag_delete' object.pk %}', '确定要删除标签《{{ object.name|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
-                            删除标签
-                        </button>
-                    </div>
-                    {% else %}
-                    <div class="divider my-1"></div>
-                    <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">取消</a>
-                    {% endif %}
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">保存并新增</button>
+                    <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">保存并继续</button>
                 </div>
+
+                {% if object %}
+                <div class="divider my-1"></div>
+                <div class="flex justify-between items-center">
+                    <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">取消</a>
+                    <button type="button" onclick="confirmDelete('{% url 'administration:tag_delete' object.pk %}', '确定要删除标签《{{ object.name|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
+                        删除标签
+                    </button>
+                </div>
+                {% else %}
+                <div class="divider my-1"></div>
+                <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">取消</a>
+                {% endif %}
             </div>
-        </div>
+        {% endcaptureas %}
+        {% include "administration/components/form_card.html" with title="发布" icon="publish" content=publish_content %}
 
         <!-- Status Box -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">状态设置</h3>
-                
-                <div class="form-control">
-                    <label class="label cursor-pointer justify-between">
-                        <span class="label-text font-medium">启用状态</span>
-                        {% render_field form.is_active class="toggle toggle-success" %}
-                    </label>
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">禁用后，该标签将不会在前端显示。</span>
-                    </label>
-                </div>
+        {% captureas status_content %}
+            <div class="form-control">
+                <label class="label cursor-pointer justify-between">
+                    <span class="label-text font-medium">启用状态</span>
+                    {% render_field form.is_active class="toggle toggle-success" %}
+                </label>
+                <label class="label">
+                    <span class="label-text-alt text-base-content/60">禁用后，该标签将不会在前端显示。</span>
+                </label>
             </div>
-        </div>
+        {% endcaptureas %}
+        {% include "administration/components/form_card.html" with title="状态设置" icon="toggle_on" content=status_content %}
 
         <!-- Appearance Box -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">外观设置</h3>
-                
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-medium">颜色标识</span>
-                    </label>
-                    {% include 'components/color_picker.html' with value=form.color.value name=form.color.name %}
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">直接使用自定义颜色，建议选择清晰耐看的色值。</span>
-                    </label>
-                    {% if form.color.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.color.errors.0 }}</span>
-                    </label>
-                    {% endif %}
-                </div>
+        {% captureas appearance_content %}
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-medium">颜色标识</span>
+                </label>
+                {% include 'components/color_picker.html' with value=form.color.value name=form.color.name %}
+                <label class="label">
+                    <span class="label-text-alt text-base-content/60">直接使用自定义颜色，建议选择清晰耐看的色值。</span>
+                </label>
+                {% if form.color.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.color.errors.0 }}</span>
+                </label>
+                {% endif %}
             </div>
-        </div>
+        {% endcaptureas %}
+        {% include "administration/components/form_card.html" with title="外观设置" icon="palette" content=appearance_content %}
     </div>
 </form>
 {% endblock %}

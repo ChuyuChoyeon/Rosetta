@@ -18,7 +18,7 @@
                             <span>{{ comment.created_at|date:"Y-m-d H:i" }}</span>
                             <div class="flex items-center gap-2">
                                 {% if user == comment.user %}
-                                <form action="{% url 'delete_comment' comment.id %}" method="post" class="inline" onsubmit="return confirm('确定要删除这条评论吗？');">
+                                <form action="{% url 'delete_comment' comment.id %}" method="post" class="inline" onsubmit="event.preventDefault(); showConfirmModal('删除评论', '确定要删除这条评论吗？', () => this.submit());">
                                     {% csrf_token %}
                                     <button type="submit" class="btn btn-ghost btn-xs text-error">删除</button>
                                 </form>

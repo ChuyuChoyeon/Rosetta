@@ -17,14 +17,6 @@
 {% endblock %}
 
 {% block content %}
-<div class="text-sm breadcrumbs mb-4">
-    <ul>
-        <li><a href="{% url 'administration:index' %}">首页</a></li>
-        <li>日志与审计</li>
-        <li>系统日志</li>
-    </ul>
-</div>
-
 {% captureas card_content %}
 <div class="flex flex-col md:flex-row h-[calc(100vh-200px)] min-h-[500px]">
     <!-- Sidebar: File List -->

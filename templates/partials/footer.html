@@ -43,21 +43,15 @@
                 <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
                 首页
             </a>
-            <a href="{% url 'archive' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+            {% for nav in nav_footer %}
+            <a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %} class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
                 <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                归档
+                {{ nav.title }}
             </a>
-            <a href="{% url 'category_list' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+            {% endfor %}
+            <a href="/sitemap.xml" target="_blank" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
                 <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                分类
-            </a>
-            <a href="{% url 'tag_list' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                标签
-            </a>
-            <a href="{% url 'about' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                关于我们
+                网站地图
             </a>
         </div>
     </div>

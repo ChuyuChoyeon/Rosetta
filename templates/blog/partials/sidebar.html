@@ -1,57 +1,82 @@
 <div class="space-y-8">
-    <!-- Search Widget -->
     {% load capture_tags cache %}
+
+    <!-- Search Widget -->
     {% cache sidebar_cache_ttl "sidebar_search" %}
-    {% captureas search_card %}
-        <div class="p-5">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">search</span>
-                搜索
-            </h3>
-            {% url 'search' as search_url %}
-            {% include 'components/inspira/placeholders_and_vanish_input.html' with action=search_url placeholders=search_placeholders|default:"['搜索文章...', '搜索 Django...', '搜索 Python...', '搜索 Tailwind...']" %}
-        </div>
-    {% endcaptureas %}
-    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-        {{ search_card }}
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">search</span>
+            </span>
+            搜索
+        </h3>
+        {% url 'search' as search_url %}
+        {% include 'components/inspira/placeholders_and_vanish_input.html' with action=search_url placeholders=search_placeholders|default:"['搜索文章...', 'Python', 'Django', 'Tailwind']" %}
     </div>
     {% endcache %}
+
+    <!-- Navigation Menu -->
+    {% if nav_sidebar %}
+    {% cache sidebar_cache_ttl "sidebar_navigation" %}
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">menu_open</span>
+            </span>
+            导航菜单
+        </h3>
+        <ul class="menu menu-sm bg-base-200/50 rounded-2xl p-2 gap-1">
+            {% for nav in nav_sidebar %}
+            <li>
+                <a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %} class="rounded-xl hover:bg-primary hover:text-primary-content transition-all font-medium">
+                    {{ nav.title }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endcache %}
+    {% endif %}
 
     <!-- Popular Posts -->
     {% if sidebar_popular_posts %}
     {% cache sidebar_cache_ttl "sidebar_popular_posts" %}
-    {% captureas popular_card %}
-        <div class="p-5">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-secondary">trending_up</span>
-                热门文章
-            </h3>
-            <div class="flex flex-col gap-4">
-                {% for post in sidebar_popular_posts %}
-                <div class="flex gap-3 relative z-20">
-                    <a href="{% url 'post_detail' post.slug %}" class="w-16 h-16 rounded-lg overflow-hidden shrink-0 bg-base-200 block group">
-                        {% if post.cover_image %}
-                        <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300">
-                        {% else %}
-                        <div class="w-full h-full bg-gradient-to-br from-primary/10 to-secondary/10 flex items-center justify-center text-primary font-bold">
-                            {{ post.title|slice:":1" }}
-                        </div>
-                        {% endif %}
-                    </a>
-                    <div class="flex flex-col justify-center">
-                        <a href="{% url 'post_detail' post.slug %}" class="font-medium text-sm line-clamp-2 hover:text-primary transition-colors">{{ post.title }}</a>
-                        <span class="text-xs text-base-content/50 mt-1 flex items-center gap-1">
-                            <span class="material-symbols-outlined text-[12px]">visibility</span>
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-secondary/20 hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-5 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">trending_up</span>
+            </span>
+            热门文章
+        </h3>
+        <div class="flex flex-col gap-5">
+            {% for post in sidebar_popular_posts %}
+            <div class="flex gap-4 group/item relative">
+                <span class="absolute -left-3 -top-2 text-6xl font-black text-base-content/5 select-none -z-10 transition-colors group-hover/item:text-secondary/10">{{ forloop.counter }}</span>
+                <a href="{% url 'post_detail' post.slug %}" class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-base-200 shadow-sm group-hover/item:shadow-md transition-all">
+                    {% if post.cover_image %}
+                    <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-500" loading="lazy">
+                    {% else %}
+                    <div class="w-full h-full bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center text-secondary font-bold text-xl">
+                        {{ post.title|slice:":1" }}
+                    </div>
+                    {% endif %}
+                </a>
+                <div class="flex flex-col justify-center py-1">
+                    <a href="{% url 'post_detail' post.slug %}" class="font-bold text-sm leading-snug line-clamp-2 hover:text-secondary transition-colors mb-2">{{ post.title }}</a>
+                    <div class="flex items-center gap-3 text-xs text-base-content/50">
+                        <span class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">visibility</span>
                             {{ post.views }}
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                            {{ post.created_at|date:"m-d" }}
                         </span>
                     </div>
                 </div>
-                {% endfor %}
             </div>
+            {% endfor %}
         </div>
-    {% endcaptureas %}
-    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-        {{ popular_card }}
     </div>
     {% endcache %}
     {% endif %}
@@ -59,33 +84,30 @@
     <!-- Tag Cloud -->
     {% if sidebar_tags %}
     {% cache sidebar_cache_ttl "sidebar_tags" %}
-    {% captureas tags_card %}
-        <div class="p-5">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-accent">label</span>
-                标签云
-            </h3>
-            <div class="flex flex-wrap gap-3 relative z-20">
-                {% for tag in sidebar_tags %}
-                {% if tag.color|first == '#' %}
-                <a href="{% url 'post_by_tag' tag.slug %}" 
-                   class="badge badge-outline transition-colors py-4 px-4 gap-1 hover:opacity-80"
-                   style="border-color: {{ tag.color }}; color: {{ tag.color }};">
-                    {{ tag.name }}
-                    <span class="opacity-50 text-xs">({{ tag.count }})</span>
-                </a>
-                {% else %}
-                <a href="{% url 'post_by_tag' tag.slug %}" class="badge badge-outline badge-{{ tag.color }} hover:badge-{{ tag.color }} transition-colors py-4 px-4 gap-1">
-                    {{ tag.name }}
-                    <span class="opacity-50 text-xs">({{ tag.count }})</span>
-                </a>
-                {% endif %}
-                {% endfor %}
-            </div>
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-accent/20 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-5 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">label</span>
+            </span>
+            标签云
+        </h3>
+        <div class="flex flex-wrap gap-2">
+            {% for tag in sidebar_tags %}
+            {% if tag.color|first == '#' %}
+            <a href="{% url 'post_by_tag' tag.slug %}" 
+               class="badge border-none py-3 px-3 gap-1.5 transition-all hover:scale-105 hover:brightness-110 shadow-sm"
+               style="background-color: {{ tag.color }}15; color: {{ tag.color }};">
+                <span class="font-medium">{{ tag.name }}</span>
+                <span class="opacity-60 text-xs">{{ tag.count }}</span>
+            </a>
+            {% else %}
+            <a href="{% url 'post_by_tag' tag.slug %}" class="badge border-none bg-{{ tag.color }}/10 text-{{ tag.color }} hover:bg-{{ tag.color }}/20 transition-all py-3 px-3 gap-1.5 hover:scale-105 shadow-sm">
+                <span class="font-medium">{{ tag.name }}</span>
+                <span class="opacity-60 text-xs">{{ tag.count }}</span>
+            </a>
+            {% endif %}
+            {% endfor %}
         </div>
-    {% endcaptureas %}
-    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-        {{ tags_card }}
     </div>
     {% endcache %}
     {% endif %}
@@ -93,36 +115,33 @@
     <!-- Recent Comments -->
     {% if sidebar_comments %}
     {% cache sidebar_cache_ttl "sidebar_comments" %}
-    {% captureas comments_card %}
-        <div class="p-5">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-info">forum</span>
-                最新评论
-            </h3>
-            <div class="flex flex-col gap-4">
-                {% for comment in sidebar_comments %}
-                <div class="flex gap-3 relative z-20 group">
-                    <div class="avatar placeholder shrink-0">
-                        <div class="bg-neutral text-neutral-content rounded-full w-10 h-10 ring-1 ring-base-content/5">
-                            <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}">
-                        </div>
-                    </div>
-                    <div class="flex flex-col justify-center flex-1 min-w-0">
-                        <div class="flex justify-between items-center w-full">
-                            <span class="font-bold text-sm truncate">{{ comment.user.nickname|default:comment.user.username }}</span>
-                            <span class="text-[10px] text-base-content/40 whitespace-nowrap ml-2">{{ comment.created_at|timesince }}前</span>
-                        </div>
-                        <a href="{% url 'post_detail' comment.post.slug %}#comment-{{ comment.id }}" class="text-xs text-base-content/60 line-clamp-1 hover:text-primary transition-colors mt-0.5">
-                            {{ comment.content|striptags }}
-                        </a>
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-info/20 hover:shadow-xl hover:shadow-info/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-5 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-info/10 text-info flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">forum</span>
+            </span>
+            最新评论
+        </h3>
+        <div class="flex flex-col gap-5">
+            {% for comment in sidebar_comments %}
+            <div class="flex gap-3 group/comment">
+                <div class="avatar placeholder shrink-0 mt-1">
+                    <div class="bg-base-200 rounded-xl w-10 h-10 ring-1 ring-base-content/5 group-hover/comment:ring-info/30 transition-all">
+                        <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}">
                     </div>
                 </div>
-                {% endfor %}
+                <div class="flex flex-col flex-1 min-w-0 bg-base-200/30 p-3 rounded-2xl rounded-tl-none hover:bg-base-200/60 transition-colors">
+                    <div class="flex justify-between items-center w-full mb-1">
+                        <span class="font-bold text-sm truncate">{{ comment.user.nickname|default:comment.user.username }}</span>
+                        <span class="text-[10px] text-base-content/40 whitespace-nowrap">{{ comment.created_at|timesince }}前</span>
+                    </div>
+                    <a href="{% url 'post_detail' comment.post.slug %}#comment-{{ comment.id }}" class="text-xs text-base-content/70 line-clamp-2 hover:text-info transition-colors leading-relaxed">
+                        {{ comment.content|striptags }}
+                    </a>
+                </div>
             </div>
+            {% endfor %}
         </div>
-    {% endcaptureas %}
-    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-        {{ comments_card }}
     </div>
     {% endcache %}
     {% endif %}
@@ -130,40 +149,25 @@
     <!-- Friend Links -->
     {% if friend_links %}
     {% cache sidebar_cache_ttl "sidebar_friend_links" %}
-    {% captureas links_card %}
-        <div class="p-5">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-success">link</span>
-                友情链接
-            </h3>
-            <div class="grid grid-cols-2 gap-2 relative z-20">
-                {% load capture_tags %}
-                {% for link in friend_links %}
-                {% captureas link_content %}
-                    <div class="flex items-center gap-2 w-full text-left">
-                        {% if link.logo %}
-                        <img src="{{ link.logo.url }}" class="w-4 h-4 rounded-full object-cover shrink-0">
-                        {% else %}
-                        <img src="{% if link.url|last == '/' %}{{ link.url }}favicon.ico{% else %}{{ link.url }}/favicon.ico{% endif %}" class="w-4 h-4 rounded-full object-cover shrink-0">
-                        {% endif %}
-                        <span class="truncate text-xs">{{ link.name }}</span>
-                    </div>
-                {% endcaptureas %}
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-success/20 hover:shadow-xl hover:shadow-success/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-5 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-success/10 text-success flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">link</span>
+            </span>
+            友情链接
+        </h3>
+        <div class="grid grid-cols-2 gap-3">
+            {% for link in friend_links %}
+            <a href="{{ link.url }}" target="_blank" class="flex items-center gap-2 p-2 rounded-xl hover:bg-base-200/50 transition-all group/link">
                 {% if link.logo %}
-                    <a href="{{ link.url }}" target="_blank" class="btn btn-ghost btn-sm btn-block justify-start gap-2 font-normal h-auto py-2 px-2">
-                        {{ link_content }}
-                    </a>
+                <img src="{{ link.logo.url }}" class="w-6 h-6 rounded-lg object-cover shrink-0 shadow-sm group-hover/link:scale-110 transition-transform">
                 {% else %}
-                    <a href="{{ link.url }}" target="_blank" class="btn btn-ghost btn-sm btn-block justify-start gap-2 font-normal h-auto py-2 px-2">
-                        {{ link_content }}
-                    </a>
+                <img src="{% if link.url|last == '/' %}{{ link.url }}favicon.ico{% else %}{{ link.url }}/favicon.ico{% endif %}" class="w-6 h-6 rounded-lg object-cover shrink-0 shadow-sm group-hover/link:scale-110 transition-transform" onerror="this.src='https://ui-avatars.com/api/?name={{ link.name }}&background=random'">
                 {% endif %}
-                {% endfor %}
-            </div>
+                <span class="truncate text-sm font-medium opacity-80 group-hover/link:opacity-100 group-hover/link:text-success transition-colors">{{ link.name }}</span>
+            </a>
+            {% endfor %}
         </div>
-    {% endcaptureas %}
-    <div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-        {{ links_card }}
     </div>
     {% endcache %}
     {% endif %}

@@ -2,16 +2,14 @@
 {% load capture_tags %}
 {% load widget_tweaks %}
 
-{% block title %}{% if form.instance.pk %}编辑用户组: {{ form.instance.name }}{% else %}新建用户组{% endif %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
-<div class="text-sm breadcrumbs mb-4">
-    <ul>
-        <li><a href="{% url 'administration:index' %}">首页</a></li>
-        <li><a href="{% url 'administration:group_list' %}">用户组管理</a></li>
-        <li>{% if form.instance.pk %}编辑{% else %}新建{% endif %}</li>
-    </ul>
-</div>
+<!-- Header -->
+{% captureas header_actions %}
+{% endcaptureas %}
+
+{% include "administration/components/header.html" with title=title|default:"编辑用户组" icon="groups" breadcrumbs=breadcrumbs actions=header_actions %}
 
 <form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-6" novalidate>
     {% csrf_token %}
@@ -19,93 +17,90 @@
     <!-- Left Column: Main Content -->
     <div class="lg:col-span-2 space-y-6">
         <!-- Group Info -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-6">
-                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">groups</span>
-                    基本信息
-                </h2>
-                
-                {% if form.non_field_errors %}
-                <div class="alert alert-error mb-4">
-                    <span class="material-symbols-outlined">error</span>
-                    <div>
-                        {% for error in form.non_field_errors %}
-                        <p>{{ error }}</p>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Name -->
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-medium">用户组名称</span>
-                    </label>
-                    <div class="relative">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm">badge</span>
-                        {% render_field form.name class+="input input-bordered w-full pl-9 focus:input-primary transition-all" placeholder="例如：编辑人员" %}
-                    </div>
-                    {% if form.name.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
-                    </label>
-                    {% endif %}
+        {% captureas info_content %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-error mb-4 shadow-sm">
+                <span class="material-symbols-outlined">error</span>
+                <div class="flex flex-col">
+                    <span class="font-bold">表单错误</span>
+                    {% for error in form.non_field_errors %}
+                    <span class="text-sm">{{ error }}</span>
+                    {% endfor %}
                 </div>
             </div>
-        </div>
+            {% endif %}
+
+            <!-- Name -->
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-bold text-base">用户组名称 <span class="text-error">*</span></span>
+                </label>
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">badge</span>
+                    {% render_field form.name class+="input input-bordered w-full pl-10 focus:input-primary transition-all" placeholder="例如：编辑人员" %}
+                </div>
+                {% if form.name.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
+                </label>
+                {% endif %}
+            </div>
+        {% endcaptureas %}
+        {% include "administration/components/form_card.html" with title="基本信息" icon="groups" content=info_content %}
 
         <!-- Permissions -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-6">
-                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-secondary">security</span>
-                    权限分配
-                </h2>
-                
-                <div class="alert alert-info shadow-sm mb-4">
-                    <span class="material-symbols-outlined">info</span>
-                    <span class="text-sm">选中的权限将被授予该组内的所有用户。按住 Ctrl/Command 可多选。</span>
-                </div>
-
-                <div class="form-control w-full">
-                    {% render_field form.permissions class+="select select-bordered w-full h-96 font-mono text-sm" size="15" %}
-                    {% if form.permissions.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.permissions.errors.0 }}</span>
-                    </label>
-                    {% endif %}
-                </div>
+        {% captureas perm_content %}
+            <div class="alert alert-info shadow-sm mb-4">
+                <span class="material-symbols-outlined">info</span>
+                <span class="text-sm">选中的权限将被授予该组内的所有用户。按住 Ctrl/Command 可多选。</span>
             </div>
-        </div>
+
+            <div class="form-control w-full">
+                {% render_field form.permissions class+="select select-bordered w-full h-96 font-mono text-sm focus:select-primary transition-all" size="15" %}
+                {% if form.permissions.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.permissions.errors.0 }}</span>
+                </label>
+                {% endif %}
+            </div>
+        {% endcaptureas %}
+        {% include "administration/components/form_card.html" with title="权限分配" icon="security" icon_class="text-secondary" content=perm_content %}
     </div>
 
     <!-- Right Column: Sidebar -->
     <div class="lg:col-span-1 space-y-6">
         <!-- Publish Box -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">操作</h3>
+        {% captureas publish_content %}
+            <div class="flex flex-col gap-3">
+                <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined">save</span>
+                    保存更改
+                </button>
                 
-                <div class="flex flex-col gap-3">
-                    <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
-                        <span class="material-symbols-outlined">save</span>
-                        保存更改
-                    </button>
-                    <a href="{% url 'administration:group_list' %}" class="btn btn-ghost w-full">取消</a>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">保存并新增</button>
+                    <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">保存并继续</button>
                 </div>
 
-                {% if form.instance.pk %}
-                <div class="divider my-2"></div>
-                <div class="text-xs text-base-content/50 space-y-1">
-                    <div class="flex justify-between">
-                        <span>成员数量:</span>
-                        <span class="font-mono">{{ form.instance.user_set.count }}</span>
+                <div class="divider my-1"></div>
+                
+                {% if object %}
+                    <div class="flex justify-between items-center">
+                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">取消</a>
+                        <button type="button" onclick="confirmDelete('{% url 'administration:group_delete' object.pk %}', '确定要删除用户组《{{ object.name|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
+                            删除用户组
+                        </button>
                     </div>
-                </div>
+                    <div class="mt-4 text-xs text-base-content/50 bg-base-200/50 p-3 rounded-lg flex justify-between items-center">
+                        <span>成员数量</span>
+                        <span class="font-mono font-bold">{{ object.user_set.count }}</span>
+                    </div>
+                {% else %}
+                    <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">取消</a>
                 {% endif %}
             </div>
-        </div>
+        {% endcaptureas %}
+        {% include "administration/components/form_card.html" with title="操作" icon="settings" content=publish_content %}
     </div>
 </form>
 {% endblock %}

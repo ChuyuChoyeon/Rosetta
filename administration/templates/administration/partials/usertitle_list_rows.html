@@ -1,5 +1,5 @@
 {% for title in titles %}
-<tr class="hover:bg-base-200/50 transition-colors duration-200 group">
+<tr class="hover">
     <th class="pl-4">
         <label>
             <input type="checkbox" name="selected_ids" value="{{ title.pk }}" class="checkbox checkbox-xs rounded-sm row-checkbox" onchange="updateBulkToolbar()" />
@@ -7,7 +7,11 @@
     </th>
     <td>
         <a href="{% url 'administration:usertitle_edit' title.pk %}" class="flex items-center gap-2 font-semibold text-sm hover:text-primary transition-colors">
+            {% if title.color|first == '#' %}
+            <span class="badge badge-sm gap-1 border-none shadow-sm text-white" style="background-color: {{ title.color }}">
+            {% else %}
             <span class="badge badge-{{ title.color }} badge-sm gap-1 border-none shadow-sm">
+            {% endif %}
                 {% if title.icon %}
                     <span class="w-3 h-3 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
                         {{ title.icon|safe }}
@@ -24,8 +28,13 @@
     </td>
     <td class="hidden md:table-cell">
         <div class="flex items-center gap-2">
+            {% if title.color|first == '#' %}
+            <span class="w-2.5 h-2.5 rounded-full ring-1 ring-base-content/10" style="background-color: {{ title.color }}"></span>
+            <span class="text-xs opacity-70">{{ title.color }}</span>
+            {% else %}
             <span class="w-2.5 h-2.5 rounded-full bg-{{ title.color }} ring-1 ring-base-content/10"></span>
             <span class="text-xs opacity-70">{{ title.get_color_display }}</span>
+            {% endif %}
         </div>
     </td>
     <td class="hidden lg:table-cell text-sm opacity-70 max-w-xs truncate" title="{{ title.description }}">

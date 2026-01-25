@@ -38,20 +38,18 @@
         {% endif %}
 
         <!-- View Toggle -->
-        <div class="join bg-base-100 shadow-sm border border-base-content/10">
-            <button class="join-item btn btn-sm gap-2" 
-                    :class="viewMode === 'grid' ? 'btn-active btn-primary' : 'btn-ghost'" 
+        <div class="flex items-center gap-1 p-1 bg-base-200/50 rounded-xl border border-base-content/5 backdrop-blur-sm">
+            <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
+                    :class="viewMode === 'grid' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
                     @click="toggleView('grid')"
                     title="网格视图">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                <span class="hidden sm:inline">网格</span>
+                    <span class="material-symbols-outlined text-lg">grid_view</span>
             </button>
-            <button class="join-item btn btn-sm gap-2" 
-                    :class="viewMode === 'list' ? 'btn-active btn-primary' : 'btn-ghost'" 
+            <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
+                    :class="viewMode === 'list' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
                     @click="toggleView('list')"
                     title="列表视图">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-                <span class="hidden sm:inline">列表</span>
+                    <span class="material-symbols-outlined text-lg">view_list</span>
             </button>
         </div>
     </div>
@@ -67,75 +65,76 @@
                 {% for post in posts %}
                 
                 {% captureas card_content %}
-                <div class="h-full flex flex-col group/card bg-base-100 rounded-2xl overflow-hidden transition-all duration-300 border border-base-content/5 hover:border-primary/20 hover:shadow-lg" :class="viewMode === 'list' ? 'flex-col sm:flex-row' : ''">
-                    {% if post.cover_image %}
-                    <figure class="overflow-hidden relative transition-all duration-300 ease-in-out"
-                            :class="viewMode === 'grid' ? 'w-full aspect-w-3 aspect-h-2' : 'w-full aspect-w-3 aspect-h-2 sm:aspect-none sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[10rem]'">
-                        <img src="{{ post.cover_image.url }}" 
-                             alt="{{ post.title }}" 
-                             class="object-cover w-full h-full group-hover/card:scale-105 transition-transform duration-300"
-                             :class="viewMode === 'grid' ? 'absolute inset-0' : 'absolute inset-0 sm:static'"
-                             loading="lazy" />
-                        <div class="absolute inset-0 bg-black/0 group-hover/card:bg-black/10 transition-colors duration-300"></div>
-                    </figure>
-                    {% else %}
-                    <figure class="pattern-placeholder relative overflow-hidden group-hover/card:brightness-110 transition-all duration-300 ease-in-out flex items-center justify-center text-center"
-                            :class="viewMode === 'grid' ? 'w-full aspect-w-3 aspect-h-2' : 'w-full aspect-w-3 aspect-h-2 sm:aspect-none sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[10rem]'"
-                            data-seed="{{ post.title }}"
-                            x-init="initGeoPattern($el, '{{ post.title }}')"
-                            x-effect="initGeoPattern($el, '{{ post.title }}')">
-                        <div class="flex items-center justify-center p-4"
-                             :class="viewMode === 'grid' ? 'absolute inset-0' : 'absolute inset-0 sm:static sm:w-full sm:h-full'">
-                            <div class="text-white font-bold text-lg leading-tight opacity-90 drop-shadow-md z-10 break-words w-full">{{ post.title }}</div>
-                        </div>
-                    </figure>
-                    {% endif %}
-                    
-                    <div class="card-body flex-1 p-6 relative">
-                        <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
-                            <a href="{% url 'post_detail' post.slug %}" class="line-clamp-2 before:absolute before:inset-0 z-20">{{ post.title }}</a>
-                        </h2>
-                        
-                        <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
-                            {% if post.is_pinned %}
-                            <div class="badge badge-accent badge-outline badge-sm gap-1 pl-1.5 pr-2 h-6">
-                                <span class="material-symbols-outlined text-[14px] leading-none -rotate-45">push_pin</span>
-                                <span class="text-xs font-medium">置顶</span>
+                <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1" :class="viewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col'">
+                    <div class="h-full flex flex-col w-full rounded-3xl overflow-hidden border border-base-content/5 hover:border-primary/20 transition-colors" :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                        {% if post.cover_image %}
+                        <figure class="overflow-hidden relative transition-all duration-300 ease-in-out"
+                                :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'">
+                            <img src="{{ post.cover_image.url }}" 
+                                 alt="{{ post.title }}" 
+                                 class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 group-hover/card:scale-105"
+                                 {% if forloop.counter > 6 %}loading="lazy"{% else %}loading="eager"{% endif %} />
+                            <div class="absolute inset-0 transition-all duration-300 group-hover/card:bg-black/10 group-hover/card:backdrop-blur-[2px]"></div>
+                        </figure>
+                        {% else %}
+                        <figure class="pattern-placeholder relative overflow-hidden group-hover/card:brightness-110 transition-all duration-300 ease-in-out"
+                                :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'"
+                                data-seed="{{ post.title }}"
+                                x-init="initGeoPattern($el, '{{ post.title|escapejs }}')"
+                                x-effect="initGeoPattern($el, '{{ post.title|escapejs }}')">
+                            <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+                                <div class="absolute inset-0 bg-black/10 backdrop-blur-[0px] group-hover/card:backdrop-blur-[2px] transition-all duration-500"></div>
+                                <div class="text-white font-bold text-lg leading-tight opacity-90 drop-shadow-md z-10 break-words w-full group-hover/card:opacity-100 transition-opacity relative px-4">{{ post.title }}</div>
                             </div>
-                            {% endif %}
-                            {% if post.created_at|date:"Y-m-d" == now|date:"Y-m-d" %}
-                            <div class="badge badge-secondary badge-sm">最新</div>
-                            {% endif %}
-                            {% if post.category %}
-                            <a href="{% url 'post_by_category' post.category.slug %}" class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
-                                {{ post.category.name }}
-                            </a>
-                            {% endif %}
-                        </div>
+                        </figure>
+                        {% endif %}
+                        
+                        <div class="card-body flex-1 p-6 relative">
+                            <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                                <a href="{% url 'post_detail' post.slug %}" class="line-clamp-2 before:absolute before:inset-0 z-20">{{ post.title }}</a>
+                            </h2>
+                            
+                            <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                                {% if post.is_pinned %}
+                                <div class="badge badge-accent badge-outline badge-sm gap-1 pl-1.5 pr-2 h-6">
+                                    <span class="material-symbols-outlined text-[14px] leading-none -rotate-45">push_pin</span>
+                                    <span class="text-xs font-medium">置顶</span>
+                                </div>
+                                {% endif %}
+                                {% if post.created_at|date:"Y-m-d" == now|date:"Y-m-d" %}
+                                <div class="badge badge-secondary badge-sm">最新</div>
+                                {% endif %}
+                                {% if post.category %}
+                                <a href="{% url 'post_by_category' post.category.slug %}" class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                                    {{ post.category.name }}
+                                </a>
+                                {% endif %}
+                            </div>
 
-                        <p class="text-base-content/70 text-sm line-clamp-3 mb-4">{{ post.excerpt|default:post.content|markdown_text|truncatechars:100 }}</p>
-                        
-                        <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
-                            <div class="flex items-center gap-3">
-                                <div class="flex items-center gap-1" title="发布时间">
-                                    <span class="material-symbols-outlined text-[14px]">calendar_today</span>
-                                    <span>{{ post.created_at|date:"m-d" }}</span>
+                            <p class="text-base-content/70 text-sm line-clamp-3 mb-4">{{ post.excerpt|default:post.content|markdown_text|truncatechars:100 }}</p>
+                            
+                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                                <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-1" title="发布时间">
+                                        <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                        <span>{{ post.created_at|date:"m-d" }}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1" title="阅读量">
+                                        <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                        <span>{{ post.views }}</span>
+                                    </div>
                                 </div>
-                                <div class="flex items-center gap-1" title="阅读量">
-                                    <span class="material-symbols-outlined text-[14px]">visibility</span>
-                                    <span>{{ post.views }}</span>
+                                <div class="flex items-center gap-1" title="作者">
+                                    <span class="material-symbols-outlined text-[14px]">person</span>
+                                    <span class="font-medium">{{ post.author.nickname|default:post.author.username }}</span>
                                 </div>
-                            </div>
-                            <div class="flex items-center gap-1" title="作者">
-                                <span class="material-symbols-outlined text-[14px]">person</span>
-                                <span class="font-medium">{{ post.author.nickname|default:post.author.username }}</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 {% endcaptureas %}
                 
-                <div class="p-0 overflow-hidden border-none shadow-none hover:shadow-xl bg-transparent h-full">
+                <div class="h-full">
                     {{ card_content }}
                 </div>
                 

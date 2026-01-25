@@ -32,7 +32,7 @@
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="clear_all">
-                <button type="submit" class="btn btn-error btn-sm" onclick="return confirm('确定要清理所有缓存吗？')">立即清理</button>
+                <button type="button" class="btn btn-error btn-sm" onclick="showConfirmModal('清理缓存', '确定要清理所有缓存吗？', () => this.form.submit())">立即清理</button>
             </form>
         </div>
 

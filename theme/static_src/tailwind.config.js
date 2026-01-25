@@ -33,8 +33,14 @@ module.exports = {
         text: "#1E293B",
       },
       fontFamily: {
-        sans: ['"Open Sans"', 'sans-serif'],
-        heading: ['"Poppins"', 'sans-serif'],
+        sans: ['"PingFang SC"', '"Inter"', '"Hiragino Sans GB"', '"Microsoft YaHei"', '"Noto Sans SC"', 'sans-serif'],
+        heading: ['"PingFang SC"', '"Poppins"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif'],
+        mono: ['"Fira Code"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+      },
+      borderRadius: {
+        'box': '1rem',
+        'card': '1rem',
+        'btn': '0.5rem',
       },
       animation: {
         "rainbow": "rainbow var(--speed, 2s) infinite linear",

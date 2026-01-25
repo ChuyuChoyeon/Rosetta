@@ -18,6 +18,8 @@
         }
     }"
     @notify.window="add($event.detail.message, $event.detail.type)"
+    @showToast.window="add($event.detail.message, $event.detail.type)"
+    @show-toast.window="add($event.detail.message, $event.detail.type)"
     class="toast toast-end z-[100] fixed pointer-events-none p-4 top-24"
 >
     <!-- Server-side Messages -->

@@ -4,54 +4,112 @@
 {% block title %}页面管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
-<div class="text-sm breadcrumbs mb-4">
-    <ul>
-        <li><a href="{% url 'administration:index' %}">首页</a></li>
-        <li>页面管理</li>
-    </ul>
-</div>
-
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">页面管理</h1>
-    <div class="flex gap-2">
-        <div class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
-                <span class="material-symbols-outlined text-lg">more_vert</span>
-                更多
-            </div>
-            <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow bg-base-100 rounded-box w-52">
-                <li>
-                    <a href="{% url 'administration:export_all' 'Page' %}" target="_blank">
-                        <span class="material-symbols-outlined">file_download</span>
-                        导出全部 (JSON)
-                    </a>
-                </li>
-                <li>
-                    <button onclick="import_modal.showModal()">
-                        <span class="material-symbols-outlined">file_upload</span>
-                        导入数据 (JSON)
-                    </button>
-                </li>
-            </ul>
+<!-- Header Actions -->
+{% captureas header_actions %}
+    <div class="dropdown dropdown-end">
+        <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
+            <span class="material-symbols-outlined text-lg">more_vert</span>
+            更多
         </div>
-        {% url 'administration:page_create' as create_url %}
-        {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建页面' extra_classes='px-4 !h-8 text-xs' href=create_url %}
-            {% include 'components/inspira/rainbow_button.html' %}
-        {% endwith %}
+        <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-content/5">
+            <li>
+                <a href="{% url 'administration:export_all' 'Page' %}" target="_blank">
+                    <span class="material-symbols-outlined">file_download</span>
+                    导出全部 (JSON)
+                </a>
+            </li>
+            <li>
+                <button onclick="import_modal.showModal()">
+                    <span class="material-symbols-outlined">file_upload</span>
+                    导入数据 (JSON)
+                </button>
+            </li>
+        </ul>
     </div>
-</div>
+    {% url 'administration:page_create' as create_url %}
+    {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建页面' extra_classes='px-4 !h-8 text-xs' href=create_url %}
+        {% include 'components/inspira/rainbow_button.html' %}
+    {% endwith %}
+{% endcaptureas %}
+
+<!-- Header -->
+{% include "administration/components/header.html" with title="页面管理" icon="description" breadcrumbs=breadcrumbs actions=header_actions %}
+
+<!-- Filter Tabs -->
+{% captureas filter_tabs %}
+    <a href="?{% if request.GET.q %}q={{ request.GET.q }}{% endif %}" 
+       class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if not request.GET.status %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
+       全部
+    </a>
+    <a href="?status=published{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+       class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if request.GET.status == 'published' %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
+       已发布
+    </a>
+    <a href="?status=draft{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
+       class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if request.GET.status == 'draft' %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
+       草稿
+    </a>
+{% endcaptureas %}
+
+<!-- Bulk Actions -->
+{% captureas bulk_actions %}
+    <button type="button" onclick="submitBulkAction('published')" class="btn btn-sm btn-primary gap-2">
+        <span class="material-symbols-outlined text-[18px]">check_circle</span> 修改成发布
+    </button>
+    <button type="button" onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral gap-2">
+        <span class="material-symbols-outlined text-[18px]">drafts</span> 修改成草稿
+    </button>
+    <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1">
+        <span class="material-symbols-outlined text-[16px]">delete</span> 删除
+    </button>
+{% endcaptureas %}
+
+<!-- Main Content -->
+{% captureas list_content %}
+    <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='page' %}">
+        {% csrf_token %}
+        <table class="table table-zebra table-pin-rows table-hover w-full">
+            <!-- Head -->
+            <thead class="bg-base-200/30 text-base-content/60 font-medium">
+                <tr>
+                    <th class="w-10 pl-6">
+                        <label>
+                            <input type="checkbox" class="checkbox checkbox-sm rounded-sm" onclick="toggleAll(this)" />
+                        </label>
+                    </th>
+                    <th class="w-16 font-mono hidden md:table-cell">ID</th>
+                    <th>标题</th>
+                    <th class="hidden lg:table-cell">Slug</th>
+                    <th class="w-32 text-center hidden sm:table-cell whitespace-nowrap">状态</th>
+                    <th class="w-32 hidden lg:table-cell">创建时间</th>
+                    <th class="w-24 text-center pr-6">操作</th>
+                </tr>
+            </thead>
+            <!-- Body (HTMX Target) -->
+            <tbody id="page-list-body">
+                {% include "administration/partials/page_list_rows.html" %}
+            </tbody>
+        </table>
+    </form>
+{% endcaptureas %}
+
+<!-- List Container -->
+{% include "administration/components/list_container.html" with title="页面列表" icon="list" search_url="." filter_tabs=filter_tabs bulk_actions=bulk_actions content=list_content %}
 
 <!-- Import Modal -->
 <dialog id="import_modal" class="modal">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg">导入数据 (JSON)</h3>
+  <div class="modal-box rounded-2xl">
+    <h3 class="font-bold text-lg flex items-center gap-2">
+        <span class="material-symbols-outlined text-primary">file_upload</span>
+        导入数据 (JSON)
+    </h3>
     <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
     <form action="{% url 'administration:import_json' 'Page' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        <input type="file" name="json_file" class="file-input file-input-bordered w-full" accept=".json" required />
+        <input type="file" name="json_file" class="file-input file-input-bordered w-full file-input-sm" accept=".json" required />
         <div class="modal-action">
-            <button type="button" class="btn" onclick="import_modal.close()">取消</button>
-            <button type="submit" class="btn btn-primary">开始导入</button>
+            <button type="button" class="btn btn-sm" onclick="import_modal.close()">取消</button>
+            <button type="submit" class="btn btn-sm btn-primary">开始导入</button>
         </div>
     </form>
   </div>
@@ -59,104 +117,6 @@
     <button>close</button>
   </form>
 </dialog>
-
-{% captureas card_content %}
-    <div class="p-0">
-        <div class="p-4 border-b border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 class="card-title text-base whitespace-nowrap">
-                <span class="material-symbols-outlined text-secondary">description</span>
-                页面列表
-            </h2>
-            
-            <div class="flex gap-2 w-full sm:w-auto">
-                <form action="." method="get" class="join w-full sm:w-auto">
-                    {% if request.GET.status %}<input type="hidden" name="status" value="{{ request.GET.status }}">{% endif %}
-                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索页面..." class="input input-bordered input-sm join-item w-full sm:w-64" />
-                    <button type="submit" class="btn btn-sm btn-ghost join-item border border-base-300">
-                        <span class="material-symbols-outlined">search</span>
-                    </button>
-                </form>
-            </div>
-        </div>
-        
-        <!-- Filter Tabs -->
-        <div class="px-4 py-2 border-b border-base-200 bg-base-100">
-            <div class="tabs tabs-boxed bg-transparent p-0 gap-2 flex-nowrap overflow-x-auto w-full justify-start scrollbar-hide">
-                <a href="?{% if request.GET.q %}q={{ request.GET.q }}{% endif %}" class="tab tab-sm whitespace-nowrap shrink-0 {% if not request.GET.status %}tab-active bg-primary text-primary-content{% else %}bg-base-200{% endif %} rounded-btn">全部</a>
-                <a href="?status=published{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="tab tab-sm whitespace-nowrap shrink-0 {% if request.GET.status == 'published' %}tab-active bg-success text-success-content{% else %}bg-base-200{% endif %} rounded-btn">已发布</a>
-                <a href="?status=draft{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="tab tab-sm whitespace-nowrap shrink-0 {% if request.GET.status == 'draft' %}tab-active bg-neutral text-neutral-content{% else %}bg-base-200{% endif %} rounded-btn">草稿</a>
-            </div>
-        </div>
-        
-        <!-- Bulk Actions Toolbar -->
-        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
-            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
-            <div class="flex gap-2">
-                <button type="button" onclick="submitBulkAction('published')" class="btn btn-sm btn-primary gap-2">
-                    <span class="material-symbols-outlined text-[18px]">check_circle</span> 修改成发布
-                </button>
-                <button type="button" onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral gap-2">
-                    <span class="material-symbols-outlined text-[18px]">drafts</span> 修改成草稿
-                </button>
-                <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1">
-                    <span class="material-symbols-outlined text-[16px]">delete</span> 删除
-                </button>
-            </div>
-        </div>
-
-        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='page' %}">
-            {% csrf_token %}
-            <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
-                <table class="table table-zebra table-pin-rows w-full">
-                    <!-- Head -->
-                    <thead class="bg-base-200/30 text-base-content/60 font-medium">
-                        <tr>
-                            <th class="w-10 pl-6 rounded-tl-2xl">
-                                <label>
-                                    <input type="checkbox" class="checkbox checkbox-sm rounded-sm" onclick="toggleAll(this)" />
-                                </label>
-                            </th>
-                            <th class="w-16 font-mono hidden md:table-cell">ID</th>
-                            <th>标题</th>
-                            <th class="hidden lg:table-cell">Slug</th>
-                            <th class="w-32 text-center hidden sm:table-cell whitespace-nowrap">状态</th>
-                            <th class="w-32 hidden lg:table-cell">创建时间</th>
-                            <th class="w-24 text-center pr-6 rounded-tr-2xl">操作</th>
-                        </tr>
-                    </thead>
-                    <!-- Body (HTMX Target) -->
-                    <tbody id="page-list-body">
-                        {% include "administration/partials/page_list_rows.html" %}
-                    </tbody>
-                </table>
-            </div>
-        </form>
-        
-        <!-- Pagination -->
-        <div class="p-4 border-t border-base-200 flex justify-center">
-            {% if is_paginated %}
-            <div class="join">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-sm">«</a>
-                {% else %}
-                <button class="join-item btn btn-sm btn-disabled">«</button>
-                {% endif %}
-                
-                <button class="join-item btn btn-sm">第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页</button>
-                
-                {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-sm">»</a>
-                {% else %}
-                <button class="join-item btn btn-sm btn-disabled">»</button>
-                {% endif %}
-            </div>
-            {% endif %}
-        </div>
-    </div>
-{% endcaptureas %}
-<div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-    {{ card_content }}
-</div>
 
 <script>
     function submitBulkAction(action) {
@@ -170,7 +130,6 @@
         if (action === 'delete') actionName = '批量删除';
         else if (action === 'published') actionName = '批量发布';
         else if (action === 'draft') actionName = '批量转草稿';
-        else if (action === 'export_json') actionName = '批量导出';
 
         showConfirmModal(
             actionName,

@@ -21,6 +21,9 @@
                 <span class="badge badge-sm badge-error ml-2 animate-pulse">{{ profile_user.unread_notification_count }}</span>
             {% endif %}
         </a>
+        <a role="tab" class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'security' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}" href="?tab=security">
+            安全
+        </a>
         <a role="tab" class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'settings' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}" href="?tab=settings">
             设置
         </a>

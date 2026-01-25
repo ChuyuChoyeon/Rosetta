@@ -230,6 +230,9 @@ urlpatterns = [
     # --- System Tools (系统工具) ---
     # 系统设置 (Settings - Placeholder)
     path("settings/", views.SettingsView.as_view(), name="settings"),
+    path("system/", views.SystemToolsView.as_view(), name="system_tools"),
+    path("system/monitor/", views.SystemMonitorView.as_view(), name="system_monitor"),
+    path("system/backup/download/<str:filename>/", views.BackupDownloadView.as_view(), name="backup_download"),
     # 调试工具 (Debug)
     path("debug/", views.DebugDashboardView.as_view(), name="debug"),
     path("debug/ui-test/", views.DebugUITestView.as_view(), name="debug_ui_test"),

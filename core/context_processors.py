@@ -34,15 +34,24 @@ def site_settings(request):
     if not placeholders:
         placeholders = ["搜索文章...", "搜索标签..."]
 
+    def build_navigations():
+        navs = Navigation.objects.filter(is_active=True).order_by("order")
+        return {
+            "header": [n for n in navs if n.location == "header"],
+            "footer": [n for n in navs if n.location == "footer"],
+            "sidebar": [n for n in navs if n.location == "sidebar"],
+        }
+
+    navigations = load_cached("site:navigations_dict", build_navigations)
+
     return {
         "friend_links": load_cached(
             "site:friend_links",
             lambda: list(FriendLink.objects.filter(is_active=True)),
         ),
-        "navigations": load_cached(
-            "site:navigations",
-            lambda: list(Navigation.objects.filter(is_active=True)),
-        ),
+        "nav_header": navigations["header"],
+        "nav_footer": navigations["footer"],
+        "nav_sidebar": navigations["sidebar"],
         "themes": themes,
         "search_placeholders": placeholders,
         "config": config,

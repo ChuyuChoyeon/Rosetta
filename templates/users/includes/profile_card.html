@@ -63,11 +63,17 @@
         </div>
         
         {% if user.is_authenticated and user == profile_user or user.is_staff %}
-        <div class="mt-6 w-full px-4">
+        <div class="mt-6 w-full px-4 space-y-2">
             <button onclick="profile_edit_modal.showModal()" class="btn btn-primary btn-outline btn-sm w-full gap-2 rounded-full hover:shadow-lg transition-all">
                 <span class="material-symbols-outlined text-lg">edit</span>
                 编辑资料
             </button>
+            {% if user == profile_user %}
+            <a href="?tab=security" class="btn btn-ghost btn-xs w-full gap-1 text-base-content/60 hover:text-primary">
+                <span class="material-symbols-outlined text-sm">lock_reset</span>
+                修改密码
+            </a>
+            {% endif %}
         </div>
         {% endif %}
         

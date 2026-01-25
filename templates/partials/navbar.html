@@ -8,7 +8,7 @@
         <div class="w-full flex justify-center lg:justify-start lg:w-auto py-2 lg:py-0">
             <a href="{% url 'home' %}" class="text-2xl font-heading font-bold text-base-content flex items-center gap-2 px-0 hover:opacity-80 transition-opacity whitespace-nowrap">
                 {% if config.SHOW_SITE_LOGO and config.SITE_LOGO %}
-                <img src="{{ config.SITE_LOGO }}" alt="Logo" class="h-8 w-auto object-contain">
+                <img src="{{ config.SITE_LOGO }}" alt="Logo" class="h-8 w-auto object-contain" onerror="this.style.display='none'">
                 {% endif %}
                 <span class="text-primary truncate">{{ config.SITE_NAME|default:"Rosetta" }}</span>
             </a>
@@ -23,7 +23,7 @@
                 </div>
                 <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
                     <li><a href="{% url 'home' %}">首页</a></li>
-                    {% for nav in navigations %}
+                    {% for nav in nav_header %}
                     <li><a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %}>{{ nav.title }}</a></li>
                     {% endfor %}
                 </ul>
@@ -36,10 +36,10 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </button>
                 <!-- 主题切换 -->
-                <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors grid place-items-center">
                     <input type="checkbox" class="theme-controller hidden" value="dark" onchange="updateTheme(this.checked ? 'dark' : 'light')" />
-                    <svg class="swap-off fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,4.93,1,1,0,0,0,5.64,7.05Zm12.02,12.72a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.41ZM17.34,6.18a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29l.71-.71a1,1,0,0,0,0-1.41,1,1,0,0,0-1.41,0l-.71.71A1,1,0,0,0,17.34,6.18ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM10.5,12a1.5,1.5,0,1,1,1.5,1.5A1.5,1.5,0,0,1,10.5,12Zm2.5,0a2.5,2.5,0,1,1-2.5-2.5A2.5,2.5,0,0,1,13,12Z"/></svg>
-                    <svg class="swap-on fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
+                    <span class="material-symbols-outlined swap-off text-[20px] leading-none col-start-1 row-start-1">light_mode</span>
+                    <span class="material-symbols-outlined swap-on text-[20px] leading-none col-start-1 row-start-1">dark_mode</span>
                 </label>
                 <!-- 用户菜单 (移动端) -->
                 {% if user.is_authenticated %}
@@ -81,7 +81,7 @@
           <li>
               <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}text-primary font-bold{% endif %} hover:text-primary transition-colors px-4 py-2">首页</a>
           </li>
-          {% for nav in navigations %}
+          {% for nav in nav_header %}
           <li>
               <a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %} class="hover:text-primary transition-colors px-4 py-2">{{ nav.title }}</a>
           </li>
@@ -96,20 +96,20 @@
       </button>
       
       <!-- 主题切换 -->
-      <label class="swap swap-rotate btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors">
-        <!-- 隐藏的复选框用于控制状态 -->
-        <input type="checkbox" 
-               class="theme-controller hidden" 
-               value="dark"
-               onchange="updateTheme(this.checked ? 'dark' : 'light')"
-               id="theme-toggle-nav" />
-        
-        <!-- 太阳图标 -->
-        <svg class="swap-off fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,4.93,1,1,0,0,0,5.64,7.05Zm12.02,12.72a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.41ZM17.34,6.18a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29l.71-.71a1,1,0,0,0,0-1.41,1,1,0,0,0-1.41,0l-.71.71A1,1,0,0,0,17.34,6.18ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM10.5,12a1.5,1.5,0,1,1,1.5,1.5A1.5,1.5,0,0,1,10.5,12Zm2.5,0a2.5,2.5,0,1,1-2.5-2.5A2.5,2.5,0,0,1,13,12Z"/></svg>
-        
-        <!-- 月亮图标 -->
-        <svg class="swap-on fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
-      </label>
+      <label class="swap swap-rotate btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors grid place-items-center">
+                    <!-- 隐藏的复选框用于控制状态 -->
+                    <input type="checkbox" 
+                           class="theme-controller hidden" 
+                           value="dark"
+                           onchange="updateTheme(this.checked ? 'dark' : 'light')"
+                           id="theme-toggle-nav" />
+                    
+                    <!-- 太阳图标 -->
+                    <span class="material-symbols-outlined swap-off text-[24px] leading-none col-start-1 row-start-1">light_mode</span>
+                    
+                    <!-- 月亮图标 -->
+                    <span class="material-symbols-outlined swap-on text-[24px] leading-none col-start-1 row-start-1">dark_mode</span>
+                </label>
 
       <script>
           // 根据当前主题初始化切换开关状态

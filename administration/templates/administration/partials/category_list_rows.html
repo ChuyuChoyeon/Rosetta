@@ -1,5 +1,5 @@
 {% for category in categories %}
-<tr class="hover:bg-base-200/50 transition-colors duration-200 group">
+<tr class="hover">
     <th class="pl-6">
         <label>
             <input type="checkbox" name="selected_ids" value="{{ category.pk }}" class="checkbox checkbox-xs rounded-sm row-checkbox" onchange="updateBulkToolbar()" />
@@ -9,7 +9,11 @@
     <td>
         <div class="flex items-center gap-3">
             {% if category.icon %}
+                {% if category.color|first == '#' %}
+                <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center shrink-0" style="color: {{ category.color }}">
+                {% else %}
                 <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center text-{{ category.color|default:'base-content' }} shrink-0">
+                {% endif %}
                     <span class="material-symbols-outlined text-lg">{{ category.icon }}</span>
                 </div>
             {% else %}
@@ -18,7 +22,11 @@
                 </div>
             {% endif %}
             <div class="min-w-0">
-                <a href="{% url 'administration:category_edit' category.pk %}" class="font-bold text-{{ category.color|default:'base-content' }} group-hover:text-primary transition-colors block truncate" title="{{ category.name }}">
+                {% if category.color|first == '#' %}
+                <a href="{% url 'administration:category_edit' category.pk %}" class="font-bold hover:text-primary transition-colors block truncate" style="color: {{ category.color }}" title="{{ category.name }}">
+                {% else %}
+                <a href="{% url 'administration:category_edit' category.pk %}" class="font-bold text-{{ category.color|default:'base-content' }} hover:text-primary transition-colors block truncate" title="{{ category.name }}">
+                {% endif %}
                     {{ category.name }}
                 </a>
                 <div class="text-xs text-base-content/50 font-mono truncate lg:hidden">{{ category.slug }}</div>

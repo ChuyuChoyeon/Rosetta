@@ -13,40 +13,90 @@
     </div>
 {% elif active_tab == 'articles' %}
     <!-- 文章列表选项卡 -->
-    <h2 class="card-title mb-6">发布文章</h2>
-    {% if posts %}
-        <div class="flex flex-col gap-6">
-            {% for post in posts %}
-            <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all border border-base-content/10 flex-col md:flex-row overflow-hidden md:min-h-[10rem]">
-                {% if post.cover_image %}
-                <figure class="w-full md:w-48 shrink-0 h-48 md:h-full overflow-hidden relative">
-                    <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
-                </figure>
-                {% endif %}
-                <div class="card-body p-5 flex-1">
-                    <h3 class="card-title text-lg font-bold">
-                        <a href="{{ post.get_absolute_url }}" class="hover:text-primary transition-colors line-clamp-1">{{ post.title }}</a>
-                    </h3>
-                    <p class="text-sm text-base-content/70 line-clamp-2 mt-2 leading-relaxed min-h-[2.8rem]">{{ post.excerpt|default:post.content|markdown_text|truncatechars:100 }}</p>
-                    <div class="flex items-center justify-between mt-auto pt-4 text-xs text-base-content/50">
-                        <div class="flex items-center gap-3">
-                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> {{ post.created_at|date:"Y-m-d" }}</span>
-                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span> {{ post.views }}</span>
+    <div x-data="{ 
+        viewMode: localStorage.getItem('profileViewMode') || 'grid',
+        toggleView(mode) {
+            this.viewMode = mode;
+            localStorage.setItem('profileViewMode', mode);
+        }
+    }">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="card-title">发布文章</h2>
+            
+            <!-- View Toggle -->
+            <div class="flex items-center gap-1 p-1 bg-base-200/50 rounded-xl border border-base-content/5 backdrop-blur-sm">
+                <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
+                        :class="viewMode === 'grid' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
+                        @click="toggleView('grid')"
+                        title="网格视图">
+                        <span class="material-symbols-outlined text-lg">grid_view</span>
+                </button>
+                <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
+                        :class="viewMode === 'list' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
+                        @click="toggleView('list')"
+                        title="列表视图">
+                        <span class="material-symbols-outlined text-lg">view_list</span>
+                </button>
+            </div>
+        </div>
+
+        {% if posts %}
+            <div class="grid gap-6 transition-all duration-500 ease-in-out"
+                 :class="viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1'">
+                {% for post in posts %}
+                <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1 border border-base-content/5 flex flex-col"
+                     :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                    {% if post.cover_image %}
+                    <figure class="relative overflow-hidden transition-all duration-300 ease-in-out"
+                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%] rounded-t-3xl' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem] rounded-t-3xl sm:rounded-l-3xl sm:rounded-tr-none'">
+                        <img src="{{ post.cover_image.url }}" 
+                             alt="{{ post.title }}" 
+                             class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 group-hover/card:scale-105" 
+                             loading="lazy" />
+                        <div class="absolute inset-0 transition-all duration-300 group-hover/card:bg-black/10 group-hover/card:backdrop-blur-[2px]"></div>
+                    </figure>
+                    {% else %}
+                    <figure class="pattern-placeholder relative overflow-hidden transition-all duration-300 ease-in-out group-hover/card:brightness-110"
+                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%] rounded-t-3xl' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem] rounded-t-3xl sm:rounded-l-3xl sm:rounded-tr-none'"
+                            data-seed="{{ post.title }}"
+                            x-init="initGeoPattern($el, '{{ post.title|escapejs }}')"
+                            x-effect="initGeoPattern($el, '{{ post.title|escapejs }}')">
+                        <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+                            <div class="absolute inset-0 bg-black/10 backdrop-blur-[0px] group-hover/card:backdrop-blur-[2px] transition-all duration-500"></div>
+                            <div class="text-white font-bold text-lg leading-tight opacity-90 drop-shadow-md z-10 break-words w-full group-hover/card:opacity-100 transition-opacity relative px-4">{{ post.title }}</div>
                         </div>
-                        {% if post.category %}
-                        <span class="badge badge-ghost badge-sm">{{ post.category.name }}</span>
-                        {% endif %}
+                    </figure>
+                    {% endif %}
+                    
+                    <div class="card-body flex-1 p-6 relative">
+                        <h3 class="card-title text-lg font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                            <a href="{{ post.get_absolute_url }}" class="line-clamp-2 before:absolute before:inset-0 z-20">{{ post.title }}</a>
+                        </h3>
+                        
+                        <p class="text-base-content/70 text-sm line-clamp-3 mb-4">{{ post.excerpt|default:post.content|markdown_text|truncatechars:100 }}</p>
+                        
+                        <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                            <div class="flex items-center gap-3">
+                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> {{ post.created_at|date:"Y-m-d" }}</span>
+                                <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">visibility</span> {{ post.views }}</span>
+                            </div>
+                            {% if post.category %}
+                            <a href="{% url 'post_by_category' post.category.slug %}" class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors z-30">
+                                {{ post.category.name }}
+                            </a>
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="flex flex-col items-center justify-center py-12 text-center opacity-50">
-            <span class="material-symbols-outlined text-6xl mb-4 text-base-content/20">article</span>
-            <p>暂无发布的文章</p>
-        </div>
-    {% endif %}
+        {% else %}
+            <div class="flex flex-col items-center justify-center py-12 text-center opacity-50">
+                <span class="material-symbols-outlined text-6xl mb-4 text-base-content/20">article</span>
+                <p>暂无发布的文章</p>
+            </div>
+        {% endif %}
+    </div>
 
 {% elif active_tab == 'comments' %}
     <!-- 评论记录选项卡 -->
@@ -195,6 +245,67 @@
             <p>暂无新通知</p>
         </div>
     {% endif %}
+
+{% elif active_tab == 'security' and user == profile_user %}
+    <!-- 安全设置选项卡（仅本人可见） -->
+    <h2 class="card-title mb-6">账号安全</h2>
+    
+    <div class="max-w-xl">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">lock</span>
+            修改密码
+        </h3>
+        <form action="{% url 'users:user_public_profile' user.username %}" method="post" class="space-y-6">
+            {% csrf_token %}
+            <input type="hidden" name="change_password" value="true">
+            
+            {% for field in password_form %}
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-bold">{{ field.label }}</span>
+                </label>
+                
+                <div class="relative group">
+                    <input type="{{ field.field.widget.input_type }}" 
+                           name="{{ field.name }}" 
+                           class="input input-bordered w-full pl-4 pr-10 focus:input-primary transition-all duration-300 rounded-xl bg-base-200/30 focus:bg-base-100 {% if field.errors %}input-error{% endif %}" 
+                           {% if field.field.required %}required{% endif %}>
+                    
+                    {% if 'password' in field.name %}
+                    <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-base-content/40">
+                        <span class="material-symbols-outlined text-[20px]">key</span>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if field.help_text %}
+                <label class="label pt-1">
+                    <span class="label-text-alt text-base-content/50 flex items-start gap-1 leading-tight">
+                        <span class="material-symbols-outlined text-[14px] mt-0.5">info</span>
+                        {{ field.help_text|safe }}
+                    </span>
+                </label>
+                {% endif %}
+                
+                {% for error in field.errors %}
+                <label class="label pt-1">
+                    <span class="label-text-alt text-error flex items-center gap-1 font-medium">
+                        <span class="material-symbols-outlined text-[14px]">error</span>
+                        {{ error }}
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+            {% endfor %}
+
+            <div class="card-actions justify-end mt-8">
+                <button type="submit" class="btn btn-primary px-8 gap-2">
+                    <span class="material-symbols-outlined text-sm">save</span>
+                    保存修改
+                </button>
+            </div>
+        </form>
+    </div>
 
 {% elif active_tab == 'settings' and user == profile_user %}
     <!-- 偏好设置选项卡（仅本人可见） -->

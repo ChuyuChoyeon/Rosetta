@@ -8,158 +8,138 @@
 {% endblock %}
 
 {% block content %}
-<div class="text-sm breadcrumbs mb-4">
-    <ul>
-        <li><a href="{% url 'administration:index' %}">首页</a></li>
-        <li><a href="{% url 'administration:post_list' %}">文章管理</a></li>
-        <li>{{ title|default:"编辑文章" }}</li>
-    </ul>
-</div>
+    <!-- Header -->
+    {% include "administration/components/header.html" with title=title|default:"编辑文章" subtitle="编辑文章内容和设置" breadcrumbs=None %}
 
-<form method="post" enctype="multipart/form-data" class="w-full">
-    {% csrf_token %}
-    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        <!-- Main Content (Left Column - 75%) -->
-        <div class="lg:col-span-3 space-y-6">
-            {% captureas main_card %}
-            <div class="p-6 relative">
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-bold text-lg">文章标题</span>
-                    </label>
-                    {{ form.title }}
-                    {% if form.title.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
-                    </label>
-                    {% endif %}
-                </div>
+    <form method="post" enctype="multipart/form-data" class="w-full">
+        {% csrf_token %}
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
+            <!-- Main Content (Left Column - 75%) -->
+            <div class="lg:col-span-3 space-y-6">
                 
-                <div class="form-control w-full mt-4">
-                    <label class="label flex justify-between items-center">
-                        <span class="label-text font-bold">内容 (Markdown)</span>
-                    </label>
+                <!-- Main Info Card -->
+                {% captureas main_card_content %}
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text font-bold text-lg">文章标题</span>
+                        </label>
+                        {{ form.title }}
+                        {% if form.title.errors %}
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
+                        </label>
+                        {% endif %}
+                    </div>
                     
-                    <div id="editor" class="bg-base-100"></div>
+                    <div class="form-control w-full mt-4">
+                        <label class="label flex justify-between items-center">
+                            <span class="label-text font-bold">内容 (Markdown)</span>
+                        </label>
+                        
+                        <div id="editor" class="bg-base-100 rounded-lg border border-base-300"></div>
 
-                    <div class="hidden">
-                        {{ form.content }}
-                    </div>
+                        <div class="hidden">
+                            {{ form.content }}
+                        </div>
 
-                    <script>
-                        (function() {
-                            const initEditor = () => {
-                                const container = document.getElementById('editor');
-                                // 检查容器是否存在，且未初始化，且 ByteMD 已加载
-                                if (container && !container.dataset.initialized && window.initByteMD) {
-                                    container.innerHTML = ''; // 清空容器
-                                    window.initByteMD('editor', 'id_content', `{{ form.content.value|default:""|escapejs }}`);
-                                    container.dataset.initialized = '1'; // 标记已初始化
-                                }
-                            };
-
-                            initEditor();
-
-                            if (document.readyState === 'loading') {
-                                document.addEventListener('DOMContentLoaded', initEditor);
-                            } else {
-                                // 如果 DOM 已加载，延迟执行以防脚本执行过快
-                                setTimeout(initEditor, 50);
-                            }
-                            
-                            // 异步加载兜底：轮询检查 window.initByteMD 是否就绪
-                            if (!window.initByteMD) {
-                                const checkInterval = setInterval(() => {
-                                    if (window.initByteMD) {
-                                        clearInterval(checkInterval);
-                                        initEditor();
+                        <script>
+                            (function() {
+                                const initEditor = () => {
+                                    const container = document.getElementById('editor');
+                                    // 检查容器是否存在，且未初始化，且 ByteMD 已加载
+                                    if (container && !container.dataset.initialized && window.initByteMD) {
+                                        container.innerHTML = ''; // 清空容器
+                                        window.initByteMD('editor', 'id_content', `{{ form.content.value|default:""|escapejs }}`);
+                                        container.dataset.initialized = '1'; // 标记已初始化
                                     }
-                                }, 100);
-                                // 5秒后停止轮询，防止死循环
-                                setTimeout(() => clearInterval(checkInterval), 5000);
-                            }
-                        })();
-                    </script>
+                                };
 
-                    {% if form.content.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
-                    </label>
-                    {% endif %}
-                </div>
+                                initEditor();
 
-                <div class="form-control w-full mt-4">
-                    <label class="label">
-                        <span class="label-text font-bold">摘要</span>
-                    </label>
-                    {{ form.excerpt }}
-                    <label class="label">
-                        <span class="label-text-alt opacity-60">可选，用于列表页展示</span>
-                    </label>
-                </div>
-            </div>
-            {% endcaptureas %}
-            <!-- Use simple div instead of Card Spotlight to prevent Stacking Context issues with Fullscreen Editor -->
-            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-                {{ main_card }}
-            </div>
-            
-            <!-- SEO / Slug Settings -->
-            {% captureas seo_card %}
-            <div class="p-6 relative">
-                <h3 class="card-title text-base mb-4">SEO 设置</h3>
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text">Slug (URL别名)</span>
-                    </label>
-                    {{ form.slug }}
-                    <label class="label">
-                        <span class="label-text-alt opacity-60">留空将自动根据标题生成</span>
-                    </label>
-                </div>
-            </div>
-            {% endcaptureas %}
-            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-                {{ seo_card }}
-            </div>
-        </div>
+                                if (document.readyState === 'loading') {
+                                    document.addEventListener('DOMContentLoaded', initEditor);
+                                } else {
+                                    // 如果 DOM 已加载，延迟执行以防脚本执行过快
+                                    setTimeout(initEditor, 50);
+                                }
+                                
+                                // 异步加载兜底：轮询检查 window.initByteMD 是否就绪
+                                if (!window.initByteMD) {
+                                    const checkInterval = setInterval(() => {
+                                        if (window.initByteMD) {
+                                            clearInterval(checkInterval);
+                                            initEditor();
+                                        }
+                                    }, 100);
+                                    // 5秒后停止轮询，防止死循环
+                                    setTimeout(() => clearInterval(checkInterval), 5000);
+                                }
+                            })();
+                        </script>
 
-        <!-- Sidebar (Right Column - 25% - Sticky) -->
-        <div class="lg:col-span-1 space-y-6 sticky top-24 z-30">
-            <!-- Publish Actions -->
-            {% captureas publish_card %}
-            <div class="p-6 relative">
-                <h3 class="card-title text-base mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">publish</span>
-                    发布
-                </h3>
+                        {% if form.content.errors %}
+                        <label class="label">
+                            <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
+                        </label>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-control w-full mt-4">
+                        <label class="label">
+                            <span class="label-text font-bold">摘要</span>
+                        </label>
+                        {{ form.excerpt }}
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">可选，用于列表页展示</span>
+                        </label>
+                    </div>
+                {% endcaptureas %}
+                {% include "administration/components/form_card.html" with content=main_card_content %}
                 
-                <div class="space-y-4">
+                <!-- SEO / Slug Settings -->
+                {% captureas seo_card_content %}
                     <div class="form-control w-full">
-                        <label class="label cursor-pointer justify-between">
-                            <span class="label-text">状态</span> 
-                            {{ form.status }}
+                        <label class="label">
+                            <span class="label-text">Slug (URL别名)</span>
+                        </label>
+                        {{ form.slug }}
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">留空将自动根据标题生成</span>
                         </label>
                     </div>
+                {% endcaptureas %}
+                {% include "administration/components/form_card.html" with title="SEO 设置" content=seo_card_content %}
+            </div>
 
-                    <div class="form-control w-full">
-                        <label class="label cursor-pointer justify-between">
-                            <span class="label-text">是否置顶</span>
-                            {{ form.is_pinned }}
-                        </label>
+            <!-- Sidebar (Right Column - 25% - Sticky) -->
+            <div class="lg:col-span-1 space-y-6 sticky top-24 z-30">
+                <!-- Publish Actions -->
+                {% captureas publish_content %}
+                    <div class="space-y-4">
+                        <div class="form-control w-full">
+                            <label class="label cursor-pointer justify-between">
+                                <span class="label-text">状态</span> 
+                                {{ form.status }}
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label cursor-pointer justify-between">
+                                <span class="label-text">是否置顶</span>
+                                {{ form.is_pinned }}
+                            </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label cursor-pointer justify-between">
+                                <span class="label-text">允许评论</span>
+                                {{ form.allow_comments }}
+                            </label>
+                        </div>
                     </div>
+                {% endcaptureas %}
 
-                    <div class="form-control w-full">
-                        <label class="label cursor-pointer justify-between">
-                            <span class="label-text">允许评论</span>
-                            {{ form.allow_comments }}
-                        </label>
-                    </div>
-                </div>
-
-                <div class="divider my-2"></div>
-
-                <div class="card-actions justify-end flex-col items-stretch gap-2">
+                {% captureas publish_actions %}
                     {% if object.slug %}
                     <a href="{% url 'post_detail' object.slug %}" target="_blank" class="btn btn-outline btn-sm w-full gap-2">
                         <span class="material-symbols-outlined text-sm">open_in_new</span>
@@ -173,185 +153,92 @@
                         <button type="submit" name="_continue" class="btn btn-ghost btn-xs flex-1">保存并继续</button>
                         <button type="submit" name="_addanother" class="btn btn-ghost btn-xs flex-1">保存并新增</button>
                     </div>
-                </div>
-            </div>
-            {% endcaptureas %}
-            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-                {{ publish_card }}
-            </div>
+                {% endcaptureas %}
 
-            <!-- Categories & Tags -->
-            {% captureas taxonomy_card %}
-            <div class="p-6 relative">
-                <h3 class="card-title text-base mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-secondary">category</span>
-                    分类与标签
-                </h3>
-                
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text">分类</span>
-                    </label>
-                    {{ form.category }}
-                </div>
+                {% include "administration/components/form_card.html" with title="发布" icon="publish" content=publish_content actions=publish_actions %}
 
-                <div class="form-control w-full mt-4" 
-                     x-data="{ 
-                        tags: [], 
-                        newTag: '',
-                        suggestions: [],
-                        showSuggestions: false,
-                        activeSuggestion: -1,
-                        init() {
-                            const initialTags = '{{ form.tags_str.value|default:''|escapejs }}';
-                            if (initialTags) {
-                                this.tags = initialTags.split(',').map(t => t.trim()).filter(t => t);
+                <!-- Categories & Tags -->
+                {% captureas taxonomy_content %}
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">分类</span>
+                        </label>
+                        {{ form.category }}
+                    </div>
+
+                    <div class="form-control w-full mt-4" 
+                         x-data="{ 
+                            tags: [], 
+                            newTag: '',
+                            init() {
+                                const initialValue = document.getElementById('id_tags_str').value;
+                                if (initialValue) {
+                                    this.tags = initialValue.split(',').filter(t => t.trim() !== '').map(t => t.trim());
+                                }
+                            },
+                            addTag() {
+                                const tag = this.newTag.trim();
+                                if (tag && !this.tags.includes(tag)) {
+                                    this.tags.push(tag);
+                                }
+                                this.newTag = '';
+                                this.updateHiddenInput();
+                            },
+                            removeTag(index) {
+                                this.tags.splice(index, 1);
+                                this.updateHiddenInput();
+                            },
+                            updateHiddenInput() {
+                                document.getElementById('id_tags_str').value = this.tags.join(',');
                             }
-                        },
-                        async fetchSuggestions() {
-                            if (this.newTag.length < 1) {
-                                this.suggestions = [];
-                                this.showSuggestions = false;
-                                return;
-                            }
-                            try {
-                                const response = await fetch(`{% url 'administration:tag_autocomplete' %}?q=${this.newTag}`);
-                                const data = await response.json();
-                                this.suggestions = data.results.filter(t => !this.tags.includes(t));
-                                this.showSuggestions = this.suggestions.length > 0;
-                                this.activeSuggestion = -1;
-                            } catch (e) {
-                                console.error('Error fetching tags:', e);
-                            }
-                        },
-                        addTag(tagToAdd = null) {
-                            const tag = tagToAdd || this.newTag.trim();
-                            if (tag && !this.tags.includes(tag)) {
-                                this.tags.push(tag);
-                            }
-                            this.newTag = '';
-                            this.suggestions = [];
-                            this.showSuggestions = false;
-                        },
-                        removeTag(index) {
-                            this.tags.splice(index, 1);
-                        },
-                        selectSuggestion(index) {
-                            if (index >= 0 && index < this.suggestions.length) {
-                                this.addTag(this.suggestions[index]);
-                            }
-                        },
-                        get tagsValue() {
-                            return this.tags.join(',');
-                        }
-                     }"
-                     @click.away="showSuggestions = false">
-                    <label class="label">
-                        <span class="label-text">标签</span>
-                    </label>
-                    
-                    <!-- Hidden input for form submission -->
-                    <input type="hidden" name="tags_str" :value="tagsValue">
-                    
-                    <div class="relative">
-                        <div class="flex flex-wrap gap-2 mb-2 p-2 border border-base-300 rounded-lg bg-base-100 min-h-[3rem] items-center">
+                         }">
+                        <label class="label">
+                            <span class="label-text">标签</span>
+                        </label>
+                        
+                        <!-- Hidden Input for Form Submission -->
+                        {{ form.tags_str }}
+                        
+                        <!-- Visual Tag Input -->
+                        <div class="flex flex-wrap gap-2 mb-2">
                             <template x-for="(tag, index) in tags" :key="index">
-                                <div class="badge badge-primary gap-1 py-3 pl-3 pr-2">
+                                <div class="badge badge-primary gap-1 p-3">
                                     <span x-text="tag"></span>
-                                    <button type="button" @click="removeTag(index)" class="btn btn-ghost btn-xs btn-circle h-5 w-5 min-h-0 text-primary-content/70 hover:text-white hover:bg-white/20">
-                                        <span class="material-symbols-outlined text-[14px]">close</span>
+                                    <button type="button" @click="removeTag(index)" class="btn btn-ghost btn-xs btn-circle text-primary-content/70 hover:text-white min-h-0 h-4 w-4">
+                                        <span class="material-symbols-outlined text-[10px] font-bold">close</span>
                                     </button>
                                 </div>
                             </template>
-                            
-                            <input type="text" 
-                                   x-model="newTag" 
-                                   @input.debounce.300ms="fetchSuggestions()"
-                                   @keydown.enter.prevent="showSuggestions && activeSuggestion >= 0 ? selectSuggestion(activeSuggestion) : addTag()" 
-                                   @keydown.comma.prevent="addTag()"
-                                   @keydown.arrow-down.prevent="activeSuggestion = Math.min(activeSuggestion + 1, suggestions.length - 1)"
-                                   @keydown.arrow-up.prevent="activeSuggestion = Math.max(activeSuggestion - 1, -1)"
-                                   @keydown.escape="showSuggestions = false"
-                                   @blur="setTimeout(() => addTag(), 200)"
-                                   class="input input-ghost input-sm focus:bg-transparent focus:outline-none flex-grow min-w-[150px] px-1 h-8" 
-                                   placeholder="输入标签按回车添加..." />
                         </div>
                         
-                        <!-- Suggestions Dropdown -->
-                        <div x-show="showSuggestions" 
-                             x-transition
-                             class="absolute z-50 w-full bg-base-100 border border-base-300 rounded-lg shadow-lg mt-1 max-h-48 overflow-y-auto">
-                            <ul class="menu menu-compact p-1">
-                                <template x-for="(suggestion, index) in suggestions" :key="index">
-                                    <li>
-                                        <a @mousedown.prevent="addTag(suggestion)"
-                                           :class="{ 'active': index === activeSuggestion }"
-                                           @mouseenter="activeSuggestion = index">
-                                            <span x-text="suggestion"></span>
-                                        </a>
-                                    </li>
-                                </template>
-                            </ul>
+                        <div class="join w-full">
+                            <input type="text" 
+                                   x-model="newTag" 
+                                   @keydown.enter.prevent="addTag()" 
+                                   @keydown.comma.prevent="addTag()"
+                                   @blur="addTag()"
+                                   class="input input-bordered join-item w-full" 
+                                   placeholder="输入标签..." />
+                            <button type="button" @click="addTag()" class="btn btn-square join-item">
+                                <span class="material-symbols-outlined">add</span>
+                            </button>
                         </div>
-                    </div>
-                    
-                    <label class="label">
-                        <span class="label-text-alt opacity-60">输入标签名称后按回车键添加，保存时将自动创建新标签。</span>
-                    </label>
-                </div>
-            </div>
-            {% endcaptureas %}
-            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-                {{ taxonomy_card }}
-            </div>
 
-            <!-- 特色图片 -->
-            {% captureas image_card %}
-            <div class="p-6 relative" x-data="{ showPreview: false }">
-                <h3 class="card-title text-base mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-accent">image</span>
-                    特色图片
-                </h3>
-                <div class="form-control w-full">
-                    {{ form.cover_image }}
-                    <label class="label">
-                        <span class="label-text-alt opacity-60">支持 JPG, PNG, WebP 格式</span>
-                    </label>
-                </div>
-                {% if object.cover_image %}
-                <div class="mt-4 group relative rounded-xl overflow-hidden border border-base-content/10 shadow-sm cursor-zoom-in bg-base-200" @click.stop="showPreview = true">
-                    <!-- 图片显示：固定高度，覆盖模式，确保布局整齐 -->
-                    <img src="{{ object.cover_image.url }}" class="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105" alt="封面预览" />
-                    
-                    <!-- 悬停遮罩 -->
-                    <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white gap-2 backdrop-blur-sm">
-                        <span class="material-symbols-outlined text-3xl">zoom_in</span>
-                        <span class="text-xs font-medium">点击查看大图</span>
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">输入标签后按回车或逗号添加</span>
+                        </label>
                     </div>
-                </div>
-
-                <!-- 预览模态框 (使用 Teleport 传送到 body 避免被裁剪) -->
-                <template x-teleport="body">
-                    <div class="modal modal-bottom sm:modal-middle" :class="{ 'modal-open': showPreview }" @keydown.escape.window="showPreview = false" style="z-index: 9999;">
-                        <!-- 移除 @click.outside 防止打开瞬间被误触发 -->
-                        <div class="modal-box p-0 max-w-5xl bg-transparent shadow-none overflow-visible text-center">
-                            <div class="relative inline-block" @click.stop>
-                                <img src="{{ object.cover_image.url }}" class="max-h-[85vh] max-w-full rounded-lg shadow-2xl object-contain bg-black/20" alt="封面大图" />
-                                <button class="btn btn-circle btn-sm absolute -top-4 -right-4 bg-base-100 border-none shadow-md hover:bg-base-200 text-base-content z-50" @click="showPreview = false">
-                                    <span class="material-symbols-outlined text-sm">close</span>
-                                </button>
-                            </div>
-                        </div>
-                        <div class="modal-backdrop bg-black/80 backdrop-blur-sm" @click="showPreview = false"></div>
+                {% endcaptureas %}
+                {% include "administration/components/form_card.html" with title="分类与标签" icon="category" icon_class="text-secondary" content=taxonomy_content %}
+                
+                <!-- Cover Image -->
+                {% captureas cover_content %}
+                    <div class="form-control w-full">
+                        {{ form.cover_image }}
                     </div>
-                </template>
-                {% endif %}
-            </div>
-            {% endcaptureas %}
-            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-                {{ image_card }}
+                {% endcaptureas %}
+                {% include "administration/components/form_card.html" with title="封面图片" icon="image" icon_class="text-accent" content=cover_content %}
             </div>
         </div>
-    </div>
-</form>
+    </form>
 {% endblock %}

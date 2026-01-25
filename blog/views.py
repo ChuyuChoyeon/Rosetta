@@ -142,8 +142,15 @@ class ArchiveView(SidebarContextMixin, ListView):
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        
+        # Enhanced SEO for Archive
+        post_count = self.object_list.count() if hasattr(self, 'object_list') else 0
+        archive_desc = f"{site_name}文章归档。共收录 {post_count} 篇文章，记录了从建站至今的所有技术分享与生活感悟。"
+        if site_desc:
+            archive_desc = f"{archive_desc} {site_desc}"
+            
         context["meta"] = _build_meta(
-            f"{site_name} - 归档", self.request, site_desc, site_keywords
+            f"{site_name} - 归档", self.request, archive_desc, site_keywords + ["文章归档", "历史文章", "全站索引"]
         )
         return context
 

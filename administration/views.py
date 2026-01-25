@@ -31,6 +31,7 @@ from .forms import (
     UserTitleForm,
 )
 from django.utils import timezone
+import django
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from datetime import timedelta
@@ -38,15 +39,67 @@ import psutil
 import sys
 from users.models import UserTitle
 from django.contrib.auth.models import Group
-from django.contrib.admin.models import LogEntry
+from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
 import os
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, Http404
-from core.utils import trigger_watson_rebuild_async, queue_post_images_async
+from core.utils import (
+    trigger_watson_rebuild_async,
+    queue_post_images_async,
+    trigger_media_scan_async,
+    trigger_media_clean_async,
+    list_backups,
+    create_backup,
+    delete_backup,
+    restore_backup,
+)
 import uuid
+from django.contrib.contenttypes.models import ContentType
+from django.utils.encoding import force_str
 
 User = get_user_model()
+
+
+class AuditLogMixin:
+    """
+    操作日志混入类
+
+    自动记录用户的操作日志 (Create, Update, Delete)。
+    """
+
+    def log_action(self, action_flag, object_repr=None, change_message=""):
+        if not self.request.user.is_authenticated:
+            return
+
+        obj = getattr(self, "object", None)
+        if not obj and hasattr(self, "get_object"):
+            try:
+                obj = self.get_object()
+            except Exception:
+                pass
+
+        if not obj:
+            return
+
+        try:
+            content_type = ContentType.objects.get_for_model(obj)
+            object_repr = object_repr or force_str(obj)
+
+            # Use create() directly to avoid manager issues and ensure compatibility
+            LogEntry.objects.create(
+                user_id=self.request.user.pk,
+                content_type_id=content_type.pk,
+                object_id=str(obj.pk),
+                object_repr=object_repr[:200],
+                action_flag=action_flag,
+                change_message=change_message,
+            )
+        except Exception as e:
+            # In development, print errors to help debugging
+            if settings.DEBUG:
+                print(f"Failed to create audit log: {e}")
+            pass
 
 
 class StaffRequiredMixin(UserPassesTestMixin):
@@ -148,17 +201,32 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             .order_by("date")
         )
 
+        # 用户注册趋势
+        user_trend = (
+            User.objects.filter(date_joined__gte=last_month)
+            .annotate(date=TruncDate("date_joined"))
+            .values("date")
+            .annotate(count=Count("id"))
+            .order_by("date")
+        )
+
         # 补全缺失日期的据
         date_map = {item["date"]: item["count"] for item in trend_data}
+        user_date_map = {item["date"]: item["count"] for item in user_trend}
+        
         dates = []
         counts = []
+        user_counts = []
+        
         for i in range(30):
             d = (last_month + timedelta(days=i)).date()
             dates.append(d.strftime("%m-%d"))
             counts.append(date_map.get(d, 0))
+            user_counts.append(user_date_map.get(d, 0))
 
         context["trend_dates"] = dates
         context["trend_counts"] = counts
+        context["user_trend_counts"] = user_counts
 
         # 热门文章 Top 5 (柱状图)
         top_posts = list(Post.objects.only("id", "title", "views").order_by("-views")[:5])
@@ -198,6 +266,7 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
                 "memory_percent": memory.percent,
                 "disk_percent": disk.percent,
                 "python_version": platform.python_version(),
+                "django_version": django.get_version(),
                 "platform_system": platform.system(),
                 "platform_release": platform.release(),
                 "server_time": timezone.now(),
@@ -262,7 +331,7 @@ class BaseListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
         return [f"administration/{self.model._meta.model_name}_list.html"]
 
 
-class BaseCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
+class BaseCreateView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, CreateView):
     """
     基础创建视图混入类
 
@@ -272,6 +341,7 @@ class BaseCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
     1. 自动查找模板 ({model}_form.html 或 generic_form.html)。
     2. 处理保存后的跳转逻辑 (保存并继续编辑、保存并新增另一个)。
     3. 集成消息提示 (创建成功)。
+    4. 自动记录操作日志 (AuditLogMixin)。
     """
 
     template_name_suffix = "_form"
@@ -293,8 +363,10 @@ class BaseCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
         return super().get_success_url()
 
     def form_valid(self, form):
+        response = super().form_valid(form)
         messages.success(self.request, f"{self.model._meta.verbose_name} 创建成功")
-        return super().form_valid(form)
+        self.log_action(ADDITION, change_message="通过管理后台创建")
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -303,7 +375,7 @@ class BaseCreateView(LoginRequiredMixin, StaffRequiredMixin, CreateView):
         return context
 
 
-class BaseUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
+class BaseUpdateView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, UpdateView):
     """
     基础更新视图混入类
 
@@ -330,8 +402,17 @@ class BaseUpdateView(LoginRequiredMixin, StaffRequiredMixin, UpdateView):
         return super().get_success_url()
 
     def form_valid(self, form):
+        response = super().form_valid(form)
         messages.success(self.request, f"{self.model._meta.verbose_name} 更新成功")
-        return super().form_valid(form)
+        
+        # 尝试检测变更字段 (简单的实现)
+        changed_data = form.changed_data
+        msg = "通过管理后台更新"
+        if changed_data:
+            msg = f"更新字段: {', '.join(changed_data)}"
+        
+        self.log_action(CHANGE, change_message=msg)
+        return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -423,7 +504,7 @@ class BaseImportView(LoginRequiredMixin, StaffRequiredMixin, View):
         return redirect(self.success_url)
 
 
-class BaseDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
+class BaseDeleteView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, DeleteView):
     """
     基础删除视图混入类
 
@@ -435,6 +516,14 @@ class BaseDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
 
     def form_valid(self, form):
         success_url = self.get_success_url()
+        
+        # 在删除前记录日志
+        try:
+            self.object = self.get_object()
+            self.log_action(DELETION, change_message="通过管理后台删除")
+        except Exception:
+            pass
+
         self.object.delete()
 
         # HTMX Support
@@ -443,7 +532,7 @@ class BaseDeleteView(LoginRequiredMixin, StaffRequiredMixin, DeleteView):
             response = HttpResponse("")
             response["HX-Trigger"] = json.dumps(
                 {
-                    "showToast": {
+                    "show-toast": {
                         "message": f"{self.model._meta.verbose_name} 删除成功",
                         "type": "success",
                     }
@@ -665,8 +754,16 @@ class TagListView(BaseListView):
     def get_queryset(self) -> QuerySet[Tag]:
         qs = super().get_queryset().annotate(post_count=Count("posts"))
         query = self.request.GET.get("q")
+        status = self.request.GET.get("status")
+
         if query:
             qs = qs.filter(name__icontains=query)
+
+        if status == "active":
+            qs = qs.filter(is_active=True)
+        elif status == "inactive":
+            qs = qs.filter(is_active=False)
+
         return qs
 
 
@@ -930,8 +1027,14 @@ class NavigationListView(BaseListView):
     def get_queryset(self) -> QuerySet[Navigation]:
         qs = super().get_queryset()
         query = self.request.GET.get("q")
+        location = self.request.GET.get("location")
+
         if query:
             qs = qs.filter(title__icontains=query)
+
+        if location:
+            qs = qs.filter(location=location)
+
         return qs
 
 
@@ -1014,8 +1117,16 @@ class FriendLinkListView(BaseListView):
     def get_queryset(self) -> QuerySet[FriendLink]:
         qs = super().get_queryset()
         query = self.request.GET.get("q")
+        is_active = self.request.GET.get("is_active")
+
         if query:
             qs = qs.filter(name__icontains=query)
+
+        if is_active == "true":
+            qs = qs.filter(is_active=True)
+        elif is_active == "false":
+            qs = qs.filter(is_active=False)
+
         return qs
 
 
@@ -1081,8 +1192,16 @@ class SearchPlaceholderListView(BaseListView):
     def get_queryset(self):
         qs = super().get_queryset()
         q = self.request.GET.get("q")
+        is_active = self.request.GET.get("is_active")
+
         if q:
             qs = qs.filter(text__icontains=q)
+
+        if is_active == "true":
+            qs = qs.filter(is_active=True)
+        elif is_active == "false":
+            qs = qs.filter(is_active=False)
+
         return qs
 
 
@@ -1148,8 +1267,22 @@ class UserListView(BaseListView):
     def get_queryset(self):
         qs = super().get_queryset().select_related("title")
         query = self.request.GET.get("q")
+        is_staff = self.request.GET.get("is_staff")
+        is_active = self.request.GET.get("is_active")
+
         if query:
             qs = qs.filter(username__icontains=query)
+
+        if is_staff == "true":
+            qs = qs.filter(is_staff=True)
+        elif is_staff == "false":
+            qs = qs.filter(is_staff=False)
+
+        if is_active == "true":
+            qs = qs.filter(is_active=True)
+        elif is_active == "false":
+            qs = qs.filter(is_active=False)
+
         return qs
 
 
@@ -1609,13 +1742,47 @@ class BulkActionView(LoginRequiredMixin, StaffRequiredMixin, View):
                 return HttpResponseRedirect(request.META.get("HTTP_REFERER", "/"))
 
             if action == "delete":
-                model_cls.objects.filter(id__in=selected_ids).delete()
+                # 记录删除日志
+                objects = model_cls.objects.filter(id__in=selected_ids)
+                if request.user.is_authenticated:
+                    content_type = ContentType.objects.get_for_model(model_cls)
+                    user_id = request.user.pk
+                    for obj in objects:
+                        try:
+                            LogEntry.objects.create(
+                                user_id=user_id,
+                                content_type_id=content_type.pk,
+                                object_id=str(obj.pk),
+                                object_repr=force_str(obj)[:200],
+                                action_flag=DELETION,
+                                change_message="通过管理后台批量删除",
+                            )
+                        except:
+                            pass
+                
+                objects.delete()
                 messages.success(request, "批量删除成功")
             elif action == "published":
                 if hasattr(model_cls, "status"):
                     model_cls.objects.filter(id__in=selected_ids).update(
                         status="published"
                     )
+                    # 记录日志
+                    if request.user.is_authenticated:
+                        content_type = ContentType.objects.get_for_model(model_cls)
+                        user_id = request.user.pk
+                        for obj in model_cls.objects.filter(id__in=selected_ids):
+                            try:
+                                LogEntry.objects.create(
+                                    user_id=user_id,
+                                    content_type_id=content_type.pk,
+                                    object_id=str(obj.pk),
+                                    object_repr=force_str(obj)[:200],
+                                    action_flag=CHANGE,
+                                    change_message="批量发布",
+                                )
+                            except:
+                                pass
                     messages.success(request, "批量发布成功")
             elif action == "draft":
                 if hasattr(model_cls, "status"):
@@ -1812,6 +1979,8 @@ class ImportJsonView(LoginRequiredMixin, StaffRequiredMixin, View):
 
 
 # --- Debug Views (调试工具视图) ---
+from django.utils.dateparse import parse_datetime
+from django.utils import timezone
 from django.core.cache import cache
 from django.core.mail import send_mail
 from django.urls import get_resolver, reverse
@@ -2166,7 +2335,223 @@ class DebugEmailView(
 
 from constance import config
 from django.conf import settings as django_settings
+from django.contrib.sites.models import Site
 from pygments.styles import get_all_styles
+
+
+class SystemToolsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+    """
+    系统工具视图
+
+    提供系统维护工具，如搜索索引重建、图片预处理等。
+    """
+    template_name = "administration/system_tools.html"
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["title"] = "系统工具"
+        context["breadcrumbs"] = [
+            {"label": "设置", "url": reverse_lazy("administration:settings")},
+            {"label": "系统工具"},
+        ]
+
+        latest_task_key = cache.get("watson:rebuild:latest")
+        watson_status = cache.get(latest_task_key) if latest_task_key else None
+        context["watson_rebuild_status"] = (
+            watson_status.get("status") if watson_status else "idle"
+        )
+        watson_updated = watson_status.get("updated_at") if watson_status else None
+        if watson_updated:
+             context["watson_rebuild_updated_at"] = parse_datetime(watson_updated)
+        else:
+             context["watson_rebuild_updated_at"] = ""
+
+        latest_image_key = cache.get("image:queue:latest")
+        image_status = cache.get(latest_image_key) if latest_image_key else None
+        context["image_queue_status"] = (
+            image_status.get("status") if image_status else "idle"
+        )
+        image_updated = image_status.get("updated_at") if image_status else None
+        if image_updated:
+            context["image_queue_updated_at"] = parse_datetime(image_updated)
+        else:
+            context["image_queue_updated_at"] = ""
+
+        context["image_queue_queued"] = (
+            image_status.get("queued") if image_status else 0
+        )
+        context["image_queue_processed"] = (
+            image_status.get("processed") if image_status else 0
+        )
+
+        # Media Cleaner Status
+        latest_scan_key = cache.get("media:scan:latest")
+        scan_status = cache.get(latest_scan_key) if latest_scan_key else None
+        context["media_scan_status"] = scan_status.get("status") if scan_status else "idle"
+        
+        scan_updated = scan_status.get("updated_at") if scan_status else None
+        if scan_updated:
+            context["media_scan_updated_at"] = parse_datetime(scan_updated)
+        else:
+             context["media_scan_updated_at"] = ""
+             
+        context["media_scan_orphaned_count"] = scan_status.get("orphaned_count") if scan_status else 0
+        context["media_scan_orphaned_size"] = scan_status.get("orphaned_size") if scan_status else 0
+
+        latest_clean_key = cache.get("media:clean:latest")
+        clean_status = cache.get(latest_clean_key) if latest_clean_key else None
+        context["media_clean_status"] = clean_status.get("status") if clean_status else "idle"
+        context["media_clean_cleaned_count"] = clean_status.get("cleaned_count") if clean_status else 0
+        context["media_clean_cleaned_size"] = clean_status.get("cleaned_size") if clean_status else 0
+        context["media_clean_error"] = clean_status.get("detail") if clean_status and clean_status.get("status") == "error" else ""
+        
+        # Database Backups
+        context["backups"] = list_backups()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        action = request.POST.get("action")
+        
+        if action == "rebuild_watson":
+            result = trigger_watson_rebuild_async()
+            if result["accepted"]:
+                messages.success(request, "搜索索引重建已开始")
+            else:
+                messages.info(request, "已有重建任务在执行，请稍后再试")
+            return redirect("administration:system_tools")
+
+        if action == "queue_images":
+            try:
+                limit = max(1, int(request.POST.get("limit") or 20))
+                delay = max(
+                    0,
+                    int(
+                        request.POST.get("delay")
+                        or getattr(settings, "IMAGE_PROCESSING_DELAY", 120)
+                    ),
+                )
+            except (TypeError, ValueError):
+                messages.error(request, "参数不合法，请检查输入")
+                return redirect("administration:system_tools")
+
+            result = queue_post_images_async(limit=limit, delay_seconds=delay)
+            if result["accepted"]:
+                messages.success(request, "图片处理队列已开始")
+            else:
+                messages.info(request, "已有图片处理任务在执行，请稍后再试")
+            return redirect("administration:system_tools")
+
+        # Media Cleaner Actions
+        if action == "scan_media":
+            result = trigger_media_scan_async()
+            if result["accepted"]:
+                messages.success(request, "媒体文件扫描已开始")
+            else:
+                messages.info(request, "已有扫描任务在执行，请稍后再试")
+            return redirect("administration:system_tools")
+            
+        if action == "clean_media":
+            result = trigger_media_clean_async()
+            if result["accepted"]:
+                messages.success(request, "孤儿文件清理已开始")
+            elif result.get("error"):
+                 messages.error(request, f"清理失败: {result['error']}")
+            else:
+                messages.info(request, "已有清理任务在执行，请稍后再试")
+            return redirect("administration:system_tools")
+            
+        # Backup Actions
+        if action == "create_backup":
+            try:
+                filename = create_backup()
+                messages.success(request, f"备份创建成功: {filename}")
+            except Exception as e:
+                messages.error(request, f"备份创建失败: {str(e)}")
+            return redirect("administration:system_tools")
+            
+        if action == "delete_backup":
+            filename = request.POST.get("filename")
+            try:
+                if delete_backup(filename):
+                    messages.success(request, f"备份 {filename} 已删除")
+                else:
+                    messages.error(request, "文件不存在或无法删除")
+            except Exception as e:
+                messages.error(request, f"删除失败: {str(e)}")
+            return redirect("administration:system_tools")
+            
+        if action == "restore_backup":
+            filename = request.POST.get("filename")
+            try:
+                restore_backup(filename)
+                messages.success(request, f"数据库已从 {filename} 恢复")
+            except Exception as e:
+                messages.error(request, f"恢复失败: {str(e)}")
+            return redirect("administration:system_tools")
+            
+        return redirect("administration:system_tools")
+
+
+class SystemMonitorView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
+    """
+    系统监控视图 (HTMX Partial)
+
+    返回系统 CPU、内存、磁盘使用情况的 HTML 片段。
+    """
+    template_name = "administration/partials/system_monitor.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        try:
+            import psutil
+            cpu_percent = psutil.cpu_percent(interval=None)
+            memory = psutil.virtual_memory()
+            disk = psutil.disk_usage("/")
+            
+            context.update({
+                "cpu_percent": round(cpu_percent),
+                "memory_percent": round(memory.percent),
+                "memory_used": memory.used,
+                "memory_total": memory.total,
+                "disk_percent": round(disk.percent),
+                "disk_free": disk.free,
+            })
+        except Exception as e:
+            # Log error for debugging
+            import sys
+            import traceback
+            print(f"[SystemMonitor Error] {str(e)}", file=sys.stderr)
+            traceback.print_exc(file=sys.stderr)
+            
+            context.update({
+                "cpu_percent": 0,
+                "memory_percent": 0,
+                "memory_used": 0,
+                "memory_total": 0,
+                "disk_percent": 0,
+                "disk_free": 0,
+            })
+        return context
+
+
+class BackupDownloadView(LoginRequiredMixin, StaffRequiredMixin, View):
+    """
+    下载数据库备份文件
+    """
+    def get(self, request, filename):
+        backup_dir = settings.BASE_DIR / "backups"
+        file_path = backup_dir / filename
+        
+        # 安全检查
+        if not file_path.resolve().is_relative_to(backup_dir.resolve()):
+            raise Http404("Invalid file path")
+            
+        if not file_path.exists():
+            raise Http404("File not found")
+            
+        from django.http import FileResponse
+        return FileResponse(open(file_path, "rb"), as_attachment=True, filename=filename)
 
 
 class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
@@ -2180,6 +2565,15 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["breadcrumbs"] = [
+            {"label": "站点设置"},
+        ]
+        
+        # 获取当前站点信息
+        try:
+            context["current_site"] = Site.objects.get_current()
+        except Exception:
+            context["current_site"] = None
 
         # 获取所有可用的 Pygments 风格并排序
         context["pygments_styles"] = sorted(list(get_all_styles()))
@@ -2273,6 +2667,15 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         context["image_queue_queued"] = (
             image_status.get("queued") if image_status else 0
         )
+        context["image_queue_processed"] = (
+            image_status.get("processed") if image_status else 0
+        )
+        context["image_queue_failed"] = (
+            image_status.get("failed") if image_status else 0
+        )
+        context["image_queue_skipped"] = (
+            image_status.get("skipped") if image_status else 0
+        )
         context["image_queue_delay"] = (
             image_status.get("delay")
             if image_status
@@ -2317,6 +2720,19 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             return self.get(request, *args, **kwargs)
 
         # 保存设置
+        # 处理 Site 更新
+        site_domain = request.POST.get("site_domain")
+        site_name = request.POST.get("site_name")
+        
+        if site_domain and site_name:
+            try:
+                site = Site.objects.get_current()
+                site.domain = site_domain
+                site.name = site_name
+                site.save()
+            except Exception as e:
+                messages.error(request, f"更新站点信息失败: {str(e)}")
+
         if hasattr(django_settings, "CONSTANCE_CONFIG"):
             for key in django_settings.CONSTANCE_CONFIG.keys():
                 if key in request.POST:

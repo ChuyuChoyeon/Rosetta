@@ -1,188 +1,170 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
-{% load widget_tweaks %}
+{% load capture_tags widget_tweaks %}
 
 {% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
-<div class="text-sm breadcrumbs mb-4">
-    <ul>
-        <li><a href="{% url 'administration:index' %}">首页</a></li>
-        <li><a href="{% url 'administration:category_list' %}">分类管理</a></li>
-        <li>{{ title|default:"编辑分类" }}</li>
-    </ul>
-</div>
+<!-- Header -->
+{% captureas header_actions %}
+{% endcaptureas %}
+
+{% include "administration/components/header.html" with title=title|default:"编辑分类" icon="category" breadcrumbs=breadcrumbs actions=header_actions %}
 
 <form method="post" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
     {% csrf_token %}
     
     <!-- Left Column: Main Content -->
     <div class="lg:col-span-2 space-y-6">
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-6">
-                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">edit_note</span>
-                    基本信息
-                </h2>
-                
-                {% if form.non_field_errors %}
-                <div class="alert alert-error mb-4 shadow-sm">
-                    <span class="material-symbols-outlined">error</span>
-                    <div class="flex flex-col">
-                        <span class="font-bold">表单错误</span>
-                        {% for error in form.non_field_errors %}
-                        <span class="text-sm">{{ error }}</span>
-                        {% endfor %}
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Name Field -->
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-bold text-base">名称 <span class="text-error">*</span></span>
-                    </label>
-                    {% render_field form.name class="input input-bordered w-full focus:input-primary transition-all" placeholder="输入分类名称" %}
-                    {% if form.name.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
-                    </label>
-                    {% endif %}
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">这将是它在站点上显示的名字。</span>
-                    </label>
-                </div>
-
-                <!-- Slug Field -->
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-bold text-base">别名 (Slug)</span>
-                    </label>
-                    {% render_field form.slug class="input input-bordered w-full focus:input-primary transition-all font-mono" placeholder="输入URL别名" %}
-                    {% if form.slug.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
-                    </label>
-                    {% endif %}
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。</span>
-                    </label>
-                </div>
-
-                <!-- Description Field -->
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-bold text-base">描述</span>
-                    </label>
-                    {% render_field form.description class="textarea textarea-bordered h-32 focus:textarea-primary transition-all" placeholder="输入分类描述..." %}
-                    {% if form.description.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.description.errors.0 }}</span>
-                    </label>
-                    {% endif %}
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">描述默认只在后台显示，部分主题可能会显示。</span>
-                    </label>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Icon Field -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text font-bold text-base">图标 (Material Symbols)</span>
-                        </label>
-                        <div class="join w-full">
-                            <div class="join-item bg-base-200 border border-base-300 flex items-center justify-center px-3" id="icon-preview-container">
-                                <span class="material-symbols-outlined text-2xl" id="icon-preview">
-                                    {{ form.icon.value|default:"category" }}
-                                </span>
-                            </div>
-                            {% render_field form.icon class="input input-bordered join-item w-full focus:input-primary transition-all font-mono" placeholder="图标代码 (如: home)" oninput="updateIconPreview(this.value)" %}
-                            <button type="button" onclick="icon_modal.showModal()" class="btn btn-neutral join-item">
-                                <span class="material-symbols-outlined text-lg">grid_view</span>
-                                选择
-                            </button>
-                        </div>
-                        {% if form.icon.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.icon.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                        <label class="label">
-                            <span class="label-text-alt text-base-content/60">
-                                使用 Google Material Symbols 代码。
-                            </span>
-                        </label>
-                    </div>
-
-                    <!-- Color Field -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text font-bold text-base">颜色 (Tailwind Class)</span>
-                        </label>
-                        {% render_field form.color class="input input-bordered w-full focus:input-primary transition-all font-mono" placeholder="如: primary, secondary" %}
-                        {% if form.color.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.color.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                        <div class="flex gap-2 mt-2 flex-wrap">
-                            <button type="button" onclick="setColor('primary')" class="badge badge-primary cursor-pointer hover:scale-110 transition-transform">primary</button>
-                            <button type="button" onclick="setColor('secondary')" class="badge badge-secondary cursor-pointer hover:scale-110 transition-transform">secondary</button>
-                            <button type="button" onclick="setColor('accent')" class="badge badge-accent cursor-pointer hover:scale-110 transition-transform">accent</button>
-                            <button type="button" onclick="setColor('neutral')" class="badge badge-neutral cursor-pointer hover:scale-110 transition-transform">neutral</button>
-                            <button type="button" onclick="setColor('info')" class="badge badge-info cursor-pointer hover:scale-110 transition-transform">info</button>
-                            <button type="button" onclick="setColor('success')" class="badge badge-success cursor-pointer hover:scale-110 transition-transform">success</button>
-                            <button type="button" onclick="setColor('warning')" class="badge badge-warning cursor-pointer hover:scale-110 transition-transform">warning</button>
-                            <button type="button" onclick="setColor('error')" class="badge badge-error cursor-pointer hover:scale-110 transition-transform">error</button>
-                        </div>
-                    </div>
+        {% captureas main_content %}
+            {% if form.non_field_errors %}
+            <div class="alert alert-error mb-4 shadow-sm">
+                <span class="material-symbols-outlined">error</span>
+                <div class="flex flex-col">
+                    <span class="font-bold">表单错误</span>
+                    {% for error in form.non_field_errors %}
+                    <span class="text-sm">{{ error }}</span>
+                    {% endfor %}
                 </div>
             </div>
-        </div>
+            {% endif %}
+
+            <!-- Name Field -->
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-bold text-base">名称 <span class="text-error">*</span></span>
+                </label>
+                {% render_field form.name class="input input-bordered w-full focus:input-primary transition-all" placeholder="输入分类名称" %}
+                {% if form.name.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
+                </label>
+                {% endif %}
+                <label class="label">
+                    <span class="label-text-alt text-base-content/60">这将是它在站点上显示的名字。</span>
+                </label>
+            </div>
+
+            <!-- Slug Field -->
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-bold text-base">别名 (Slug)</span>
+                </label>
+                {% render_field form.slug class="input input-bordered w-full focus:input-primary transition-all font-mono" placeholder="输入URL别名" %}
+                {% if form.slug.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
+                </label>
+                {% endif %}
+                <label class="label">
+                    <span class="label-text-alt text-base-content/60">“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。</span>
+                </label>
+            </div>
+
+            <!-- Description Field -->
+            <div class="form-control w-full">
+                <label class="label">
+                    <span class="label-text font-bold text-base">描述</span>
+                </label>
+                {% render_field form.description class="textarea textarea-bordered h-32 focus:textarea-primary transition-all" placeholder="输入分类描述..." %}
+                {% if form.description.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.description.errors.0 }}</span>
+                </label>
+                {% endif %}
+                <label class="label">
+                    <span class="label-text-alt text-base-content/60">描述默认只在后台显示，部分主题可能会显示。</span>
+                </label>
+            </div>
+        {% endcaptureas %}
+        {% include "administration/components/form_card.html" with title="基本信息" icon="edit_note" content=main_content %}
+
+        {% captureas appearance_content %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Icon Field -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-bold text-base">图标 (Material Symbols)</span>
+                    </label>
+                    <div class="join w-full">
+                        <div class="join-item bg-base-200 border border-base-300 flex items-center justify-center px-3" id="icon-preview-container">
+                            <span class="material-symbols-outlined text-2xl" id="icon-preview">
+                                {{ form.icon.value|default:"category" }}
+                            </span>
+                        </div>
+                        {% render_field form.icon class="input input-bordered join-item w-full focus:input-primary transition-all font-mono" placeholder="图标代码 (如: home)" oninput="updateIconPreview(this.value)" %}
+                        <button type="button" onclick="icon_modal.showModal()" class="btn btn-neutral join-item">
+                            <span class="material-symbols-outlined text-lg">grid_view</span>
+                            选择
+                        </button>
+                    </div>
+                    {% if form.icon.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.icon.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">
+                            使用 Google Material Symbols 代码。
+                        </span>
+                    </label>
+                </div>
+
+                <!-- Color Field -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-bold text-base">颜色设置</span>
+                    </label>
+                    {% include 'components/color_picker.html' with value=form.color.value name=form.color.name %}
+                    {% if form.color.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.color.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">选择分类的主题颜色。</span>
+                    </label>
+                </div>
+            </div>
+        {% endcaptureas %}
+        {% include "administration/components/form_card.html" with title="外观设置" icon="palette" content=appearance_content %}
     </div>
 
     <!-- Right Column: Sidebar -->
     <div class="lg:col-span-1 space-y-6">
         <!-- Publish Box -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">发布</h3>
+        {% captureas publish_content %}
+            <div class="flex flex-col gap-3">
+                <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined">save</span>
+                    保存更改
+                </button>
                 
-                <div class="flex flex-col gap-3">
-                    <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
-                        <span class="material-symbols-outlined">save</span>
-                        保存更改
-                    </button>
-                    
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">保存并新增</button>
-                        <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">保存并继续</button>
-                    </div>
-
-                    {% if object %}
-                    <div class="divider my-1"></div>
-                    <div class="flex justify-between items-center">
-                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">取消</a>
-                        <button type="button" onclick="confirmDelete('{% url 'administration:category_delete' object.pk %}', '确定要删除分类《{{ object.name|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
-                            删除分类
-                        </button>
-                    </div>
-                    {% else %}
-                    <div class="divider my-1"></div>
-                    <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">取消</a>
-                    {% endif %}
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">保存并新增</button>
+                    <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">保存并继续</button>
                 </div>
-            </div>
-        </div>
 
-        <!-- Appearance Box Removed (Moved to Main Content) -->
+                {% if object %}
+                <div class="divider my-1"></div>
+                <div class="flex justify-between items-center">
+                    <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">取消</a>
+                    <button type="button" onclick="confirmDelete('{% url 'administration:category_delete' object.pk %}', '确定要删除分类《{{ object.name|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
+                        删除分类
+                    </button>
+                </div>
+                {% else %}
+                <div class="divider my-1"></div>
+                <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">取消</a>
+                {% endif %}
+            </div>
+        {% endcaptureas %}
+        {% include "administration/components/form_card.html" with title="发布" icon="publish" content=publish_content %}
     </div>
 </form>
 
 <!-- Icon Selector Modal -->
 <dialog id="icon_modal" class="modal">
-    <div class="modal-box w-11/12 max-w-5xl h-[80vh] flex flex-col p-0 bg-base-100">
+    <div class="modal-box w-11/12 max-w-5xl h-[80vh] flex flex-col p-0 bg-base-100 rounded-2xl">
         <!-- Header -->
         <div class="p-4 border-b border-base-200 flex justify-between items-center sticky top-0 bg-base-100/95 backdrop-blur z-10">
             <h3 class="font-bold text-lg flex items-center gap-2">
@@ -234,7 +216,7 @@
 <script>
     // Material Symbols List (Subset of commonly used icons)
     const materialSymbols = [
-        "search", "home", "menu", "close", "settings", "check", "favorite", "add", "delete", "arrow_back", "arrow_forward", "arrow_drop_down", "cancel", "more_vert", "chevron_right", "check_circle", "logout", "arrow_drop_up", "login", "group", "edit", "refresh", "file_download", "image", "add_circle", "grid_view", "download", "person", "sort", "arrow_back_ios", "expand_more", "bolt", "list", "filter_list", "arrow_forward_ios", "calendar_today", "info", "notifications", "more_horiz", "add_box", "arrow_left", "arrow_right", "description", "upload", "remove", "language", "account_circle", "visibility", "done", "open_in_new", "verified", "schedule", "warning", "thumb_up", "lock", "error", "fingerprint", "event", "light_mode", "dark_mode", "dashboard", "category", "article", "sell", "tag", "link", "public", "bookmark", "history", "code", "bug_report", "build", "cached", "help", "feedback", "manage_accounts", "admin_panel_settings", "supervisor_account", "perm_identity", "people", "email", "phone", "contact_page", "map", "place", "store", "shopping_cart", "payments", "credit_card", "receipt", "attach_money", "trending_up", "analytics", "bar_chart", "pie_chart", "folder", "folder_open", "cloud", "cloud_upload", "cloud_download", "upload_file", "download_for_offline", "image", "photo_camera", "videocam", "music_note", "movie", "slideshow", "palette", "brush", "format_bold", "format_italic", "title", "text_fields", "insert_link", "attach_file", "insert_photo", "computer", "phone_iphone", "tablet", "desktop_windows", "keyboard", "mouse", "router", "wifi", "security", "vpn_key", "shield", "lock_open", "visibility_off", "delete_forever", "restore_from_trash", "archive", "unarchive", "content_copy", "content_paste", "save", "save_alt", "print", "share", "send", "reply", "reply_all", "flag", "report", "block", "star", "star_border", "star_half", "favorite_border", "thumb_down", "emoji_emotions", "sentiment_satisfied", "sentiment_dissatisfied", "mood", "mood_bad", "face", "rocket", "shopping_bag", "local_shipping", "support_agent", "wifi_off", "battery_full", "developer_mode", "devices", "widgets", "storage", "web", "chat", "mail", "drafts", "send", "archive", "report_problem", "change_history", "donut_large", "timeline", "update", "watch_later", "extension", "verified_user", "pets", "eco", "spa", "grass", "local_florist", "restaurant", "local_cafe", "local_bar", "celebration", "cake", "sports_esports", "directions_car", "directions_bike", "flight", "train", "hotel", "beach_access", "ac_unit", "waves", "umbrella", "wb_sunny", "nights_stay", "palette", "auto_awesome", "looks", "crop", "tune", "style", "photo", "panorama", "camera", "lens", "flash_on", "broken_image", "audiotrack", "volume_up", "volume_off", "mic", "headset", "album", "av_timer", "speed", "closed_caption", "library_books", "library_music", "video_library", "whatshot", "poll", "pages", "domain", "location_city", "school", "science", "sports", "hiking", "fitness_center", "business_center", "casino", "golf_course", "pool", "kitchen", "room_service", "child_care", "smoking_rooms", "free_breakfast", "golf_course", "pool", "kitchen", "room_service", "child_care", "smoking_rooms", "free_breakfast"
+        "search", "home", "menu", "close", "settings", "check", "favorite", "add", "delete", "arrow_back", "arrow_forward", "arrow_drop_down", "cancel", "more_vert", "chevron_right", "check_circle", "logout", "arrow_drop_up", "login", "group", "edit", "refresh", "file_download", "image", "add_circle", "grid_view", "download", "person", "sort", "arrow_back_ios", "expand_more", "bolt", "list", "filter_list", "arrow_forward_ios", "calendar_today", "info", "notifications", "more_horiz", "add_box", "arrow_left", "arrow_right", "description", "upload", "remove", "language", "account_circle", "visibility", "done", "open_in_new", "verified", "schedule", "warning", "thumb_up", "lock", "error", "fingerprint", "event", "light_mode", "dark_mode", "dashboard", "category", "article", "sell", "tag", "link", "public", "bookmark", "history", "code", "bug_report", "build", "cached", "help", "feedback", "manage_accounts", "admin_panel_settings", "supervisor_account", "perm_identity", "people", "email", "phone", "contact_page", "map", "place", "store", "shopping_cart", "payments", "credit_card", "receipt", "attach_money", "trending_up", "analytics", "bar_chart", "pie_chart", "folder", "folder_open", "cloud", "cloud_upload", "cloud_download", "upload_file", "download_for_offline", "image", "photo_camera", "videocam", "music_note", "movie", "slideshow", "palette", "brush", "format_bold", "format_italic", "title", "text_fields", "insert_link", "attach_file", "insert_photo", "computer", "phone_iphone", "tablet", "desktop_windows", "keyboard", "mouse", "router", "wifi", "security", "vpn_key", "shield", "lock_open", "visibility_off", "delete_forever", "restore_from_trash", "archive", "unarchive", "content_copy", "content_paste", "save", "save_alt", "print", "share", "send", "reply", "reply_all", "flag", "report", "block", "star", "star_border", "star_half", "favorite_border", "thumb_down", "emoji_emotions", "sentiment_satisfied", "sentiment_dissatisfied", "mood", "mood_bad", "face", "rocket"
     ];
 
     // Remove duplicates and sort
@@ -314,16 +296,6 @@
         } else {
             iconPreview.textContent = value;
             iconPreview.classList.remove('opacity-50');
-        }
-    }
-
-    // Set Color Helper
-    function setColor(color) {
-        const colorInput = document.getElementById('{{ form.color.auto_id }}');
-        if (colorInput) {
-            colorInput.value = color;
-            // Trigger visual feedback
-            colorInput.focus();
         }
     }
 </script>

@@ -1,170 +1,176 @@
 {% extends "administration/base.html" %}
-{% load static capture_tags %}
+{% load static capture_tags core_extras %}
 
 {% block title %}{{ config.SITE_HEADER|default:"Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
-<div class="p-2 space-y-6">
+<div class="space-y-8">
     <!-- Hero Section -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
-            <h1 class="text-4xl font-bold mb-2 flex items-center gap-2">
+            <h1 class="text-4xl font-bold font-heading mb-2 flex items-center gap-2">
                 Hello, 
                 {% with words=config.DASHBOARD_WELCOME_WORDS|default:"['Creator', 'Admin', 'Master', 'Manager']" %}
                     {% include "components/inspira/flip_words.html" with words=words extra_classes="text-primary" %}
                 {% endwith %}
             </h1>
-            <p class="text-base-content/60">{{ config.DASHBOARD_WELCOME_TEXT|default:"欢迎回到 Rosetta 控制台。这里是您的数字指挥中心。" }}</p>
+            <p class="text-base-content/60 text-lg">{{ config.DASHBOARD_WELCOME_TEXT|default:"欢迎回到 Rosetta 控制台。这里是您的数字指挥中心。" }}</p>
         </div>
-        <div class="flex gap-2">
+        <div class="flex gap-3">
             {% url 'administration:post_create' as create_url %}
-            {% with text="写文章" icon="edit" href=create_url %}
+            {% with text="写文章" icon="edit_note" href=create_url %}
                 {% include "components/inspira/rainbow_button.html" %}
             {% endwith %}
         </div>
     </div>
 
-    <!-- Stats Grid (Bento Box 1) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- Stats Grid (KPI Cards) -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Total Posts -->
-        {% captureas card_content_1 %}
-        <div class="p-6 h-full flex flex-col justify-between">
-            <div class="flex justify-between items-start">
-                <div class="p-2 bg-primary/10 rounded-lg text-primary">
-                    <span class="material-symbols-outlined">article</span>
+        <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
+            <div class="stat relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
+                <div class="stat-figure text-primary">
+                    <span class="material-symbols-outlined text-3xl">article</span>
                 </div>
-                {% if post_growth >= 0 %}
-                <div class="badge badge-success gap-1">
-                    <span class="material-symbols-outlined text-xs">trending_up</span>
-                    {{ post_growth }}%
+                <div class="stat-title font-bold text-base-content/60">总文章数</div>
+                <div class="stat-value text-primary text-4xl font-heading mt-1">{{ total_posts }}</div>
+                <div class="stat-desc mt-2 flex items-center gap-1 font-medium">
+                    {% if post_growth >= 0 %}
+                    <span class="text-success flex items-center bg-success/10 px-1.5 py-0.5 rounded-md">
+                        <span class="material-symbols-outlined text-sm">trending_up</span>
+                        {{ post_growth }}%
+                    </span>
+                    <span class="opacity-60">较上月</span>
+                    {% else %}
+                    <span class="text-error flex items-center bg-error/10 px-1.5 py-0.5 rounded-md">
+                        <span class="material-symbols-outlined text-sm">trending_down</span>
+                        {{ post_growth }}%
+                    </span>
+                    <span class="opacity-60">较上月</span>
+                    {% endif %}
                 </div>
-                {% else %}
-                <div class="badge badge-error gap-1">
-                    <span class="material-symbols-outlined text-xs">trending_down</span>
-                    {{ post_growth }}%
-                </div>
-                {% endif %}
             </div>
-            <div>
-                <div class="text-3xl font-bold mt-4">{{ total_posts }}</div>
-                <div class="text-sm opacity-60">总文章数</div>
-            </div>
-        </div>
-        {% endcaptureas %}
-        <div class="h-full bg-base-100 border border-base-content/5 rounded-2xl">
-            {{ card_content_1 }}
         </div>
 
         <!-- Total Comments -->
-        {% captureas card_content_2 %}
-        <div class="p-6 h-full flex flex-col justify-between">
-            <div class="flex justify-between items-start">
-                <div class="p-2 bg-secondary/10 rounded-lg text-secondary">
-                    <span class="material-symbols-outlined">comment</span>
+        <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
+            <div class="stat relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary/5 rounded-full blur-2xl group-hover:bg-secondary/10 transition-colors"></div>
+                <div class="stat-figure text-secondary">
+                    <span class="material-symbols-outlined text-3xl">comment</span>
                 </div>
-                <div class="badge badge-warning gap-1">
-                    <span class="material-symbols-outlined text-xs">pending</span>
-                    {{ pending_comments }}
+                <div class="stat-title font-bold text-base-content/60">总评论数</div>
+                <div class="stat-value text-secondary text-4xl font-heading mt-1">{{ total_comments }}</div>
+                <div class="stat-desc mt-2 flex items-center gap-1 font-medium">
+                    {% if pending_comments > 0 %}
+                    <span class="text-warning flex items-center bg-warning/10 px-1.5 py-0.5 rounded-md animate-pulse">
+                        <span class="material-symbols-outlined text-sm">pending</span>
+                        {{ pending_comments }} 待审
+                    </span>
+                    {% else %}
+                    <span class="text-success flex items-center bg-success/10 px-1.5 py-0.5 rounded-md">
+                        <span class="material-symbols-outlined text-sm">check_circle</span>
+                        全部已审
+                    </span>
+                    {% endif %}
                 </div>
             </div>
-            <div>
-                <div class="text-3xl font-bold mt-4">{{ total_comments }}</div>
-                <div class="text-sm opacity-60">总评论数</div>
-            </div>
-        </div>
-        {% endcaptureas %}
-        <div class="h-full bg-base-100 border border-base-content/5 rounded-2xl">
-            {{ card_content_2 }}
         </div>
         
         <!-- System Health -->
-        {% captureas card_content_3 %}
-        <div class="p-6 h-full flex flex-col justify-between">
-            <div class="flex justify-between items-start">
-                <div class="p-2 bg-success/10 rounded-lg text-success">
-                    <span class="material-symbols-outlined">health_and_safety</span>
+        <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
+            <div class="stat relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-success/5 rounded-full blur-2xl group-hover:bg-success/10 transition-colors"></div>
+                <div class="stat-figure text-success">
+                    <div class="radial-progress text-success bg-success/10 border-4 border-transparent text-xs font-bold" style="--value:{{ system_health }}; --size:2.5rem; --thickness: 4px;">{{ system_health }}%</div>
                 </div>
-                <div class="radial-progress text-success text-xs" style="--value:{{ system_health }}; --size:1.5rem;">{{ system_health }}</div>
+                <div class="stat-title font-bold text-base-content/60">系统健康度</div>
+                <div class="stat-value text-success text-4xl font-heading mt-1">{{ system_health }}%</div>
+                <div class="stat-desc mt-2 font-medium opacity-60">运行正常</div>
             </div>
-            <div>
-                <div class="text-3xl font-bold mt-4">{{ system_health }}%</div>
-                <div class="text-sm opacity-60">系统健康度</div>
-            </div>
-        </div>
-        {% endcaptureas %}
-        <div class="h-full bg-base-100 border border-base-content/5 rounded-2xl">
-            {{ card_content_3 }}
         </div>
 
-        <!-- Quick Actions (Mock) -->
-        {% captureas card_content_4 %}
-        <div class="p-6 h-full flex flex-col justify-between">
-            <div class="flex justify-between items-start">
-                <div class="p-2 bg-info/10 rounded-lg text-info">
-                    <span class="material-symbols-outlined">bolt</span>
+        <!-- Quick Actions -->
+        <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
+            <div class="stat relative overflow-hidden group">
+                <div class="absolute -right-4 -top-4 w-24 h-24 bg-info/5 rounded-full blur-2xl group-hover:bg-info/10 transition-colors"></div>
+                <div class="stat-figure text-info">
+                    <span class="material-symbols-outlined text-3xl">bolt</span>
+                </div>
+                <div class="stat-title font-bold text-base-content/60">快捷操作</div>
+                <div class="mt-3 flex gap-2">
+                    <a href="{% url 'administration:debug_cache' %}" class="btn btn-sm btn-outline btn-info gap-1 h-9 min-h-0">
+                        <span class="material-symbols-outlined text-base">cleaning_services</span>
+                        清理缓存
+                    </a>
+                    <a href="{% url 'administration:settings' %}" class="btn btn-sm btn-ghost gap-1 h-9 min-h-0 bg-base-200/50 hover:bg-base-200">
+                        <span class="material-symbols-outlined text-base">settings</span>
+                        站点设置
+                    </a>
                 </div>
             </div>
-            <div>
-                <div class="text-xl font-bold mt-4 mb-2">快捷操作</div>
-                <div class="flex gap-2">
-                    <a href="{% url 'administration:debug_cache' %}" class="btn btn-xs btn-outline">清除缓存</a>
-                    <a href="{% url 'administration:settings' %}" class="btn btn-xs btn-outline">站点设置</a>
-                </div>
-            </div>
-        </div>
-        {% endcaptureas %}
-        <div class="h-full bg-base-100 border border-base-content/5 rounded-2xl">
-            {{ card_content_4 }}
         </div>
     </div>
 
     <!-- Charts Grid (Bento Box 2) -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Main Trend Chart (Span 2) -->
-        <div class="lg:col-span-2 relative group rounded-2xl bg-base-100 border border-base-content/5 overflow-hidden">
+        <div class="lg:col-span-2 relative group rounded-3xl bg-base-100 border border-base-content/5 shadow-xl overflow-hidden">
              {% include "components/inspira/border_beam.html" %}
              <div class="p-6">
-                 <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                     <span class="material-symbols-outlined text-primary">ssid_chart</span>
-                     流量趋势
-                 </h3>
-                 <div id="trendChart" class="w-full h-[300px]"></div>
+                 <div class="flex justify-between items-center mb-6">
+                     <h3 class="font-bold text-lg flex items-center gap-2 font-heading">
+                         <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                             <span class="material-symbols-outlined text-lg">ssid_chart</span>
+                         </span>
+                         活跃趋势
+                     </h3>
+                     <div class="flex gap-2">
+                         <span class="badge badge-sm badge-ghost gap-1">
+                             <span class="w-2 h-2 rounded-full bg-primary"></span> 评论
+                         </span>
+                     </div>
+                 </div>
+                 <div id="trendChart" class="w-full h-[320px]"></div>
              </div>
         </div>
 
-        <!-- Distribution Charts (Span 1, Stacked) -->
-        <div class="flex flex-col gap-4">
+        <!-- Side Widgets (Span 1) -->
+        <div class="flex flex-col gap-6">
             <!-- Comment Status -->
-            <div class="rounded-2xl bg-base-100 border border-base-content/5 p-6 flex-1 relative overflow-hidden">
-                <h3 class="font-bold text-sm mb-2 opacity-70">评论分布</h3>
+            <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden">
+                <h3 class="font-bold text-sm mb-4 opacity-70 uppercase tracking-wider">评论分布</h3>
                 <div class="flex items-center justify-between">
                     <div id="commentDonut" class="flex-1 min-w-0"></div>
-                    <div class="flex flex-col gap-2 text-xs shrink-0 whitespace-nowrap pl-2">
-                        <div class="flex items-center gap-1.5">
-                            <div class="w-2 h-2 rounded-full bg-success"></div>
-                            <span>已发布</span>
+                    <div class="flex flex-col gap-3 text-xs shrink-0 whitespace-nowrap pl-4 border-l border-base-content/5">
+                        <div class="flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-success shadow-sm shadow-success/50"></div>
+                            <span class="font-medium">已发布</span>
                         </div>
-                        <div class="flex items-center gap-1.5">
-                            <div class="w-2 h-2 rounded-full bg-warning"></div>
-                            <span>待审核</span>
+                        <div class="flex items-center gap-2">
+                            <div class="w-2.5 h-2.5 rounded-full bg-warning shadow-sm shadow-warning/50"></div>
+                            <span class="font-medium">待审核</span>
                         </div>
                     </div>
                 </div>
             </div>
             
             <!-- Top Posts List -->
-            <div class="rounded-2xl bg-base-100 border border-base-content/5 p-6 flex-1 relative overflow-hidden">
-                 <h3 class="font-bold text-sm mb-4 opacity-70">热门文章 TOP 5</h3>
-                 <div class="flex flex-col gap-3">
+            <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 flex-1 relative overflow-hidden">
+                 <h3 class="font-bold text-sm mb-5 opacity-70 uppercase tracking-wider">热门文章 TOP 5</h3>
+                 <div class="flex flex-col gap-4">
                      {% for post in top_posts %}
-                     <a href="{% url 'post_detail' post.slug %}" target="_blank" class="group block">
-                         <div class="flex justify-between items-center text-sm mb-1">
-                             <span class="truncate max-w-[150px] group-hover:text-primary transition-colors">{{ post.title }}</span>
-                             <span class="badge badge-ghost badge-sm font-mono text-xs">
-                                {{ post.views }} 阅读
+                     <a href="{% url 'post_detail' post.slug %}" target="_blank" class="group block relative">
+                         <div class="flex justify-between items-center text-sm mb-1.5 relative z-10">
+                             <span class="truncate max-w-[180px] font-medium group-hover:text-primary transition-colors">{{ post.title }}</span>
+                             <span class="badge badge-sm bg-base-200 border-none font-mono text-xs opacity-80 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                {{ post.views }}
                              </span>
                          </div>
-                         <progress class="progress progress-primary w-full h-1 group-hover:opacity-80 transition-opacity" value="{{ post.views }}" max="{{ top_posts.0.views }}"></progress>
+                         <div class="w-full h-1.5 bg-base-200 rounded-full overflow-hidden">
+                             <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full opacity-80 group-hover:opacity-100 transition-all duration-500" style="width: {% widthratio post.views top_posts.0.views 100 %}%"></div>
+                         </div>
                      </a>
                      {% endfor %}
                  </div>
@@ -172,40 +178,52 @@
         </div>
     </div>
     
-    <!-- Recent Activity Feed -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-        <div class="lg:col-span-2 rounded-2xl bg-base-100 border border-base-content/5 p-6">
+    <!-- Bottom Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Recent Comments -->
+        <div class="lg:col-span-2 rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-lg">最近评论</h3>
-                <a href="{% url 'administration:comment_list' %}" class="btn btn-xs btn-ghost">查看全部</a>
+                <h3 class="font-bold text-lg font-heading flex items-center gap-2">
+                    <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">forum</span>
+                    </span>
+                    最近评论
+                </h3>
+                <a href="{% url 'administration:comment_list' %}" class="btn btn-sm btn-ghost hover:bg-base-200">查看全部</a>
             </div>
             
             {% captureas list_content %}
                 {% for comment in recent_comments %}
-                <div class="flex items-start gap-3 p-3 hover:bg-base-200/50 rounded-lg transition-colors cursor-default group">
+                <div class="flex items-start gap-4 p-4 hover:bg-base-200/40 rounded-2xl transition-all cursor-default group border border-transparent hover:border-base-content/5">
                     <div class="avatar">
-                        <div class="w-10 h-10 rounded-full">
-                            <img src="{{ comment.user.get_avatar_url }}" />
+                        <div class="w-10 h-10 rounded-full ring-1 ring-base-content/5 group-hover:ring-secondary/30 transition-all overflow-hidden bg-base-200">
+                            <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}" class="w-full h-full object-cover">
                         </div>
                     </div>
                     <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-start">
-                            <span class="font-bold text-sm">{{ comment.user.nickname|default:comment.user.username }}</span>
-                            <span class="text-xs opacity-50">{{ comment.created_at|timesince }}前</span>
+                        <div class="flex justify-between items-start mb-1">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-sm">{{ comment.user.nickname|default:comment.user.username }}</span>
+                                {% if not comment.active %}
+                                <span class="badge badge-xs badge-warning font-bold">待审</span>
+                                {% endif %}
+                            </div>
+                            <span class="text-xs font-mono opacity-40">{{ comment.created_at|time_ago }}</span>
                         </div>
-                        <a href="{% url 'post_detail' comment.post.slug %}#comment-{{ comment.id }}" target="_blank" class="text-sm opacity-70 truncate mt-0.5 block hover:text-primary transition-colors">
+                        <a href="{% url 'post_detail' comment.post.slug %}#comment-{{ comment.id }}" target="_blank" class="text-sm opacity-80 line-clamp-2 hover:text-secondary transition-colors leading-relaxed">
                             {{ comment.content }}
                         </a>
-                        <div class="flex items-center gap-2 mt-1">
-                            <span class="text-xs opacity-40">on {{ comment.post.title }}</span>
-                            {% if not comment.active %}
-                            <span class="badge badge-xs badge-warning">待审</span>
-                            {% endif %}
+                        <div class="flex items-center gap-1 mt-2 text-xs opacity-40 group-hover:opacity-60 transition-opacity">
+                            <span class="material-symbols-outlined text-[12px]">article</span>
+                            <span>{{ comment.post.title }}</span>
                         </div>
                     </div>
                 </div>
                 {% empty %}
-                <div class="text-center opacity-50 py-4">暂无活动</div>
+                <div class="text-center opacity-50 py-10 flex flex-col items-center gap-2">
+                    <span class="material-symbols-outlined text-4xl">inbox</span>
+                    <span>暂无活动</span>
+                </div>
                 {% endfor %}
             {% endcaptureas %}
             
@@ -213,65 +231,68 @@
             {% include "components/inspira/animated_list.html" with slot_content=list_content %}
         </div>
         
-        <div class="rounded-2xl bg-base-100 border border-base-content/5 p-6 bg-gradient-to-br from-primary/5 to-secondary/5">
-            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">info</span>
-                系统信息
+        <!-- System Info -->
+        <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden">
+            <!-- Background Decoration -->
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <h3 class="font-bold text-lg mb-6 flex items-center gap-2 font-heading">
+                <span class="w-8 h-8 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
+                    <span class="material-symbols-outlined text-lg">memory</span>
+                </span>
+                系统状态
             </h3>
-            <div class="space-y-4">
-                <!-- System Info Items -->
-                <div class="space-y-3">
+            
+            <div class="space-y-6 relative z-10">
+                <!-- Resources -->
+                <div class="space-y-4">
                     <!-- CPU -->
                     <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs opacity-70">CPU</span>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-xs font-bold opacity-70">CPU</span>
                             <span class="font-mono text-xs font-bold">{{ system_info.cpu_percent }}%</span>
                         </div>
-                        <progress class="progress progress-primary w-full h-1.5" value="{{ system_info.cpu_percent }}" max="100"></progress>
+                        <progress class="progress progress-primary w-full h-2" value="{{ system_info.cpu_percent }}" max="100"></progress>
                     </div>
                     
                     <!-- Memory -->
                     <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs opacity-70">内存</span>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-xs font-bold opacity-70">内存</span>
                             <span class="font-mono text-xs font-bold">{{ system_info.memory_percent }}%</span>
                         </div>
-                        <progress class="progress progress-secondary w-full h-1.5" value="{{ system_info.memory_percent }}" max="100"></progress>
+                        <progress class="progress progress-secondary w-full h-2" value="{{ system_info.memory_percent }}" max="100"></progress>
                     </div>
 
                     <!-- Disk -->
                     <div>
-                        <div class="flex justify-between items-center mb-1">
-                            <span class="text-xs opacity-70">硬盘</span>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-xs font-bold opacity-70">存储</span>
                             <span class="font-mono text-xs font-bold">{{ system_info.disk_percent }}%</span>
                         </div>
-                        <progress class="progress progress-accent w-full h-1.5" value="{{ system_info.disk_percent }}" max="100"></progress>
+                        <progress class="progress progress-accent w-full h-2" value="{{ system_info.disk_percent }}" max="100"></progress>
                     </div>
                 </div>
 
                 <div class="divider my-2"></div>
 
                 <!-- Environment Info -->
-                <div class="space-y-2 text-sm">
-                    <div class="flex justify-between items-center">
-                        <span class="opacity-70">Python</span>
-                        <span class="font-mono">{{ system_info.python_version }}</span>
+                <div class="grid grid-cols-2 gap-4 text-xs">
+                    <div class="flex flex-col gap-1">
+                        <span class="opacity-50">Python 版本</span>
+                        <span class="font-mono font-bold">{{ system_info.python_version }}</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="opacity-70">System</span>
-                        <span class="font-mono">{{ system_info.platform_system }} {{ system_info.platform_release }}</span>
+                    <div class="flex flex-col gap-1">
+                        <span class="opacity-50">Django 版本</span>
+                        <span class="font-mono font-bold">{{ system_info.django_version }}</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="opacity-70">Django</span>
-                        <span class="font-mono">5.0+</span>
+                    <div class="flex flex-col gap-1 col-span-2">
+                        <span class="opacity-50">系统</span>
+                        <span class="font-mono font-bold truncate">{{ system_info.platform_system }} {{ system_info.platform_release }}</span>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <span class="opacity-70">Server Time</span>
-                        <span class="font-mono">{{ system_info.server_time|date:"Y-m-d H:i:s" }}</span>
-                    </div>
-                    <div class="flex justify-between items-center">
-                        <span class="opacity-70">Running Time</span>
-                        <span class="font-mono text-success">{{ system_info.uptime }}</span>
+                    <div class="flex flex-col gap-1 col-span-2">
+                        <span class="opacity-50">运行时间</span>
+                        <span class="font-mono font-bold text-success">{{ system_info.uptime }}</span>
                     </div>
                 </div>
             </div>
@@ -282,10 +303,39 @@
 
 <script>
     window.initCharts = function () {
+            const resolveColor = (cssColor) => {
+                const el = document.createElement('span');
+                el.style.color = cssColor;
+                el.style.display = 'none';
+                document.body.appendChild(el);
+                const resolved = getComputedStyle(el).color;
+                document.body.removeChild(el);
+                return resolved || cssColor;
+            };
+            const getCssVar = (varName) => {
+                return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+            };
+
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const themeMode = (currentTheme === 'light') ? 'light' : 'dark';
+            const textColor = resolveColor('oklch(var(--bc))');
+            const mutedTextColor = resolveColor('oklch(var(--bc) / 0.6)');
+            const gridColor = resolveColor('oklch(var(--bc) / 0.1)');
+
+            const applyChartTextColors = (container) => {
+                if (!container) return;
+                const textNodes = container.querySelectorAll('text.apexcharts-text');
+                textNodes.forEach((node) => {
+                    const isMuted = node.classList.contains('apexcharts-xaxis-label') || node.classList.contains('apexcharts-yaxis-label') || node.classList.contains('apexcharts-datalabel-label');
+                    const color = isMuted ? mutedTextColor : textColor;
+                    node.setAttribute('fill', color);
+                    node.style.fill = color;
+                });
+            };
+
             // 1. Trend Chart (Area)
             const trendEl = document.querySelector("#trendChart");
             if (trendEl) {
-                // Destroy existing chart if any
                 if (trendEl._chart) {
                     try { trendEl._chart.destroy(); } catch(e) {}
                 }
@@ -294,58 +344,70 @@
                     series: [{
                         name: '评论数',
                         data: {{ trend_counts|safe }}
+                    }, {
+                        name: '新用户',
+                        data: {{ user_trend_counts|safe }}
                     }],
                     chart: {
                         type: 'area',
-                        height: 300,
+                        height: 320,
                         toolbar: { show: false },
                         fontFamily: 'inherit',
                         background: 'transparent',
-                        events: {
-                            // Ensure chart is destroyed when element is removed
-                            mounted: function(chartContext, config) {
-                                config.globals.chartID = 'trendChart';
-                            }
-                        }
+                        animations: { enabled: true },
+                        foreColor: textColor
                     },
-                    stroke: {
-                        curve: 'smooth',
-                        width: 3
-                    },
+                    stroke: { curve: 'smooth', width: 3 },
                     fill: {
                         type: 'gradient',
                         gradient: {
                             shadeIntensity: 1,
-                            opacityFrom: 0.7,
-                            opacityTo: 0.2,
-                            stops: [0, 90, 100]
+                            opacityFrom: 0.45,
+                            opacityTo: 0.05,
+                            stops: [0, 100]
                         }
                     },
                     dataLabels: { enabled: false },
                     xaxis: {
                         categories: {{ trend_dates|safe }},
-                        labels: { show: false },
+                        labels: { 
+                            show: true,
+                            style: { colors: mutedTextColor, fontSize: '11px', fontFamily: 'inherit' }
+                        },
                         axisBorder: { show: false },
-                        axisTicks: { show: false }
+                        axisTicks: { show: false },
+                        tooltip: { enabled: false }
                     },
-                    yaxis: { show: false },
+                    yaxis: { 
+                        show: true,
+                        labels: {
+                            style: { colors: mutedTextColor, fontSize: '11px', fontFamily: 'inherit' }
+                        }
+                    },
                     grid: {
                         show: true,
-                        borderColor: 'rgba(255, 255, 255, 0.05)',
+                        borderColor: gridColor,
                         strokeDashArray: 4,
+                        padding: { top: 0, right: 0, bottom: 0, left: 10 } 
                     },
-                    theme: { mode: 'dark' },
-                    colors: ['#3ABFF8']
+                    theme: { mode: themeMode }, 
+                    colors: [
+                        getCssVar('--p') || '#3ABFF8',
+                        getCssVar('--s') || '#D926A9'
+                    ],
+                    tooltip: {
+                        theme: themeMode,
+                        style: { fontSize: '12px', fontFamily: 'inherit' },
+                        x: { show: false },
+                        marker: { show: false },
+                        cssClass: 'apexcharts-tooltip-theme-layer'
+                    }
                 };
                 
-                // Check current theme to set mode
-                if (document.documentElement.getAttribute('data-theme') === 'light' || !document.documentElement.getAttribute('data-theme')) {
-                     optionsTrend.theme.mode = 'light';
-                }
-
                 var chartTrend = new ApexCharts(trendEl, optionsTrend);
                 chartTrend.render();
                 trendEl._chart = chartTrend;
+                setTimeout(() => applyChartTextColors(trendEl), 0);
             }
 
             // 2. Comment Status (Donut)
@@ -360,30 +422,60 @@
                     labels: ['已发布', '待审核'],
                     chart: {
                         type: 'donut',
-                        height: 120,
+                        height: 160,
                         fontFamily: 'inherit',
-                        background: 'transparent'
+                        background: 'transparent',
+                        foreColor: textColor
                     },
                     plotOptions: {
                         pie: {
                             donut: {
-                                size: '70%',
-                                labels: { show: false }
+                                size: '75%',
+                                labels: { 
+                                    show: true,
+                                    name: { show: false },
+                                    value: {
+                                        show: true,
+                                        fontSize: '20px',
+                                        fontWeight: 700,
+                                        color: textColor,
+                                        formatter: function (val) { return val }
+                                    },
+                                    total: {
+                                        show: true,
+                                        showAlways: true,
+                                        label: '总计',
+                                        fontSize: '12px',
+                                        color: mutedTextColor,
+                                        formatter: function (w) {
+                                            return w.globals.seriesTotals.reduce((a, b) => {
+                                                return a + b
+                                            }, 0)
+                                        }
+                                    }
+                                }
                             }
                         }
                     },
                     dataLabels: { enabled: false },
                     legend: { show: false },
                     stroke: { show: false },
-                    colors: ['#36D399', '#FBBD23']
+                    theme: { mode: themeMode },
+                    colors: [
+                        getCssVar('--su') || '#36D399',
+                        getCssVar('--wa') || '#FBBD23'
+                    ],
+                    tooltip: { enabled: false }
                 };
                 
                 var chartDonut = new ApexCharts(donutEl, optionsDonut);
                 chartDonut.render();
                 donutEl._chart = chartDonut;
+                setTimeout(() => applyChartTextColors(donutEl), 0);
             }
     };
-    // Cleanup on HTMX swap to prevent "setting width of undefined" errors
+    
+    // Cleanup on HTMX swap
     document.addEventListener('htmx:beforeSwap', function(evt) {
              const trendEl = document.querySelector("#trendChart");
              if (trendEl && trendEl._chart) {
@@ -397,13 +489,26 @@
                  delete donutEl._chart;
              }
     });
+
+    // Theme Change Observer
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
+                // Re-init charts to update series colors (which depend on JS resolution)
+                setTimeout(window.initCharts, 100);
+            }
+        });
+    });
+
     // Initial page load
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', function () {
-            window.initCharts();
+            observer.observe(document.documentElement, { attributes: true });
+            setTimeout(window.initCharts, 100);
         });
     } else {
-        window.initCharts();
+        observer.observe(document.documentElement, { attributes: true });
+        setTimeout(window.initCharts, 100);
     }
 </script>
 {% endblock %}

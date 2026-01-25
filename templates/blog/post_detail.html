@@ -155,7 +155,7 @@
                         <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title }}" target="_blank" class="btn btn-sm btn-circle btn-ghost hover:bg-black/10 hover:text-black" title="分享到 X">
                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                         </a>
-                        <button class="btn btn-sm btn-circle btn-ghost hover:bg-primary/10 hover:text-primary" @click="$dispatch('notify', { message: '链接已复制！', type: 'success' }); navigator.clipboard.writeText(window.location.href)" title="复制链接">
+                        <button class="btn btn-sm btn-circle btn-ghost hover:bg-primary/10 hover:text-primary" @click="$dispatch('show-toast', { message: '链接已复制！', type: 'success' }); navigator.clipboard.writeText(window.location.href)" title="复制链接">
                             <span class="material-symbols-outlined text-[20px]">content_copy</span>
                         </button>
                     </div>
@@ -564,12 +564,49 @@
     import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
     
     async function initMermaid() {
-        const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'default';
-        mermaid.initialize({ 
-            startOnLoad: false, // 手动加载
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const theme = 'base';
+        const styles = getComputedStyle(document.documentElement);
+        const getVar = (name, fallback) => {
+            const value = styles.getPropertyValue(name).trim();
+            return value || fallback;
+        };
+        const baseTextColor = getVar('--bc', isDark ? '#e5e7eb' : '#1f2937');
+        const baseBackground = getVar('--b1', isDark ? '#0b1220' : '#ffffff');
+        const surfaceBackground = getVar('--b2', isDark ? '#111827' : '#f8fafc');
+        const borderColor = getVar('--b3', isDark ? '#1f2937' : '#e2e8f0');
+        const themeVariables = {
+            background: baseBackground,
+            mainBkg: surfaceBackground,
+            primaryColor: getVar('--p', '#3b82f6'),
+            primaryTextColor: baseTextColor,
+            primaryBorderColor: borderColor,
+            secondaryColor: getVar('--s', '#60a5fa'),
+            secondaryTextColor: baseTextColor,
+            secondaryBorderColor: borderColor,
+            tertiaryColor: getVar('--a', '#f59e0b'),
+            tertiaryTextColor: baseTextColor,
+            tertiaryBorderColor: borderColor,
+            lineColor: baseTextColor,
+            textColor: baseTextColor,
+            labelTextColor: baseTextColor,
+            nodeTextColor: baseTextColor,
+            noteBkgColor: surfaceBackground,
+            noteTextColor: baseTextColor,
+            edgeLabelBackground: surfaceBackground,
+            titleColor: baseTextColor,
+            actorTextColor: baseTextColor,
+            taskTextColor: baseTextColor,
+            taskTextOutsideColor: baseTextColor,
+            clusterBkg: surfaceBackground,
+            clusterBorder: borderColor,
+        };
+        mermaid.initialize({
+            startOnLoad: false,
             theme: theme,
             securityLevel: 'loose',
-            fontFamily: 'inherit'
+            fontFamily: 'inherit',
+            themeVariables: themeVariables,
         });
 
         // 查找所有 mermaid 代码块
@@ -587,6 +624,7 @@
             const div = document.createElement('div');
             div.classList.add('mermaid');
             div.textContent = graphDefinition;
+            div.dataset.source = graphDefinition;
             
             // 替换整个 pre 标签 (或者 codehilite 容器)
             const pre = code.parentElement; // <pre>
@@ -606,9 +644,17 @@
             }
         }
         
+        const mermaidNodes = document.querySelectorAll('.mermaid');
+        mermaidNodes.forEach((node) => {
+            if (node.dataset.source) {
+                node.textContent = node.dataset.source;
+            }
+            node.removeAttribute('data-processed');
+        });
+
         // 运行 Mermaid
         await mermaid.run({
-            nodes: document.querySelectorAll('.mermaid')
+            nodes: mermaidNodes
         });
     }
     
@@ -620,10 +666,14 @@
     }
     
     // 监听主题切换事件
+    let themeUpdateTimer;
     const observer = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
             if (mutation.attributeName === 'data-theme') {
-                location.reload(); 
+                if (themeUpdateTimer) clearTimeout(themeUpdateTimer);
+                themeUpdateTimer = setTimeout(() => {
+                    initMermaid();
+                }, 50);
             }
         });
     });

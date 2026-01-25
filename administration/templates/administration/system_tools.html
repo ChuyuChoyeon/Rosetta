@@ -1,0 +1,249 @@
+{% extends "administration/base.html" %}
+{% load static capture_tags %}
+
+{% block title %}系统工具{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+
+{% block content %}
+<!-- Header -->
+{% captureas header_actions %}
+{% endcaptureas %}
+
+{% include "administration/components/header.html" with title="系统工具" subtitle="全站索引重建与图片处理服务" icon="build_circle" breadcrumbs=breadcrumbs actions=header_actions %}
+
+<!-- System Monitor (Full Width) -->
+<div class="card bg-base-100 shadow-sm border border-base-content/5 mb-6">
+    <div class="card-body gap-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">monitor_heart</span>
+                <h2 class="card-title">实时系统监控</h2>
+            </div>
+            <span class="loading loading-dots loading-xs text-primary htmx-indicator" id="monitor-loading"></span>
+        </div>
+        
+        <div hx-get="{% url 'administration:system_monitor' %}" 
+             hx-trigger="load, every 2s" 
+             hx-swap="innerHTML"
+             hx-indicator="#monitor-loading">
+             <!-- Initial Skeleton -->
+             <div class="skeleton w-full h-32 rounded-xl"></div>
+        </div>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Watson Search Index Card -->
+    <div class="card bg-base-100 shadow-sm border border-base-content/5">
+        <div class="card-body gap-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-secondary">manage_search</span>
+                    <h2 class="card-title">全站搜索索引</h2>
+                </div>
+                <span class="badge badge-outline font-mono
+                    {% if watson_rebuild_status == 'success' %}badge-success
+                    {% elif watson_rebuild_status == 'running' %}badge-info
+                    {% elif watson_rebuild_status == 'error' %}badge-error{% endif %}">
+                    {{ watson_rebuild_status|default:'idle' }}
+                </span>
+            </div>
+            <p class="text-sm text-base-content/60">
+                如果用户在前台搜索不到最新的文章或内容，请尝试重建索引。这通常在大量导入数据后需要手动执行。
+            </p>
+            <div class="text-xs opacity-50 font-mono">
+                上次任务：{{ watson_rebuild_updated_at|date:"Y-m-d H:i:s"|default:"无记录" }}
+            </div>
+            <form method="post" class="mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="rebuild_watson">
+                <button type="submit" class="btn btn-secondary btn-sm w-full sm:w-auto gap-2">
+                    <span class="material-symbols-outlined text-lg">sync</span>
+                    立即更新搜索数据
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Image Processing Card -->
+    <div class="card bg-base-100 shadow-sm border border-base-content/5">
+        <div class="card-body gap-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-accent">imagesmode</span>
+                    <h2 class="card-title">图片预处理服务</h2>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="badge badge-outline font-mono">{{ image_queue_status }}</span>
+                </div>
+            </div>
+            <p class="text-sm text-base-content/60">
+                后台自动生成文章封面图的缩略图，提升前台页面加载速度。建议在上传大量图片后执行。
+            </p>
+            <div class="stats stats-vertical lg:stats-horizontal shadow-sm bg-base-200/30 border border-base-content/5 my-2">
+                <div class="stat py-2 px-4">
+                    <div class="stat-title text-xs">待优化图片</div>
+                    <div class="stat-value text-lg">{{ image_queue_queued }}</div>
+                </div>
+                <div class="stat py-2 px-4">
+                    <div class="stat-title text-xs">处理进度</div>
+                    <div class="stat-value text-lg flex items-baseline gap-1">
+                        <span>{{ image_queue_processed }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="text-xs opacity-50 font-mono mb-1">
+                上次任务：{{ image_queue_updated_at|date:"Y-m-d H:i:s"|default:"无记录" }}
+            </div>
+            <form method="post" class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="queue_images">
+                <div class="join w-full sm:w-auto">
+                    <div class="tooltip" data-tip="每次处理的数量">
+                        <input type="number" name="limit" class="input input-bordered join-item input-sm w-full sm:w-24" placeholder="数量" min="1" value="20">
+                    </div>
+                    <div class="tooltip" data-tip="任务开始前的延迟(秒)">
+                        <input type="number" name="delay" class="input input-bordered join-item input-sm w-full sm:w-24" placeholder="延迟" min="0" value="120">
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-accent btn-sm w-full sm:w-auto gap-2">
+                    <span class="material-symbols-outlined text-lg">play_circle</span>
+                    启动处理任务
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- Media Cleaner Card -->
+    <div class="card bg-base-100 shadow-sm border border-base-content/5">
+        <div class="card-body gap-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-warning">cleaning_services</span>
+                    <h2 class="card-title">媒体文件清理</h2>
+                </div>
+                <div class="flex flex-col items-end gap-1">
+                     <span class="badge badge-outline font-mono text-xs">Scan: {{ media_scan_status|default:'idle' }}</span>
+                     <span class="badge badge-outline font-mono text-xs">Clean: {{ media_clean_status|default:'idle' }}</span>
+                     {% if media_clean_error %}
+                     <div class="tooltip tooltip-left tooltip-error" data-tip="{{ media_clean_error }}">
+                         <span class="badge badge-error badge-xs animate-pulse">!</span>
+                     </div>
+                     {% endif %}
+                </div>
+            </div>
+            <p class="text-sm text-base-content/60">
+                扫描并清理未被数据库引用的"孤儿"媒体文件，释放存储空间。请谨慎操作。
+            </p>
+            
+            <div class="stats stats-vertical lg:stats-horizontal shadow-sm bg-base-200/30 border border-base-content/5 my-2">
+                <div class="stat py-2 px-4">
+                    <div class="stat-title text-xs">孤儿文件</div>
+                    <div class="stat-value text-lg text-warning">{{ media_scan_orphaned_count }}</div>
+                    <div class="stat-desc">{{ media_scan_orphaned_size|filesizeformat }}</div>
+                </div>
+                <div class="stat py-2 px-4">
+                    <div class="stat-title text-xs">已清理</div>
+                    <div class="stat-value text-lg text-success">{{ media_clean_cleaned_count }}</div>
+                    <div class="stat-desc">{{ media_clean_cleaned_size|filesizeformat }}</div>
+                </div>
+            </div>
+
+            <div class="text-xs opacity-50 font-mono">
+                上次扫描：{{ media_scan_updated_at|date:"Y-m-d H:i:s"|default:"无记录" }}
+            </div>
+
+            <div class="flex gap-2 mt-2">
+                <form method="post" class="flex-1">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="scan_media">
+                    <button type="submit" class="btn btn-warning btn-outline btn-sm w-full gap-2" {% if media_scan_status == 'running' %}disabled{% endif %}>
+                        <span class="material-symbols-outlined text-lg">search</span>
+                        扫描文件
+                    </button>
+                </form>
+                
+                <form method="post" class="flex-1" id="form-clean-media">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="clean_media">
+                    <button type="button" class="btn btn-error btn-sm w-full gap-2" 
+                        onclick="showConfirmModal('确认清理', '确定要永久删除这些文件吗？此操作不可撤销。', () => document.getElementById('form-clean-media').submit())"
+                        {% if media_scan_orphaned_count == 0 or media_clean_status == 'running' %}disabled{% endif %}>
+                        <span class="material-symbols-outlined text-lg">delete_forever</span>
+                        立即清理
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Database Backup Card -->
+    <div class="card bg-base-100 shadow-sm border border-base-content/5 md:col-span-2">
+        <div class="card-body gap-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-info">database</span>
+                    <h2 class="card-title">数据库备份与恢复</h2>
+                </div>
+                <form method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="create_backup">
+                    <button type="submit" class="btn btn-info btn-sm gap-2">
+                        <span class="material-symbols-outlined text-lg">save</span>
+                        创建新备份
+                    </button>
+                </form>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="table table-sm table-zebra border border-base-content/5 rounded-lg">
+                    <thead class="bg-base-200">
+                        <tr>
+                            <th>文件名</th>
+                            <th>大小</th>
+                            <th>创建时间</th>
+                            <th class="text-right">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for backup in backups %}
+                        <tr>
+                            <td class="font-mono text-xs">{{ backup.name }}</td>
+                            <td class="text-xs opacity-70">{{ backup.size|filesizeformat }}</td>
+                            <td class="text-xs opacity-70">{{ backup.mtime|date:"Y-m-d H:i:s" }}</td>
+                            <td class="flex justify-end gap-1">
+                                <a href="{% url 'administration:backup_download' backup.name %}" class="btn btn-xs btn-ghost btn-square tooltip" data-tip="下载">
+                                    <span class="material-symbols-outlined text-base">download</span>
+                                </a>
+                                <form method="post" id="form-restore-{{ forloop.counter }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="restore_backup">
+                                    <input type="hidden" name="filename" value="{{ backup.name }}">
+                                    <button type="button" class="btn btn-xs btn-ghost btn-square text-warning tooltip" data-tip="恢复"
+                                        onclick="showConfirmModal('确认恢复', '警告：这将覆盖当前数据库所有数据！确定要恢复吗？', () => document.getElementById('form-restore-{{ forloop.counter }}').submit())">
+                                        <span class="material-symbols-outlined text-base">settings_backup_restore</span>
+                                    </button>
+                                </form>
+                                <form method="post" id="form-delete-{{ forloop.counter }}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="delete_backup">
+                                    <input type="hidden" name="filename" value="{{ backup.name }}">
+                                    <button type="button" class="btn btn-xs btn-ghost btn-square text-error tooltip" data-tip="删除"
+                                        onclick="showConfirmModal('确认删除', '确定要删除此备份吗？', () => document.getElementById('form-delete-{{ forloop.counter }}').submit())">
+                                        <span class="material-symbols-outlined text-base">delete</span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center py-8 opacity-50">
+                                暂无备份文件
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

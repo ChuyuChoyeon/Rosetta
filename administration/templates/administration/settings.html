@@ -4,20 +4,13 @@
 {% block title %}站点设置{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
-<div class="w-full" x-data="{ activeTab: 'general' }">
-    <div class="mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-            <h1 class="text-3xl font-bold mb-2">站点设置</h1>
-            <p class="text-base-content/60">管理网站的全局配置参数</p>
-        </div>
-        <div class="text-sm breadcrumbs">
-            <ul>
-                <li><a href="{% url 'administration:index' %}">首页</a></li>
-                <li>站点设置</li>
-            </ul>
-        </div>
-    </div>
+<!-- Header -->
+{% captureas header_actions %}
+{% endcaptureas %}
 
+{% include "administration/components/header.html" with title="站点设置" subtitle="管理网站的全局配置参数" breadcrumbs=breadcrumbs actions=header_actions %}
+
+<div class="w-full" x-data="{ activeTab: 'general' }">
     <!-- Tabs Navigation -->
     <div class="overflow-x-auto -mx-4 px-4 pb-2 sm:mx-0 sm:px-0 sm:pb-0 scrollbar-hide">
         <div role="tablist" class="tabs tabs-lifted tabs-lg w-max min-w-full sm:w-auto">
@@ -40,6 +33,41 @@
         <form method="post" class="p-4 md:p-8 max-w-5xl mx-auto">
             {% csrf_token %}
             
+            <!-- General Tab (with Site Settings) -->
+            <div x-show="activeTab === 'general'" 
+                 x-transition:enter="transition ease-out duration-300" 
+                 x-transition:enter-start="opacity-0 translate-y-4" 
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 class="space-y-8 py-4">
+                {% if current_site %}
+                <div class="card bg-base-200/50 border border-base-content/5">
+                    <div class="card-body p-6">
+                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                            <span class="material-symbols-outlined text-primary">public</span>
+                            站点识别 (Sites Framework)
+                        </h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">域名 (Domain)</span>
+                                </label>
+                                <input type="text" name="site_domain" value="{{ current_site.domain }}" class="input input-bordered w-full focus:input-primary" placeholder="example.com" />
+                                <label class="label">
+                                    <span class="label-text-alt text-base-content/60">用于生成 Sitemap 和邮件链接。</span>
+                                </label>
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold">显示名称 (Display Name)</span>
+                                </label>
+                                <input type="text" name="site_name" value="{{ current_site.name }}" class="input input-bordered w-full focus:input-primary" placeholder="My Site" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
             {% for group in fieldsets %}
             <div x-show="activeTab === '{{ group.slug }}'" 
                  x-transition:enter="transition ease-out duration-300" 
@@ -70,10 +98,12 @@
                             
                             <div class="mt-1">
                                 {% if item.type == 'bool' %}
-                                    <label class="cursor-pointer label justify-start gap-4 p-0">
-                                        <input type="checkbox" name="{{ item.key }}" class="toggle toggle-primary toggle-lg" {% if item.value %}checked{% endif %}>
-                                        <span class="label-text text-base-content/60" x-text="{{ item.key }} ? '已启用' : '已禁用'"></span>
-                                    </label>
+                                    <div x-data="{ enabled: {{ item.value|yesno:'true,false' }} }">
+                                        <label class="cursor-pointer label justify-start gap-4 p-0">
+                                            <input type="checkbox" name="{{ item.key }}" class="toggle toggle-primary toggle-lg" x-model="enabled">
+                                            <span class="label-text text-base-content/60" x-text="enabled ? '已启用' : '已禁用'"></span>
+                                        </label>
+                                    </div>
                                 {% elif item.type == 'int' %}
                                     <input type="number" name="{{ item.key }}" value="{{ item.value }}" class="input input-bordered w-full max-w-md focus:input-primary transition-all">
                                 {% else %}
@@ -83,7 +113,7 @@
                                             words: {{ item.value|default:'[]' }},
                                             newWord: ''
                                         }">
-                                            <input type="hidden" name="{{ item.key }}" :value="JSON.stringify(words).replace(/&quot;/g, '\'').replace(/\"/g, '\'')">
+                                            <input type="hidden" name="{{ item.key }}" :value="JSON.stringify(words).replace(/&quot;/g, '\'')">
                                             
                                             <div class="flex flex-wrap gap-2 mb-2">
                                                 <template x-for="(word, index) in words" :key="index">
@@ -147,50 +177,6 @@
                 </button>
             </div>
         </form>
-        <div class="divider"></div>
-        <div class="p-4 md:p-8 max-w-5xl mx-auto">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="card bg-base-100 border border-base-content/5">
-                    <div class="card-body gap-4">
-                        <div class="flex items-center justify-between">
-                            <h2 class="card-title">搜索索引</h2>
-                            <span class="badge badge-outline">{{ watson_rebuild_status }}</span>
-                        </div>
-                        <div class="text-sm opacity-70">
-                            最近更新：{{ watson_rebuild_updated_at|default:"暂无" }}
-                        </div>
-                        <form method="post" class="flex items-center gap-3">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="rebuild_watson">
-                            <button type="submit" class="btn btn-secondary btn-sm">异步重建索引</button>
-                        </form>
-                    </div>
-                </div>
-                <div class="card bg-base-100 border border-base-content/5">
-                    <div class="card-body gap-4">
-                        <div class="flex items-center justify-between">
-                            <h2 class="card-title">图片处理队列</h2>
-                            <span class="badge badge-outline">{{ image_queue_status }}</span>
-                        </div>
-                        <div class="text-sm opacity-70">
-                            最近更新：{{ image_queue_updated_at|default:"暂无" }}
-                        </div>
-                        <div class="text-sm opacity-70">
-                            可处理封面图：{{ cover_image_count }}，已入队：{{ image_queue_queued }}
-                        </div>
-                        <form method="post" class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                            {% csrf_token %}
-                            <input type="hidden" name="action" value="queue_images">
-                            <div class="join w-full sm:w-auto">
-                                <input type="number" name="limit" class="input input-bordered join-item w-full sm:w-28" placeholder="数量" min="1" value="20">
-                                <input type="number" name="delay" class="input input-bordered join-item w-full sm:w-32" placeholder="延迟秒数" min="0" value="{{ image_queue_delay }}">
-                            </div>
-                            <button type="submit" class="btn btn-accent btn-sm">加入延迟队列</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 </div>
 {% endblock %}

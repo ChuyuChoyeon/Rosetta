@@ -1,5 +1,5 @@
 {% for log in logentries %}
-<tr class="hover:bg-base-200/50 transition-colors duration-200 group">
+<tr class="hover">
     <td class="font-mono text-xs whitespace-nowrap text-base-content/60 pl-4">
         {{ log.action_time|date:"Y-m-d" }}
         <span class="block text-base-content/40 text-[10px]">{{ log.action_time|date:"H:i:s" }}</span>
@@ -12,23 +12,23 @@
                 </div>
             </div>
             <div class="flex flex-col">
-                <span class="font-semibold text-sm text-base-content group-hover:text-primary transition-colors">{{ log.user.nickname|default:log.user.username }}</span>
+                <span class="font-semibold text-sm text-base-content">{{ log.user.nickname|default:log.user.username }}</span>
             </div>
         </div>
     </td>
     <td>
         {% if log.action_flag == 1 %}
-        <div class="badge badge-success badge-sm gap-1 shadow-sm bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-500/20 dark:text-emerald-300 dark:border-emerald-500/30">
+        <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/10 font-bold h-auto py-1">
             <span class="material-symbols-outlined text-[14px]">add_circle</span>
             <span class="hidden sm:inline">新增</span>
         </div>
         {% elif log.action_flag == 2 %}
-        <div class="badge badge-warning badge-sm gap-1 shadow-sm bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-500/20 dark:text-amber-300 dark:border-amber-500/30">
+        <div class="badge badge-warning badge-sm gap-1 badge-outline bg-warning/10 font-bold h-auto py-1">
             <span class="material-symbols-outlined text-[14px]">edit</span>
             <span class="hidden sm:inline">修改</span>
         </div>
         {% elif log.action_flag == 3 %}
-        <div class="badge badge-error badge-sm gap-1 shadow-sm bg-rose-100 text-rose-700 border-rose-200 dark:bg-rose-500/20 dark:text-rose-300 dark:border-rose-500/30">
+        <div class="badge badge-error badge-sm gap-1 badge-outline bg-error/10 font-bold h-auto py-1">
             <span class="material-symbols-outlined text-[14px]">delete</span>
             <span class="hidden sm:inline">删除</span>
         </div>
@@ -36,23 +36,30 @@
     </td>
     <td class="hidden md:table-cell">
         <div class="flex items-center gap-2" title="{{ log.content_type }}">
-            <div class="w-1.5 h-1.5 rounded-full bg-primary/40 group-hover:bg-primary transition-colors"></div>
+            <div class="w-1.5 h-1.5 rounded-full bg-primary/40"></div>
             <span class="text-xs font-medium text-base-content/70">{{ log.content_type }}</span>
         </div>
     </td>
     <td class="hidden lg:table-cell">
-        <div class="font-mono text-xs text-primary/80 bg-primary/5 px-2 py-1 rounded border border-primary/10 max-w-[150px] truncate transition-all group-hover:bg-primary/10 group-hover:border-primary/20" title="{{ log.object_repr }}">
+        <div class="font-mono text-xs text-primary/80 bg-primary/5 px-2 py-1 rounded border border-primary/10 max-w-[150px] truncate" title="{{ log.object_repr }}">
             {{ log.object_repr }}
         </div>
     </td>
     <td class="max-w-xs hidden sm:table-cell">
-        <p class="text-xs text-base-content/60 truncate group-hover:text-base-content/80 transition-colors" title="{{ log.change_message }}">
+        <p class="text-xs text-base-content/60 truncate" title="{{ log.change_message }}">
             {{ log.change_message|default:"-" }}
         </p>
     </td>
     <td class="text-center">
         <div class="join">
-            <button type="button" onclick="confirmDelete('{% url 'administration:logentry_delete' log.pk %}', '确定要删除这条日志吗？')" class="btn btn-ghost btn-xs join-item text-error" title="删除">
+            <button type="button" 
+                    hx-post="{% url 'administration:logentry_delete' log.pk %}"
+                    hx-trigger="confirmed"
+                    hx-target="closest tr"
+                    hx-swap="outerHTML swap:0.5s"
+                    onclick="confirmHtmx(this, '确定要删除这条日志吗？')"
+                    class="btn btn-ghost btn-xs join-item text-error" 
+                    title="删除">
                 <span class="material-symbols-outlined text-base">delete</span>
             </button>
         </div>

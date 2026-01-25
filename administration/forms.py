@@ -75,10 +75,7 @@ class PostForm(forms.ModelForm):
             self.fields["tags_str"].initial = ",".join(
                 [t.name for t in self.instance.tags.all()]
             )
-        self.apply_styles()
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
         # Apply styles to all fields
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
@@ -358,7 +355,6 @@ class UserForm(forms.ModelForm):
             "username",
             "nickname",
             "email",
-            "password",
             "avatar",
             "cover_image",
             "bio",

@@ -1,0 +1,13 @@
+<div class="flex flex-col items-center justify-center py-16 text-base-content/40">
+    <div class="w-20 h-20 rounded-full bg-base-200/50 flex items-center justify-center mb-4">
+        <span class="material-symbols-outlined text-4xl opacity-50">{{ icon|default:"inbox" }}</span>
+    </div>
+    <h3 class="font-bold text-lg mb-1">{{ title|default:"暂无数据" }}</h3>
+    <p class="text-sm opacity-70 max-w-xs text-center">{{ description|default:"当前列表没有任何数据。" }}</p>
+    {% if action_url and action_text %}
+    <a href="{{ action_url }}" class="btn btn-primary btn-sm mt-6 gap-2">
+        <span class="material-symbols-outlined text-sm">add</span>
+        {{ action_text }}
+    </a>
+    {% endif %}
+</div>

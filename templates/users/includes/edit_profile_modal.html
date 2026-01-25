@@ -30,8 +30,8 @@
                         <span class="label-text font-medium">头像</span>
                     </label>
                     <div class="flex flex-col items-center gap-4 text-center">
-                        <div class="avatar placeholder cursor-pointer group" @click="$refs.avatarInput.click()">
-                            <div class="bg-neutral text-neutral-content rounded-full w-32 h-32 ring ring-base-200 ring-offset-2 overflow-hidden relative shadow-lg">
+                        <div class="avatar cursor-pointer group" @click="$refs.avatarInput.click()">
+                            <div class="rounded-full w-32 h-32 ring ring-base-200 ring-offset-2 overflow-hidden relative shadow-lg">
                                 <img :src="avatarPreview || '{{ profile_user.get_avatar_url }}'" alt="Avatar Preview" class="object-cover w-full h-full" />
                                 <div class="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                     <span class="material-symbols-outlined text-white text-3xl">edit</span>

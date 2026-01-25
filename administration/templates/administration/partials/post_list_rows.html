@@ -1,6 +1,6 @@
 {% for post in posts %}
-<tr class="hover:bg-base-200/50 transition-colors duration-200 group">
-    <th class="pl-4">
+<tr class="hover">
+    <th class="pl-6">
         <label>
             <input type="checkbox" name="selected_ids" value="{{ post.pk }}" form="bulk-form" class="checkbox checkbox-xs rounded-sm row-checkbox" onclick="updateBulkToolbar()" />
         </label>
@@ -9,12 +9,12 @@
     <td class="hidden md:table-cell">
         {% if post.cover_image %}
         <div class="avatar">
-            <div class="w-12 h-8 rounded-lg ring-1 ring-base-content/10 shadow-sm overflow-hidden group-hover:ring-primary/50 transition-all duration-300">
-                <img src="{{ post.cover_image.url }}" alt="Cover" class="object-cover transition-transform duration-500 group-hover:scale-110" />
+            <div class="w-12 h-8 rounded-lg ring-1 ring-base-content/10 shadow-sm overflow-hidden">
+                <img src="{{ post.cover_image.url }}" alt="Cover" class="object-cover" />
             </div>
         </div>
         {% else %}
-        <div class="w-12 h-8 rounded-lg bg-base-200 flex items-center justify-center text-base-content/20 ring-1 ring-base-content/5 group-hover:bg-base-300 transition-colors">
+        <div class="w-12 h-8 rounded-lg bg-base-200 flex items-center justify-center text-base-content/20 ring-1 ring-base-content/5">
             <span class="material-symbols-outlined text-sm">image</span>
         </div>
         {% endif %}
@@ -40,7 +40,7 @@
     <td class="hidden lg:table-cell">
         <div class="flex items-center space-x-2">
             <div class="avatar">
-                <div class="w-6 h-6 rounded-full ring ring-base-200 ring-offset-1 group-hover:ring-primary/20 transition-all">
+                <div class="w-6 h-6 rounded-full ring ring-base-200 ring-offset-1">
                     <img src="{{ post.author.get_avatar_url }}" alt="{{ post.author.username }}" />
                 </div>
             </div>

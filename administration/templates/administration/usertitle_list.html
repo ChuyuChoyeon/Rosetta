@@ -4,61 +4,44 @@
 {% block title %}用户称号管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
-<div class="text-sm breadcrumbs mb-4">
-    <ul>
-        <li><a href="{% url 'administration:index' %}">首页</a></li>
-        <li>用户称号管理</li>
-    </ul>
-</div>
-
-{% captureas card_content %}
-    <div class="p-0">
-        <!-- Toolbar -->
-        <div class="p-4 border-b border-base-200/60 bg-base-100/50 backdrop-blur-sm flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-info/10 rounded-lg">
-                    <span class="material-symbols-outlined text-info">badge</span>
-                </div>
-                <div>
-                    <h2 class="font-bold text-base">称号列表</h2>
-                    <p class="text-xs text-base-content/60">管理用户特殊身份标识</p>
-                </div>
+    <!-- Header Actions -->
+    {% url 'administration:usertitle_create' as create_url %}
+    {% captureas actions_block %}
+        <div class="dropdown dropdown-end">
+            <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal hover:bg-base-200">
+                更多
+                <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
             </div>
-            
-            <div class="flex gap-2">
-                <div class="dropdown dropdown-end">
-                    <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal">
-                        更多
-                        <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
-                    </div>
-                    <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-content/5">
-                        <li><a href="{% url 'administration:usertitle_export' %}" target="_blank"><span class="material-symbols-outlined">download</span> 导出 JSON</a></li>
-                        <li><button onclick="import_modal.showModal()"><span class="material-symbols-outlined">upload</span> 导入 JSON</button></li>
-                        <div class="divider my-1"></div>
-                        <li><button onclick="submitBulkAction('delete')" class="text-error"><span class="material-symbols-outlined">delete</span> 批量删除</button></li>
-                    </ul>
-                </div>
-                {% url 'administration:usertitle_create' as create_url %}
-                <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-1 shadow-lg shadow-primary/20">
-                    <span class="material-symbols-outlined text-lg">add</span>
-                    新建称号
-                </a>
-            </div>
+            <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-xl bg-base-100 rounded-2xl w-52 border border-base-content/5 mt-2">
+                <li><a href="{% url 'administration:usertitle_export' %}" target="_blank" class="rounded-xl"><span class="material-symbols-outlined">download</span> 导出 JSON</a></li>
+                <li><button onclick="import_modal.showModal()" class="rounded-xl"><span class="material-symbols-outlined">upload</span> 导入 JSON</button></li>
+                <div class="divider my-1"></div>
+                <li><button onclick="submitBulkAction('delete')" class="text-error rounded-xl"><span class="material-symbols-outlined">delete</span> 批量删除</button></li>
+            </ul>
         </div>
+        
+        {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建称号' extra_classes='px-4 !h-8 text-xs min-h-0 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105' href=create_url %}
+            {% include 'components/inspira/rainbow_button.html' %}
+        {% endwith %}
+    {% endcaptureas %}
 
-        <!-- Bulk Actions Overlay -->
-        <div id="bulk-actions" class="hidden bg-neutral text-neutral-content px-4 py-2 flex justify-between items-center text-sm transition-all duration-300">
-            <span id="selected-count">已选择 0 项</span>
-            <div class="flex gap-2">
-                <button type="button" onclick="submitBulkAction('delete')" class="btn btn-xs btn-error btn-outline">批量删除</button>
-            </div>
-        </div>
+    <!-- Header -->
+    {% include "administration/components/header.html" with title="称号列表" subtitle="管理用户特殊身份标识" breadcrumbs=None actions=actions_block %}
 
-        <!-- Table -->
-        <div class="overflow-x-auto bg-base-100/50 rounded-lg border-base-content/5 backdrop-blur-sm h-[calc(100vh-300px)]">
-            <table class="table table-sm table-pin-rows w-full">
+    <!-- Bulk Actions -->
+    {% captureas bulk_actions_block %}
+        <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error-focus text-white border-none gap-2 rounded-lg">
+            <span class="material-symbols-outlined text-[16px]">delete</span> 删除
+        </button>
+    {% endcaptureas %}
+
+    <!-- Table Content -->
+    {% captureas table_content %}
+        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='usertitle' %}">
+            {% csrf_token %}
+            <table class="table table-pin-rows w-full">
                 <!-- Head -->
-                <thead class="bg-base-200/50 text-base-content/60 font-medium sticky top-0 z-30">
+                <thead class="bg-base-200/50 text-base-content/60 font-medium text-xs uppercase tracking-wider">
                     <tr>
                         <th class="w-10 pl-4">
                             <label>
@@ -78,126 +61,60 @@
                     {% include "administration/partials/usertitle_list_rows.html" %}
                 </tbody>
             </table>
-        </div>
-        
-        <!-- Pagination -->
-        {% if is_paginated %}
-        <div class="p-4 border-t border-base-200 flex justify-center bg-base-100/30">
-            <div class="join">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-xs btn-outline">«</a>
-                {% else %}
-                <button class="join-item btn btn-xs btn-outline btn-disabled">«</button>
-                {% endif %}
-                
-                <button class="join-item btn btn-xs btn-outline">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</button>
-                
-                {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-xs btn-outline">»</a>
-                {% else %}
-                <button class="join-item btn btn-xs btn-outline btn-disabled">»</button>
-                {% endif %}
+        </form>
+    {% endcaptureas %}
+
+    <!-- List Container -->
+    {% include "administration/components/list_container.html" with title="称号列表" icon="badge" search_url="." bulk_actions=bulk_actions_block content=table_content %}
+
+    <!-- Import Modal -->
+    <dialog id="import_modal" class="modal">
+      <div class="modal-box rounded-2xl">
+        <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">file_upload</span>
             </div>
-        </div>
-        {% endif %}
-    </div>
-{% endcaptureas %}
-
-{% include "administration/components/card.html" with content=card_content class="col-span-12" %}
-
-<!-- Import Modal -->
-<dialog id="import_modal" class="modal">
-    <div class="modal-box">
-        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-            <span class="material-symbols-outlined text-primary">upload</span>
-            导入称号数据
+            导入称号数据 (JSON)
         </h3>
+        <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
         <form action="{% url 'administration:usertitle_import' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="form-control w-full max-w-xs">
-                <label class="label">
-                    <span class="label-text">选择 JSON 文件</span>
-                </label>
-                <input type="file" name="json_file" accept=".json" class="file-input file-input-bordered w-full max-w-xs" required />
-                <label class="label">
-                    <span class="label-text-alt text-warning">注意：导入将覆盖同名称号</span>
-                </label>
-            </div>
+            <input type="file" name="json_file" class="file-input file-input-bordered file-input-sm w-full rounded-lg mb-6" accept=".json" required />
             <div class="modal-action">
-                <button type="button" class="btn" onclick="import_modal.close()">取消</button>
-                <button type="submit" class="btn btn-primary">开始导入</button>
+                <button type="button" class="btn btn-sm btn-ghost rounded-lg" onclick="import_modal.close()">取消</button>
+                <button type="submit" class="btn btn-sm btn-primary rounded-lg">开始导入</button>
             </div>
         </form>
-    </div>
-    <form method="dialog" class="modal-backdrop">
-        <button>关闭</button>
-    </form>
-</dialog>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+      </form>
+    </dialog>
 
-<!-- Bulk Actions Form -->
-<form id="bulk-action-form" method="post" style="display:none;">
-    {% csrf_token %}
-</form>
-
-<script>
-    function toggleAll(source) {
-        const checkboxes = document.querySelectorAll('.row-checkbox');
-        checkboxes.forEach(cb => cb.checked = source.checked);
-        updateBulkToolbar();
-    }
-
-    function updateBulkToolbar() {
-        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-        const count = checkedBoxes.length;
-        const toolbar = document.getElementById('bulk-actions');
-        const countSpan = document.getElementById('selected-count');
-        
-        if (count > 0) {
-            toolbar.classList.remove('hidden');
-            countSpan.textContent = `已选择 ${count} 项`;
-        } else {
-            toolbar.classList.add('hidden');
-        }
-    }
-
-    function submitBulkAction(action) {
-        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-        if (checkedBoxes.length === 0) {
-            showGlobalAlert('请至少选择一项进行操作');
-            return;
-        }
-
-        let actionName = '批量操作';
-        if (action === 'delete') actionName = '批量删除';
-
-        showConfirmModal(
-            actionName,
-            `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
-            () => {
-                const form = document.getElementById('bulk-action-form');
-                // 保留 CSRF token
-                const csrfToken = form.querySelector('input[name="csrfmiddlewaretoken"]');
-                form.innerHTML = '';
-                form.appendChild(csrfToken);
-                
-                const actionInput = document.createElement('input');
-                actionInput.type = 'hidden';
-                actionInput.name = 'action';
-                actionInput.value = action;
-                form.appendChild(actionInput);
-                
-                checkedBoxes.forEach(cb => {
-                    const input = document.createElement('input');
-                    input.type = 'hidden';
-                    input.name = 'selected_ids';
-                    input.value = cb.value;
-                    form.appendChild(input);
-                });
-                
-                form.action = "{% url 'administration:bulk_action' 'usertitle' %}";
-                form.submit();
+    <script>
+        function submitBulkAction(action) {
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                showGlobalAlert('请至少选择一项进行操作');
+                return;
             }
-        );
-    }
-</script>
+
+            let actionName = '批量操作';
+            if (action === 'delete') actionName = '批量删除';
+
+            showConfirmModal(
+                actionName,
+                `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+                () => {
+                    const form = document.getElementById('bulk-form');
+                    const actionInput = document.createElement('input');
+                    actionInput.type = 'hidden';
+                    actionInput.name = 'action';
+                    actionInput.value = action;
+                    form.appendChild(actionInput);
+                    form.submit();
+                }
+            );
+        }
+    </script>
 {% endblock %}

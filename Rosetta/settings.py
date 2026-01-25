@@ -125,6 +125,9 @@ CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 CELERY_RESULT_SERIALIZER = "json"
 CELERY_TIMEZONE = "Asia/Shanghai"
+# 开发环境如果没有 Redis，使用立即执行模式
+if DEBUG and "memory://" in CELERY_BROKER_URL:
+    CELERY_TASK_ALWAYS_EAGER = True
 
 # ------------------------------------------------------------------------------
 # 应用注册 (Installed Apps)
@@ -363,7 +366,7 @@ CONSTANCE_CONFIG = {
     "SITE_KEYWORDS": ("blog, django, python", "SEO 关键词"),
     "SITE_AUTHOR": ("Rosetta", "站点作者"),
     "SHOW_SITE_LOGO": (True, "是否显示站点 Logo"),
-    "SITE_LOGO": ("/static/core/img/logo.png", "站点 Logo URL"),
+    "SITE_LOGO": ("/static/core/img/logo.svg", "站点 Logo URL"),
     "SITE_FAVICON": ("/static/core/img/favicon.ico", "站点 Favicon URL"),
     "SITE_HEADER": ("Rosetta Dashboard", "后台头部标题"),
     "SITE_ADMIN_SUFFIX": (" - Rosetta Dashboard", "后台页面标题后缀"),

@@ -119,6 +119,12 @@
         modal.showModal();
     };
 
+    window.showToast = function(message, type = 'success') {
+        window.dispatchEvent(new CustomEvent('show-toast', {
+            detail: { message, type }
+        }));
+    };
+
     // HTMX Confirmation Helper
     // Usage: <button hx-post="..." hx-trigger="confirmed" onclick="confirmHtmx(this, 'Msg')">
     window.confirmHtmx = function(element, message) {
@@ -262,8 +268,8 @@
                     <!-- Mobile Theme Switcher -->
                     <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors">
                         <input type="checkbox" class="theme-controller hidden" value="dark" onchange="updateTheme(this.checked ? 'dark' : 'light')" />
-                        <svg class="swap-off fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,4.93,1,1,0,0,0,5.64,7.05Zm12.02,12.72a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.41ZM17.34,6.18a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29l.71-.71a1,1,0,0,0,0-1.41,1,1,0,0,0-1.41,0l-.71.71A1,1,0,0,0,17.34,6.18ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM10.5,12a1.5,1.5,0,1,1,1.5,1.5A1.5,1.5,0,0,1,10.5,12Zm2.5,0a2.5,2.5,0,1,1-2.5-2.5A2.5,2.5,0,0,1,13,12Z"/></svg>
-                        <svg class="swap-on fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
+                        <span class="material-symbols-outlined swap-off text-[20px] w-5 h-5 leading-none">light_mode</span>
+                        <span class="material-symbols-outlined swap-on text-[20px] w-5 h-5 leading-none">dark_mode</span>
                     </label>
                     
                     <!-- Mobile User Avatar -->
@@ -307,10 +313,10 @@
                      id="theme-toggle-admin" />
               
               <!-- sun icon -->
-              <svg class="swap-off fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M5.64,17l-.71.71a1,1,0,0,0,0,1.41,1,1,0,0,0,1.41,0l.71-.71A1,1,0,0,0,5.64,17ZM5,12a1,1,0,0,0-1-1H3a1,1,0,0,0,0,2H4A1,1,0,0,0,5,12Zm7-7a1,1,0,0,0,1-1V3a1,1,0,0,0-2,0V4A1,1,0,0,0,12,5ZM5.64,7.05a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71A1,1,0,0,0,4.93,4.93,1,1,0,0,0,5.64,7.05Zm12.02,12.72a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29,1,1,0,0,0,0-1.41l-.71-.71a1,1,0,0,0-1.41,0,1,1,0,0,0,0,1.41ZM17.34,6.18a1,1,0,0,0,.7.29,1,1,0,0,0,.71-.29l.71-.71a1,1,0,0,0,0-1.41,1,1,0,0,0-1.41,0l-.71.71A1,1,0,0,0,17.34,6.18ZM21,11H20a1,1,0,0,0,0,2h1a1,1,0,0,0,0-2Zm-9,8a1,1,0,0,0-1,1v1a1,1,0,0,0,2,0V20A1,1,0,0,0,12,19ZM10.5,12a1.5,1.5,0,1,1,1.5,1.5A1.5,1.5,0,0,1,10.5,12Zm2.5,0a2.5,2.5,0,1,1-2.5-2.5A2.5,2.5,0,0,1,13,12Z"/></svg>
+              <span class="material-symbols-outlined swap-off text-[20px] w-5 h-5 leading-none">light_mode</span>
               
               <!-- moon icon -->
-              <svg class="swap-on fill-current w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21.64,13a1,1,0,0,0-1.05-.14,8.05,8.05,0,0,1-3.37.73A8.15,8.15,0,0,1,9.08,5.49a8.59,8.59,0,0,1,.25-2A1,1,0,0,0,8,2.36,10.14,10.14,0,1,0,22,14.05,1,1,0,0,0,21.64,13Zm-9.5,6.69A8.14,8.14,0,0,1,7.08,5.22v.27A10.15,10.15,0,0,0,17.22,15.63a9.79,9.79,0,0,0,2.1-.22A8.11,8.11,0,0,1,12.14,19.73Z"/></svg>
+              <span class="material-symbols-outlined swap-on text-[20px] w-5 h-5 leading-none">dark_mode</span>
             </label>
 
             <script>
@@ -493,6 +499,12 @@
 
                 <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">维护与工具</li>
                 <li>
+                    <a href="{% url 'administration:system_tools' %}" class="{% if request.resolver_match.url_name == 'system_tools' %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'system_tools' %}text-primary{% else %}text-info{% endif %}">build_circle</span>
+                        系统工具
+                    </a>
+                </li>
+                <li>
                     <a href="{% url 'administration:settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'settings' %}text-primary{% else %}text-info{% endif %}">settings</span>
                         站点设置
@@ -557,15 +569,19 @@
         }
 
         function submitBulkAction(action) {
-            if (!confirm('确定要执行此批量操作吗？')) return;
-            
-            const form = document.getElementById('bulk-form');
-            const actionInput = document.createElement('input');
-            actionInput.type = 'hidden';
-            actionInput.name = 'action';
-            actionInput.value = action;
-            form.appendChild(actionInput);
-            form.submit();
+            showConfirmModal(
+                '批量操作',
+                '确定要执行此批量操作吗？',
+                () => {
+                    const form = document.getElementById('bulk-form');
+                    const actionInput = document.createElement('input');
+                    actionInput.type = 'hidden';
+                    actionInput.name = 'action';
+                    actionInput.value = action;
+                    form.appendChild(actionInput);
+                    form.submit();
+                }
+            );
         }
     </script>
     
@@ -614,6 +630,7 @@
             { id: 'logentry', title: '操作日志', icon: 'history', url: '{% url 'administration:logentry_list' %}', group: '日志', keywords: '审计 日志 操作记录' },
             { id: 'logentry_export', title: '导出操作日志', icon: 'download', url: '{% url 'administration:logentry_export' %}', group: '日志', keywords: '日志 导出' },
             { id: 'logfile', title: '系统日志', icon: 'description', url: '{% url 'administration:logfile_list' %}', group: '日志', keywords: '系统 日志 文件' },
+            { id: 'system_tools', title: '系统工具', icon: 'build_circle', url: '{% url 'administration:system_tools' %}', group: '系统工具', keywords: '系统 维护 索引 图片' },
             { id: 'settings', title: '站点设置', icon: 'settings', url: '{% url 'administration:settings' %}', group: '系统工具', keywords: '设置 配置 参数' },
             { id: 'debug', title: '调试面板', icon: 'bug_report', url: '{% url 'administration:debug' %}', group: '调试', keywords: '调试 面板' },
             { id: 'debug_ui', title: '调试 UI 测试', icon: 'design_services', url: '{% url 'administration:debug_ui_test' %}', group: '调试', keywords: '调试 UI 组件' },

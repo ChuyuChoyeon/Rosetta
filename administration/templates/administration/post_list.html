@@ -4,204 +4,132 @@
 {% block title %}文章管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
-<div class="text-sm breadcrumbs mb-4">
-    <ul>
-        <li><a href="{% url 'administration:index' %}">首页</a></li>
-        <li>文章管理</li>
-    </ul>
-</div>
-
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold">文章管理</h1>
-    <div class="flex gap-2">
+    <!-- 1. Header -->
+    {% url 'administration:post_create' as create_url %}
+    {% captureas actions_block %}
         <div class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal">
+            <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal hover:bg-base-200">
                 更多
                 <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
             </div>
-            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 border border-base-content/5">
-                <li><a href="{% url 'administration:export_all' 'Post' %}" target="_blank"><span class="material-symbols-outlined">download</span> 导出 JSON</a></li>
-                <li><button onclick="import_modal.showModal()"><span class="material-symbols-outlined">upload</span> 导入 JSON</button></li>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-xl bg-base-100 rounded-2xl w-52 border border-base-content/5 mt-2">
+                <li><a href="{% url 'administration:export_all' 'Post' %}" target="_blank" class="rounded-xl"><span class="material-symbols-outlined">download</span> 导出 JSON</a></li>
+                <li><button onclick="import_modal.showModal()" class="rounded-xl"><span class="material-symbols-outlined">upload</span> 导入 JSON</button></li>
             </ul>
         </div>
-        {% url 'administration:post_create' as create_url %}
-        {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>写文章' extra_classes='px-4 !h-8 text-xs' href=create_url %}
-            {% include 'components/inspira/rainbow_button.html' %}
-        {% endwith %}
-    </div>
-</div>
+        <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-2 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105">
+            <span class="material-symbols-outlined text-lg">add_circle</span>
+            写文章
+        </a>
+    {% endcaptureas %}
 
-<!-- Import Modal -->
-<dialog id="import_modal" class="modal">
-  <div class="modal-box">
-    <h3 class="font-bold text-lg flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary">file_upload</span>
-        导入数据 (JSON)
-    </h3>
-    <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
-    <form action="{% url 'administration:import_json' 'Post' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="json_file" class="file-input file-input-bordered w-full" accept=".json" required />
-        <div class="modal-action">
-            <button type="button" class="btn" onclick="import_modal.close()">取消</button>
-            <button type="submit" class="btn btn-primary">开始导入</button>
-        </div>
-    </form>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
-</dialog>
+    {% include "administration/components/header.html" with title="文章管理" subtitle="管理和发布您的博客文章" breadcrumbs=None actions=actions_block %}
 
-{% captureas card_content %}
-    <div class="p-0">
-        <!-- Card Title & Search -->
-        <div class="p-4 border-b border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <h2 class="card-title text-base whitespace-nowrap">
-                <span class="material-symbols-outlined text-secondary">article</span>
-                文章列表
-            </h2>
-            <div class="flex gap-2 w-full sm:w-auto">
-                <form action="." method="get" class="join w-full sm:w-auto">
-                    {% if request.GET.status %}<input type="hidden" name="status" value="{{ request.GET.status }}">{% endif %}
-                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索标题..." class="input input-bordered input-sm join-item w-full sm:w-64" />
-                    <button type="submit" class="btn btn-sm btn-ghost join-item border border-base-300">
-                        <span class="material-symbols-outlined">search</span>
-                    </button>
-                </form>
+    <!-- 2. Import Modal (Keep as is) -->
+    <dialog id="import_modal" class="modal">
+      <div class="modal-box rounded-2xl">
+        <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
+            <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <span class="material-symbols-outlined">file_upload</span>
             </div>
-        </div>
-
-        <!-- Filter Tabs -->
-        <div class="px-4 py-2 border-b border-base-200 bg-base-100 overflow-x-auto">
-            <div class="tabs tabs-boxed bg-transparent p-0 gap-2 min-w-max">
-                <a href="{% url 'administration:post_list' %}" class="tab tab-sm {% if not request.GET.status %}tab-active bg-primary text-primary-content{% else %}bg-base-200{% endif %} rounded-btn">全部</a>
-                <a href="{% url 'administration:post_list' %}?status=published" class="tab tab-sm {% if request.GET.status == 'published' %}tab-active bg-success text-success-content{% else %}bg-base-200{% endif %} rounded-btn">已发布</a>
-                <a href="{% url 'administration:post_list' %}?status=draft" class="tab tab-sm {% if request.GET.status == 'draft' %}tab-active bg-neutral text-neutral-content{% else %}bg-base-200{% endif %} rounded-btn">草稿</a>
-            </div>
-        </div>
-
-        <!-- Bulk Actions Toolbar -->
-        <div id="bulk-actions" class="hidden bg-base-200/80 backdrop-blur p-2 px-4 flex justify-between items-center border-b border-base-300 animate-in slide-in-from-top-2 duration-200">
-            <span class="text-sm font-medium"><span id="selected-count" class="font-bold text-primary">0</span> 项已选择</span>
-            <div class="flex gap-2">
-                <button type="button" onclick="submitBulkAction('published')" class="btn btn-sm btn-primary gap-2">
-                    <span class="material-symbols-outlined text-[18px]">check_circle</span> 发布
-                </button>
-                <button type="button" onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral gap-2">
-                    <span class="material-symbols-outlined text-[18px]">drafts</span> 草稿
-                </button>
-                <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1">
-                    <span class="material-symbols-outlined text-[16px]">delete</span> 删除
-                </button>
-            </div>
-        </div>
-
-        <!-- Table -->
-        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='post' %}">
+            导入数据 (JSON)
+        </h3>
+        <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
+        <form action="{% url 'administration:import_json' 'Post' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <div class="overflow-x-auto min-h-[500px]">
-                <table class="table table-pin-rows w-full">
-                    <!-- Head -->
-                    <thead class="bg-base-200/30 text-base-content/60 font-medium">
-                        <tr>
-                            <th class="w-10 pl-6 rounded-tl-2xl">
-                                <label>
-                                    <input type="checkbox" class="checkbox checkbox-sm rounded-sm" onclick="toggleAll(this)" />
-                                </label>
-                            </th>
-                            <th class="w-16 font-mono hidden md:table-cell">ID</th>
-                            <th class="w-16 hidden md:table-cell">封面</th>
-                            <th>标题 / 摘要</th>
-                            <th class="hidden lg:table-cell">作者</th>
-                            <th class="hidden lg:table-cell">分类</th>
-                            <th class="hidden xl:table-cell">标签</th>
-                            <th class="w-24">状态</th>
-                            <th class="hidden md:table-cell w-32">发布时间</th>
-                            <th class="hidden md:table-cell w-20 text-center">浏览</th>
-                            <th class="w-24 text-center pr-6 rounded-tr-2xl">操作</th>
-                        </tr>
-                    </thead>
-                    <!-- Body (HTMX Target) -->
-                    <tbody id="post-list-body" class="divide-y divide-base-200/50">
-                        {% include "administration/partials/post_list_rows.html" %}
-                    </tbody>
-                </table>
+            <input type="file" name="json_file" class="file-input file-input-bordered file-input-sm w-full rounded-lg mb-6" accept=".json" required />
+            <div class="modal-action">
+                <button type="button" class="btn btn-sm btn-ghost rounded-lg" onclick="import_modal.close()">取消</button>
+                <button type="submit" class="btn btn-sm btn-primary rounded-lg">开始导入</button>
             </div>
         </form>
-        
-        <!-- Pagination -->
-        <div class="p-4 border-t border-base-200 flex justify-center">
-            {% if is_paginated %}
-            <div class="join">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-sm">«</a>
-                {% else %}
-                <button class="join-item btn btn-sm btn-disabled">«</button>
-                {% endif %}
-                
-                <button class="join-item btn btn-sm">第 {{ page_obj.number }} 页 / 共 {{ page_obj.paginator.num_pages }} 页</button>
-                
-                {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}{% if request.GET.status %}&status={{ request.GET.status }}{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="join-item btn btn-sm">»</a>
-                {% else %}
-                <button class="join-item btn btn-sm btn-disabled">»</button>
-                {% endif %}
-            </div>
-            {% endif %}
-        </div>
-    </div>
-{% endcaptureas %}
-<div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-    {{ card_content }}
-</div>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+      </form>
+    </dialog>
 
-<script>
-    function toggleAll(source) {
-        const checkboxes = document.querySelectorAll('.row-checkbox');
-        checkboxes.forEach(cb => cb.checked = source.checked);
-        updateBulkToolbar();
-    }
+    <!-- 3. Main List Container -->
+    {% captureas filter_tabs_block %}
+        <a href="{% url 'administration:post_list' %}" class="tab tab-sm {% if not request.GET.status %}tab-active bg-base-100 shadow-sm text-base-content font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">全部</a>
+        <a href="{% url 'administration:post_list' %}?status=published" class="tab tab-sm {% if request.GET.status == 'published' %}tab-active bg-success text-success-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">已发布</a>
+        <a href="{% url 'administration:post_list' %}?status=draft" class="tab tab-sm {% if request.GET.status == 'draft' %}tab-active bg-neutral text-neutral-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">草稿</a>
+    {% endcaptureas %}
 
-    function updateBulkToolbar() {
-        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-        const count = checkedBoxes.length;
-        const toolbar = document.getElementById('bulk-actions');
-        const countSpan = document.getElementById('selected-count');
-        
-        if (count > 0) {
-            toolbar.classList.remove('hidden');
-            countSpan.textContent = count;
-        } else {
-            toolbar.classList.add('hidden');
-        }
-    }
+    {% captureas bulk_actions_block %}
+        <button type="button" onclick="submitBulkAction('published')" class="btn btn-sm btn-primary hover:bg-primary-focus text-white border-none gap-2 rounded-lg">
+            <span class="material-symbols-outlined text-[18px]">check_circle</span> 发布
+        </button>
+        <button type="button" onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral hover:bg-neutral-focus text-white border-none gap-2 rounded-lg">
+            <span class="material-symbols-outlined text-[18px]">drafts</span> 草稿
+        </button>
+        <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error-focus text-white border-none gap-2 rounded-lg">
+            <span class="material-symbols-outlined text-[18px]">delete</span> 删除
+        </button>
+    {% endcaptureas %}
 
-    function submitBulkAction(action) {
-        const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
-        if (checkedBoxes.length === 0) {
-            showGlobalAlert('请至少选择一项进行操作');
-            return;
-        }
+    {% captureas table_content %}
+        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='post' %}">
+            {% csrf_token %}
+            <table class="table table-pin-rows w-full">
+                <!-- Head -->
+                <thead class="bg-base-200/50 text-base-content/60 font-medium text-xs uppercase tracking-wider">
+                    <tr>
+                        <th class="w-10 pl-6">
+                            <label>
+                                <input type="checkbox" class="checkbox checkbox-xs rounded-sm" onclick="toggleAll(this)" />
+                            </label>
+                        </th>
+                        <th class="w-16 font-mono hidden md:table-cell">ID</th>
+                        <th class="w-16 hidden md:table-cell">封面</th>
+                        <th>标题 / 摘要</th>
+                        <th class="hidden lg:table-cell">作者</th>
+                        <th class="hidden lg:table-cell">分类</th>
+                        <th class="hidden xl:table-cell">标签</th>
+                        <th class="w-24">状态</th>
+                        <th class="hidden md:table-cell w-32">发布时间</th>
+                        <th class="hidden md:table-cell w-20 text-center">浏览</th>
+                        <th class="w-24 text-center pr-6">操作</th>
+                    </tr>
+                </thead>
+                <!-- Body -->
+                <tbody class="divide-y divide-base-content/5">
+                    {% include "administration/partials/post_list_rows.html" %}
+                </tbody>
+            </table>
+        </form>
+    {% endcaptureas %}
 
-        let actionName = '批量操作';
-        if (action === 'delete') actionName = '批量删除';
-        else if (action === 'published') actionName = '批量发布';
-        else if (action === 'draft') actionName = '批量设为草稿';
+    {% include "administration/components/list_container.html" with title="文章列表" icon="article" search_url="." filter_tabs=filter_tabs_block bulk_actions=bulk_actions_block content=table_content %}
 
-        showConfirmModal(
-            actionName,
-            `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
-            () => {
-                const form = document.getElementById('bulk-form');
-                const actionInput = document.createElement('input');
-                actionInput.type = 'hidden';
-                actionInput.name = 'action';
-                actionInput.value = action;
-                form.appendChild(actionInput);
-                form.submit();
+    <!-- Bulk Action Scripts (Specific) -->
+    <script>
+        function submitBulkAction(action) {
+            const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
+            if (checkedBoxes.length === 0) {
+                showGlobalAlert('请至少选择一项进行操作');
+                return;
             }
-        );
-    }
-</script>
+
+            let actionName = '批量操作';
+            if (action === 'delete') actionName = '批量删除';
+            else if (action === 'published') actionName = '批量发布';
+            else if (action === 'draft') actionName = '批量设为草稿';
+
+            // Use global confirm modal
+            showConfirmModal(
+                actionName,
+                `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+                () => {
+                    const form = document.getElementById('bulk-form');
+                    const actionInput = document.createElement('input');
+                    actionInput.type = 'hidden';
+                    actionInput.name = 'action';
+                    actionInput.value = action;
+                    form.appendChild(actionInput);
+                    form.submit();
+                }
+            );
+        }
+    </script>
 {% endblock %}

@@ -1,0 +1,48 @@
+<div class="stats stats-vertical lg:stats-horizontal shadow-sm bg-base-100 border border-base-content/5 w-full">
+    
+    <!-- CPU Usage -->
+    <div class="stat">
+        <div class="stat-figure text-primary">
+            <div class="radial-progress bg-primary/10 text-primary border-4 border-transparent" 
+                 style="--value:{{ cpu_percent|default:0 }}; --size:3rem; --thickness: 4px;" 
+                 role="progressbar">
+                {{ cpu_percent|default:0 }}%
+            </div>
+        </div>
+        <div class="stat-title text-xs font-bold uppercase opacity-60">CPU 使用率</div>
+        <div class="stat-value text-primary text-2xl">{{ cpu_percent|default:0 }}%</div>
+        <div class="stat-desc">系统负载</div>
+    </div>
+    
+    <!-- Memory Usage -->
+    <div class="stat">
+        <div class="stat-figure text-secondary">
+            <div class="radial-progress bg-secondary/10 text-secondary border-4 border-transparent" 
+                 style="--value:{{ memory_percent|default:0 }}; --size:3rem; --thickness: 4px;" 
+                 role="progressbar">
+                {{ memory_percent|default:0 }}%
+            </div>
+        </div>
+        <div class="stat-title text-xs font-bold uppercase opacity-60">内存使用率</div>
+        <div class="stat-value text-secondary text-2xl">{{ memory_percent|default:0 }}%</div>
+        <div class="stat-desc">{{ memory_used|filesizeformat }} / {{ memory_total|filesizeformat }}</div>
+    </div>
+    
+    <!-- Disk Usage -->
+    <div class="stat">
+        <div class="stat-figure text-accent">
+            <div class="radial-progress bg-accent/10 text-accent border-4 border-transparent" 
+                 style="--value:{{ disk_percent|default:0 }}; --size:3rem; --thickness: 4px;" 
+                 role="progressbar">
+                {{ disk_percent|default:0 }}%
+            </div>
+        </div>
+        <div class="stat-title text-xs font-bold uppercase opacity-60">磁盘使用率</div>
+        <div class="stat-value text-accent text-2xl">{{ disk_percent|default:0 }}%</div>
+        <div class="stat-desc">{{ disk_free|filesizeformat }} 可用</div>
+    </div>
+
+</div>
+<div class="text-right text-[10px] opacity-30 mt-1 font-mono">
+    Updated: {% now "H:i:s" %}
+</div>

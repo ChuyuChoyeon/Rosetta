@@ -4,15 +4,6 @@
 
 {% block content %}
 <div class="flex flex-col gap-6">
-    <!-- Breadcrumbs -->
-    <div class="text-sm breadcrumbs">
-        <ul>
-            <li><a href="{% url 'administration:index' %}">首页</a></li>
-            <li>调试工具</li>
-            <li>{% block debug_title %}概览{% endblock %}</li>
-        </ul>
-    </div>
-
     <!-- Header -->
     <div class="flex items-center gap-3">
         <div class="p-3 bg-warning/10 rounded-xl text-warning">

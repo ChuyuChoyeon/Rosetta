@@ -53,20 +53,9 @@ class Tag(models.Model):
     包含颜色配置，用于前端展示。
     """
 
-    COLOR_CHOICES = (
-        ("primary", "主色 (Indigo)"),
-        ("secondary", "次色 (Pink)"),
-        ("accent", "强调色 (Cyan)"),
-        ("neutral", "中性色 (Grey)"),
-        ("info", "信息 (Blue)"),
-        ("success", "成功 (Green)"),
-        ("warning", "警告 (Yellow)"),
-        ("error", "错误 (Red)"),
-    )
-
     name = models.CharField("名称", max_length=100)
     slug = models.SlugField("别名", unique=True, blank=True)
-    color = models.CharField("颜色", max_length=20, default="neutral")
+    color = models.CharField("颜色", max_length=20, default="#64748B")
     is_active = models.BooleanField("是否可见", default=True)
 
     class Meta:

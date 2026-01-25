@@ -6,6 +6,8 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, View
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
 from .forms import RegisterForm, UserPreferenceForm, UserProfileForm
 from .models import User, UserPreference, Notification
 from blog.models import PostViewHistory, Comment, Post
@@ -229,6 +231,9 @@ class UnifiedProfileView(View):
                 context["preference_form"] = UserPreferenceForm(
                     instance=preference
                 )
+            
+            elif active_tab == "security":
+                context["password_form"] = PasswordChangeForm(user=request.user)
 
         # HTMX 请求支持 (局部刷新内容区域)
         if request.headers.get("HX-Request"):
@@ -270,6 +275,35 @@ class UnifiedProfileView(View):
             else:
                 messages.error(request, "偏好设置更新失败")
             return redirect(f"{profile_url}?tab=settings")
+        
+        # --- 处理密码修改 ---
+        if "change_password" in request.POST:
+            password_form = PasswordChangeForm(request.user, request.POST)
+            if password_form.is_valid():
+                user = password_form.save()
+                update_session_auth_hash(request, user)  # Important!
+                messages.success(request, "密码修改成功")
+                return redirect(f"{profile_url}?tab=security")
+            else:
+                messages.error(request, "密码修改失败，请检查输入")
+                # 重新渲染页面以显示表单错误
+                # 我们需要重新构建上下文，这有点麻烦，但为了显示错误是必须的
+                # 或者我们可以简单地重定向并带上错误（但这不会显示具体的字段错误）
+                # 为了更好的体验，我们这里手动调用 get 方法的部分逻辑来重新渲染
+                
+                # 构建基本上下文
+                profile_user = request.user
+                preference, _ = UserPreference.objects.get_or_create(user=profile_user)
+                profile_user.preference = preference
+                
+                context = {
+                    "profile_user": profile_user,
+                    "active_tab": "security",
+                    "is_private_profile": False,
+                    "comments_count": Comment.objects.filter(user=profile_user, active=True).count(),
+                    "password_form": password_form, # 包含错误的表单
+                }
+                return render(request, self.template_name, context)
 
         # --- 处理个人资料更新 (头像、封面、基本信息) ---
         form = UserProfileForm(request.POST, request.FILES, instance=request.user)

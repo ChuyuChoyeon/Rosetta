@@ -1,6 +1,5 @@
 {% extends "administration/base.html" %}
-{% load capture_tags static %}
-{% load widget_tweaks %}
+{% load capture_tags static widget_tweaks %}
 
 {% block title %}{{ title|default:"编辑页面" }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
@@ -9,160 +8,149 @@
 {% endblock %}
 
 {% block content %}
-<div class="text-sm breadcrumbs mb-4">
-    <ul>
-        <li><a href="{% url 'administration:index' %}">首页</a></li>
-        <li><a href="{% url 'administration:page_list' %}">页面管理</a></li>
-        <li>{{ title|default:"编辑页面" }}</li>
-    </ul>
-</div>
+<!-- Header -->
+{% captureas header_actions %}
+{% endcaptureas %}
+
+{% include "administration/components/header.html" with title=title|default:"编辑页面" icon="edit_note" breadcrumbs=breadcrumbs actions=header_actions %}
 
 <form method="post" enctype="multipart/form-data" class="w-full">
     {% csrf_token %}
     <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
         <!-- Main Content (Left Column - 75%) -->
         <div class="lg:col-span-3 space-y-6">
-            <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-                <div class="p-6 relative">
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text font-bold text-lg">页面标题</span>
-                        </label>
-                        {% render_field form.title class="input input-bordered w-full focus:input-primary transition-all text-lg font-bold" placeholder="输入页面标题" %}
-                        {% if form.title.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="form-control w-full mt-4">
-                        <label class="label flex justify-between items-center">
-                            <span class="label-text font-bold">内容 (Markdown)</span>
-                        </label>
-                        
-                        <div id="editor" class="bg-base-100 border border-base-200 rounded-lg overflow-hidden min-h-[500px]"></div>
-
-                        <div class="hidden">
-                            {{ form.content }}
-                        </div>
-
-                        <script>
-                            (function() {
-                                const initEditor = () => {
-                                    const container = document.getElementById('editor');
-                                    // 检查容器是否存在，且未初始化，且 ByteMD 已加载
-                                    if (container && !container.dataset.initialized && window.initByteMD) {
-                                        container.innerHTML = ''; // 清空容器
-                                        window.initByteMD('editor', 'id_content', `{{ form.content.value|default:""|escapejs }}`);
-                                        container.dataset.initialized = '1'; // 标记已初始化
-                                    }
-                                };
-
-                                initEditor();
-
-                                if (document.readyState === 'loading') {
-                                    document.addEventListener('DOMContentLoaded', initEditor);
-                                } else {
-                                    // 如果 DOM 已加载，延迟执行以防脚本执行过快
-                                    setTimeout(initEditor, 50);
-                                }
-                                
-                                // 异步加载兜底：轮询检查 window.initByteMD 是否就绪
-                                if (!window.initByteMD) {
-                                    const checkInterval = setInterval(() => {
-                                        if (window.initByteMD) {
-                                            clearInterval(checkInterval);
-                                            initEditor();
-                                        }
-                                    }, 100);
-                                    // 5秒后停止轮询，防止死循环
-                                    setTimeout(() => clearInterval(checkInterval), 5000);
-                                }
-                            })();
-                        </script>
-
-                        {% if form.content.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
+            {% captureas main_form_content %}
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-bold text-lg">页面标题</span>
+                    </label>
+                    {% render_field form.title class="input input-bordered w-full focus:input-primary transition-all text-lg font-bold" placeholder="输入页面标题" %}
+                    {% if form.title.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
+                    </label>
+                    {% endif %}
                 </div>
-            </div>
+                
+                <div class="form-control w-full mt-4">
+                    <label class="label flex justify-between items-center">
+                        <span class="label-text font-bold">内容 (Markdown)</span>
+                    </label>
+                    
+                    <div id="editor" class="bg-base-100 border border-base-200 rounded-lg overflow-hidden min-h-[500px]"></div>
+
+                    <div class="hidden">
+                        {{ form.content }}
+                    </div>
+
+                    <script>
+                        (function() {
+                            const initEditor = () => {
+                                const container = document.getElementById('editor');
+                                // 检查容器是否存在，且未初始化，且 ByteMD 已加载
+                                if (container && !container.dataset.initialized && window.initByteMD) {
+                                    container.innerHTML = ''; // 清空容器
+                                    window.initByteMD('editor', 'id_content', `{{ form.content.value|default:""|escapejs }}`);
+                                    container.dataset.initialized = '1'; // 标记已初始化
+                                }
+                            };
+
+                            initEditor();
+
+                            if (document.readyState === 'loading') {
+                                document.addEventListener('DOMContentLoaded', initEditor);
+                            } else {
+                                // 如果 DOM 已加载，延迟执行以防脚本执行过快
+                                setTimeout(initEditor, 50);
+                            }
+                            
+                            // 异步加载兜底：轮询检查 window.initByteMD 是否就绪
+                            if (!window.initByteMD) {
+                                const checkInterval = setInterval(() => {
+                                    if (window.initByteMD) {
+                                        clearInterval(checkInterval);
+                                        initEditor();
+                                    }
+                                }, 100);
+                                // 5秒后停止轮询，防止死循环
+                                setTimeout(() => clearInterval(checkInterval), 5000);
+                            }
+                        })();
+                    </script>
+
+                    {% if form.content.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+            {% endcaptureas %}
+            {% include "administration/components/form_card.html" with content=main_form_content %}
         </div>
 
         <!-- Sidebar (Right Column - 25%) -->
         <div class="lg:col-span-1 space-y-6">
             <!-- Publish Box -->
-            <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
-                <div class="card-body p-4">
-                    <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">发布</h3>
+            {% captureas publish_content %}
+                <div class="flex flex-col gap-3">
+                    <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                        <span class="material-symbols-outlined">save</span>
+                        保存页面
+                    </button>
                     
-                    <div class="flex flex-col gap-3">
-                        <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
-                            <span class="material-symbols-outlined">save</span>
-                            保存页面
-                        </button>
-                        
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">保存并新增</button>
-                            <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">保存并继续</button>
-                        </div>
-
-                        {% if object %}
-                        <div class="divider my-1"></div>
-                        <div class="flex justify-between items-center">
-                            <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">取消</a>
-                            <button type="button" onclick="confirmDelete('{% url 'administration:page_delete' object.pk %}', '确定要删除页面《{{ object.title|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
-                                删除页面
-                            </button>
-                        </div>
-                        {% else %}
-                        <div class="divider my-1"></div>
-                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">取消</a>
-                        {% endif %}
+                    <div class="grid grid-cols-2 gap-2">
+                        <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">保存并新增</button>
+                        <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">保存并继续</button>
                     </div>
+
+                    {% if object %}
+                    <div class="divider my-1"></div>
+                    <div class="flex justify-between items-center">
+                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">取消</a>
+                        <button type="button" onclick="confirmDelete('{% url 'administration:page_delete' object.pk %}', '确定要删除页面《{{ object.title|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
+                            删除页面
+                        </button>
+                    </div>
+                    {% else %}
+                    <div class="divider my-1"></div>
+                    <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">取消</a>
+                    {% endif %}
                 </div>
-            </div>
+            {% endcaptureas %}
+            {% include "administration/components/form_card.html" with title="发布" icon="publish" content=publish_content %}
 
             <!-- Meta Box -->
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
-                <div class="card-body p-4">
-                    <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">页面属性</h3>
-                    
-                    <!-- Slug Field -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text font-medium">别名 (Slug)</span>
-                        </label>
-                        {% render_field form.slug class="input input-bordered w-full focus:input-primary transition-all font-mono text-sm" placeholder="输入URL别名" %}
-                        {% if form.slug.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
-
-                    <!-- Status Field -->
-                    <div class="form-control w-full mt-2">
-                        <label class="label">
-                            <span class="label-text font-medium">状态</span>
-                        </label>
-                        {% render_field form.status class="select select-bordered w-full focus:select-primary transition-all" %}
-                        {% if form.status.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.status.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
+            {% captureas meta_content %}
+                <!-- Slug Field -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">别名 (Slug)</span>
+                    </label>
+                    {% render_field form.slug class="input input-bordered w-full focus:input-primary transition-all font-mono text-sm" placeholder="输入URL别名" %}
+                    {% if form.slug.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
+                    </label>
+                    {% endif %}
                 </div>
-            </div>
+
+                <!-- Status Field -->
+                <div class="form-control w-full mt-2">
+                    <label class="label">
+                        <span class="label-text font-medium">状态</span>
+                    </label>
+                    {% render_field form.status class="select select-bordered w-full focus:select-primary transition-all" %}
+                    {% if form.status.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.status.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+            {% endcaptureas %}
+            {% include "administration/components/form_card.html" with title="页面属性" icon="settings" content=meta_content %}
             
             {% if object %}
-            <div class="card bg-base-100 shadow-sm border border-base-content/5">
-                <div class="card-body p-4">
-                    <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-2 border-b border-base-200 pb-2">信息</h3>
+                {% captureas info_content %}
                     <div class="text-xs space-y-2 opacity-70">
                         <div class="flex justify-between">
                             <span>创建于:</span>
@@ -179,8 +167,8 @@
                             </a>
                         </div>
                     </div>
-                </div>
-            </div>
+                {% endcaptureas %}
+                {% include "administration/components/form_card.html" with title="信息" icon="info" content=info_content %}
             {% endif %}
         </div>
     </div>
