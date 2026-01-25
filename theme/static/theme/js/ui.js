@@ -124,173 +124,141 @@
 
         const createTechSvg = (seedText, width, height) => {
             const rand = createSeededRandom(seedText);
-            const hue1 = Math.floor(rand() * 360);
-            const hue2 = (hue1 + 60 + rand() * 120) % 360;
-            const hue3 = (hue2 + 40 + rand() * 80) % 360;
-            const bg1 = `hsl(${hue1} 70% 18%)`;
-            const bg2 = `hsl(${hue2} 70% 12%)`;
-            const glow1 = `hsl(${hue3} 90% 55%)`;
-            const glow2 = `hsl(${(hue3 + 40) % 360} 95% 65%)`;
-            const gridColor = `hsla(${hue1} 60% 60% / 0.18)`;
-            const circuitColor = `hsla(${hue2} 80% 70% / 0.55)`;
-            const highlight = `hsla(${hue3} 100% 70% / 0.5)`;
-            const shardFill = `hsla(${(hue2 + 30) % 360} 80% 60% / 0.18)`;
-            const shardStroke = `hsla(${(hue3 + 20) % 360} 90% 70% / 0.45)`;
-            const meshStroke = `hsla(${(hue1 + 140) % 360} 80% 70% / 0.35)`;
-            const meshFill = `hsla(${(hue2 + 200) % 360} 70% 55% / 0.12)`;
-            const scanline = `hsla(${(hue3 + 80) % 360} 90% 70% / 0.08)`;
-
-            const gridSize = 24 + Math.floor(rand() * 22);
-            const blur = 110 + Math.floor(rand() * 90);
-            const glowX = Math.floor(width * (0.2 + rand() * 0.6));
-            const glowY = Math.floor(height * (0.2 + rand() * 0.6));
-            const glowR = Math.floor(Math.max(width, height) * (0.35 + rand() * 0.2));
-            const styleMode = Math.floor(rand() * 3);
-
-            const buildCircuit = () => {
-                const points = [];
-                const startX = Math.floor(width * (0.05 + rand() * 0.2));
-                const startY = Math.floor(height * (0.2 + rand() * 0.6));
-                points.push([startX, startY]);
-                const segments = 4 + Math.floor(rand() * 4);
-                for (let i = 0; i < segments; i++) {
-                    const dir = rand() > 0.5 ? 1 : -1;
-                    const len = Math.floor(width * (0.12 + rand() * 0.18));
-                    const last = points[points.length - 1];
-                    const nextX = Math.max(0, Math.min(width, last[0] + len * dir));
-                    const nextY = Math.max(0, Math.min(height, last[1] + (rand() - 0.5) * height * 0.25));
-                    points.push([nextX, nextY]);
+            const palettes = [
+                {
+                    bg: '#0b1120',
+                    colors: ['#0f172a', '#1e293b', '#334155', '#3b82f6', '#22d3ee'],
+                    line: 'rgba(148, 163, 184, 0.2)',
+                    accent: '#f59e0b'
+                },
+                {
+                    bg: '#0f172a',
+                    colors: ['#111827', '#1f2937', '#312e81', '#7c3aed', '#f472b6'],
+                    line: 'rgba(199, 210, 254, 0.18)',
+                    accent: '#38bdf8'
+                },
+                {
+                    bg: '#0c101b',
+                    colors: ['#0f172a', '#172554', '#1e3a8a', '#0ea5e9', '#38bdf8'],
+                    line: 'rgba(125, 211, 252, 0.2)',
+                    accent: '#f97316'
+                },
+                {
+                    bg: '#10131f',
+                    colors: ['#111827', '#1f2937', '#4b5563', '#06b6d4', '#2dd4bf'],
+                    line: 'rgba(148, 163, 184, 0.18)',
+                    accent: '#f472b6'
+                },
+                {
+                    bg: '#0c111f',
+                    colors: ['#111827', '#1e293b', '#3f3f46', '#6366f1', '#c084fc'],
+                    line: 'rgba(165, 180, 252, 0.18)',
+                    accent: '#34d399'
                 }
-                const path = points.map((p, index) => `${index === 0 ? 'M' : 'L'}${p[0]},${p[1]}`).join(' ');
-                return { path, points };
-            };
+            ];
+            const palette = palettes[Math.floor(rand() * palettes.length)];
+            const cell = Math.max(70, Math.min(width, height) * (0.16 + rand() * 0.12));
+            const cols = Math.ceil(width / cell) + 1;
+            const rows = Math.ceil(height / cell) + 1;
+            const points = [];
+            for (let y = 0; y <= rows; y++) {
+                for (let x = 0; x <= cols; x++) {
+                    const jitterX = (rand() - 0.5) * cell * 0.7;
+                    const jitterY = (rand() - 0.5) * cell * 0.7;
+                    points.push({
+                        x: Math.max(0, Math.min(width, x * cell + jitterX)),
+                        y: Math.max(0, Math.min(height, y * cell + jitterY))
+                    });
+                }
+            }
 
-            const accents = Array.from({ length: 6 }).map(() => {
-                const x = Math.floor(rand() * width);
-                const y = Math.floor(rand() * height);
-                const w = 14 + Math.floor(rand() * 32);
-                const h = 6 + Math.floor(rand() * 18);
-                const opacity = 0.2 + rand() * 0.4;
-                return `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="2" fill="${highlight}" opacity="${opacity}"/>`;
+            const idx = (x, y) => y * (cols + 1) + x;
+            const triangles = [];
+            for (let y = 0; y < rows; y++) {
+                for (let x = 0; x < cols; x++) {
+                    const p1 = points[idx(x, y)];
+                    const p2 = points[idx(x + 1, y)];
+                    const p3 = points[idx(x, y + 1)];
+                    const p4 = points[idx(x + 1, y + 1)];
+                    if (rand() > 0.5) {
+                        triangles.push([p1, p2, p4]);
+                        triangles.push([p1, p4, p3]);
+                    } else {
+                        triangles.push([p1, p2, p3]);
+                        triangles.push([p2, p4, p3]);
+                    }
+                }
+            }
+
+            const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+            const triangleMarkup = triangles.map((tri) => {
+                const cx = (tri[0].x + tri[1].x + tri[2].x) / 3;
+                const cy = (tri[0].y + tri[1].y + tri[2].y) / 3;
+                const t = clamp((cx / width) * 0.5 + (cy / height) * 0.5 + (rand() - 0.5) * 0.12, 0, 0.999);
+                const baseIndex = Math.floor(t * palette.colors.length);
+                const shift = rand() > 0.84 ? 1 : 0;
+                const fill = palette.colors[(baseIndex + shift) % palette.colors.length];
+                const opacity = 0.78 + rand() * 0.18;
+                const pointsAttr = `${tri[0].x},${tri[0].y} ${tri[1].x},${tri[1].y} ${tri[2].x},${tri[2].y}`;
+                return `<polygon points="${pointsAttr}" fill="${fill}" opacity="${opacity}" stroke="${palette.line}" stroke-width="0.9"/>`;
             }).join('');
 
-            const circuitA = buildCircuit();
-            const circuitB = buildCircuit();
-            const nodeMarkup = (points) => points.slice(1).map((p) => {
-                const r = 2 + rand() * 3.2;
-                return `<circle cx="${p[0]}" cy="${p[1]}" r="${r}" fill="${highlight}" opacity="0.85"/>`;
+            const bandCount = 3 + Math.floor(rand() * 3);
+            const bands = Array.from({ length: bandCount }).map((_, i) => {
+                const bandHeight = height * (0.18 + rand() * 0.12);
+                const y = (i / bandCount) * height + (rand() - 0.5) * bandHeight * 0.4;
+                const skew = width * (0.08 + rand() * 0.08);
+                const fill = rand() > 0.6 ? palette.accent : palette.colors[palette.colors.length - 1];
+                const opacity = 0.14 + rand() * 0.12;
+                const pointsAttr = `${-skew},${y} ${width - skew},${y} ${width + skew},${y + bandHeight} ${skew},${y + bandHeight}`;
+                return `<polygon points="${pointsAttr}" fill="${fill}" opacity="${opacity}"/>`;
             }).join('');
 
-            const shardCount = 6 + Math.floor(rand() * 6);
+            const shardCount = 4 + Math.floor(rand() * 4);
             const shards = Array.from({ length: shardCount }).map(() => {
                 const centerX = width * (0.1 + rand() * 0.8);
                 const centerY = height * (0.1 + rand() * 0.8);
-                const radius = Math.min(width, height) * (0.12 + rand() * 0.18);
-                const sides = 3 + Math.floor(rand() * 3);
+                const radius = Math.min(width, height) * (0.08 + rand() * 0.12);
+                const sides = 4 + Math.floor(rand() * 3);
                 const rotation = rand() * Math.PI * 2;
-                const points = Array.from({ length: sides }).map((_, idx) => {
-                    const angle = rotation + (idx / sides) * Math.PI * 2;
-                    const r = radius * (0.65 + rand() * 0.45);
+                const pointsAttr = Array.from({ length: sides }).map((_, idx2) => {
+                    const angle = rotation + (idx2 / sides) * Math.PI * 2;
+                    const r = radius * (0.7 + rand() * 0.4);
                     const x = Math.max(0, Math.min(width, centerX + Math.cos(angle) * r));
                     const y = Math.max(0, Math.min(height, centerY + Math.sin(angle) * r));
                     return `${x},${y}`;
                 }).join(' ');
-                const opacity = 0.1 + rand() * 0.18;
-                return `<polygon points="${points}" fill="${shardFill}" stroke="${shardStroke}" stroke-width="1" opacity="${opacity}"/>`;
+                const opacity = 0.12 + rand() * 0.16;
+                return `<polygon points="${pointsAttr}" fill="none" stroke="${palette.accent}" stroke-width="1.2" opacity="${opacity}"/>`;
             }).join('');
 
-            const rings = Array.from({ length: 2 + Math.floor(rand() * 3) }).map(() => {
-                const r = Math.min(width, height) * (0.18 + rand() * 0.22);
-                const cx = width * (0.2 + rand() * 0.6);
-                const cy = height * (0.2 + rand() * 0.6);
-                return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${highlight}" stroke-width="1.4" opacity="0.35"/>`;
+            const lineCount = 2 + Math.floor(rand() * 3);
+            const polylines = Array.from({ length: lineCount }).map(() => {
+                const pointsAttr = Array.from({ length: 4 + Math.floor(rand() * 3) }).map((_, idx2) => {
+                    const x = (idx2 / 4) * width + (rand() - 0.5) * width * 0.08;
+                    const y = rand() * height;
+                    return `${x.toFixed(2)},${y.toFixed(2)}`;
+                }).join(' ');
+                return `<polyline points="${pointsAttr}" fill="none" stroke="${palette.line}" stroke-width="1.1" opacity="0.45"/>`;
             }).join('');
 
-            const meshGrid = () => {
-                const cols = 6 + Math.floor(rand() * 4);
-                const rows = 4 + Math.floor(rand() * 4);
-                const stepX = width / cols;
-                const stepY = height / rows;
-                const points = [];
-                for (let y = 0; y <= rows; y++) {
-                    for (let x = 0; x <= cols; x++) {
-                        const jitterX = (rand() - 0.5) * stepX * 0.35;
-                        const jitterY = (rand() - 0.5) * stepY * 0.35;
-                        points.push({
-                            x: Math.max(0, Math.min(width, x * stepX + jitterX)),
-                            y: Math.max(0, Math.min(height, y * stepY + jitterY))
-                        });
-                    }
-                }
-                const polygons = [];
-                const lines = [];
-                const idx = (x, y) => y * (cols + 1) + x;
-                for (let y = 0; y < rows; y++) {
-                    for (let x = 0; x < cols; x++) {
-                        const p1 = points[idx(x, y)];
-                        const p2 = points[idx(x + 1, y)];
-                        const p3 = points[idx(x, y + 1)];
-                        const p4 = points[idx(x + 1, y + 1)];
-                        if (rand() > 0.5) {
-                            polygons.push(`${p1.x},${p1.y} ${p2.x},${p2.y} ${p4.x},${p4.y}`);
-                            polygons.push(`${p1.x},${p1.y} ${p4.x},${p4.y} ${p3.x},${p3.y}`);
-                        } else {
-                            polygons.push(`${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y}`);
-                            polygons.push(`${p2.x},${p2.y} ${p4.x},${p4.y} ${p3.x},${p3.y}`);
-                        }
-                        lines.push(`M${p1.x},${p1.y} L${p2.x},${p2.y} L${p4.x},${p4.y} L${p3.x},${p3.y} Z`);
-                    }
-                }
-                const polyMarkup = polygons.map((pts) => {
-                    const opacity = 0.06 + rand() * 0.1;
-                    return `<polygon points="${pts}" fill="${meshFill}" opacity="${opacity}"/>`;
-                }).join('');
-                const lineMarkup = lines.map((path) => `<path d="${path}" fill="none" stroke="${meshStroke}" stroke-width="1" opacity="0.35"/>`).join('');
-                return { polyMarkup, lineMarkup };
-            };
-
-            const mesh = meshGrid();
-            const scanlines = Array.from({ length: 8 + Math.floor(rand() * 6) }).map((_, index) => {
-                const y = (index + 1) * (height / (10 + rand() * 6));
-                return `<rect x="0" y="${y.toFixed(2)}" width="${width}" height="2" fill="${scanline}" opacity="0.4"/>`;
+            const nodeCount = 6 + Math.floor(rand() * 6);
+            const nodes = Array.from({ length: nodeCount }).map(() => {
+                const x = Math.floor(rand() * width);
+                const y = Math.floor(rand() * height);
+                const r = 2 + rand() * 3.5;
+                return `<circle cx="${x}" cy="${y}" r="${r}" fill="${palette.accent}" opacity="0.7"/>`;
             }).join('');
 
             const svg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid slice">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="${bg1}"/>
-      <stop offset="55%" stop-color="${bg2}"/>
-      <stop offset="100%" stop-color="${bg1}"/>
-    </linearGradient>
-    <radialGradient id="glow" cx="${glowX}" cy="${glowY}" r="${glowR}" gradientUnits="userSpaceOnUse">
-      <stop offset="0%" stop-color="${glow2}" stop-opacity="0.55"/>
-      <stop offset="60%" stop-color="${glow1}" stop-opacity="0.25"/>
-      <stop offset="100%" stop-color="${glow1}" stop-opacity="0"/>
-    </radialGradient>
-    <pattern id="grid" width="${gridSize}" height="${gridSize}" patternUnits="userSpaceOnUse">
-      <path d="M ${gridSize} 0 L 0 0 0 ${gridSize}" fill="none" stroke="${gridColor}" stroke-width="1"/>
-    </pattern>
-    <pattern id="diag" width="${gridSize}" height="${gridSize}" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-      <path d="M 0 ${gridSize / 2} L ${gridSize} ${gridSize / 2}" fill="none" stroke="${gridColor}" stroke-width="1"/>
-    </pattern>
-    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%">
-      <feGaussianBlur stdDeviation="${blur}"/>
-    </filter>
-  </defs>
-  <rect width="${width}" height="${height}" fill="url(#bg)"/>
-  <rect width="${width}" height="${height}" fill="url(#glow)"/>
-  <rect width="${width}" height="${height}" fill="url(#grid)" opacity="0.65"/>
-  <rect width="${width}" height="${height}" fill="url(#diag)" opacity="0.25"/>
-  ${styleMode === 1 ? mesh.polyMarkup : shards}
-  ${styleMode === 2 ? rings : mesh.lineMarkup}
-  ${styleMode === 2 ? '' : `<path d="${circuitA.path}" fill="none" stroke="${circuitColor}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>`}
-  ${styleMode === 2 ? '' : `<path d="${circuitB.path}" fill="none" stroke="${circuitColor}" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.5"/>`}
-  ${styleMode === 2 ? '' : nodeMarkup(circuitA.points)}
-  ${styleMode === 2 ? '' : nodeMarkup(circuitB.points)}
-  ${scanlines}
-  ${accents}
-  <rect width="${width}" height="${height}" fill="none" stroke="${highlight}" stroke-width="2" opacity="0.4"/>
+  <rect width="${width}" height="${height}" fill="${palette.bg}"/>
+  ${triangleMarkup}
+  ${bands}
+  ${shards}
+  ${polylines}
+  ${nodes}
+  <rect width="${width}" height="${height}" fill="none" stroke="${palette.line}" stroke-width="1" opacity="0.22"/>
 </svg>`;
             return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
         };

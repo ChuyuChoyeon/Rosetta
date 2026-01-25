@@ -40,7 +40,7 @@
 
     <!-- Popular Posts -->
     {% if sidebar_popular_posts %}
-    {% cache sidebar_cache_ttl "sidebar_popular_posts" %}
+    {% cache sidebar_cache_ttl "sidebar_popular_posts_v2" %}
     <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-secondary/20 hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300">
         <h3 class="font-bold text-lg mb-5 flex items-center gap-2 font-heading">
             <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
@@ -54,11 +54,9 @@
                 <span class="absolute -left-3 -top-2 text-6xl font-black text-base-content/5 select-none -z-10 transition-colors group-hover/item:text-secondary/10">{{ forloop.counter }}</span>
                 <a href="{% url 'post_detail' post.slug %}" class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-base-200 shadow-sm group-hover/item:shadow-md transition-all">
                     {% if post.cover_image %}
-                    <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-500" loading="lazy">
+                    <img src="{{ post.cover_thumbnail.url }}" alt="{{ post.title }}" class="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-500" loading="lazy">
                     {% else %}
-                    <div class="w-full h-full bg-gradient-to-br from-primary/5 to-secondary/5 flex items-center justify-center text-secondary font-bold text-xl">
-                        {{ post.title|slice:":1" }}
-                    </div>
+                    <div class="w-full h-full pattern-placeholder bg-gradient-to-br from-primary/10 to-secondary/10" data-seed="{{ post.title }}"></div>
                     {% endif %}
                 </a>
                 <div class="flex flex-col justify-center py-1">
