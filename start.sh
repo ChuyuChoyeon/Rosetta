@@ -11,6 +11,8 @@ if ! command -v uv >/dev/null 2>&1; then
 fi
 
 uv sync
+uv run python manage.py makemigrations
+
 uv run python manage.py migrate
 uv run python manage.py collectstatic --noinput
 uv run python manage.py buildwatson
