@@ -68,7 +68,7 @@
                         </span>
                         <span class="flex items-center gap-1">
                             <span class="material-symbols-outlined text-[14px]">calendar_today</span>
-                            {{ post.created_at|date:"m-d" }}
+                            {{ post.published_at|default:post.created_at|date:"m-d" }}
                         </span>
                     </div>
                 </div>

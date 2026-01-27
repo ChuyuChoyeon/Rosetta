@@ -29,7 +29,7 @@
             </p>
         </div>
 
-        {% regroup posts by created_at.year as year_list %}
+        {% regroup posts by published_at_fallback.year as year_list %}
 
         <div class="relative">
             <!-- Vertical Line (Desktop) -->
@@ -51,8 +51,8 @@
                             <!-- Date (Desktop: Alternating) -->
                             <div class="w-full md:w-1/2 flex md:justify-end {% if forloop.counter|divisibleby:2 %}md:order-1 md:text-right{% else %}md:order-3 md:text-left{% endif %}">
                                 <div class="hidden md:flex flex-col gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
-                                    <span class="text-sm font-mono font-bold">{{ post.created_at|date:"m-d" }}</span>
-                                    <span class="text-xs">{{ post.created_at|date:"l" }}</span>
+                                    <span class="text-sm font-mono font-bold">{{ post.published_at_fallback|date:"m-d" }}</span>
+                                    <span class="text-xs">{{ post.published_at_fallback|date:"l" }}</span>
                                 </div>
                             </div>
 
@@ -67,7 +67,7 @@
                                 <a href="{{ post.get_absolute_url }}" class="block card bg-base-100 border border-base-content/5 hover:border-primary/20 shadow-sm hover:shadow-xl transition-all duration-300 group-hover:-translate-y-1 overflow-hidden">
                                     <div class="card-body p-5">
                                         <div class="flex items-center gap-2 mb-2">
-                                            <span class="md:hidden text-xs font-mono opacity-50">{{ post.created_at|date:"m-d" }}</span>
+                                            <span class="md:hidden text-xs font-mono opacity-50">{{ post.published_at_fallback|date:"m-d" }}</span>
                                             {% if post.category %}
                                             <span class="badge badge-xs md:badge-sm badge-ghost group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                                 {{ post.category.name }}

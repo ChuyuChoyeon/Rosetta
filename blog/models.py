@@ -11,6 +11,7 @@ from core.utils import generate_unique_slug, schedule_post_image_processing
 from core.validators import validate_image_file
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
+from django.utils import timezone
 
 
 class Category(models.Model):
@@ -140,6 +141,7 @@ class Post(models.Model):
     )
     views = models.PositiveIntegerField("阅读量", default=0)
     created_at = models.DateTimeField("创建时间", auto_now_add=True, db_index=True)
+    published_at = models.DateTimeField("发布时间", null=True, blank=True, db_index=True)
     updated_at = models.DateTimeField("更新时间", auto_now=True)
     is_pinned = models.BooleanField("置顶", default=False)
     allow_comments = models.BooleanField("允许评论", default=True)
@@ -171,11 +173,12 @@ class Post(models.Model):
         return math.ceil(minutes) if minutes > 0 else 1
 
     class Meta:
-        ordering = ["-is_pinned", "-created_at"]
+        ordering = ["-is_pinned", "-published_at", "-created_at"]
         verbose_name = "文章"
         verbose_name_plural = verbose_name
         indexes = [
             models.Index(fields=["status", "created_at"]),
+            models.Index(fields=["status", "published_at"]),
         ]
 
     def set_password(self, raw_password):
@@ -190,6 +193,8 @@ class Post(models.Model):
         """保存时自动生成 slug（如果未提供）"""
         if not self.slug:
             self.slug = generate_unique_slug(Post, self.title)
+        if self.status == "published" and not self.published_at:
+            self.published_at = timezone.now()
         super().save(*args, **kwargs)
 
     def __str__(self):

@@ -4,6 +4,7 @@ from django.core.cache import cache
 from django.utils import timezone
 from django.views.generic import ListView, DetailView
 from django.db.models import Q, Count
+from django.db.models.functions import Coalesce
 from django.contrib import messages
 from django.http import HttpResponse
 from .models import Post, Category, Tag, Comment, PostViewHistory
@@ -133,7 +134,8 @@ class ArchiveView(SidebarContextMixin, ListView):
         Post.objects.filter(status="published")
         .select_related("author", "category")
         .prefetch_related("tags")
-        .order_by("-created_at")
+        .annotate(published_at_fallback=Coalesce("published_at", "created_at"))
+        .order_by("-published_at_fallback")
     )
     paginate_by = 100  # 归档页显示更多文章，便于快速浏览
 
@@ -219,7 +221,7 @@ class PostDetailView(DetailView):
                 Post.objects.filter(tags__in=post_tags_ids, status="published")
                 .exclude(id=self.object.id)
                 .annotate(same_tags=Count("tags"))
-                .order_by("-same_tags", "-created_at")[:3]
+                .order_by("-same_tags", "-published_at", "-created_at")[:3]
             ),
         )
 
@@ -230,7 +232,7 @@ class PostDetailView(DetailView):
                 Post.objects.filter(category=self.object.category, status="published")
                 .exclude(id=self.object.id)
                 .exclude(id__in=[p.id for p in related_posts])
-                .order_by("-created_at")[:remaining_count]
+                .order_by("-published_at", "-created_at")[:remaining_count]
             )
 
             related_posts = related_posts + category_posts
@@ -242,18 +244,20 @@ class PostDetailView(DetailView):
         context["previous_post"] = load_cached(
             f"post:{self.object.id}:previous",
             lambda: Post.objects.filter(
-                status="published", created_at__lt=self.object.created_at
+                status="published",
+                published_at__lt=(self.object.published_at or self.object.created_at),
             )
-            .order_by("-created_at")
+            .order_by("-published_at", "-created_at")
             .first(),
         )
 
         context["next_post"] = load_cached(
             f"post:{self.object.id}:next",
             lambda: Post.objects.filter(
-                status="published", created_at__gt=self.object.created_at
+                status="published",
+                published_at__gt=(self.object.published_at or self.object.created_at),
             )
-            .order_by("created_at")
+            .order_by("published_at", "created_at")
             .first(),
         )
 
@@ -282,6 +286,7 @@ class PostDetailView(DetailView):
                 )
             cache.set(cache_key, description, ttl)
 
+        published_time = post.published_at or post.created_at
         return Meta(
             title=post.title,
             description=description,
@@ -289,7 +294,7 @@ class PostDetailView(DetailView):
             image=post.cover_image.url if post.cover_image else None,
             url=self.request.build_absolute_uri(),
             object_type="article",
-            published_time=post.created_at,
+            published_time=published_time,
             modified_time=post.updated_at,
             author=post.author.username,
         )
@@ -456,6 +461,7 @@ class PostByCategoryView(SidebarContextMixin, ListView):
             Post.objects.filter(category=self.category, status="published")
             .select_related("author", "category")
             .prefetch_related("tags")
+            .order_by("-published_at", "-created_at")
         )
 
     def get_context_data(self, **kwargs):
@@ -494,6 +500,7 @@ class PostByTagView(SidebarContextMixin, ListView):
             Post.objects.filter(tags=self.tag, status="published")
             .select_related("author", "category")
             .prefetch_related("tags")
+            .order_by("-published_at", "-created_at")
         )
 
     def get_context_data(self, **kwargs):

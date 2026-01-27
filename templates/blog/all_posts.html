@@ -123,7 +123,7 @@
                         <div class="flex items-center gap-4">
                             <div class="flex items-center gap-1.5" title="发布时间">
                                 <span class="material-symbols-outlined text-[16px]">calendar_today</span>
-                                <span>{{ post.created_at|date:"Y-m-d" }}</span>
+                                <span>{{ post.published_at|default:post.created_at|date:"Y-m-d" }}</span>
                             </div>
                             <div class="flex items-center gap-1.5" title="阅读量">
                                 <span class="material-symbols-outlined text-[16px]">visibility</span>

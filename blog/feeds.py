@@ -11,7 +11,10 @@ class LatestPostsFeed(Feed):
     feed_type = Rss201rev2Feed
 
     def items(self):
-        return Post.objects.filter(status="published").order_by("-created_at")[:20]
+        return (
+            Post.objects.filter(status="published")
+            .order_by("-published_at", "-created_at")[:20]
+        )
 
     def item_title(self, item):
         return item.title
@@ -23,4 +26,4 @@ class LatestPostsFeed(Feed):
         return reverse("post_detail", args=[item.slug])
 
     def item_pubdate(self, item):
-        return item.created_at
+        return item.published_at or item.created_at

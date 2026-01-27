@@ -132,7 +132,11 @@
                          </span>
                      </div>
                  </div>
-                 <div id="trendChart" class="w-full h-[320px]"></div>
+                <div id="trendChart"
+                     class="w-full h-[320px]"
+                     data-trend-counts="{{ trend_counts }}"
+                     data-user-trend-counts="{{ user_trend_counts }}"
+                     data-trend-dates="{{ trend_dates }}"></div>
              </div>
         </div>
 
@@ -142,7 +146,9 @@
             <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden">
                 <h3 class="font-bold text-sm mb-4 opacity-70 uppercase tracking-wider">评论分布</h3>
                 <div class="flex items-center justify-between">
-                    <div id="commentDonut" class="flex-1 min-w-0"></div>
+                    <div id="commentDonut"
+                         class="flex-1 min-w-0"
+                         data-comment-status="{{ comment_status_data }}"></div>
                     <div class="flex flex-col gap-3 text-xs shrink-0 whitespace-nowrap pl-4 border-l border-base-content/5">
                         <div class="flex items-center gap-2">
                             <div class="w-2.5 h-2.5 rounded-full bg-success shadow-sm shadow-success/50"></div>
@@ -175,6 +181,39 @@
                      {% endfor %}
                  </div>
             </div>
+        </div>
+    </div>
+    
+    <!-- Analytics Grid (New) -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Category Distribution -->
+        <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden group">
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
+            <h3 class="font-bold text-lg mb-6 flex items-center gap-2 font-heading relative z-10">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-lg">pie_chart</span>
+                </span>
+                分类分布
+            </h3>
+            <div id="categoryChart" 
+                 class="w-full h-[300px]"
+                 data-category-labels="{{ category_labels }}"
+                 data-category-data="{{ category_data }}"></div>
+        </div>
+
+        <!-- Tag Usage -->
+        <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden group">
+            <div class="absolute -right-10 -top-10 w-32 h-32 bg-secondary/5 rounded-full blur-3xl group-hover:bg-secondary/10 transition-colors"></div>
+            <h3 class="font-bold text-lg mb-6 flex items-center gap-2 font-heading relative z-10">
+                <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-lg">tag</span>
+                </span>
+                热门标签
+            </h3>
+            <div id="tagChart" 
+                 class="w-full h-[300px]"
+                 data-tag-labels="{{ tag_labels }}"
+                 data-tag-data="{{ tag_data }}"></div>
         </div>
     </div>
     
@@ -301,214 +340,4 @@
 
 </div>
 
-<script>
-    window.initCharts = function () {
-            const resolveColor = (cssColor) => {
-                const el = document.createElement('span');
-                el.style.color = cssColor;
-                el.style.display = 'none';
-                document.body.appendChild(el);
-                const resolved = getComputedStyle(el).color;
-                document.body.removeChild(el);
-                return resolved || cssColor;
-            };
-            const getCssVar = (varName) => {
-                return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-            };
-
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const themeMode = (currentTheme === 'light') ? 'light' : 'dark';
-            const textColor = resolveColor('oklch(var(--bc))');
-            const mutedTextColor = resolveColor('oklch(var(--bc) / 0.6)');
-            const gridColor = resolveColor('oklch(var(--bc) / 0.1)');
-
-            const applyChartTextColors = (container) => {
-                if (!container) return;
-                const textNodes = container.querySelectorAll('text.apexcharts-text');
-                textNodes.forEach((node) => {
-                    const isMuted = node.classList.contains('apexcharts-xaxis-label') || node.classList.contains('apexcharts-yaxis-label') || node.classList.contains('apexcharts-datalabel-label');
-                    const color = isMuted ? mutedTextColor : textColor;
-                    node.setAttribute('fill', color);
-                    node.style.fill = color;
-                });
-            };
-
-            // 1. Trend Chart (Area)
-            const trendEl = document.querySelector("#trendChart");
-            if (trendEl) {
-                if (trendEl._chart) {
-                    try { trendEl._chart.destroy(); } catch(e) {}
-                }
-
-                var optionsTrend = {
-                    series: [{
-                        name: '评论数',
-                        data: {{ trend_counts|safe }}
-                    }, {
-                        name: '新用户',
-                        data: {{ user_trend_counts|safe }}
-                    }],
-                    chart: {
-                        type: 'area',
-                        height: 320,
-                        toolbar: { show: false },
-                        fontFamily: 'inherit',
-                        background: 'transparent',
-                        animations: { enabled: true },
-                        foreColor: textColor
-                    },
-                    stroke: { curve: 'smooth', width: 3 },
-                    fill: {
-                        type: 'gradient',
-                        gradient: {
-                            shadeIntensity: 1,
-                            opacityFrom: 0.45,
-                            opacityTo: 0.05,
-                            stops: [0, 100]
-                        }
-                    },
-                    dataLabels: { enabled: false },
-                    xaxis: {
-                        categories: {{ trend_dates|safe }},
-                        labels: { 
-                            show: true,
-                            style: { colors: mutedTextColor, fontSize: '11px', fontFamily: 'inherit' }
-                        },
-                        axisBorder: { show: false },
-                        axisTicks: { show: false },
-                        tooltip: { enabled: false }
-                    },
-                    yaxis: { 
-                        show: true,
-                        labels: {
-                            style: { colors: mutedTextColor, fontSize: '11px', fontFamily: 'inherit' }
-                        }
-                    },
-                    grid: {
-                        show: true,
-                        borderColor: gridColor,
-                        strokeDashArray: 4,
-                        padding: { top: 0, right: 0, bottom: 0, left: 10 } 
-                    },
-                    theme: { mode: themeMode }, 
-                    colors: [
-                        getCssVar('--p') || '#3ABFF8',
-                        getCssVar('--s') || '#D926A9'
-                    ],
-                    tooltip: {
-                        theme: themeMode,
-                        style: { fontSize: '12px', fontFamily: 'inherit' },
-                        x: { show: false },
-                        marker: { show: false },
-                        cssClass: 'apexcharts-tooltip-theme-layer'
-                    }
-                };
-                
-                var chartTrend = new ApexCharts(trendEl, optionsTrend);
-                chartTrend.render();
-                trendEl._chart = chartTrend;
-                setTimeout(() => applyChartTextColors(trendEl), 0);
-            }
-
-            // 2. Comment Status (Donut)
-            const donutEl = document.querySelector("#commentDonut");
-            if (donutEl) {
-                if (donutEl._chart) {
-                    try { donutEl._chart.destroy(); } catch(e) {}
-                }
-
-                var optionsDonut = {
-                    series: {{ comment_status_data|safe }},
-                    labels: ['已发布', '待审核'],
-                    chart: {
-                        type: 'donut',
-                        height: 160,
-                        fontFamily: 'inherit',
-                        background: 'transparent',
-                        foreColor: textColor
-                    },
-                    plotOptions: {
-                        pie: {
-                            donut: {
-                                size: '75%',
-                                labels: { 
-                                    show: true,
-                                    name: { show: false },
-                                    value: {
-                                        show: true,
-                                        fontSize: '20px',
-                                        fontWeight: 700,
-                                        color: textColor,
-                                        formatter: function (val) { return val }
-                                    },
-                                    total: {
-                                        show: true,
-                                        showAlways: true,
-                                        label: '总计',
-                                        fontSize: '12px',
-                                        color: mutedTextColor,
-                                        formatter: function (w) {
-                                            return w.globals.seriesTotals.reduce((a, b) => {
-                                                return a + b
-                                            }, 0)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    dataLabels: { enabled: false },
-                    legend: { show: false },
-                    stroke: { show: false },
-                    theme: { mode: themeMode },
-                    colors: [
-                        getCssVar('--su') || '#36D399',
-                        getCssVar('--wa') || '#FBBD23'
-                    ],
-                    tooltip: { enabled: false }
-                };
-                
-                var chartDonut = new ApexCharts(donutEl, optionsDonut);
-                chartDonut.render();
-                donutEl._chart = chartDonut;
-                setTimeout(() => applyChartTextColors(donutEl), 0);
-            }
-    };
-    
-    // Cleanup on HTMX swap
-    document.addEventListener('htmx:beforeSwap', function(evt) {
-             const trendEl = document.querySelector("#trendChart");
-             if (trendEl && trendEl._chart) {
-                 try { trendEl._chart.destroy(); } catch(e) {}
-                 delete trendEl._chart;
-             }
-             
-             const donutEl = document.querySelector("#commentDonut");
-             if (donutEl && donutEl._chart) {
-                 try { donutEl._chart.destroy(); } catch(e) {}
-                 delete donutEl._chart;
-             }
-    });
-
-    // Theme Change Observer
-    const observer = new MutationObserver(function(mutations) {
-        mutations.forEach(function(mutation) {
-            if (mutation.type === "attributes" && mutation.attributeName === "data-theme") {
-                // Re-init charts to update series colors (which depend on JS resolution)
-                setTimeout(window.initCharts, 100);
-            }
-        });
-    });
-
-    // Initial page load
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', function () {
-            observer.observe(document.documentElement, { attributes: true });
-            setTimeout(window.initCharts, 100);
-        });
-    } else {
-        observer.observe(document.documentElement, { attributes: true });
-        setTimeout(window.initCharts, 100);
-    }
-</script>
 {% endblock %}

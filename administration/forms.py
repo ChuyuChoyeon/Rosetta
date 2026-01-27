@@ -1,4 +1,5 @@
 from django import forms
+from django.utils import timezone
 from blog.models import Post, Category, Tag, Comment
 from core.models import Page, Navigation, FriendLink, SearchPlaceholder
 from users.models import UserTitle
@@ -46,6 +47,12 @@ class PostForm(forms.ModelForm):
     """
 
     tags_str = forms.CharField(required=False, widget=forms.HiddenInput, label="标签")
+    published_at = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
+        input_formats=["%Y-%m-%dT%H:%M"],
+        label="发布时间",
+    )
 
     class Meta:
         model = Post
@@ -56,6 +63,7 @@ class PostForm(forms.ModelForm):
             "content",
             "excerpt",
             "status",
+            "published_at",
             "category",
             "password",
             "is_pinned",
@@ -75,6 +83,10 @@ class PostForm(forms.ModelForm):
             self.fields["tags_str"].initial = ",".join(
                 [t.name for t in self.instance.tags.all()]
             )
+            if self.instance.published_at:
+                self.fields["published_at"].initial = timezone.localtime(
+                    self.instance.published_at
+                ).strftime("%Y-%m-%dT%H:%M")
 
         # Apply styles to all fields
         for name, field in self.fields.items():

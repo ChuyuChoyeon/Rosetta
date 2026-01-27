@@ -87,7 +87,7 @@
                     </div>
                     <div class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-                        <time>{{ post.created_at|date:"Y年m月d日" }}</time>
+                        <time>{{ post.published_at|default:post.created_at|date:"Y年m月d日" }}</time>
                     </div>
                     <div class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[18px]">schedule</span>
@@ -186,7 +186,7 @@
                             <div class="p-4 flex flex-col flex-grow">
                                 <h4 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">{{ related_post.title }}</h4>
                                 <div class="mt-auto flex items-center justify-between text-xs text-base-content/60">
-                                    <time>{{ related_post.created_at|date:"Y-m-d" }}</time>
+                                    <time>{{ related_post.published_at|default:related_post.created_at|date:"Y-m-d" }}</time>
                                     <span>{{ related_post.reading_time|default:"1" }} 分钟阅读</span>
                                 </div>
                             </div>

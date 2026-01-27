@@ -194,7 +194,7 @@ class UnifiedProfileView(View):
                     )
                     .select_related("category")
                     .prefetch_related("tags")
-                    .order_by("-created_at")[:20]
+                    .order_by("-published_at", "-created_at")[:20]
                 )
             elif active_tab == "comments":
                 context["comments"] = (

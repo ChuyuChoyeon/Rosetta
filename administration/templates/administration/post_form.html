@@ -42,41 +42,6 @@
                             {{ form.content }}
                         </div>
 
-                        <script>
-                            (function() {
-                                const initEditor = () => {
-                                    const container = document.getElementById('editor');
-                                    // 检查容器是否存在，且未初始化，且 ByteMD 已加载
-                                    if (container && !container.dataset.initialized && window.initByteMD) {
-                                        container.innerHTML = ''; // 清空容器
-                                        window.initByteMD('editor', 'id_content', `{{ form.content.value|default:""|escapejs }}`);
-                                        container.dataset.initialized = '1'; // 标记已初始化
-                                    }
-                                };
-
-                                initEditor();
-
-                                if (document.readyState === 'loading') {
-                                    document.addEventListener('DOMContentLoaded', initEditor);
-                                } else {
-                                    // 如果 DOM 已加载，延迟执行以防脚本执行过快
-                                    setTimeout(initEditor, 50);
-                                }
-                                
-                                // 异步加载兜底：轮询检查 window.initByteMD 是否就绪
-                                if (!window.initByteMD) {
-                                    const checkInterval = setInterval(() => {
-                                        if (window.initByteMD) {
-                                            clearInterval(checkInterval);
-                                            initEditor();
-                                        }
-                                    }, 100);
-                                    // 5秒后停止轮询，防止死循环
-                                    setTimeout(() => clearInterval(checkInterval), 5000);
-                                }
-                            })();
-                        </script>
-
                         {% if form.content.errors %}
                         <label class="label">
                             <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
@@ -121,6 +86,22 @@
                                 <span class="label-text">状态</span> 
                                 {{ form.status }}
                             </label>
+                        </div>
+
+                        <div class="form-control w-full">
+                            <label class="label">
+                                <span class="label-text">发布时间</span>
+                            </label>
+                            {{ form.published_at }}
+                            {% if form.published_at.errors %}
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ form.published_at.errors.0 }}</span>
+                            </label>
+                            {% else %}
+                            <label class="label">
+                                <span class="label-text-alt opacity-60">留空将使用当前时间</span>
+                            </label>
+                            {% endif %}
                         </div>
 
                         <div class="form-control w-full">

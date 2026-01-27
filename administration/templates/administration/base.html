@@ -320,19 +320,6 @@
             </label>
 
             <script>
-                // Initialize theme toggle state based on current theme
-                document.addEventListener('DOMContentLoaded', () => {
-                    setTimeout(() => {
-                        const themeToggle = document.getElementById('theme-toggle-admin');
-                        // Use ThemeManager logic or fallback to DOM
-                        const currentTheme = localStorage.getItem('theme') || document.documentElement.getAttribute('data-theme');
-                        
-                        if (themeToggle) {
-                            themeToggle.checked = (currentTheme === 'dark');
-                        }
-                    }, 50);
-                });
-
                 function updateTheme(theme) {
                     // Use ThemeManager if available (from global theme.js)
                     if (window.ThemeManager) {

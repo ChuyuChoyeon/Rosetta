@@ -178,7 +178,7 @@
                         <span class="material-symbols-outlined text-sm">search</span>
                     </button>
                 </div>
-                <form method="dialog">
+                <form method="dialog" hx-boost="false">
                     <button class="btn btn-sm btn-circle btn-ghost">
                         <span class="material-symbols-outlined">close</span>
                     </button>
@@ -208,95 +208,96 @@
             <span>共 <span id="total-icons-count">0</span> 个图标</span>
         </div>
     </div>
-    <form method="dialog" class="modal-backdrop">
+    <form method="dialog" class="modal-backdrop" hx-boost="false">
         <button>关闭</button>
     </form>
 </dialog>
 
 <script>
-    // Material Symbols List (Subset of commonly used icons)
     const materialSymbols = [
         "search", "home", "menu", "close", "settings", "check", "favorite", "add", "delete", "arrow_back", "arrow_forward", "arrow_drop_down", "cancel", "more_vert", "chevron_right", "check_circle", "logout", "arrow_drop_up", "login", "group", "edit", "refresh", "file_download", "image", "add_circle", "grid_view", "download", "person", "sort", "arrow_back_ios", "expand_more", "bolt", "list", "filter_list", "arrow_forward_ios", "calendar_today", "info", "notifications", "more_horiz", "add_box", "arrow_left", "arrow_right", "description", "upload", "remove", "language", "account_circle", "visibility", "done", "open_in_new", "verified", "schedule", "warning", "thumb_up", "lock", "error", "fingerprint", "event", "light_mode", "dark_mode", "dashboard", "category", "article", "sell", "tag", "link", "public", "bookmark", "history", "code", "bug_report", "build", "cached", "help", "feedback", "manage_accounts", "admin_panel_settings", "supervisor_account", "perm_identity", "people", "email", "phone", "contact_page", "map", "place", "store", "shopping_cart", "payments", "credit_card", "receipt", "attach_money", "trending_up", "analytics", "bar_chart", "pie_chart", "folder", "folder_open", "cloud", "cloud_upload", "cloud_download", "upload_file", "download_for_offline", "image", "photo_camera", "videocam", "music_note", "movie", "slideshow", "palette", "brush", "format_bold", "format_italic", "title", "text_fields", "insert_link", "attach_file", "insert_photo", "computer", "phone_iphone", "tablet", "desktop_windows", "keyboard", "mouse", "router", "wifi", "security", "vpn_key", "shield", "lock_open", "visibility_off", "delete_forever", "restore_from_trash", "archive", "unarchive", "content_copy", "content_paste", "save", "save_alt", "print", "share", "send", "reply", "reply_all", "flag", "report", "block", "star", "star_border", "star_half", "favorite_border", "thumb_down", "emoji_emotions", "sentiment_satisfied", "sentiment_dissatisfied", "mood", "mood_bad", "face", "rocket"
     ];
 
-    // Remove duplicates and sort
     const uniqueIcons = [...new Set(materialSymbols)].sort();
-    
-    // DOM Elements
-    const iconGrid = document.getElementById('icon-grid');
-    const noIconsFound = document.getElementById('no-icons-found');
-    const totalIconsCount = document.getElementById('total-icons-count');
-    const iconInput = document.getElementById('{{ form.icon.auto_id }}');
-    const iconPreview = document.getElementById('icon-preview');
+    function initCategoryIconSelector(root) {
+        const scope = root || document;
+        const iconGrid = scope.getElementById ? scope.getElementById('icon-grid') : scope.querySelector('#icon-grid');
+        const noIconsFound = scope.getElementById ? scope.getElementById('no-icons-found') : scope.querySelector('#no-icons-found');
+        const totalIconsCount = scope.getElementById ? scope.getElementById('total-icons-count') : scope.querySelector('#total-icons-count');
+        const iconInput = scope.getElementById ? scope.getElementById('{{ form.icon.auto_id }}') : scope.querySelector('#{{ form.icon.auto_id }}');
+        const iconPreview = scope.getElementById ? scope.getElementById('icon-preview') : scope.querySelector('#icon-preview');
 
-    // Initialize
-    document.addEventListener('DOMContentLoaded', () => {
+        if (!iconGrid || !noIconsFound || !totalIconsCount || !iconInput || !iconPreview) return;
+        if (iconGrid.dataset.initialized === '1') return;
+        iconGrid.dataset.initialized = '1';
+
+        function renderIcons(filter = "") {
+            iconGrid.innerHTML = "";
+            let matchCount = 0;
+            const lowerFilter = filter.toLowerCase();
+
+            uniqueIcons.forEach(icon => {
+                if (icon.toLowerCase().includes(lowerFilter)) {
+                    matchCount++;
+                    const btn = document.createElement('button');
+                    btn.type = 'button';
+                    btn.className = 'btn btn-ghost h-auto py-4 flex flex-col gap-2 hover:bg-base-200 hover:border-primary/20 border border-transparent transition-all rounded-xl group';
+                    btn.onclick = () => window.selectIcon(icon);
+                    
+                    btn.innerHTML = `
+                        <span class="material-symbols-outlined text-3xl text-base-content/70 group-hover:text-primary group-hover:scale-110 transition-all">${icon}</span>
+                        <span class="text-[10px] text-base-content/40 font-mono truncate w-full px-1 group-hover:text-base-content/70">${icon}</span>
+                    `;
+                    
+                    iconGrid.appendChild(btn);
+                }
+            });
+
+            if (matchCount === 0) {
+                iconGrid.classList.add('hidden');
+                noIconsFound.classList.remove('hidden');
+            } else {
+                iconGrid.classList.remove('hidden');
+                noIconsFound.classList.add('hidden');
+            }
+        }
+
+        function updateIconPreview(value) {
+            if (!value) {
+                iconPreview.textContent = 'category';
+                iconPreview.classList.add('opacity-50');
+            } else {
+                iconPreview.textContent = value;
+                iconPreview.classList.remove('opacity-50');
+            }
+        }
+
+        window.filterIcons = function (value) {
+            renderIcons(value);
+        };
+
+        window.selectIcon = function (icon) {
+            iconInput.value = icon;
+            updateIconPreview(icon);
+            const modal = document.getElementById('icon_modal');
+            if (modal) modal.close();
+            iconInput.classList.add('input-primary');
+            setTimeout(() => iconInput.classList.remove('input-primary'), 300);
+        };
+
+        window.updateIconPreview = updateIconPreview;
+
         renderIcons();
         totalIconsCount.textContent = uniqueIcons.length;
-        
-        // Initial preview update
+
         if (iconInput.value) {
             updateIconPreview(iconInput.value);
         }
-    });
-
-    // Render Icons
-    function renderIcons(filter = "") {
-        iconGrid.innerHTML = "";
-        let matchCount = 0;
-        const lowerFilter = filter.toLowerCase();
-
-        uniqueIcons.forEach(icon => {
-            if (icon.toLowerCase().includes(lowerFilter)) {
-                matchCount++;
-                const btn = document.createElement('button');
-                btn.type = 'button';
-                btn.className = 'btn btn-ghost h-auto py-4 flex flex-col gap-2 hover:bg-base-200 hover:border-primary/20 border border-transparent transition-all rounded-xl group';
-                btn.onclick = () => selectIcon(icon);
-                
-                btn.innerHTML = `
-                    <span class="material-symbols-outlined text-3xl text-base-content/70 group-hover:text-primary group-hover:scale-110 transition-all">${icon}</span>
-                    <span class="text-[10px] text-base-content/40 font-mono truncate w-full px-1 group-hover:text-base-content/70">${icon}</span>
-                `;
-                
-                iconGrid.appendChild(btn);
-            }
-        });
-
-        if (matchCount === 0) {
-            iconGrid.classList.add('hidden');
-            noIconsFound.classList.remove('hidden');
-        } else {
-            iconGrid.classList.remove('hidden');
-            noIconsFound.classList.add('hidden');
-        }
     }
 
-    // Filter Icons
-    function filterIcons(value) {
-        renderIcons(value);
+    if (window.registerHtmxInit) {
+        window.registerHtmxInit(initCategoryIconSelector);
     }
-
-    // Select Icon
-    function selectIcon(icon) {
-        iconInput.value = icon;
-        updateIconPreview(icon);
-        icon_modal.close();
-        
-        // Optional: Flash the input to indicate change
-        iconInput.classList.add('input-primary');
-        setTimeout(() => iconInput.classList.remove('input-primary'), 300);
-    }
-
-    // Update Preview
-    function updateIconPreview(value) {
-        if (!value) {
-            iconPreview.textContent = 'category'; // Default
-            iconPreview.classList.add('opacity-50');
-        } else {
-            iconPreview.textContent = value;
-            iconPreview.classList.remove('opacity-50');
-        }
-    }
+    initCategoryIconSelector(document);
 </script>
 {% endblock %}

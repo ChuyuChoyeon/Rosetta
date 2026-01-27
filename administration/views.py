@@ -137,9 +137,10 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     """
 
     template_name: str = "administration/index.html"
-
+    
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context: Dict[str, Any] = super().get_context_data(**kwargs)
+        import json
 
         # 1. 关键指标统计 (Key Metrics)
         today = timezone.now()
@@ -234,6 +235,33 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         context["top_posts_labels"] = [
             p.title[:10] + "..." if len(p.title) > 10 else p.title for p in top_posts
         ]
+
+        # 分类分布 (饼图)
+        category_counts = (
+            Category.objects.annotate(count=Count("posts"))
+            .values("name", "count")
+            .order_by("-count")
+        )
+        # 使用 json.dumps 确保正确的 JSON 格式
+        context["category_labels"] = json.dumps([c["name"] for c in category_counts], ensure_ascii=False)
+        context["category_data"] = json.dumps([c["count"] for c in category_counts])
+
+        # 标签使用 Top 10 (柱状图)
+        tag_counts = (
+            Tag.objects.annotate(count=Count("posts"))
+            .values("name", "count")
+            .order_by("-count")[:10]
+        )
+        context["tag_labels"] = json.dumps([t["name"] for t in tag_counts], ensure_ascii=False)
+        context["tag_data"] = json.dumps([t["count"] for t in tag_counts])
+
+        # 之前的趋势数据也建议做相同处理
+        context["trend_dates"] = json.dumps(dates, ensure_ascii=False)
+        context["trend_counts"] = json.dumps(counts)
+        context["user_trend_counts"] = json.dumps(user_counts)
+
+        # 评论状态分布
+        context["comment_status_data"] = json.dumps([active_comments, inactive_comments])
 
         # 系统健康状态 (实时数据)
         try:
@@ -563,7 +591,7 @@ class PostListView(BaseListView):
 
     model = Post
     context_object_name = "posts"
-    ordering = ["-created_at"]
+    ordering = ["-is_pinned", "-published_at", "-created_at"]
     paginate_by = 20
 
     def get_queryset(self) -> QuerySet[Post]:

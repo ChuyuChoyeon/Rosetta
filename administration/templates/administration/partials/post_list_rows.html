@@ -32,7 +32,7 @@
                 <div class="text-xs text-base-content/50 mt-1 sm:hidden">
                     <span class="opacity-70">{{ post.author.username }}</span>
                     <span class="mx-1">·</span>
-                    <span class="opacity-70">{{ post.created_at|date:"m-d" }}</span>
+                    <span class="opacity-70">{{ post.published_at|default:post.created_at|date:"m-d" }}</span>
                 </div>
             </div>
         </div>
@@ -90,7 +90,7 @@
             {% endif %}
         </div>
     </td>
-    <td class="text-sm font-mono opacity-70 hidden md:table-cell whitespace-nowrap">{{ post.created_at|date:"Y-m-d" }}</td>
+    <td class="text-sm font-mono opacity-70 hidden md:table-cell whitespace-nowrap">{{ post.published_at|default:post.created_at|date:"Y-m-d" }}</td>
     <td class="text-sm font-mono opacity-70 hidden md:table-cell text-center">{{ post.views }}</td>
     <td class="text-right pr-4">
         <div class="join">

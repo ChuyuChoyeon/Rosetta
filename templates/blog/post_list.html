@@ -101,7 +101,7 @@
                                     <span class="text-xs font-medium">置顶</span>
                                 </div>
                                 {% endif %}
-                                {% if post.created_at|date:"Y-m-d" == now|date:"Y-m-d" %}
+                                {% if post.published_at|default:post.created_at|date:"Y-m-d" == now|date:"Y-m-d" %}
                                 <div class="badge badge-secondary badge-sm">最新</div>
                                 {% endif %}
                                 {% if post.category %}
@@ -117,7 +117,7 @@
                                 <div class="flex items-center gap-3">
                                     <div class="flex items-center gap-1" title="发布时间">
                                         <span class="material-symbols-outlined text-[14px]">calendar_today</span>
-                                        <span>{{ post.created_at|date:"m-d" }}</span>
+                                        <span>{{ post.published_at|default:post.created_at|date:"m-d" }}</span>
                                     </div>
                                     <div class="flex items-center gap-1" title="阅读量">
                                         <span class="material-symbols-outlined text-[14px]">visibility</span>

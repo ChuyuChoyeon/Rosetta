@@ -22,13 +22,21 @@
 </div>
 
 <script>
-    // 自动滚动到底部
-    document.addEventListener('DOMContentLoaded', function() {
-        const logContainer = document.getElementById('log-container');
-        if (logContainer) {
-            logContainer.scrollTop = logContainer.scrollHeight;
+    (function() {
+        const initLogScroll = (root) => {
+            const scope = root || document;
+            const logContainer = scope.getElementById ? scope.getElementById('log-container') : scope.querySelector('#log-container');
+            if (logContainer) {
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+        };
+        initLogScroll(document);
+        if (window.registerHtmxInit) {
+            window.registerHtmxInit(initLogScroll);
+        } else {
+            document.addEventListener('htmx:afterSettle', (evt) => initLogScroll(evt.target));
         }
-    });
+    })();
 </script>
 
 {% endblock %}
