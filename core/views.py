@@ -84,12 +84,48 @@ class PageView(DetailView):
             item.strip() for item in str(site_keywords).split(",") if item.strip()
         ]
         page = self.object
+        
+        # Render page content as a template to support {{ config.SITE_NAME }} etc.
+        if page and page.content:
+            from django.template import Template, Context
+            try:
+                # Use current context to render the content
+                # We need to ensure 'config' is available. 
+                # Since we are in get_context_data, context processors haven't run yet for *this* dictionary,
+                # but they will run when the final response is rendered.
+                # However, to render the string *now*, we need the values.
+                
+                # A safer/simpler way for just config is to pass it explicitly if needed,
+                # or use RequestContext if we were in a view function.
+                # Here we just want to support 'config' and basic tags.
+                
+                # Let's create a temporary context with 'config' and 'request'
+                render_ctx = Context({
+                    'config': config,
+                    'request': self.request,
+                    'user': self.request.user,
+                    'site_name': site_name, # helper
+                })
+                template = Template(page.content)
+                rendered_content = template.render(render_ctx)
+                context['rendered_content'] = rendered_content
+            except Exception as e:
+                # Fallback to raw content if rendering fails
+                context['rendered_content'] = page.content
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Failed to render page content template: {e}")
+        else:
+            context['rendered_content'] = ""
+
         description = site_desc
         if page and page.content:
             from django.utils.html import strip_tags
             import markdown
 
-            text = strip_tags(markdown.markdown(page.content))
+            # Use the rendered content for description to avoid {{ }} showing up
+            text_source = context.get('rendered_content', page.content)
+            text = strip_tags(markdown.markdown(text_source))
             if text:
                 description = text[:150] + "..." if len(text) > 150 else text
         if page and page.title:
@@ -127,13 +163,13 @@ def health_check(request):
     )
 
 
-@user_passes_test(lambda u: u.is_staff, login_url="users:login")
+@user_passes_test(lambda u: u.is_superuser, login_url="users:login")
 def admin_debug(request):
     """
     调试工具视图
 
     提供 Mock 数据生成、缓存清理和邮件测试功能。
-    仅限管理员访问。
+    仅限超级管理员访问。
     """
     if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
         return JsonResponse({"error": "Not found"}, status=404)
@@ -247,7 +283,7 @@ def admin_debug(request):
     return render(request, "administration/debug.html", context)
 
 
-@user_passes_test(lambda u: u.is_staff, login_url="users:login")
+@user_passes_test(lambda u: u.is_superuser, login_url="users:login")
 def debug_api_stats(request):
     """
     调试 API：返回系统统计数据
@@ -277,7 +313,7 @@ def debug_api_stats(request):
     )
 
 
-@user_passes_test(lambda u: u.is_staff, login_url="users:login")
+@user_passes_test(lambda u: u.is_superuser, login_url="users:login")
 def debug_api_system(request):
     """
     调试 API：返回系统环境信息
@@ -343,7 +379,7 @@ def debug_api_system(request):
     )
 
 
-@user_passes_test(lambda u: u.is_staff, login_url="users:login")
+@user_passes_test(lambda u: u.is_superuser, login_url="users:login")
 def debug_api_migrations(request):
     """
     调试 API：返回待执行的数据库迁移列表。
@@ -367,7 +403,7 @@ def debug_api_migrations(request):
         return JsonResponse({"count": 0, "pending": [], "error": str(exc)}, status=500)
 
 
-@user_passes_test(lambda u: u.is_staff, login_url="users:login")
+@user_passes_test(lambda u: u.is_superuser, login_url="users:login")
 def debug_execute_command(request):
     """
     调试 API：执行受限的 Django 管理命令。

@@ -18,7 +18,12 @@ class UserTitleForm(forms.ModelForm):
         fields = ["name", "color", "icon", "description"]
         widgets = {
             "name": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
-            "color": forms.Select(attrs={"class": "select select-bordered w-full"}),
+            "color": forms.TextInput(
+                attrs={
+                    "class": "input input-bordered w-full h-10 p-1 cursor-pointer",
+                    "type": "color",
+                }
+            ),
             "icon": forms.Textarea(
                 attrs={
                     "class": "textarea textarea-bordered w-full h-24 font-mono text-xs",
@@ -68,10 +73,14 @@ class PostForm(forms.ModelForm):
             "password",
             "is_pinned",
             "allow_comments",
+            "meta_title",
+            "meta_description",
+            "meta_keywords",
         ]
         widgets = {
             "content": forms.Textarea(attrs={"rows": 20}),
             "excerpt": forms.Textarea(attrs={"rows": 3}),
+            "meta_description": forms.Textarea(attrs={"rows": 2}),
             "cover_image": forms.FileInput(
                 attrs={"class": "file-input file-input-bordered w-full"}
             ),
@@ -242,6 +251,104 @@ class PageForm(forms.ModelForm):
         widgets = {
             "content": forms.Textarea(attrs={"rows": 20}),
         }
+
+    def clean_content(self):
+        content = self.cleaned_data.get("content")
+        if content:
+            import bleach
+
+            allowed_tags = list(bleach.sanitizer.ALLOWED_TAGS) + [
+                "h1",
+                "h2",
+                "h3",
+                "h4",
+                "h5",
+                "h6",
+                "p",
+                "div",
+                "span",
+                "br",
+                "hr",
+                "ul",
+                "ol",
+                "li",
+                "dl",
+                "dt",
+                "dd",
+                "img",
+                "pre",
+                "code",
+                "blockquote",
+                "table",
+                "thead",
+                "tbody",
+                "tr",
+                "th",
+                "td",
+                "strong",
+                "em",
+                "b",
+                "i",
+                "u",
+                "s",
+                "strike",
+                "iframe",
+                "figure",
+                "figcaption",
+                "video",
+                "audio",
+                "source",
+            ]
+            allowed_attrs = {
+                "*": ["class", "id", "style", "title", "data-theme"],
+                "a": ["href", "target", "rel"],
+                "img": ["src", "alt", "width", "height"],
+                "iframe": [
+                    "src",
+                    "width",
+                    "height",
+                    "frameborder",
+                    "allow",
+                    "allowfullscreen",
+                ],
+                "video": [
+                    "src",
+                    "controls",
+                    "width",
+                    "height",
+                    "poster",
+                    "autoplay",
+                    "loop",
+                    "muted",
+                    "playsinline",
+                ],
+                "audio": ["src", "controls", "autoplay", "loop", "muted"],
+                "source": ["src", "type"],
+            }
+            allowed_styles = [
+                "color",
+                "background-color",
+                "text-align",
+                "font-size",
+                "font-weight",
+                "text-decoration",
+                "width",
+                "height",
+                "display",
+                "margin",
+                "padding",
+                "border",
+                "border-radius",
+            ]
+
+            content = bleach.clean(
+                content,
+                tags=allowed_tags,
+                attributes=allowed_attrs,
+                styles=allowed_styles,
+                strip=True,
+            )
+        return content
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

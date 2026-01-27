@@ -1,0 +1,32 @@
+<script>
+    // Theme initialization to prevent FOUC
+    (function() {
+        try {
+            // 1. Get stored theme or system preference
+            var localTheme = localStorage.getItem('theme');
+            var theme = localTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            // 2. Server-side user preference override
+            {% if user.is_authenticated and user.preference.theme and user.preference.theme != 'auto' %}
+                theme = "{{ user.preference.theme }}";
+                localStorage.setItem('theme', theme);
+            {% endif %}
+
+            // 3. Apply theme
+            // If ThemeManager is loaded (theme.js), use it (frontend case)
+            if (window.ThemeManager) {
+                window.ThemeManager.applyTheme(theme, false);
+            } else {
+                // Fallback / Admin case: direct DOM manipulation
+                document.documentElement.setAttribute('data-theme', theme);
+                if (theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+        } catch (e) {
+            console.error('Theme initialization error:', e);
+        }
+    })();
+</script>

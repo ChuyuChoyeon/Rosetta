@@ -17,6 +17,13 @@ class CommentForm(forms.ModelForm):
                     "class": "textarea textarea-bordered w-full focus:textarea-primary transition-all",
                     "placeholder": "参与讨论...",
                     "rows": 3,
+                    "maxlength": "2000",  # 前端限制
                 }
             )
         }
+
+    def clean_content(self):
+        content = self.cleaned_data.get("content")
+        if len(content) > 2000:
+            raise forms.ValidationError("评论内容过长，请控制在 2000 字以内。")
+        return content

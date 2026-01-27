@@ -1,6 +1,14 @@
 {% extends 'base.html' %}
 {% load static capture_tags markdown_extras %}
 
+{% block extra_head %}
+    {% if website_schema %}
+    <script type="application/ld+json">
+    {{ website_schema|safe }}
+    </script>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
 <div x-data="{ 
     viewMode: localStorage.getItem('blogViewMode') || 'grid',

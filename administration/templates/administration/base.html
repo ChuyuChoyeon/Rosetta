@@ -33,6 +33,11 @@
     <link rel="shortcut icon" href="{{ config.SITE_FAVICON|default:'/static/core/img/favicon.ico' }}">
     <title>{% block title %}{{ config.SITE_HEADER|default:"Rosetta Dashboard" }}{% endblock %}</title>
     {% tailwind_css %}
+
+    <!-- NProgress & PageLoader -->
+    <script src="{% static 'theme/js/nprogress.js' %}"></script>
+    <link rel="stylesheet" href="{% static 'theme/css/nprogress.css' %}" />
+    <script src="{% static 'js/page-loader.js' %}"></script>
     
     <!-- Alpine.js -->
     <script defer src="{% static 'theme/js/alpine.min.js' %}"></script>
@@ -40,150 +45,9 @@
     <!-- HTMX -->
     <script src="{% static 'theme/js/htmx.min.js' %}"></script>
     <script src="{% static 'js/htmx-init.js' %}"></script>
-
-    <!-- Admin Utils (Confirm Modal, etc.) -->
-    <script>
-    // Global Helper Functions
-    window.ensureGlobalModals = function() {
-        const hasConfirm = document.getElementById('global_confirm_modal');
-        const hasAlert = document.getElementById('global_alert_modal');
-        if (!hasConfirm || !hasAlert) {
-            const wrapper = document.createElement('div');
-            wrapper.innerHTML = `
-            <dialog id="global_confirm_modal" class="modal">
-                <div class="modal-box">
-                    <h3 class="font-bold text-lg flex items-center gap-2 text-warning" id="global_confirm_title">
-                        <span class="material-symbols-outlined">warning</span>
-                        确认操作
-                    </h3>
-                    <p class="py-4 text-base-content/80" id="global_confirm_message">确定要执行此操作吗？</p>
-                    <div class="modal-action">
-                        <button type="button" class="btn btn-ghost" data-modal-close="global_confirm_modal">取消</button>
-                        <button type="button" id="global_confirm_btn" class="btn btn-error text-white shadow-lg shadow-error/20">确定</button>
-                    </div>
-                </div>
-                <div class="modal-backdrop" data-modal-close="global_confirm_modal"></div>
-            </dialog>
-            <dialog id="global_alert_modal" class="modal">
-                <div class="modal-box">
-                    <h3 class="font-bold text-lg flex items-center gap-2 text-info">
-                        <span class="material-symbols-outlined">info</span>
-                        提示
-                    </h3>
-                    <p class="py-4 text-base-content/80" id="global_alert_message"></p>
-                    <div class="modal-action">
-                        <button type="button" class="btn btn-primary" data-modal-close="global_alert_modal">确定</button>
-                    </div>
-                </div>
-                <div class="modal-backdrop" data-modal-close="global_alert_modal"></div>
-            </dialog>
-            `;
-            document.body.appendChild(wrapper);
-        }
-        document.querySelectorAll('[data-modal-close]').forEach((el) => {
-            if (el.dataset.bound === '1') return;
-            el.dataset.bound = '1';
-            el.addEventListener('click', (evt) => {
-                evt.preventDefault();
-                const modalId = el.getAttribute('data-modal-close');
-                const modal = document.getElementById(modalId);
-                if (modal) modal.close();
-            });
-        });
-    };
-
-    window.showConfirmModal = function(title, message, onConfirm) {
-        ensureGlobalModals();
-        const modal = document.getElementById('global_confirm_modal');
-        const titleEl = document.getElementById('global_confirm_title');
-        const msgEl = document.getElementById('global_confirm_message');
-        const btn = document.getElementById('global_confirm_btn');
-        if (!modal || !titleEl || !msgEl || !btn) return;
-        titleEl.innerHTML = `<span class="material-symbols-outlined">warning</span> ${title}`;
-        msgEl.textContent = message;
-        const newBtn = btn.cloneNode(true);
-        btn.parentNode.replaceChild(newBtn, btn);
-        newBtn.onclick = () => {
-            onConfirm();
-            modal.close();
-        };
-        modal.showModal();
-    };
-
-    window.showGlobalAlert = function(message) {
-        ensureGlobalModals();
-        const modal = document.getElementById('global_alert_modal');
-        const msgEl = document.getElementById('global_alert_message');
-        if (!modal || !msgEl) return;
-        msgEl.textContent = message;
-        modal.showModal();
-    };
-
-    window.showToast = function(message, type = 'success') {
-        window.dispatchEvent(new CustomEvent('show-toast', {
-            detail: { message, type }
-        }));
-    };
-
-    // HTMX Confirmation Helper
-    // Usage: <button hx-post="..." hx-trigger="confirmed" onclick="confirmHtmx(this, 'Msg')">
-    window.confirmHtmx = function(element, message) {
-        // Prevent default HTMX trigger immediately
-        // Use window.event for inline handlers if event is not passed
-        if (window.event) {
-            window.event.preventDefault();
-            window.event.stopPropagation();
-        }
-        
-        showConfirmModal(
-            '确认操作',
-            message || '确定要执行此操作吗？',
-            () => {
-                // Trigger the actual HTMX request
-                htmx.trigger(element, 'confirmed');
-            }
-        );
-    };
-
-    // Legacy Support (Deprecated but kept for non-HTMX actions if any)
-    window.confirmDelete = function(url, message) {
-        window.showConfirmModal(
-            '确认删除', 
-            message || '确定要删除此项目吗？此操作无法撤销。',
-            () => {
-                // Check if it's a form submit or link navigation
-                if (url.startsWith('javascript:')) {
-                    eval(url);
-                } else {
-                    // Create a form to submit POST request for deletion (Best Practice)
-                    // This avoids the intermediate confirmation page and ensures proper HTTP method usage
-                    const form = document.createElement('form');
-                    form.method = 'POST';
-                    form.action = url;
-                    form.style.display = 'none';
-                    // Disable HTMX processing for this form to ensure standard browser submission
-                    form.setAttribute('hx-boost', 'false');
-                    form.setAttribute('hx-disable', 'true');
-                    
-                    // Add CSRF Token
-                    const csrfToken = document.querySelector('input[name="csrfmiddlewaretoken"]')?.value;
-                    if (csrfToken) {
-                        const csrfInput = document.createElement('input');
-                        csrfInput.type = 'hidden';
-                        csrfInput.name = 'csrfmiddlewaretoken';
-                        csrfInput.value = csrfToken;
-                        form.appendChild(csrfInput);
-                    } else {
-                        console.error('CSRF Token not found! Delete action may fail.');
-                    }
-                    
-                    document.body.appendChild(form);
-                    form.submit();
-                }
-            }
-        );
-    };
-    </script>
+    
+    <!-- Global UI Helpers -->
+    <script src="{% static 'js/ui-helpers.js' %}"></script>
     
     <!-- ApexCharts -->
     <script src="{% static 'theme/js/apexcharts.min.js' %}"></script>
@@ -230,7 +94,10 @@
     <link rel="stylesheet" href="{% static 'theme/css/editor-overrides.css' %}" />
     <script src="{% static 'theme/js/toastui-editor-all.min.js' %}"></script>
 </head>
-<body class="min-h-screen flex flex-col scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-base-100 {% if debug %}debug-screens{% endif %}" hx-boost="true" hx-ext="class-tools">
+<body class="min-h-screen flex flex-col scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-base-100 {% if debug %}debug-screens{% endif %}" 
+      hx-boost="true" 
+      hx-ext="class-tools"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
     <!-- Inspira UI: Neural Background -->
     {% include 'components/inspira/neural_background.html' %}
@@ -571,6 +438,9 @@
             );
         }
     </script>
+    
+    <!-- Global Modals -->
+    {% include 'components/confirm_modal.html' %}
     
     <!-- Global Command Palette -->
     <div x-data="{ 

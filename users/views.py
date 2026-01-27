@@ -1,4 +1,5 @@
 import json
+import re
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
@@ -88,6 +89,12 @@ class UpdateThemeView(LoginRequiredMixin, View):
             data = json.loads(request.body or "{}")
             theme = data.get("theme")
             if theme:
+                # Validate theme name to prevent XSS (alphanumeric and hyphens only)
+                if not re.match(r"^[a-zA-Z0-9-]+$", theme):
+                    return JsonResponse(
+                        {"status": "error", "message": "Invalid theme name"}, status=400
+                    )
+
                 UserPreference.objects.update_or_create(
                     user=request.user, defaults={"theme": theme}
                 )
@@ -136,13 +143,21 @@ class UnifiedProfileView(View):
         - 如果未提供 username 且当前用户已登录，则返回当前用户（查看自己）。
         - 否则返回 None。
         """
+        from django.db.models import Sum
         if username:
             return get_object_or_404(
-                User.objects.select_related("preference"), username=username
+                User.objects.select_related("preference").annotate(
+                    total_views_annotated=Sum("posts__views")
+                ),
+                username=username,
             )
         # 如果未提供 username 且用户已登录，则默认为当前用户
         if self.request.user.is_authenticated:
-            return self.request.user
+            # Re-fetch user to get annotation if needed, or rely on property
+            # Ideally we should annotate current user too if we use total_views
+            return User.objects.select_related("preference").annotate(
+                total_views_annotated=Sum("posts__views")
+            ).get(pk=self.request.user.pk)
         return None
 
     def get(self, request, username=None):

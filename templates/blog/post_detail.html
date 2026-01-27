@@ -59,6 +59,39 @@
 {% endblock %}
 
 {% block content %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ post.meta_title|default:post.title|escapejs }}",
+  "description": "{{ meta.description|escapejs }}",
+  "keywords": "{{ meta.keywords|join:','|escapejs }}",
+  {% if post.cover_image %}
+  "image": [
+    "{{ request.scheme }}://{{ request.get_host }}{{ post.cover_image.url }}"
+  ],
+  {% else %}
+  "image": [
+    "{{ request.scheme }}://{{ request.get_host }}{% static 'core/img/logo.png' %}"
+  ],
+  {% endif %}
+  "datePublished": "{{ post.published_at|default:post.created_at|date:'c' }}",
+  "dateModified": "{{ post.updated_at|date:'c' }}",
+  "author": [{
+      "@type": "Person",
+      "name": "{{ post.author.nickname|default:post.author.username|escapejs }}",
+      "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'users:user_public_profile' post.author.username %}"
+  }],
+  "publisher": {
+      "@type": "Organization",
+      "name": "{{ config.SITE_NAME|default:'Rosetta Blog'|escapejs }}",
+      "logo": {
+          "@type": "ImageObject",
+          "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'core/img/logo.png' %}"
+      }
+  }
+}
+</script>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
         <!-- 主要内容区域 (Main Content) -->
@@ -134,7 +167,9 @@
             <!-- 正文内容 (Content Body) -->
             <div class="bg-base-100 p-8 md:p-12 rounded-3xl shadow-sm border border-base-content/5 relative group/article overflow-hidden">
                 {% include 'components/inspira/border_beam.html' with duration='12' rx='24px' %}
-                <div id="post-content" class="min-h-[200px]"></div>
+                <div id="post-content" class="min-h-[200px] markdown-body">
+                    {{ post.content|markdown }}
+                </div>
                 {{ post.content|json_script:"post-content-data" }}
             </div>
             
@@ -172,7 +207,7 @@
                         <div class="bg-base-100 rounded-xl overflow-hidden border border-base-content/5 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
                             {% if related_post.cover_image %}
                             <div class="aspect-video overflow-hidden">
-                                <img src="{{ related_post.cover_image.url }}" alt="{{ related_post.title }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                <img src="{{ related_post.cover_image.url }}" alt="{{ related_post.title }}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                             </div>
                             {% else %}
                             <figure class="aspect-video relative overflow-hidden group-hover:brightness-110 transition-all duration-300 ease-in-out flex items-center justify-center text-center pattern-placeholder"

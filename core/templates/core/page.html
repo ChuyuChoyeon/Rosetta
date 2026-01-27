@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load markdown_extras %}
 
 {% block title %}{{ page.title }} - Rosetta{% endblock %}
 
@@ -15,7 +16,7 @@
         </header>
 
         <article class="prose prose-lg md:prose-xl mx-auto dark:prose-invert relative z-10">
-            {{ page.content|safe }}
+            {{ rendered_content|default:page.content|markdown }}
         </article>
     </div>
 </div>

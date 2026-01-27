@@ -1,6 +1,8 @@
 from django import template
 from django.utils import timezone
 from datetime import timedelta
+import bleach
+from django.utils.safestring import mark_safe
 
 register = template.Library()
 
@@ -34,3 +36,35 @@ def time_ago(value):
         return f"{diff.seconds // 3600}小时前"
     else:
         return f"{diff.days}天前"
+
+
+@register.filter(name='sanitize_svg')
+def sanitize_svg(value):
+    """
+    Sanitize SVG content using bleach to prevent XSS.
+    Allows common SVG tags and attributes.
+    """
+    if not value:
+        return ""
+    
+    allowed_tags = [
+        'svg', 'g', 'path', 'rect', 'circle', 'line', 'polyline', 'polygon', 
+        'ellipse', 'defs', 'linearGradient', 'stop', 'style', 'use', 'symbol', 'desc', 'title'
+    ]
+    
+    allowed_attributes = {
+        '*': [
+            'class', 'style', 'id', 'fill', 'stroke', 'stroke-width', 'stroke-linecap', 'stroke-linejoin',
+            'viewBox', 'width', 'height', 'd', 'opacity', 'transform', 'points', 
+            'x', 'y', 'x1', 'y1', 'x2', 'y2', 'cx', 'cy', 'r', 'rx', 'ry', 
+            'xmlns', 'version', 'preserveAspectRatio', 'offset', 'stop-color', 'stop-opacity'
+        ],
+    }
+    
+    cleaned = bleach.clean(
+        value,
+        tags=allowed_tags,
+        attributes=allowed_attributes,
+        strip=True
+    )
+    return mark_safe(cleaned)

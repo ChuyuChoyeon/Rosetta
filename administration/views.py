@@ -57,6 +57,9 @@ from core.utils import (
 import uuid
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import force_str
+import logging
+
+logger = logging.getLogger(__name__)
 
 User = get_user_model()
 
@@ -98,7 +101,7 @@ class AuditLogMixin:
         except Exception as e:
             # In development, print errors to help debugging
             if settings.DEBUG:
-                print(f"Failed to create audit log: {e}")
+                logger.error(f"Failed to create audit log: {e}")
             pass
 
 
@@ -140,7 +143,6 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context: Dict[str, Any] = super().get_context_data(**kwargs)
-        import json
 
         # 1. 关键指标统计 (Key Metrics)
         today = timezone.now()
@@ -1358,6 +1360,13 @@ class UserExportView(BaseExportView):
     """
 
     model = User
+    exclude_fields = [
+        "password",
+        "is_superuser",
+        "is_staff",
+        "groups",
+        "user_permissions",
+    ]
 
 
 class UserImportView(BaseImportView):
@@ -1367,6 +1376,14 @@ class UserImportView(BaseImportView):
 
     model = User
     success_url = reverse_lazy("administration:user_list")
+    exclude_fields = [
+        "password",
+        "is_superuser",
+        "is_staff",
+        "groups",
+        "user_permissions",
+        "last_login",  # 避免覆盖登录时间
+    ]
 
 
 # --- User Title Views (用户称号视图) ---
@@ -1785,8 +1802,8 @@ class BulkActionView(LoginRequiredMixin, StaffRequiredMixin, View):
                                 action_flag=DELETION,
                                 change_message="通过管理后台批量删除",
                             )
-                        except:
-                            pass
+                        except Exception as e:
+                            logger.error(f"批量删除日志记录失败: {e}")
                 
                 objects.delete()
                 messages.success(request, "批量删除成功")
@@ -1809,8 +1826,8 @@ class BulkActionView(LoginRequiredMixin, StaffRequiredMixin, View):
                                     action_flag=CHANGE,
                                     change_message="批量发布",
                                 )
-                            except:
-                                pass
+                            except Exception as e:
+                                logger.error(f"批量发布日志记录失败: {e}")
                     messages.success(request, "批量发布成功")
             elif action == "draft":
                 if hasattr(model_cls, "status"):
@@ -2436,11 +2453,77 @@ class SystemToolsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         # Database Backups
         context["backups"] = list_backups()
 
+        # Privacy Policy Status
+        context["privacy_policy_exists"] = Page.objects.filter(slug="privacy-policy").exists()
+
         return context
 
     def post(self, request, *args, **kwargs):
         action = request.POST.get("action")
         
+        if action == "init_privacy_policy":
+            try:
+                if Page.objects.filter(slug="privacy-policy").exists():
+                    messages.info(request, "隐私政策页面已存在")
+                else:
+                    privacy_content = """# 隐私政策
+
+**生效日期：** 2024年01月01日
+
+欢迎访问 {{ config.SITE_NAME }}（以下简称“本站”）。我们非常重视您的隐私保护。本隐私政策旨在向您说明我们如何收集、使用、存储和保护您的个人信息。
+
+## 1. 我们收集的信息
+
+当您访问本站或使用我们的服务时，我们可能会收集以下类型的信息：
+
+*   **日志信息：** 包括您的 IP 地址、浏览器类型、访问时间、访问页面等服务器日志信息。
+*   **交互信息：** 如果您发表评论或留言，我们会收集您提交的昵称、邮箱地址（仅用于通知，不会公开）和评论内容。
+*   **Cookie：** 我们使用 Cookie 来改善用户体验，例如记住您的偏好设置。
+
+## 2. 信息的使用
+
+我们收集的信息主要用于：
+
+*   提供和维护本站的服务。
+*   改善网站内容和用户体验。
+*   在您同意的情况下，向您发送相关通知（如评论回复）。
+*   保障网站安全，防止欺诈和滥用。
+
+## 3. 信息共享与披露
+
+我们要么不共享您的个人信息，除非：
+
+*   获得您的明确同意。
+*   法律法规要求或响应政府部门的强制性命令。
+*   为了保护本站或公众的权利、财产或安全。
+
+## 4. 数据安全
+
+我们采取合理的安全措施来保护您的个人信息，防止未经授权的访问、使用或泄露。
+
+## 5. 您的权利
+
+您有权查阅、更正或删除您的个人信息。如果您希望行使这些权利，请通过 {{ config.CONTACT_EMAIL }} 联系我们。
+
+## 6. 变更通知
+
+我们可能会不时更新本隐私政策。更新后的政策将发布在本页面，并更新“生效日期”。
+
+## 7. 联系我们
+
+如果您对本隐私政策有任何疑问，请联系：{{ config.SITE_EMAIL }}"""
+
+                    Page.objects.create(
+                        title="隐私政策",
+                        slug="privacy-policy",
+                        content=privacy_content,
+                        status="published",
+                    )
+                    messages.success(request, "隐私政策页面初始化成功")
+            except Exception as e:
+                messages.error(request, f"初始化失败: {str(e)}")
+            return redirect("administration:system_tools")
+
         if action == "rebuild_watson":
             result = trigger_watson_rebuild_async()
             if result["accepted"]:
@@ -2547,10 +2630,9 @@ class SystemMonitorView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             })
         except Exception as e:
             # Log error for debugging
-            import sys
             import traceback
-            print(f"[SystemMonitor Error] {str(e)}", file=sys.stderr)
-            traceback.print_exc(file=sys.stderr)
+            logger.error(f"[SystemMonitor Error] {str(e)}")
+            logger.error(traceback.format_exc())
             
             context.update({
                 "cpu_percent": 0,

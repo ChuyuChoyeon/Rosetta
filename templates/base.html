@@ -50,6 +50,7 @@
     <link href="{% static 'theme/css/cropper.min.css' %}" rel="stylesheet">
 
     {% block extra_css %}{% endblock %}
+    {% block extra_head %}{% endblock %}
 
     {% if config.EXTRA_HEAD_CODE %}
     {{ config.EXTRA_HEAD_CODE|safe }}
@@ -59,95 +60,23 @@
     <script src="{% static 'theme/js/nprogress.js' %}"></script>
     <link rel="stylesheet" href="{% static 'theme/css/nprogress.css' %}" />
     
-    <script>
-        // --- NProgress 进度条配置 ---
-        // 初始化进度条参数
-        NProgress.configure({ 
-            showSpinner: false, // 不显示加载转圈
-            minimum: 0.2,       // 最小百分比
-            easing: 'ease',     // 动画曲线
-            speed: 500          // 动画速度 (ms)
-        });
-        
-        // --- 全局页面加载状态管理 ---
-        // PageLoader 对象用于统一管理页面加载状态
-        const PageLoader = {
-            start: function() {
-                NProgress.start();
-                document.body.classList.add('loading-state'); // 添加 loading 类，可用于 CSS 样式控制
-            },
-            done: function() {
-                NProgress.done();
-                document.body.classList.remove('loading-state');
-            }
-        };
-
-        // --- HTMX 事件绑定 ---
-        // 绑定 HTMX 请求生命周期，实现无刷新加载时的进度条显示
-        document.addEventListener("htmx:beforeRequest", () => PageLoader.start());
-        document.addEventListener("htmx:afterRequest", () => PageLoader.done());
-        document.addEventListener("htmx:historyRestore", () => PageLoader.done());
-        
-        // --- 常规页面加载绑定 ---
-        // 处理普通链接跳转和页面刷新
-        window.addEventListener('beforeunload', () => PageLoader.start());
-        document.addEventListener('DOMContentLoaded', () => PageLoader.done());
-        
-        // --- 浏览器后退/前进缓存 (bfcache) 处理 ---
-        // 当页面从缓存中恢复时，确保加载状态被重置
-        window.addEventListener('pageshow', function(event) {
-            if (event.persisted) {
-                PageLoader.done();
-            }
-        });
-    </script>
+    <script src="{% static 'js/page-loader.js' %}"></script>
     <script src="{% static 'theme/js/htmx.min.js' %}"></script>
     <script defer src="{% static 'theme/js/alpine.min.js' %}"></script>
     <script src="{% static 'theme/js/cropper.min.js' %}"></script>
     <script src="{% static 'theme/js/geopattern.min.js' %}"></script>
     <script src="{% static 'theme/js/theme.js' %}"></script>
     <script src="{% static 'theme/js/ui.js' %}"></script>
+    <script src="{% static 'js/ui-helpers.js' %}"></script>
 
     <script>
         // --- 全局配置 ---
         {% if user.is_authenticated %}
         window.USER_PREFERENCE_URL = "{% url 'users:update_theme' %}";
         {% endif %}
-
-        // --- 主题初始化 (Theme Initialization) ---
-        // 立即执行以防止 FOUC (Flash of Unstyled Content, 无样式内容闪烁)
-        (function() {
-            try {
-                // 1. 获取本地存储的主题或系统偏好
-                var localTheme = localStorage.getItem('theme');
-                var theme = localTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-                
-                // 2. 服务端用户偏好覆盖 (如果用户已登录)
-                {% if user.is_authenticated and user.preference.theme and user.preference.theme != 'auto' %}
-                    theme = "{{ user.preference.theme }}";
-                    localStorage.setItem('theme', theme);
-                {% endif %}
-
-                // 3. 应用主题
-                // 如果 ThemeManager 已加载 (theme.js)，则使用它
-                if (window.ThemeManager) {
-                    // false = 不要立即同步回后端 (避免冗余请求，因为我们刚从后端获取)
-                    window.ThemeManager.applyTheme(theme, false);
-                } else {
-                    // 降级处理：直接设置 HTML 属性
-                    document.documentElement.setAttribute('data-theme', theme);
-                    // 为某些主题添加 dark 类 (Tailwind dark mode 支持)
-                    if (['dark'].includes(theme)) {
-                        document.documentElement.classList.add('dark');
-                    } else {
-                        document.documentElement.classList.remove('dark');
-                    }
-                }
-            } catch (e) {
-                console.error('Theme initialization error:', e);
-            }
-        })();
     </script>
+    
+    {% include 'partials/theme_init.html' %}
     
     <style>
         body { font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", Arial, sans-serif; }
@@ -187,7 +116,10 @@
     </style>
 </head>
 
-<body class="min-h-screen flex flex-col font-sans text-base-content selection:bg-primary selection:text-primary-content scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-base-100 {% if debug %}debug-screens{% endif %}" x-data="{ showScrollTop: false }" @scroll.window="showScrollTop = (window.pageYOffset > 300)">
+<body class="min-h-screen flex flex-col font-sans text-base-content selection:bg-primary selection:text-primary-content scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-base-100 {% if debug %}debug-screens{% endif %}" 
+      x-data="{ showScrollTop: false }" 
+      @scroll.window="showScrollTop = (window.pageYOffset > 300)"
+      hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
     <!-- Inspira UI: 神经元背景动画 -->
     {% include 'components/inspira/neural_background.html' %}
@@ -209,9 +141,12 @@
         </main>
         
         <!-- 全局确认弹窗 -->
-        {% include 'components/confirm_modal.html' %}
+    {% include 'components/confirm_modal.html' %}
+    
+    <!-- 文章详情页骨架屏 (Article Skeleton) -->
+    {% include 'components/skeletons/article_skeleton.html' %}
 
-        {% include 'partials/footer.html' %}
+    {% include 'partials/footer.html' %}
     </div>
 
     <!-- 回到顶部按钮 -->

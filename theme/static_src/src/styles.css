@@ -15,9 +15,41 @@ html {
     /* Compatibility & Accessibility */
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
-    
-    /* Scrollbar styling (Firefox support) */
-    scrollbar-color: oklch(var(--p)) oklch(var(--b1));
+}
+
+/* Global Scrollbar Styling */
+/* Firefox */
+* {
+    scrollbar-color: oklch(var(--p)) oklch(var(--b2));
+    scrollbar-width: thin;
+}
+
+/* Webkit (Chrome, Safari, Edge) - Apply to ALL elements */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+    background-color: transparent;
+}
+
+::-webkit-scrollbar-track {
+    background-color: transparent;
+    border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: oklch(var(--p) / 0.5);
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+    transition: background-color 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: oklch(var(--p));
+}
+
+::-webkit-scrollbar-corner {
+    background-color: transparent;
 }
 
 /* Custom NProgress Colors to match theme */

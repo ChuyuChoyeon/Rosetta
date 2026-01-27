@@ -32,6 +32,33 @@
 </div>
 
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Privacy Policy Card -->
+    <div class="card bg-base-100 shadow-sm border border-base-content/5">
+        <div class="card-body gap-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">policy</span>
+                    <h2 class="card-title">隐私政策初始化</h2>
+                </div>
+                <span class="badge badge-outline font-mono
+                    {% if privacy_policy_exists %}badge-success{% else %}badge-warning{% endif %}">
+                    {% if privacy_policy_exists %}已创建{% else %}未创建{% endif %}
+                </span>
+            </div>
+            <p class="text-sm text-base-content/60">
+                如果系统中缺少隐私政策页面（URL: privacy-policy），可以点击下方按钮自动创建默认的隐私政策页面。
+            </p>
+            <form method="post" class="mt-2">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="init_privacy_policy">
+                <button type="submit" class="btn btn-primary btn-sm w-full sm:w-auto gap-2" {% if privacy_policy_exists %}disabled{% endif %}>
+                    <span class="material-symbols-outlined text-lg">add_circle</span>
+                    {% if privacy_policy_exists %}页面已存在{% else %}初始化隐私政策{% endif %}
+                </button>
+            </form>
+        </div>
+    </div>
+
     <!-- Watson Search Index Card -->
     <div class="card bg-base-100 shadow-sm border border-base-content/5">
         <div class="card-body gap-4">

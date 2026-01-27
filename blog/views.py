@@ -117,6 +117,23 @@ class HomeView(SidebarContextMixin, ListView):
         context["meta"] = _build_meta(
             f"{site_name} - 首页", self.request, site_desc, site_keywords
         )
+        
+        # Add WebSite JSON-LD
+        import json
+        website_schema = {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": site_name,
+            "url": self.request.build_absolute_uri("/"),
+            "description": site_desc,
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": self.request.build_absolute_uri("/") + "search/?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        }
+        context["website_schema"] = json.dumps(website_schema)
+        
         return context
 
 
@@ -270,8 +287,10 @@ class PostDetailView(DetailView):
         cache_key = f"post:{post.id}:meta_desc"
         description = cache.get(cache_key)
 
-        # 处理描述：优先使用摘要，否则截取内容并去除 Markdown/HTML 标签
-        if not description:
+        # 处理描述：优先使用自定义描述，其次是缓存，否则生成
+        if post.meta_description:
+            description = post.meta_description
+        elif not description:
             description = post.excerpt
             if not description:
                 from django.utils.html import strip_tags
@@ -286,11 +305,17 @@ class PostDetailView(DetailView):
                 )
             cache.set(cache_key, description, ttl)
 
+        # 处理关键词：优先使用自定义关键词
+        if post.meta_keywords:
+            keywords = [k.strip() for k in post.meta_keywords.split(",") if k.strip()]
+        else:
+            keywords = list(post.tags.values_list("name", flat=True))
+
         published_time = post.published_at or post.created_at
         return Meta(
-            title=post.title,
+            title=post.meta_title or post.title,
             description=description,
-            keywords=list(post.tags.values_list("name", flat=True)),
+            keywords=keywords,
             image=post.cover_image.url if post.cover_image else None,
             url=self.request.build_absolute_uri(),
             object_type="article",
@@ -550,7 +575,13 @@ class SearchView(SidebarContextMixin, ListView):
             results = watson.filter(published_posts, query)
             if results:
                 return results
-        except Exception:
+        except ImportError:
+            # Watson is not installed, fallback to basic search
+            pass
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.warning(f"Watson search failed: {e}")
             pass
 
         return published_posts.filter(

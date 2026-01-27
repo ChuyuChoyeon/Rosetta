@@ -1,19 +1,31 @@
 <!-- Global Confirmation Modal -->
 <dialog id="global_confirm_modal" class="modal">
     <div class="modal-box">
-        <h3 class="font-bold text-lg flex items-center gap-2 text-error" id="confirm_title">
+        <h3 class="font-bold text-lg flex items-center gap-2 text-warning" id="global_confirm_title">
             <span class="material-symbols-outlined">warning</span>
             <span id="confirm_title_text">确认操作</span>
         </h3>
-        <p class="py-4" id="confirm_message">确定要执行此操作吗？此操作无法撤销。</p>
+        <p class="py-4 text-base-content/80" id="global_confirm_message">确定要执行此操作吗？</p>
         <div class="modal-action">
-            <form method="dialog">
-                <button class="btn btn-ghost">取消</button>
-            </form>
-            <form method="post" id="confirm_form">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-error" id="confirm_btn">确认</button>
-            </form>
+            <button type="button" class="btn btn-ghost" data-modal-close="global_confirm_modal">取消</button>
+            <button type="button" id="global_confirm_btn" class="btn btn-error text-white shadow-lg shadow-error/20">确定</button>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+<!-- Global Alert Modal -->
+<dialog id="global_alert_modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg flex items-center gap-2 text-info">
+            <span class="material-symbols-outlined">info</span>
+            提示
+        </h3>
+        <p class="py-4 text-base-content/80" id="global_alert_message"></p>
+        <div class="modal-action">
+            <button type="button" class="btn btn-primary" data-modal-close="global_alert_modal">确定</button>
         </div>
     </div>
     <form method="dialog" class="modal-backdrop">
@@ -22,25 +34,17 @@
 </dialog>
 
 <script>
-    /**
-     * Show global confirmation modal
-     * @param {string} url - The URL to submit the POST request to
-     * @param {string} message - The confirmation message
-     * @param {string} title - The modal title (optional)
-     */
-    window.confirmAction = function(url, message, title) {
-        const modal = document.getElementById('global_confirm_modal');
-        const form = document.getElementById('confirm_form');
-        const msgEl = document.getElementById('confirm_message');
-        const titleTextEl = document.getElementById('confirm_title_text');
-        
-        form.action = url;
-        if (message) msgEl.textContent = message;
-        if (title) titleTextEl.textContent = title;
-        
-        modal.showModal();
-    }
-
-    // Backward compatibility for Admin Dashboard
-    window.confirmDelete = window.confirmAction;
+    // Bind close buttons for included modals
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-modal-close]').forEach((el) => {
+            if (el.dataset.bound === '1') return;
+            el.dataset.bound = '1';
+            el.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                const modalId = el.getAttribute('data-modal-close');
+                const modal = document.getElementById(modalId);
+                if (modal) modal.close();
+            });
+        });
+    });
 </script>

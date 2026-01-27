@@ -1,4 +1,4 @@
-{% load capture_tags %}
+{% load capture_tags core_extras %}
 {% captureas card_content %}
 <div class="h-full flex flex-col justify-between relative z-20">
     <!-- 封面图片 -->
@@ -32,7 +32,7 @@
             <span class="badge badge-{{ profile_user.title.color }} badge-sm gap-1" title="{{ profile_user.title.description }}">
                 {% if profile_user.title.icon %}
                     <span class="w-3 h-3 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
-                         {{ profile_user.title.icon|safe }}
+                         {{ profile_user.title.icon|sanitize_svg }}
                     </span>
                 {% endif %}
                 {{ profile_user.title.name }}

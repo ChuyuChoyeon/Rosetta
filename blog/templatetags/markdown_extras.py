@@ -60,7 +60,7 @@ def markdown_format(text):
     allowed_attributes = {
         "*": ["class", "id"],
         "a": ["href", "title", "target", "rel"],
-        "img": ["src", "alt", "title", "width", "height"],
+        "img": ["src", "alt", "title", "width", "height", "loading"],
         "code": ["class"],
         "pre": ["class"],
         "div": ["class"],
@@ -85,6 +85,9 @@ def markdown_format(text):
         "<table>", '<div class="overflow-x-auto"><table class="table table-zebra">'
     )
     final_html = final_html.replace("</table>", "</table></div>")
+    
+    # Auto-add loading="lazy" to images
+    final_html = final_html.replace('<img ', '<img loading="lazy" ')
 
     return mark_safe(final_html)
 

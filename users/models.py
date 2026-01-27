@@ -112,9 +112,13 @@ class User(AbstractUser):
     def total_views(self):
         """
         获取用户所有文章的总阅读量
+        
+        优化: 优先使用注解字段 total_views_annotated (避免 N+1 查询)
         """
+        if hasattr(self, "total_views_annotated"):
+            return self.total_views_annotated or 0
+            
         from django.db.models import Sum
-
         return self.posts.aggregate(total=Sum("views"))["total"] or 0
 
 

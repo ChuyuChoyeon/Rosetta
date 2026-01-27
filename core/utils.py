@@ -264,81 +264,71 @@ def _run_media_scan(task_key, lock_key, status_ttl):
         
         media_root = settings.MEDIA_ROOT
         
-        # 1. 扫描文件系统
-        fs_files = set()
-        total_size = 0
-        file_details = []
-        
-        for root, dirs, files in os.walk(media_root):
-            for file in files:
-                full_path = os.path.join(root, file)
-                rel_path = os.path.relpath(full_path, media_root).replace("\\", "/")
-                # 忽略隐藏文件和缓存目录 (如 __pycache__, .DS_Store)
-                if file.startswith(".") or "__pycache__" in root:
-                    continue
-                # 忽略 backups 目录 (数据库备份)
-                if rel_path.startswith("backups/"):
-                    continue
-                    
-                fs_files.add(rel_path)
-                size = os.path.getsize(full_path)
-                total_size += size
-                file_details.append({
-                    "path": rel_path,
-                    "size": size,
-                    "mtime": os.path.getmtime(full_path)
-                })
-
-        # 2. 扫描数据库引用
+        # 1. 扫描数据库引用 (优先构建白名单，减少内存占用)
         db_files = set()
         for model in apps.get_models():
             file_fields = [f for f in model._meta.get_fields() if isinstance(f, (models.FileField, models.ImageField))]
             if not file_fields:
                 continue
+            
+            for field in file_fields:
+                # 优化：使用 iterator() 减少内存占用
+                paths = model.objects.exclude(
+                    **{f"{field.name}__isnull": True}
+                ).exclude(
+                    **{f"{field.name}": ""}
+                ).values_list(field.name, flat=True).iterator()
                 
-            for obj in model.objects.all().iterator():
-                for field in file_fields:
-                    file_obj = getattr(obj, field.name)
-                    if file_obj and file_obj.name:
+                for path in paths:
+                    if path:
                         # 归一化路径
-                        name = file_obj.name.replace("\\", "/")
+                        name = str(path).replace("\\", "/")
                         db_files.add(name)
-                        
-                        # 处理可能的 ImageKit 变体或其他衍生文件 (简化处理：假设变体不在此列)
-                        # 如果需要支持 ImageKit CACHE，通常 CACHE 目录在 media 下
-                        # 这里简单起见，如果文件在 CACHE 目录下，我们暂且认为是安全的或者单独处理
-                        # 但实际上 ImageKit 的 CACHE 也是可以重建的，视为 Orphan 可能不准确
-                        # 为了安全，我们只标记不在 DB 中的确切文件
 
-        # 3. 计算孤儿文件
-        # 注意：ImageKit 的 CACHE 目录通常不由 DB 直接引用，而是动态生成
-        # 所以我们需要排除 CACHE 目录，或者更激进地认为 CACHE 可以删除
-        # 这里策略：排除 CACHE 目录下的文件
+        # 2. 扫描文件系统并实时比对
         orphaned = []
         orphaned_size = 0
+        scan_count = 0
+        scan_size = 0
         
-        for f in file_details:
-            path = f["path"]
-            # 排除 CACHE 目录 (ImageKit 默认)
-            if path.startswith("CACHE/"):
-                continue
+        for root, dirs, files in os.walk(media_root):
+            for file in files:
+                full_path = os.path.join(root, file)
+                rel_path = os.path.relpath(full_path, media_root).replace("\\", "/")
                 
-            if path not in db_files:
-                orphaned.append(f)
-                orphaned_size += f["size"]
+                # 忽略隐藏文件、缓存目录和数据库备份
+                if file.startswith(".") or "__pycache__" in root:
+                    continue
+                if rel_path.startswith("backups/"):
+                    continue
+                if rel_path.startswith("CACHE/"): # ImageKit Cache
+                    continue
+                    
+                size = os.path.getsize(full_path)
+                scan_count += 1
+                scan_size += size
+                
+                # 核心比对逻辑：直接检查是否在白名单中
+                if rel_path not in db_files:
+                    orphaned.append({
+                        "path": rel_path,
+                        "size": size,
+                        "mtime": os.path.getmtime(full_path)
+                    })
+                    orphaned_size += size
 
         result = {
             "status": "success",
             "updated_at": timezone.now().isoformat(),
-            "scan_count": len(fs_files),
-            "scan_size": total_size,
+            "scan_count": scan_count,
+            "scan_size": scan_size,
             "orphaned_count": len(orphaned),
             "orphaned_size": orphaned_size,
-            "orphaned_files": orphaned[:100],  # 只存前100个详情，避免缓存爆炸
-            "orphaned_files_all_key": f"{task_key}:files" # 大列表存单独的key (暂未实现完全版，简化)
+            "orphaned_files": orphaned[:100],  # 只存前100个详情
+            "orphaned_files_all_key": f"{task_key}:files"
         }
         cache.set(task_key, result, status_ttl)
-        # 如果需要完整列表，可以单独存
+        
         if orphaned:
              cache.set(f"{task_key}:files", orphaned, status_ttl)
 

@@ -12,6 +12,8 @@ from core.validators import validate_image_file
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from django.utils import timezone
+import re
+import math
 
 
 class Category(models.Model):
@@ -146,15 +148,23 @@ class Post(models.Model):
     is_pinned = models.BooleanField("置顶", default=False)
     allow_comments = models.BooleanField("允许评论", default=True)
 
+    # SEO Fields
+    meta_title = models.CharField(
+        "Meta 标题", max_length=200, blank=True, help_text="覆盖默认的标题，用于搜索引擎显示"
+    )
+    meta_description = models.CharField(
+        "Meta 描述", max_length=200, blank=True, help_text="覆盖默认的描述，建议 160 字以内"
+    )
+    meta_keywords = models.CharField(
+        "Meta 关键词", max_length=200, blank=True, help_text="逗号分隔的关键词"
+    )
+
     @property
     def reading_time(self):
         """
         计算阅读时长 (分钟)
         假设阅读速度: 中文 300 字/分钟, 英文 150 词/分钟
         """
-        import re
-        import math
-
         # 移除 HTML 标签 (如果 content 已经是 Markdown 还没渲染 HTML，则直接计算)
         # 这里假设 content 是 Markdown 源码
         text = self.content
@@ -279,7 +289,10 @@ def _delete_pattern(pattern):
     if callable(delete_pattern):
         delete_pattern(pattern)
     else:
-        cache.clear()
+        # 如果缓存后端不支持 delete_pattern，我们选择不执行全站缓存清理
+        # 因为这在生产环境中风险过大。接受数据短暂不一致（等待 TTL 过期）。
+        # 或者可以记录一条日志提醒
+        pass
 
 
 def _clear_sidebar_cache():

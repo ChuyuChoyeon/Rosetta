@@ -72,6 +72,38 @@
                             <span class="label-text-alt opacity-60">留空将自动根据标题生成</span>
                         </label>
                     </div>
+
+                    <div class="divider"></div>
+
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Meta 标题 (Title)</span>
+                        </label>
+                        {{ form.meta_title }}
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">可选，覆盖默认标题</span>
+                        </label>
+                    </div>
+
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Meta 描述 (Description)</span>
+                        </label>
+                        {{ form.meta_description }}
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">可选，覆盖自动生成的摘要</span>
+                        </label>
+                    </div>
+
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">Meta 关键词 (Keywords)</span>
+                        </label>
+                        {{ form.meta_keywords }}
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">可选，逗号分隔</span>
+                        </label>
+                    </div>
                 {% endcaptureas %}
                 {% include "administration/components/form_card.html" with title="SEO 设置" content=seo_card_content %}
             </div>
