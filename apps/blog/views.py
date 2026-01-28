@@ -361,7 +361,9 @@ class PostDetailView(DetailView):
             is_superuser = request.user.is_superuser
             if not (is_author or is_superuser):
                 session_key = f"post_unlocked_{self.object.pk}"
+                # 如果 session 中没有解锁标记，或者标记为 False，则显示密码输入页
                 if not request.session.get(session_key, False):
+                    # 注意：这里直接返回密码页面，不渲染 post_detail.html
                     return render(
                         request, "blog/password_required.html", {"post": self.object}
                     )
@@ -389,7 +391,16 @@ class PostDetailView(DetailView):
         # 处理密码提交
         if "post_password" in request.POST:
             password = request.POST.get("post_password")
-            if self.object.check_password(password):
+            # 兼容明文密码和哈希密码
+            # 如果密码字段是哈希值（以 pbkdf2_sha256 等开头），使用 check_password
+            # 否则直接比较明文（为了兼容旧数据或简单设置）
+            is_valid = False
+            if self.object.password.startswith('pbkdf2_sha256$') or self.object.password.startswith('argon2'):
+                 is_valid = self.object.check_password(password)
+            else:
+                 is_valid = self.object.password == password
+
+            if is_valid:
                 request.session[f"post_unlocked_{self.object.pk}"] = True
                 messages.success(request, "密码验证通过")
                 return redirect("post_detail", slug=self.object.slug)

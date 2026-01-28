@@ -170,6 +170,20 @@
 
                 {% include "administration/components/form_card.html" with title="发布" icon="publish" content=publish_content actions=publish_actions %}
 
+                <!-- Password Protection -->
+                {% captureas password_content %}
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text">访问密码</span>
+                        </label>
+                        {{ form.password }}
+                        <label class="label">
+                            <span class="label-text-alt opacity-60">设置此密码后，访问文章需要输入密码。留空则公开访问。</span>
+                        </label>
+                    </div>
+                {% endcaptureas %}
+                {% include "administration/components/form_card.html" with title="访问控制" icon="lock" icon_class="text-warning" content=password_content %}
+
                 <!-- Categories & Tags -->
                 {% captureas taxonomy_content %}
                     <div class="form-control w-full">
