@@ -130,8 +130,9 @@ class PageView(DetailView):
                 description = text[:150] + "..." if len(text) > 150 else text
         if page and page.title:
             keywords = keywords + [page.title]
+        site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
         context["meta"] = Meta(
-            title=f"{site_name} - {page.title}",
+            title=f"{page.title}{site_suffix}",
             description=description or "",
             keywords=keywords,
             url=self.request.build_absolute_uri(),

@@ -138,8 +138,15 @@ class Post(models.Model):
     cover_thumbnail = ImageSpecField(
         source="cover_image",
         processors=[ResizeToFill(400, 250)],
-        format="JPEG",
+        format="WEBP",
         options={"quality": 80},
+    )
+
+    cover_optimized = ImageSpecField(
+        source="cover_image",
+        processors=[ResizeToFit(1200, 1200)],
+        format="WEBP",
+        options={"quality": 85},
     )
 
     category = models.ForeignKey(

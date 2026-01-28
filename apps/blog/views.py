@@ -127,8 +127,9 @@ class HomeView(SidebarContextMixin, ListView):
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
         context["meta"] = _build_meta(
-            f"{site_name} - 首页", self.request, site_desc, site_keywords
+            f"首页{site_suffix}", self.request, site_desc, site_keywords
         )
         
         # Add WebSite JSON-LD
@@ -174,6 +175,7 @@ class ArchiveView(SidebarContextMixin, ListView):
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
         
         # Enhanced SEO for Archive
         post_count = self.object_list.count() if hasattr(self, 'object_list') else 0
@@ -182,7 +184,7 @@ class ArchiveView(SidebarContextMixin, ListView):
             archive_desc = f"{archive_desc} {site_desc}"
             
         context["meta"] = _build_meta(
-            f"{site_name} - 归档", self.request, archive_desc, site_keywords + ["文章归档", "历史文章", "全站索引"]
+            f"归档{site_suffix}", self.request, archive_desc, site_keywords + ["文章归档", "历史文章", "全站索引"]
         )
         return context
 
@@ -336,8 +338,9 @@ class PostDetailView(DetailView):
             keywords = list(post.tags.values_list("name", flat=True))
 
         published_time = post.published_at or post.created_at
+        site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
         return Meta(
-            title=post.meta_title or post.title,
+            title=f"{post.meta_title or post.title}{site_suffix}",
             description=description,
             keywords=keywords,
             image=post.cover_image.url if post.cover_image else None,
@@ -467,8 +470,9 @@ class CategoryListView(ListView):
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
         context["meta"] = _build_meta(
-            f"{site_name} - 分类", self.request, site_desc, site_keywords
+            f"分类{site_suffix}", self.request, site_desc, site_keywords
         )
         return context
 
@@ -496,8 +500,9 @@ class TagListView(ListView):
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
         context["meta"] = _build_meta(
-            f"{site_name} - 标签", self.request, site_desc, site_keywords
+            f"标签{site_suffix}", self.request, site_desc, site_keywords
         )
         return context
 
@@ -532,9 +537,10 @@ class PostByCategoryView(SidebarContextMixin, ListView):
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
         keywords = site_keywords + [self.category.name]
         context["meta"] = _build_meta(
-            f"{site_name} - 分类: {self.category.name}",
+            f"分类: {self.category.name}{site_suffix}",
             self.request,
             site_desc,
             keywords,
@@ -790,12 +796,13 @@ class SearchView(SidebarContextMixin, ListView):
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
+        site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
         description = site_desc
         query = context["query"]
         if query:
             description = f"{site_desc} 搜索：{query}" if site_desc else f"搜索：{query}"
         context["meta"] = _build_meta(
-            f"{site_name} - 搜索", self.request, description, site_keywords
+            f"搜索{site_suffix}", self.request, description, site_keywords
         )
         return context
 

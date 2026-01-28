@@ -414,6 +414,7 @@ CONSTANCE_CONFIG = {
 CONSTANCE_CONFIG_FIELDSETS = {
     "基本设置": (
         "SITE_NAME",
+        "SITE_TITLE_SUFFIX",
         "SITE_DESCRIPTION",
         "SITE_KEYWORDS",
         "SITE_AUTHOR",

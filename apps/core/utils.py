@@ -25,9 +25,20 @@ def generate_unique_slug(
 
     # Fallback for empty slug (e.g. purely non-ASCII text without allow_unicode)
     if not origin_slug:
-        # Use first 8 chars of a UUID as fallback or handle as needed
-        # Alternatively, could support pinyin conversion here if needed
-        origin_slug = str(uuid.uuid4())[:8]
+        # Try pinyin first
+        try:
+            from xpinyin import Pinyin
+            p = Pinyin()
+            origin_slug = slugify(p.get_pinyin(source_text, ""))
+        except ImportError:
+            pass
+            
+        # If still empty, use UUID
+        if not origin_slug:
+            origin_slug = str(uuid.uuid4())[:8]
+    
+    # Ensure lowercase
+    origin_slug = origin_slug.lower()
 
     unique_slug = origin_slug
     n = 1
@@ -77,11 +88,14 @@ def _process_post_cover_image(post_id):
     post = Post.objects.filter(id=post_id).first()
     if not post or not post.cover_image:
         return "skipped"
-    spec = post.cover_thumbnail
-    if hasattr(spec, "generate"):
-        spec.generate()
-    else:
-        _ = spec.url
+    
+    # Process both thumbnail and optimized
+    specs = [post.cover_thumbnail, post.cover_optimized]
+    for spec in specs:
+        if hasattr(spec, "generate"):
+            spec.generate()
+        else:
+            _ = spec.url
     return "done"
 
 

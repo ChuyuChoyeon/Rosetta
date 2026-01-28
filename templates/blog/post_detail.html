@@ -219,7 +219,12 @@
                         <div class="bg-base-100 rounded-xl overflow-hidden border border-base-content/5 shadow-sm hover:shadow-md transition-all h-full flex flex-col">
                             {% if related_post.cover_image %}
                             <div class="aspect-video overflow-hidden">
-                                <img src="{{ related_post.cover_image.url }}" alt="{{ related_post.title }}" loading="lazy" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                                <img src="{{ related_post.cover_thumbnail.url }}" 
+                                     alt="{{ related_post.title }}" 
+                                     loading="lazy" 
+                                     width="{{ related_post.cover_thumbnail.width }}"
+                                     height="{{ related_post.cover_thumbnail.height }}"
+                                     class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                             </div>
                             {% else %}
                             <figure class="aspect-video relative overflow-hidden group-hover:brightness-110 transition-all duration-300 ease-in-out flex items-center justify-center text-center pattern-placeholder"

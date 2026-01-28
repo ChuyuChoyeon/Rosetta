@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html lang="zh-Hans">
 <head>
-    <title>{% block title %}{{ config.SITE_NAME|default:"Rosetta Blog" }}{% endblock %}</title>
+    <title>{% block title %}{{ meta.title|default:config.SITE_NAME }}{% endblock %}</title>
     <link rel="shortcut icon" href="{{ config.SITE_FAVICON|default:'/static/core/img/favicon.ico' }}">
     <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="{% url 'post_feed' %}">
     
@@ -11,10 +11,6 @@
     
     <!-- Meta 标签 -->
     {% include 'meta/meta.html' %}
-    
-    {% if config.SITE_KEYWORDS %}
-    <meta name="keywords" content="{{ config.SITE_KEYWORDS }}">
-    {% endif %}
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">

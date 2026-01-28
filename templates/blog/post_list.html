@@ -93,8 +93,10 @@
                         {% if post.cover_image %}
                         <figure class="overflow-hidden relative transition-all duration-300 ease-in-out"
                                 :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'">
-                            <img src="{{ post.cover_image.url }}" 
+                            <img src="{{ post.cover_thumbnail.url }}" 
                                  alt="{{ post.title }}" 
+                                 width="{{ post.cover_thumbnail.width }}"
+                                 height="{{ post.cover_thumbnail.height }}"
                                  class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 group-hover/card:scale-105"
                                  {% if forloop.counter > 6 %}loading="lazy"{% else %}loading="eager"{% endif %} />
                             <div class="absolute inset-0 transition-all duration-300 group-hover/card:bg-black/10 group-hover/card:backdrop-blur-[2px]"></div>
