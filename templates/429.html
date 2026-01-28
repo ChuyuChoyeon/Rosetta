@@ -1,0 +1,65 @@
+{% load static tailwind_tags %}
+<!DOCTYPE html>
+<html lang="zh-Hans">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>请求过于频繁 - {{ config.SITE_NAME|default:"Rosetta" }}</title>
+    <link rel="shortcut icon" href="{{ config.SITE_FAVICON|default:'/static/core/img/favicon.ico' }}">
+    <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">
+    {% tailwind_css %}
+</head>
+<body class="min-h-screen bg-base-200 text-base-content flex items-center justify-center font-sans">
+    <div class="w-full max-w-xl px-6">
+        <div class="card bg-base-100 shadow-xl border border-base-200">
+            <div class="card-body items-center text-center gap-6">
+                <div class="w-24 h-24 rounded-full bg-warning/10 text-warning flex items-center justify-center animate-pulse">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <div class="space-y-2">
+                    <h1 class="text-3xl font-bold">请求过于频繁</h1>
+                    <p class="text-base-content/70 leading-relaxed">
+                        您的操作速度太快了，请喝杯咖啡稍作休息。
+                        <br>
+                        请在 <span id="countdown" class="font-bold font-mono text-warning">60</span> 秒后重试。
+                    </p>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-4">
+                    <button onclick="location.reload()" class="btn btn-primary btn-lg px-10 min-h-12">刷新页面</button>
+                    <a href="/" class="btn btn-outline btn-lg px-10 min-h-12">返回首页</a>
+                </div>
+                <div class="text-sm text-base-content/50">
+                    &copy; {% now "Y" %} {{ config.SITE_NAME|default:"Rosetta" }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            try {
+                var localTheme = localStorage.getItem('theme');
+                var theme = localTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+                if (['dark'].includes(theme)) {
+                    document.documentElement.classList.add('dark');
+                }
+            } catch (e) {}
+
+            // Countdown logic
+            var seconds = 60;
+            var countdownEl = document.getElementById('countdown');
+            var interval = setInterval(function() {
+                seconds--;
+                if (seconds < 0) {
+                    clearInterval(interval);
+                    location.reload();
+                } else {
+                    countdownEl.textContent = seconds;
+                }
+            }, 1000);
+        })();
+    </script>
+</body>
+</html>

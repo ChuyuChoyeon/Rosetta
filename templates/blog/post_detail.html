@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load markdown_extras capture_tags static %}
+{% load markdown_extras capture_tags static core_extras %}
 
 {% block extra_css %}
 <!-- 代码高亮样式 (Code Highlighting Styles) -->
@@ -117,6 +117,18 @@
                             </div>
                         </div>
                         <span class="font-medium text-base-content">{{ post.author.nickname|default:post.author.username }}</span>
+                        
+                        <!-- 用户称号 (User Title) -->
+                        {% if post.author.title %}
+                        <span class="badge badge-sm gap-1 border-none text-white shadow-sm" style="background-color: {{ post.author.title.color }};" title="{{ post.author.title.description }}">
+                            {% if post.author.title.icon %}
+                                <span class="w-3 h-3 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:fill-current">
+                                    {{ post.author.title.icon|sanitize_svg }}
+                                </span>
+                            {% endif %}
+                            {{ post.author.title.name }}
+                        </span>
+                        {% endif %}
                     </div>
                     <div class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[18px]">calendar_today</span>
@@ -232,8 +244,19 @@
             </div>
             {% endif %}
 
-            <!-- 文章导航 (Post Navigation) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-16 mb-8 not-prose">
+            <!-- 投票区域 (Polls Section) -->
+            {% if post.polls.exists %}
+            <div class="not-prose my-12 space-y-8">
+                {% for poll in post.polls.all %}
+                    {% if poll.is_active %}
+                        {% include "voting/partials/poll_results.html" %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <!-- 上下篇导航 (Post Navigation) -->
+            <div class="not-prose grid grid-cols-1 md:grid-cols-2 gap-4 mt-16 mb-16 pt-8 border-t border-base-content/10">
                 {% if previous_post %}
                 <a href="{% url 'post_detail' previous_post.slug %}" class="group flex items-center gap-4 p-4 rounded-xl border border-base-content/10 hover:border-primary hover:bg-primary/5 transition-all duration-300">
                     <span class="material-symbols-outlined text-3xl text-base-content/30 group-hover:text-primary transition-colors">arrow_back</span>
@@ -346,7 +369,16 @@
                                             <a href="{% url 'users:user_public_profile' comment.user.username %}" class="font-bold text-sm link link-hover hover:text-primary transition-colors">
                                                 {{ comment.user.nickname|default:comment.user.username }}
                                             </a>
-                                            {% if comment.user.is_staff %}
+                                            {% if comment.user.title %}
+                                            <span class="badge badge-xs gap-1 border-none text-white shadow-sm" style="background-color: {{ comment.user.title.color }};" title="{{ comment.user.title.description }}">
+                                                {% if comment.user.title.icon %}
+                                                    <span class="w-3 h-3 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:fill-current">
+                                                        {{ comment.user.title.icon|sanitize_svg }}
+                                                    </span>
+                                                {% endif %}
+                                                {{ comment.user.title.name }}
+                                            </span>
+                                            {% elif comment.user.is_staff %}
                                             <span class="badge badge-warning badge-xs gap-0.5 px-1.5 h-5 font-medium border-none text-warning-content/80">
                                                 <span class="material-symbols-outlined text-[10px]">verified</span>
                                                 管理员
@@ -404,7 +436,16 @@
                                                         回复 @{{ reply.parent.user.nickname|default:reply.parent.user.username }}
                                                     </span>
                                                     {% endif %}
-                                                    {% if reply.user.is_staff %}
+                                                    {% if reply.user.title %}
+                                                    <span class="badge badge-xs gap-1 border-none text-white shadow-sm" style="background-color: {{ reply.user.title.color }};" title="{{ reply.user.title.description }}">
+                                                        {% if reply.user.title.icon %}
+                                                            <span class="w-3 h-3 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:fill-current">
+                                                                {{ reply.user.title.icon|sanitize_svg }}
+                                                            </span>
+                                                        {% endif %}
+                                                        {{ reply.user.title.name }}
+                                                    </span>
+                                                    {% elif reply.user.is_staff %}
                                                     <span class="badge badge-warning badge-xs gap-0.5 px-1.5 h-5 font-medium border-none text-warning-content/80">
                                                         <span class="material-symbols-outlined text-[10px]">verified</span>
                                                         管理员
@@ -473,8 +514,22 @@
                             <img src="{{ post.author.get_avatar_url }}" alt="{{ post.author.username }}" />
                         </div>
                     </div>
-                    <h3 class="font-bold text-lg">{{ post.author.nickname|default:post.author.username }}</h3>
-                    <p class="text-sm text-base-content/60 mt-1">
+                    <h3 class="font-bold text-lg">
+                        {{ post.author.nickname|default:post.author.username }}
+                    </h3>
+                    {% if post.author.title %}
+                    <div class="mt-2 flex justify-center">
+                        <span class="badge badge-sm gap-1 border-none text-white shadow-sm" style="background-color: {{ post.author.title.color }};" title="{{ post.author.title.description }}">
+                            {% if post.author.title.icon %}
+                                <span class="w-3 h-3 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full [&>svg]:fill-current">
+                                    {{ post.author.title.icon|sanitize_svg }}
+                                </span>
+                            {% endif %}
+                            {{ post.author.title.name }}
+                        </span>
+                    </div>
+                    {% endif %}
+                    <p class="text-sm text-base-content/60 mt-2">
                         {{ post.author.bio|default:"这个作者很懒，什么都没写~" }}
                     </p>
                     <div class="mt-6 flex justify-center gap-4">

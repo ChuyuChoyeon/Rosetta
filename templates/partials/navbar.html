@@ -77,13 +77,17 @@
 
     <!-- 桌面端导航 & 操作 (移动端隐藏) -->
     <div class="navbar-center hidden lg:flex flex-1 justify-center">
-      <ul class="menu menu-horizontal px-1 font-medium text-base gap-1">
+      <ul class="menu menu-horizontal px-1 font-medium text-base gap-2">
           <li>
-              <a href="{% url 'home' %}" class="{% if request.resolver_match.url_name == 'home' %}text-primary font-bold{% endif %} hover:text-primary transition-colors px-4 py-2">首页</a>
+              <a href="{% url 'home' %}" class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group {% if request.resolver_match.url_name == 'home' %}bg-primary/10 text-primary font-bold{% endif %}">
+                  首页
+              </a>
           </li>
           {% for nav in nav_header %}
           <li>
-              <a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %} class="hover:text-primary transition-colors px-4 py-2">{{ nav.title }}</a>
+              <a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %} class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group {% if request.path == nav.url %}bg-primary/10 text-primary font-bold{% endif %}">
+                  {{ nav.title }}
+              </a>
           </li>
           {% endfor %}
       </ul>
@@ -249,7 +253,7 @@
 </div>
 
 <dialog id="search_modal" class="modal">
-  <div class="modal-box bg-base-100/90 backdrop-blur-md shadow-2xl border border-base-content/5 relative overflow-hidden">
+  <div class="modal-box bg-base-100/90 backdrop-blur-md shadow-2xl border border-base-content/5 relative overflow-visible w-full max-w-2xl" x-data="navSearchComponent()">
     <!-- Background Effect -->
     <div class="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
     <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
@@ -258,10 +262,66 @@
         <span class="material-symbols-outlined text-primary">search</span>
         全站搜索
     </h3>
-    <div class="py-4">
-        {% url 'search' as search_url %}
-        {% include 'components/inspira/placeholders_and_vanish_input.html' with action=search_url placeholders=search_placeholders|default:"['搜索文章...', '搜索标签...', 'Python', 'Django']" extra_classes="w-full" %}
+    
+    <div class="py-4 relative">
+        <div class="relative w-full group">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-primary">
+                <span class="material-symbols-outlined text-xl">search</span>
+            </div>
+            
+            <input 
+                type="text" 
+                x-model="query"
+                @input.debounce.300ms="fetchSuggestions"
+                @keydown.enter="search"
+                class="input input-lg w-full pl-12 pr-4 rounded-xl bg-base-200/50 border-transparent focus:bg-base-100 focus:border-primary focus:outline-none transition-all duration-300"
+                placeholder="搜索文章、标签、分类..."
+                autofocus
+            >
+            
+            <div class="absolute inset-y-0 right-0 pr-4 flex items-center">
+                <span x-show="loading" class="loading loading-spinner loading-sm text-primary"></span>
+                <kbd class="kbd kbd-sm hidden md:inline-flex ml-2" x-show="!loading">↵</kbd>
+            </div>
+        </div>
+
+        <!-- Suggestions Dropdown -->
+        <div 
+            x-show="suggestions.length > 0"
+            x-transition:enter="transition ease-out duration-200"
+            x-transition:enter-start="opacity-0 translate-y-2"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-2"
+            class="absolute w-full mt-4 bg-base-100/95 backdrop-blur rounded-xl shadow-xl border border-base-200 overflow-hidden z-50"
+            style="display: none;"
+        >
+            <ul class="max-h-[60vh] overflow-y-auto">
+                <template x-for="(item, index) in suggestions" :key="index">
+                    <li>
+                        <a :href="item.url" class="flex items-center justify-between px-4 py-3 hover:bg-primary/10 hover:text-primary transition-colors group border-b border-base-content/5 last:border-0">
+                            <div class="flex items-center gap-3">
+                                <span class="material-symbols-outlined text-base-content/50 group-hover:text-primary transition-colors text-xl" x-text="getIcon(item.type)"></span>
+                                <div class="flex flex-col">
+                                    <span class="font-medium" x-html="highlightMatch(item.text)"></span>
+                                    <span class="text-xs text-base-content/50" x-text="item.type"></span>
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-base-content/30 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                        </a>
+                    </li>
+                </template>
+            </ul>
+        </div>
+        
+        <!-- Empty State -->
+        <div x-show="query.length > 0 && !loading && suggestions.length === 0" class="text-center py-8 text-base-content/60 animate-fade-in">
+            <span class="material-symbols-outlined text-4xl mb-2 opacity-50">search_off</span>
+            <p>未找到相关结果</p>
+        </div>
     </div>
+
     <div class="modal-action">
       <form method="dialog">
         <button class="btn btn-ghost hover:bg-base-200">关闭</button>
@@ -271,4 +331,62 @@
   <form method="dialog" class="modal-backdrop">
     <button>close</button>
   </form>
+
+  <script>
+    function navSearchComponent() {
+        return {
+            query: '',
+            suggestions: [],
+            loading: false,
+
+            fetchSuggestions() {
+                if (this.query.length < 1) {
+                    this.suggestions = [];
+                    return;
+                }
+                
+                this.loading = true;
+                fetch(`{% url 'search' %}?type=suggest&q=${encodeURIComponent(this.query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        this.suggestions = data.results;
+                        this.loading = false;
+                    })
+                    .catch(() => {
+                        this.loading = false;
+                    });
+            },
+
+            search() {
+                // If there is query text, search for it
+                if (this.query.trim()) {
+                    window.location.href = `{% url 'search' %}?q=${encodeURIComponent(this.query)}`;
+                    return;
+                }
+                // If input is empty (or just whitespace), go to search home page
+                window.location.href = `{% url 'search' %}`;
+            },
+
+            getIcon(type) {
+                const icons = {
+                    '文章': 'article',
+                    '标签': 'tag',
+                    '分类': 'category',
+                    '用户': 'person'
+                };
+                return icons[type] || 'search';
+            },
+
+            highlightMatch(text) {
+                if (!this.query) return text;
+                try {
+                    const regex = new RegExp(`(${this.query})`, 'gi');
+                    return text.replace(regex, '<span class="text-primary font-bold">$1</span>');
+                } catch (e) {
+                    return text;
+                }
+            }
+        }
+    }
+  </script>
 </dialog>

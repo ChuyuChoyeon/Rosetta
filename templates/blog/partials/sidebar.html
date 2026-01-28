@@ -2,7 +2,6 @@
     {% load capture_tags cache %}
 
     <!-- Search Widget -->
-    {% cache sidebar_cache_ttl "sidebar_search" %}
     <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
         <h3 class="font-bold text-lg mb-4 flex items-center gap-2 font-heading">
             <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
@@ -13,29 +12,27 @@
         {% url 'search' as search_url %}
         {% include 'components/inspira/placeholders_and_vanish_input.html' with action=search_url placeholders=search_placeholders|default:"['搜索文章...', 'Python', 'Django', 'Tailwind']" %}
     </div>
-    {% endcache %}
 
     <!-- Navigation Menu -->
     {% if nav_sidebar %}
-    {% cache sidebar_cache_ttl "sidebar_navigation" %}
-    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
-        <h3 class="font-bold text-lg mb-4 flex items-center gap-2 font-heading">
+    <div class="bg-base-100 rounded-3xl border border-base-content/5 p-4 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2 font-heading px-2 pt-2">
             <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                 <span class="material-symbols-outlined text-lg">menu_open</span>
             </span>
             导航菜单
         </h3>
-        <ul class="menu menu-sm bg-base-200/50 rounded-2xl p-2 gap-1">
+        <ul class="flex flex-col gap-2">
             {% for nav in nav_sidebar %}
             <li>
-                <a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %} class="rounded-xl hover:bg-primary hover:text-primary-content transition-all font-medium">
-                    {{ nav.title }}
+                <a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %} class="flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-base-content/5 hover:bg-base-200/50 transition-all duration-300 group w-full">
+                    <span class="font-medium text-sm pl-2 border-l-2 border-transparent group-hover:border-primary group-hover:text-primary transition-all duration-300">{{ nav.title }}</span>
+                    <span class="material-symbols-outlined text-[16px] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary">arrow_forward</span>
                 </a>
             </li>
             {% endfor %}
         </ul>
     </div>
-    {% endcache %}
     {% endif %}
 
     <!-- Popular Posts -->

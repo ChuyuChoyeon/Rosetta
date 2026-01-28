@@ -17,6 +17,9 @@ import environ  # requires: django-environ
 # 项目根目录
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# 将 apps 目录添加到 sys.path，使 Django 能直接导入其中的应用
+sys.path.insert(0, str(BASE_DIR / "apps"))
+
 # 初始化环境变量
 env = environ.Env()
 
@@ -163,6 +166,8 @@ INSTALLED_APPS = [
     "blog.apps.BlogConfig",
     "users.apps.UsersConfig",
     "core.apps.CoreConfig",
+    "voting.apps.VotingConfig",
+    "guestbook.apps.GuestbookConfig",
 ]
 
 # ------------------------------------------------------------------------------
@@ -403,6 +408,7 @@ CONSTANCE_CONFIG = {
     "EXTRA_HEAD_CODE": ("", "自定义 Head 代码 (CSS/JS)"),
     "EXTRA_FOOTER_CODE": ("", "自定义 Footer 代码 (JS)"),
     "CODE_HIGHLIGHT_STYLE": ("default", "代码高亮风格 (Pygments)"),
+    "BLOG_DEFAULT_VIEW_MODE": ("list", "博客文章列表默认视图 (list/grid)"),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
@@ -419,7 +425,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "FOOTER_TEXT",
         "BEIAN_CODE",
     ),
-    "外观设置": ("CODE_HIGHLIGHT_STYLE",),
+    "外观设置": ("CODE_HIGHLIGHT_STYLE", "BLOG_DEFAULT_VIEW_MODE"),
     "后台界面": (
         "SITE_HEADER",
         "SITE_ADMIN_SUFFIX",

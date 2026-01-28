@@ -404,38 +404,34 @@
     toggle.checked = currentTheme === 'dark';
   }
 
-  function initAll(root) {
-    run(function () {
-      initEditor(root);
-    });
-    run(function () {
-      initDashboard(root);
-    });
-    run(function () {
-      initThemeToggle(root);
-    });
-    run(function () {
-      runRegistry(root);
-    });
+  // Expose PinyinMatch if available (will be bundled)
+  if (typeof require === 'function') {
+    try {
+      window.PinyinMatch = require('pinyin-match');
+    } catch (e) {
+      // Ignore if not in Node environment
+    }
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function () {
-      initAll(document);
-    });
-  } else {
-    initAll(document);
-  }
+  // HTMX Event Listeners
+  document.addEventListener('htmx:afterSwap', function (event) {
+    runRegistry(event.detail.target);
+    initEditor(event.detail.target);
+    initDashboard(event.detail.target);
+    // Re-initialize Alpine.js components if new content is injected
+    // Alpine usually handles this automatically, but sometimes explicit init is safer for complex DOM changes
+    // Only necessary if hx-swap is used and Alpine components are inside the swapped content
+    if (typeof Alpine !== 'undefined' && event.detail.elt) {
+       // Check if the swapped content contains x-data but hasn't been initialized
+       // This is a heuristic; modern Alpine + HTMX often work out of the box.
+       // But if you see issues, you might need:
+       // Alpine.initTree(event.detail.target);
+    }
+  });
 
-  var handleInitEvent = function (evt) {
-    initAll((evt && evt.target) || document);
-  };
-
-  if (window.htmx && typeof window.htmx.on === 'function') {
-    window.htmx.on('htmx:afterSettle', handleInitEvent);
-    window.htmx.on('htmx:historyRestore', handleInitEvent);
-  } else {
-    document.addEventListener('htmx:afterSettle', handleInitEvent);
-    document.addEventListener('htmx:historyRestore', handleInitEvent);
-  }
+  document.addEventListener('DOMContentLoaded', function () {
+    runRegistry(document);
+    initEditor(document);
+    initDashboard(document);
+  });
 })();

@@ -68,6 +68,7 @@
     <script src="{% static 'theme/js/theme.js' %}"></script>
     <script src="{% static 'theme/js/ui.js' %}"></script>
     <script src="{% static 'js/ui-helpers.js' %}"></script>
+    <script src="{% static 'js/htmx-init.js' %}"></script>
 
     <script>
         // --- 全局配置 ---
@@ -79,10 +80,30 @@
     {% include 'partials/theme_init.html' %}
     
     <style>
-        body { font-family: system-ui, -apple-system, "Segoe UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", "Noto Sans SC", Arial, sans-serif; }
-        
         /* Smooth Scrolling */
         html { scroll-behavior: smooth; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: oklch(var(--bc) / 0.2);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: oklch(var(--bc) / 0.4);
+        }
+        
+        /* Selection Color */
+        ::selection {
+            background-color: oklch(var(--p) / 0.3);
+            color: inherit;
+        }
 
         /* Reading Progress Bar */
         .progress-container {

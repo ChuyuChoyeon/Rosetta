@@ -99,6 +99,16 @@
     color: hsl(var(--bc)) !important;
 }
 
+/* Custom Toggle Style (No checkmark) */
+.toggle {
+    --tglbg: white; 
+    background-image: none !important;
+}
+.toggle:checked {
+    --tglbg: white;
+    background-image: none !important;
+}
+
 .toastui-editor-popup-body .drop-down-item:hover {
     background-color: hsl(var(--b2)) !important;
 }

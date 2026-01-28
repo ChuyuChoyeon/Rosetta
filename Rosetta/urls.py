@@ -22,6 +22,8 @@ urlpatterns = [
     path("users/", include("users.urls")),  # 登录、注册、个人资料管理
     # --- 功能组件 ---
     path("captcha/", include("captcha.urls")),  # 图形验证码生成与校验
+    path("voting/", include("voting.urls")),  # 投票系统
+    path("guestbook/", include("guestbook.urls")),  # 留言板
     # --- 核心业务 ---
     # 注意：core 和 blog 的路由包含空路径 ""，应放在特定前缀路由之后
     path("", include("core.urls")),  # 首页、静态页、通用功能
