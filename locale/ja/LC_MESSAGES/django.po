@@ -1,0 +1,5350 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-01-30 03:16+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: .\Rosetta\settings.py:270
+msgid "简体中文"
+msgstr "簡体字中国語"
+
+#: .\Rosetta\settings.py:271
+msgid "繁體中文"
+msgstr "繁体字中国語"
+
+#: .\Rosetta\settings.py:272 .\templates\administration\poll_form.html:121
+msgid "English"
+msgstr "英語"
+
+#: .\Rosetta\settings.py:273 .\templates\administration\poll_form.html:123
+msgid "日本語"
+msgstr "日本語"
+
+#: .\apps\administration\forms.py:80 .\apps\blog\models.py:84
+#: .\apps\blog\models.py:161 .\apps\blog\views.py:656 .\apps\blog\views.py:672
+#: .\templates\administration\base.html:299
+#: .\templates\administration\post_form.html:289
+#: .\templates\administration\post_list.html:88
+#: .\templates\blog\search_results.html:15 .\templates\partials\footer.html:57
+#: .\templates\partials\navbar.html:28 .\templates\partials\navbar.html:122
+msgid "标签"
+msgstr "タグ"
+
+#: .\apps\administration\forms.py:85 .\apps\blog\models.py:180
+#: .\templates\administration\post_form.html:190
+#: .\templates\administration\post_list.html:90
+#: .\templates\blog\all_posts.html:128 .\templates\blog\post_detail.html:133
+#: .\templates\blog\post_list.html:149
+msgid "发布时间"
+msgstr "公開日時"
+
+#: .\apps\administration\forms.py:519
+#| msgid "访问密码"
+msgid "新密码"
+msgstr "新しいパスワード"
+
+#: .\apps\administration\forms.py:520
+msgid "如需修改密码请在此输入，否则留空"
+msgstr "パスワードを変更する場合は入力してください。変更しない場合は空欄にしてください"
+
+#: .\apps\administration\forms.py:664
+msgid "选项文本 (简中)"
+msgstr "選択肢テキスト (簡体字)"
+
+#: .\apps\administration\forms.py:665
+msgid "选项文本 (英文)"
+msgstr "選択肢テキスト (英語)"
+
+#: .\apps\administration\forms.py:666
+msgid "选项文本 (日文)"
+msgstr "選択肢テキスト (日本語)"
+
+#: .\apps\administration\forms.py:667
+msgid "选项文本 (繁中)"
+msgstr "選択肢テキスト (繁体字)"
+
+#: .\apps\administration\views.py:152
+msgid "Rosetta Dashboard"
+msgstr "Rosetta ダッシュボード"
+
+#: .\apps\administration\views.py:296
+msgid "天"
+msgstr "日"
+
+#: .\apps\administration\views.py:298
+#| msgid "取消"
+msgid "小时"
+msgstr "時間"
+
+#: .\apps\administration\views.py:299
+msgid "分钟"
+msgstr "分"
+
+#: .\apps\administration\views.py:301
+msgid "刚刚启动"
+msgstr "起動したばかり"
+
+#: .\apps\administration\views.py:406
+#, python-brace-format
+msgid "{name} 创建成功"
+msgstr "{name} を作成しました"
+
+#: .\apps\administration\views.py:407
+#| msgid "管理后台"
+msgid "通过管理后台创建"
+msgstr "管理画面から作成"
+
+#: .\apps\administration\views.py:413
+#, python-brace-format
+msgid "新建{name}"
+msgstr "新規{name}"
+
+#: .\apps\administration\views.py:445
+#, python-brace-format
+msgid "{name} 更新成功"
+msgstr "{name} を更新しました"
+
+#: .\apps\administration\views.py:449
+#| msgid "管理后台"
+msgid "通过管理后台更新"
+msgstr "管理画面から更新"
+
+#: .\apps\administration\views.py:451
+#, python-brace-format
+msgid "更新字段: {fields}"
+msgstr "更新フィールド: {fields}"
+
+#: .\apps\administration\views.py:459
+#, python-brace-format
+msgid "编辑{name}"
+msgstr "{name}を編集"
+
+#: .\apps\administration\views.py:504
+msgid "请上传 JSON 文件"
+msgstr "JSONファイルをアップロードしてください"
+
+#: .\apps\administration\views.py:511
+msgid "JSON 格式错误：根元素应为列表"
+msgstr "JSON形式エラー：ルート要素はリストである必要があります"
+
+#: .\apps\administration\views.py:538
+#, python-brace-format
+msgid "成功导入 {count} 条数据"
+msgstr "{count} 件のデータをインポートしました"
+
+#: .\apps\administration\views.py:541
+#, python-brace-format
+msgid "导入失败: {error}"
+msgstr "インポートに失敗しました: {error}"
+
+#: .\apps\administration\views.py:562
+#| msgid "管理后台"
+msgid "通过管理后台删除"
+msgstr "管理画面から削除"
+
+#: .\apps\administration\views.py:575 .\apps\administration\views.py:582
+#, python-brace-format
+msgid "{name} 删除成功"
+msgstr "{name} を削除しました"
+
+#: .\apps\blog\models.py:26 .\apps\blog\models.py:75
+#: .\templates\administration\usertitle_list.html:53
+msgid "名称"
+msgstr "名前"
+
+#: .\apps\blog\models.py:27 .\apps\blog\models.py:76 .\apps\blog\models.py:121
+#: .\apps\core\models.py:25
+msgid "别名"
+msgstr "スラッグ"
+
+#: .\apps\blog\models.py:28 .\apps\core\models.py:77
+#: .\apps\voting\models.py:10
+#: .\templates\administration\friendlink_list.html:70
+#: .\templates\administration\poll_form.html:55
+msgid "描述"
+msgstr "説明"
+
+#: .\apps\blog\models.py:30 .\apps\blog\models.py:80
+msgid "图标"
+msgstr "アイコン"
+
+#: .\apps\blog\models.py:30 .\apps\blog\models.py:80
+msgid "Material Symbols 图标代码"
+msgstr "Material Symbols アイコンコード"
+
+#: .\apps\blog\models.py:33 .\apps\blog\models.py:77
+msgid "颜色"
+msgstr "色"
+
+#: .\apps\blog\models.py:36
+msgid "Tailwind 颜色类名 (如 primary, secondary)"
+msgstr "Tailwind カラークラス名 (例: primary, secondary)"
+
+#: .\apps\blog\models.py:44
+msgid "父分类"
+msgstr "親カテゴリ"
+
+#: .\apps\blog\models.py:47 .\apps\blog\models.py:131
+#: .\templates\administration\user_form.html:123
+#: .\templates\users\includes\edit_profile_modal.html:58
+msgid "封面图"
+msgstr "カバー画像"
+
+#: .\apps\blog\models.py:55 .\apps\blog\models.py:158
+#: .\templates\administration\base.html:293
+#: .\templates\administration\post_form.html:257
+#: .\templates\administration\post_list.html:87
+#: .\templates\blog\search_results.html:16 .\templates\partials\footer.html:53
+#: .\templates\partials\navbar.html:27 .\templates\partials\navbar.html:117
+msgid "分类"
+msgstr "カテゴリ"
+
+#: .\apps\blog\models.py:78 .\apps\blog\models.py:276
+msgid "是否可见"
+msgstr "表示"
+
+#: .\apps\blog\models.py:108 .\apps\core\models.py:20
+#: .\templates\administration\page_list.html:51
+#: .\templates\administration\partials\page_list_rows.html:30
+#: .\templates\administration\partials\post_list_rows.html:80
+#: .\templates\administration\post_list.html:56
+#: .\templates\administration\post_list.html:64
+msgid "草稿"
+msgstr "下書き"
+
+#: .\apps\blog\models.py:109 .\apps\core\models.py:21
+#: .\templates\administration\comment_list.html:189
+#: .\templates\administration\comment_list.html:216
+#: .\templates\administration\index.html:156
+#: .\templates\administration\page_list.html:47
+#: .\templates\administration\partials\comment_list_rows.html:53
+#: .\templates\administration\partials\page_list_rows.html:25
+#: .\templates\administration\partials\post_list_rows.html:75
+#: .\templates\administration\post_list.html:55
+msgid "已发布"
+msgstr "公開済み"
+
+#: .\apps\blog\models.py:112 .\apps\core\models.py:23
+#: .\apps\core\models.py:102 .\apps\core\models.py:137
+#: .\apps\voting\models.py:9
+#: .\templates\administration\navigation_list.html:68
+#: .\templates\administration\page_list.html:82
+#: .\templates\administration\poll_form.html:37
+#| msgid "Meta 标题"
+msgid "标题"
+msgstr "タイトル"
+
+#: .\apps\blog\models.py:113
+#| msgid "Meta 标题"
+msgid "副标题"
+msgstr "サブタイトル"
+
+#: .\apps\blog\models.py:114
+msgid "来源"
+msgstr "ソース"
+
+#: .\apps\blog\models.py:115
+msgid "来源链接"
+msgstr "ソースリンク"
+
+#: .\apps\blog\models.py:116
+msgid "音频"
+msgstr "オーディオ"
+
+#: .\apps\blog\models.py:117
+msgid "视频"
+msgstr "ビデオ"
+
+#: .\apps\blog\models.py:119
+msgid "视频链接"
+msgstr "ビデオリンク"
+
+#: .\apps\blog\models.py:119
+msgid "外部视频链接 (YouTube, Bilibili)"
+msgstr "外部ビデオリンク (YouTube、Bilibili)"
+
+#: .\apps\blog\models.py:126 .\templates\administration\post_list.html:86
+#: .\templates\blog\all_posts.html:138 .\templates\blog\post_list.html:158
+msgid "作者"
+msgstr "著者"
+
+#: .\apps\blog\models.py:128 .\apps\blog\models.py:274
+#: .\apps\core\models.py:27 .\apps\core\models.py:138
+#: .\apps\guestbook\models.py:20 .\templates\administration\base.html:478
+#: .\templates\administration\base.html:479
+#: .\templates\administration\base.html:480
+#: .\templates\administration\base.html:481
+#: .\templates\administration\base.html:482
+#: .\templates\administration\base.html:483
+#: .\templates\administration\base.html:484
+#: .\templates\administration\base.html:485
+#: .\templates\administration\base.html:486
+#: .\templates\administration\base.html:493
+#: .\templates\administration\base.html:494
+#: .\templates\administration\comment_form.html:44
+#: .\templates\guestbook\index.html:221
+msgid "内容"
+msgstr "内容"
+
+#: .\apps\blog\models.py:129
+msgid "摘要"
+msgstr "まとめ"
+
+#: .\apps\blog\models.py:167
+msgid "点赞"
+msgstr "いいね"
+
+#: .\apps\blog\models.py:170 .\apps\core\models.py:29
+#: .\templates\administration\comment_list.html:248
+#: .\templates\administration\debug\permission.html:57
+#: .\templates\administration\friendlink_list.html:71
+#: .\templates\administration\navigation_list.html:72
+#: .\templates\administration\page_form.html:136
+#: .\templates\administration\page_list.html:84
+#: .\templates\administration\poll_list.html:39
+#: .\templates\administration\post_form.html:183
+#: .\templates\administration\post_list.html:89
+#: .\templates\administration\searchplaceholder_list.html:69
+#: .\templates\administration\tag_list.html:94
+#: .\templates\administration\user_list.html:157
+msgid "状态"
+msgstr "ステータス"
+
+#: .\apps\blog\models.py:173 .\templates\administration\post_form.html:243
+msgid "访问密码"
+msgstr "アクセスパスワード"
+
+#: .\apps\blog\models.py:176
+msgid "设置此密码后，访问文章需要输入密码"
+msgstr "設定すると、記事の閲覧にパスワードが必要になります"
+
+#: .\apps\blog\models.py:178 .\templates\blog\all_posts.html:132
+#: .\templates\blog\post_detail.html:141 .\templates\blog\post_list.html:153
+msgid "阅读量"
+msgstr "閲覧数"
+
+#: .\apps\blog\models.py:179 .\apps\blog\models.py:275
+#: .\apps\core\models.py:31 .\apps\core\models.py:58 .\apps\core\models.py:143
+#: .\apps\guestbook\models.py:22 .\apps\voting\models.py:12
+#: .\templates\administration\page_list.html:85
+#: .\templates\administration\searchplaceholder_list.html:70
+#: .\templates\administration\system_tools.html:235
+msgid "创建时间"
+msgstr "作成日時"
+
+#: .\apps\blog\models.py:181 .\apps\core\models.py:32
+msgid "更新时间"
+msgstr "更新日時"
+
+#: .\apps\blog\models.py:182
+#: .\templates\administration\partials\post_list_rows.html:26
+#: .\templates\blog\all_posts.html:107 .\templates\blog\post_list.html:132
+msgid "置顶"
+msgstr "固定表示"
+
+#: .\apps\blog\models.py:183 .\templates\administration\post_form.html:213
+msgid "允许评论"
+msgstr "コメントを許可"
+
+#: .\apps\blog\models.py:187
+msgid "Meta 标题"
+msgstr "Meta タイトル"
+
+#: .\apps\blog\models.py:187
+msgid "覆盖默认的标题，用于搜索引擎显示"
+msgstr "デフォルトのタイトルを上書き（検索エンジン表示用）"
+
+#: .\apps\blog\models.py:190
+msgid "Meta 描述"
+msgstr "Meta 説明"
+
+#: .\apps\blog\models.py:190
+msgid "覆盖默认的描述，建议 160 字以内"
+msgstr "デフォルトの説明を上書き（推奨: 160文字以内）"
+
+#: .\apps\blog\models.py:193
+msgid "Meta 关键词"
+msgstr "Meta キーワード"
+
+#: .\apps\blog\models.py:193
+msgid "逗号分隔的关键词"
+msgstr "カンマ区切りのキーワード"
+
+#: .\apps\blog\models.py:261 .\apps\blog\models.py:307
+#: .\apps\blog\views.py:662 .\apps\blog\views.py:676
+#: .\templates\administration\base.html:287
+#: .\templates\administration\debug.html:77
+#: .\templates\blog\post_detail.html:542
+#: .\templates\blog\search_results.html:13 .\templates\partials\footer.html:49
+#: .\templates\partials\navbar.html:26 .\templates\partials\navbar.html:112
+#: .\templates\users\includes\profile_tabs.html:4
+msgid "文章"
+msgstr "記事"
+
+#: .\apps\blog\models.py:264 .\apps\blog\models.py:304
+#: .\apps\core\models.py:134 .\apps\guestbook\models.py:14
+#: .\apps\voting\models.py:59 .\templates\administration\base.html:350
+#: .\templates\administration\debug.html:73
+#: .\templates\administration\logentry_list.html:56
+#: .\templates\administration\user_list.html:148
+#: .\templates\blog\search_results.html:14
+msgid "用户"
+msgstr "ユーザー"
+
+#: .\apps\blog\models.py:272
+msgid "父评论"
+msgstr "親のコメント"
+
+#: .\apps\blog\models.py:280 .\templates\administration\base.html:306
+#: .\templates\administration\debug.html:81
+#: .\templates\administration\index.html:132
+#: .\templates\blog\post_detail.html:289
+#: .\templates\users\includes\profile_tabs.html:7
+#| msgid "允许评论"
+msgid "评论"
+msgstr "コメント"
+
+#: .\apps\blog\models.py:309
+#: .\templates\users\includes\profile_content.html:129
+msgid "浏览时间"
+msgstr "閲覧日時"
+
+#: .\apps\blog\models.py:313 .\templates\partials\navbar.html:80
+#: .\templates\partials\navbar.html:282
+#: .\templates\users\includes\profile_content.html:120
+msgid "浏览历史"
+msgstr "閲覧履歴"
+
+#: .\apps\blog\views.py:410
+msgid "密码验证通过"
+msgstr "パスワード検証に合格しました"
+
+#: .\apps\blog\views.py:413
+msgid "密码错误，请重试"
+msgstr "パスワードが間違っています。もう一度お試しください"
+
+#: .\apps\blog\views.py:447
+msgid "您的评论已发布！"
+msgstr "あなたのコメントが公開されました！"
+
+#: .\apps\blog\views.py:450
+#, python-brace-format
+#| msgid "导入失败: {error}"
+msgid "评论创建失败: {error}"
+msgstr "コメントの作成に失敗しました: {error}"
+
+#: .\apps\blog\views.py:825
+msgid "您没有权限删除此评论"
+msgstr "このコメントを削除する権限がありません"
+
+#: .\apps\blog\views.py:835
+msgid "评论已删除"
+msgstr "コメントが削除されました"
+
+#: .\apps\core\models.py:25
+msgid "URL 路径的一部分，例如 about 或 contact"
+msgstr "URL パスの一部 (about や contact など)"
+
+#: .\apps\core\models.py:35 .\templates\administration\base.html:324
+#: .\templates\administration\base.html:487
+#: .\templates\administration\base.html:488
+msgid "页面"
+msgstr "ページ"
+
+#: .\apps\core\models.py:54
+msgid "占位符文本"
+msgstr "プレースホルダーテキスト"
+
+#: .\apps\core\models.py:54
+msgid "例如：搜索 Django..."
+msgstr "例: Django を検索..."
+
+#: .\apps\core\models.py:56
+msgid "是否启用"
+msgstr "有効にするかどうか"
+
+#: .\apps\core\models.py:57 .\apps\core\models.py:79 .\apps\core\models.py:107
+#: .\templates\administration\friendlink_list.html:72
+#: .\templates\administration\navigation_list.html:71
+#: .\templates\administration\searchplaceholder_list.html:68
+msgid "排序"
+msgstr "選別"
+
+#: .\apps\core\models.py:61 .\templates\administration\base.html:342
+#: .\templates\administration\base.html:499
+#: .\templates\administration\searchplaceholder_list.html:5
+#: .\templates\administration\searchplaceholder_list.html:32
+msgid "搜索占位符"
+msgstr "プレースホルダを検索"
+
+#: .\apps\core\models.py:75 .\templates\administration\friendlink_list.html:68
+msgid "网站名称"
+msgstr "ウェブサイト名"
+
+#: .\apps\core\models.py:76 .\templates\administration\friendlink_form.html:74
+msgid "网站链接"
+msgstr "ウェブサイトのリンク"
+
+#: .\apps\core\models.py:78
+msgid "标志"
+msgstr "ロゴ"
+
+#: .\apps\core\models.py:80 .\apps\core\models.py:108
+msgid "是否显示"
+msgstr "表示するかどうか"
+
+#: .\apps\core\models.py:83 .\templates\administration\base.html:336
+#: .\templates\administration\friendlink_form.html:14
+#: .\templates\administration\friendlink_list.html:4
+#: .\templates\administration\friendlink_list.html:32
+#: .\templates\blog\partials\sidebar.html:153
+#: .\templates\partials\footer.html:86
+msgid "友情链接"
+msgstr "リンク"
+
+#: .\apps\core\models.py:98
+msgid "顶部导航"
+msgstr "トップナビゲーション"
+
+#: .\apps\core\models.py:99
+msgid "底部链接"
+msgstr "一番下のリンク"
+
+#: .\apps\core\models.py:100
+#: .\templates\administration\navigation_list.html:39
+msgid "侧边栏"
+msgstr "サイドバー"
+
+#: .\apps\core\models.py:105
+#: .\templates\administration\navigation_list.html:70
+msgid "位置"
+msgstr "位置"
+
+#: .\apps\core\models.py:112 .\templates\blog\partials\sidebar.html:23
+msgid "导航菜单"
+msgstr "ナビゲーションメニュー"
+
+#: .\apps\core\models.py:126 .\templates\administration\page_form.html:168
+msgid "信息"
+msgstr "情報"
+
+#: .\apps\core\models.py:127
+msgid "成功"
+msgstr "成功"
+
+#: .\apps\core\models.py:128
+msgid "警告"
+msgstr "警告する"
+
+#: .\apps\core\models.py:129
+msgid "错误"
+msgstr "間違い"
+
+#: .\apps\core\models.py:140
+msgid "级别"
+msgstr "レベル"
+
+#: .\apps\core\models.py:142
+msgid "已读"
+msgstr "読む"
+
+#: .\apps\core\models.py:145
+#: .\templates\administration\friendlink_list.html:69
+msgid "链接"
+msgstr "リンク"
+
+#: .\apps\core\models.py:149
+msgid "可选，点击通知跳转的 URL"
+msgstr "オプションで、通知をクリックして URL にジャンプします"
+
+#: .\apps\core\models.py:153 .\templates\users\includes\profile_tabs.html:17
+msgid "通知"
+msgstr "通知"
+
+#: .\apps\core\validators.py:40
+#, python-format
+msgid "文件大小不能超过 %(size)s。当前大小为 %(current_size)s。"
+msgstr "ファイルサイズは %(size)s を超えてはいけません。現在のサイズ: %(current_size)s。"
+
+#: .\apps\core\validators.py:56
+#, python-format
+msgid "不支持的文件扩展名 \"%(ext)s\"。允许的扩展名: %(allowed_extensions)s。"
+msgstr "拡張子 \"%(ext)s\" はサポートされていません。許可されている拡張子: %(allowed_extensions)s。"
+
+#: .\apps\core\validators.py:107
+#, python-format
+msgid "不支持的文件类型 \"%(mime)s\"。允许的类型: %(allowed_mimetypes)s。"
+msgstr "ファイルタイプ \"%(mime)s\" はサポートされていません。許可されているタイプ: %(allowed_mimetypes)s。"
+
+#: .\apps\guestbook\forms.py:7 .\apps\users\forms.py:19
+#: .\templates\guestbook\index.html:231
+msgid "验证码"
+msgstr "認証コード"
+
+#: .\apps\guestbook\forms.py:13
+msgid "您的昵称"
+msgstr "あなたのニックネーム"
+
+#: .\apps\guestbook\forms.py:14
+msgid "您的邮箱 (保密)"
+msgstr "あなたのメールアドレス (機密)"
+
+#: .\apps\guestbook\forms.py:15
+msgid "您的网站 (可选)"
+msgstr "あなたのウェブサイト (オプション)"
+
+#: .\apps\guestbook\forms.py:17
+msgid "写下您的留言..."
+msgstr "メッセージを書いてください..."
+
+#: .\apps\guestbook\models.py:16 .\templates\administration\user_form.html:51
+#: .\templates\guestbook\index.html:156
+#: .\templates\users\includes\edit_profile_modal.html:100
+#: .\templates\users\includes\user_info.html:7
+#: .\templates\users\register.html:41
+msgid "昵称"
+msgstr "ニックネーム"
+
+#: .\apps\guestbook\models.py:17 .\templates\administration\user_list.html:154
+#: .\templates\guestbook\index.html:171
+#: .\templates\users\includes\edit_profile_modal.html:107
+#: .\templates\users\includes\user_info.html:14
+#: .\templates\users\register.html:41
+msgid "邮箱"
+msgstr "メールアドレス"
+
+#: .\apps\guestbook\models.py:18 .\templates\guestbook\index.html:193
+msgid "网站"
+msgstr "Webサイト"
+
+#: .\apps\guestbook\models.py:19
+msgid "显示邮箱"
+msgstr "メールボックスを表示"
+
+#: .\apps\guestbook\models.py:21
+msgid "公开"
+msgstr "公共"
+
+#: .\apps\guestbook\models.py:25
+#: .\templates\administration\comment_list.html:55
+msgid "回复内容"
+msgstr "返信内容"
+
+#: .\apps\guestbook\models.py:26
+msgid "回复时间"
+msgstr "返信時間"
+
+#: .\apps\guestbook\models.py:30
+msgid "留言"
+msgstr "メッセージ"
+
+#: .\apps\guestbook\models.py:34
+#| msgid "别名"
+msgid "匿名"
+msgstr "匿名"
+
+#: .\apps\guestbook\views.py:37
+msgid "留言发布成功！"
+msgstr "メッセージを投稿しました！"
+
+#: .\apps\users\forms.py:32
+msgid "该邮箱已被注册"
+msgstr "このメールアドレスは既に登録されています"
+
+#: .\apps\users\views.py:40
+msgid "本站目前暂停开放注册。"
+msgstr "現在、新規登録は停止されています。"
+
+#: .\apps\users\views.py:45
+msgid "注册成功，请登录"
+msgstr "登録が完了しました。ログインしてください"
+
+#: .\apps\users\views.py:67
+msgid "您的账号已被封禁，禁止登录。"
+msgstr "アカウントが停止されているため、ログインできません。"
+
+#: .\apps\users\views.py:265
+msgid "您只能编辑自己的资料"
+msgstr "自分のプロフィールのみ編集できます"
+
+#: .\apps\users\views.py:283
+#| msgid "偏好设置"
+msgid "偏好设置已更新"
+msgstr "設定を更新しました"
+
+#: .\apps\users\views.py:285
+#| msgid "偏好设置"
+msgid "偏好设置更新失败"
+msgstr "設定の更新に失敗しました"
+
+#: .\apps\users\views.py:294 .\apps\users\views.py:345
+msgid "密码修改成功"
+msgstr "パスワードを変更しました"
+
+#: .\apps\users\views.py:297
+msgid "密码修改失败，请检查输入"
+msgstr "パスワードの変更に失敗しました。入力を確認してください"
+
+#: .\apps\users\views.py:321
+msgid "个人信息更新成功"
+msgstr "プロフィールを更新しました"
+
+#: .\apps\users\views.py:323
+msgid "个人信息更新失败，请检查输入"
+msgstr "プロフィールの更新に失敗しました。入力を確認してください"
+
+#: .\apps\users\views.py:402
+msgid "通知已删除"
+msgstr "通知を削除しました"
+
+#: .\apps\voting\models.py:11
+msgid "是否开启"
+msgstr "オンにするかどうか"
+
+#: .\apps\voting\models.py:13
+msgid "允许多选"
+msgstr "複数選択を許可する"
+
+#: .\apps\voting\models.py:14
+msgid "结束时间"
+msgstr "終了時間"
+
+#: .\apps\voting\models.py:23 .\templates\administration\poll_form.html:69
+#: .\templates\administration\poll_list.html:38
+msgid "关联文章"
+msgstr "関連記事"
+
+#: .\apps\voting\models.py:27 .\apps\voting\models.py:58
+#: .\templates\administration\base.html:316
+#: .\templates\blog\search_results.html:17
+#: .\templates\blog\search_results.html:65
+#: .\templates\voting\components\sidebar_card.html:10
+#: .\templates\voting\poll_detail.html:12
+msgid "投票"
+msgstr "投票"
+
+#: .\apps\voting\models.py:42
+msgid "所属投票"
+msgstr "所属票"
+
+#: .\apps\voting\models.py:43
+#| msgid "选项文本 (简中)"
+msgid "选项文本"
+msgstr "選択肢テキスト"
+
+#: .\apps\voting\models.py:44
+msgid "票数"
+msgstr "投票数"
+
+#: .\apps\voting\models.py:47
+#: .\templates\administration\partials\poll_list_rows.html:19
+msgid "选项"
+msgstr "オプション"
+
+#: .\apps\voting\models.py:60
+#: .\templates\administration\category_form.html:170
+msgid "选择"
+msgstr "選ぶ"
+
+#: .\apps\voting\models.py:61
+msgid "投票时间"
+msgstr "投票時間"
+
+#: .\apps\voting\models.py:64
+msgid "投票记录"
+msgstr "投票記録"
+
+#: .\apps\voting\views.py:47
+msgid "请选择一个选项！"
+msgstr "選択肢を選んでください！"
+
+#: .\templates\400.html:4 .\templates\400.html:19
+msgid "错误请求"
+msgstr "要求の形式が正しくありません"
+
+#: .\templates\400.html:21
+msgid "服务器无法理解您的请求。"
+msgstr "サーバーはリクエストを理解できません。"
+
+#: .\templates\400.html:23
+msgid "这可能是由于无效的参数或请求格式错误导致的。"
+msgstr "これは、無効なパラメータまたは不正な形式のリクエストが原因である可能性があります。"
+
+#: .\templates\400.html:27 .\templates\403.html:27
+#: .\templates\403_csrf.html:27 .\templates\404.html:29
+#: .\templates\429.html:31 .\templates\500.html:63 .\templates\502.html:28
+#: .\templates\blog\password_required.html:25 .\templates\maintenance.html:31
+msgid "返回首页"
+msgstr "ホームに戻る"
+
+#: .\templates\400.html:30 .\templates\404.html:33
+msgid "返回上一页"
+msgstr "前のページに戻る"
+
+#: .\templates\403.html:4 .\templates\403.html:19
+msgid "禁止访问"
+msgstr "アクセス禁止"
+
+#: .\templates\403.html:21
+msgid "抱歉，您没有权限访问此页面。"
+msgstr "申し訳ありませんが、このページにアクセスする権限がありません。"
+
+#: .\templates\403.html:23
+msgid "这可能是一个受保护的区域，或者您的权限不足。"
+msgstr "これは保護エリアであるか、または不十分な権限を持っている可能性があります。"
+
+#: .\templates\403.html:31
+msgid "登录账号"
+msgstr "ログインアカウント"
+
+#: .\templates\403_csrf.html:4
+msgid "验证失败"
+msgstr "認証に失敗しました"
+
+#: .\templates\403_csrf.html:19
+msgid "安全验证失败"
+msgstr "セキュリティ検証に失敗しました"
+
+#: .\templates\403_csrf.html:21
+msgid "CSRF 验证失败。请求被中止。"
+msgstr "CSRF検証に失敗しました。リクエストは中止されました。"
+
+#: .\templates\403_csrf.html:23
+msgid "这通常是因为您的会话已过期或您正在提交一个来自外部站点的表单。"
+msgstr "これは通常、セッションの有効期限が切れたか、外部サイトからフォームを送信していることが原因です。"
+
+#: .\templates\403_csrf.html:30
+msgid "刷新重试"
+msgstr "更新して再試行してください"
+
+#: .\templates\404.html:4
+msgid "页面未找到"
+msgstr "ページが見つかりません"
+
+#: .\templates\404.html:19
+msgid "页面走丢了"
+msgstr "ページが失われてしまいました"
+
+#: .\templates\404.html:21
+msgid "抱歉，我们无法找到您正在寻找的页面。"
+msgstr "申し訳ありませんが、お探しのページは見つかりませんでした。"
+
+#: .\templates\404.html:23
+msgid "它可能已被移动、删除或您输入的链接有误。"
+msgstr "移動または削除されたか、間違ったリンクを入力した可能性があります。"
+
+#: .\templates\429.html:7 .\templates\429.html:22
+msgid "请求过于频繁"
+msgstr "リクエストが多すぎる"
+
+#: .\templates\429.html:24
+msgid "您的操作速度太快了，请喝杯咖啡稍作休息。"
+msgstr "仕事が早すぎます。コーヒーブレイクしてください。"
+
+#: .\templates\429.html:26
+msgid ""
+"请在 <span id=\"countdown\" class=\"font-bold font-mono text-"
+"warning\">60</span> 秒后重试。"
+msgstr ""
+"<span id=\"countdown\" class=\"font-bold font-mono text-warning\">60</span> "
+"秒後にもう一度お試しください。"
+
+#: .\templates\429.html:30 .\templates\500.html:66
+#: .\templates\maintenance.html:30
+msgid "刷新页面"
+msgstr "ページを更新する"
+
+#: .\templates\500.html:7
+msgid "服务器错误"
+msgstr "サーバーエラー"
+
+#: .\templates\500.html:55
+msgid "服务器出错了"
+msgstr "サーバーエラー"
+
+#: .\templates\500.html:57
+msgid "抱歉，服务器遇到了一些问题。"
+msgstr "申し訳ありませんが、サーバーに問題が発生しています。"
+
+#: .\templates\500.html:59
+msgid "我们的技术团队已收到自动通知，正在努力修复。"
+msgstr "弊社の技術チームは自動的に通知を受けており、修正に取り組んでいます。"
+
+#: .\templates\502.html:4
+msgid "网关错误"
+msgstr "ゲートウェイエラー"
+
+#: .\templates\502.html:20
+msgid "连接中断了"
+msgstr "接続が中断されました"
+
+#: .\templates\502.html:22
+msgid "网关错误 (502 Bad Gateway)。"
+msgstr "不正なゲートウェイ (502 不正なゲートウェイ)。"
+
+#: .\templates\502.html:24
+msgid "服务器暂时无法响应您的请求，请稍后重试。"
+msgstr "サーバーは一時的にリクエストに応答できません。後でもう一度お試しください。"
+
+#: .\templates\502.html:31
+msgid "重试连接"
+msgstr "接続を再試行します"
+
+#: .\templates\administration\base.html:119
+msgid "Rosetta Admin"
+msgstr "ロゼッタ管理者"
+
+#: .\templates\administration\base.html:151
+#: .\templates\administration\base.html:256
+#: .\templates\administration\base.html:526
+#: .\templates\administration\user_form.html:159
+msgid "个人资料"
+msgstr "個人データ"
+
+#: .\templates\administration\base.html:152
+#: .\templates\administration\base.html:257
+#: .\templates\administration\base.html:405
+#: .\templates\administration\base.html:527
+#: .\templates\partials\navbar.html:89
+msgid "退出登录"
+msgstr "ログアウト"
+
+#: .\templates\administration\base.html:162
+#: .\templates\administration\base.html:528
+msgid "查看站点"
+msgstr "サイトを表示"
+
+#: .\templates\administration\base.html:186
+msgid "搜索命令或页面…"
+msgstr "コマンドやページを検索..."
+
+#: .\templates\administration\base.html:279
+#: .\templates\administration\debug.html:5
+#: .\templates\administration\debug\base_debug.html:23
+msgid "概览"
+msgstr "概要"
+
+#: .\templates\administration\base.html:283
+msgid "内容管理"
+msgstr "コンテンツ管理"
+
+#: .\templates\administration\base.html:320
+#: .\templates\administration\page_list.html:4
+#: .\templates\administration\page_list.html:37
+msgid "页面管理"
+msgstr "ページ管理"
+
+#: .\templates\administration\base.html:330
+#: .\templates\administration\base.html:477
+#: .\templates\partials\footer.html:41
+msgid "导航"
+msgstr "ナビゲーション"
+
+#: .\templates\administration\base.html:346
+msgid "系统管理"
+msgstr "システム管理"
+
+#: .\templates\administration\base.html:356
+#: .\templates\administration\user_list.html:155
+msgid "称号"
+msgstr "称号"
+
+#: .\templates\administration\base.html:362
+msgid "用户组"
+msgstr "ユーザーグループ"
+
+#: .\templates\administration\base.html:366
+msgid "日志与审计"
+msgstr "ログと監査"
+
+#: .\templates\administration\base.html:370
+#: .\templates\administration\base.html:515
+#: .\templates\administration\logentry_list.html:5
+msgid "操作日志"
+msgstr "操作ログ"
+
+#: .\templates\administration\base.html:376
+#: .\templates\administration\base.html:517
+#: .\templates\administration\logfile_list.html:5
+msgid "系统日志"
+msgstr "システムログ"
+
+#: .\templates\administration\base.html:380
+msgid "维护与工具"
+msgstr "メンテナンスと工具"
+
+#: .\templates\administration\base.html:384
+#: .\templates\administration\base.html:518
+#: .\templates\administration\base.html:519
+#: .\templates\administration\system_tools.html:5
+#: .\templates\administration\system_tools.html:12
+msgid "系统工具"
+msgstr "システムツール"
+
+#: .\templates\administration\base.html:390
+#: .\templates\administration\base.html:519
+#: .\templates\administration\index.html:110
+#: .\templates\administration\settings.html:5
+#: .\templates\administration\settings.html:12
+msgid "站点设置"
+msgstr "サイト設定"
+
+#: .\templates\administration\base.html:396
+#: .\templates\administration\debug\base_debug.html:4
+msgid "调试工具"
+msgstr "デバッグツール"
+
+#: .\templates\administration\base.html:418
+msgid "Copyright © 2026 - All rights reserved"
+msgstr "著作権 © 2026 - 無断複写・転載を禁じます"
+
+#: .\templates\administration\base.html:453
+#: .\templates\administration\category_list.html:94
+#: .\templates\administration\comment_list.html:127
+#: .\templates\administration\friendlink_list.html:119
+#: .\templates\administration\group_list.html:101
+#: .\templates\administration\navigation_list.html:119
+#: .\templates\administration\page_list.html:130
+#: .\templates\administration\poll_list.html:61
+#: .\templates\administration\post_list.html:114
+#: .\templates\administration\searchplaceholder_list.html:117
+#: .\templates\administration\tag_list.html:118
+#: .\templates\administration\user_list.html:15
+#: .\templates\administration\usertitle_list.html:103
+msgid "批量操作"
+msgstr "バッチ操作"
+
+#: .\templates\administration\base.html:454
+msgid "确定要执行此批量操作吗？"
+msgstr "この一括操作を実行してもよろしいですか?"
+
+#: .\templates\administration\base.html:477
+#| msgid "管理后台"
+msgid "管理后台首页"
+msgstr "管理画面ホーム"
+
+#: .\templates\administration\base.html:477
+msgid "首页 概览 仪表盘"
+msgstr "ホーム概要ダッシュボード"
+
+#: .\templates\administration\base.html:478
+#: .\templates\administration\post_list.html:103
+msgid "文章列表"
+msgstr "記事一覧"
+
+#: .\templates\administration\base.html:478
+msgid "文章 内容 列表"
+msgstr "記事内容一覧"
+
+#: .\templates\administration\base.html:479
+msgid "新建文章"
+msgstr "新しい記事を作成する"
+
+#: .\templates\administration\base.html:479
+msgid "文章 新建 新增 写作"
+msgstr "記事新規追加書き込み"
+
+#: .\templates\administration\base.html:480
+#: .\templates\administration\category_list.html:84
+msgid "分类列表"
+msgstr "カテゴリ一覧"
+
+#: .\templates\administration\base.html:480
+msgid "分类 列表"
+msgstr "カテゴリ一覧"
+
+#: .\templates\administration\base.html:481
+#: .\templates\administration\category_list.html:22
+msgid "新建分类"
+msgstr "新しいカテゴリー"
+
+#: .\templates\administration\base.html:481
+msgid "分类 新建 新增"
+msgstr "カテゴリ新規追加"
+
+#: .\templates\administration\base.html:482
+msgid "导出分类"
+msgstr "輸出分類"
+
+#: .\templates\administration\base.html:482
+msgid "分类 导出"
+msgstr "分類のエクスポート"
+
+#: .\templates\administration\base.html:483
+msgid "导入分类"
+msgstr "カテゴリをインポートする"
+
+#: .\templates\administration\base.html:483
+msgid "分类 导入"
+msgstr "分類インポート"
+
+#: .\templates\administration\base.html:484
+#: .\templates\administration\tag_list.html:108
+msgid "标签列表"
+msgstr "タグリスト"
+
+#: .\templates\administration\base.html:484
+msgid "标签 列表"
+msgstr "タグリスト"
+
+#: .\templates\administration\base.html:485
+#: .\templates\administration\tag_list.html:25
+msgid "新建标签"
+msgstr "新しいラベル"
+
+#: .\templates\administration\base.html:485
+msgid "标签 新建 新增"
+msgstr "タグ新規追加"
+
+#: .\templates\administration\base.html:486
+#: .\templates\administration\comment_list.html:261
+msgid "评论列表"
+msgstr "コメント一覧"
+
+#: .\templates\administration\base.html:486
+msgid "评论 审核 列表"
+msgstr "コメントレビュー一覧"
+
+#: .\templates\administration\base.html:487
+#: .\templates\administration\page_list.html:98
+msgid "页面列表"
+msgstr "ページ一覧"
+
+#: .\templates\administration\base.html:487
+msgid "单页 页面 列表"
+msgstr "単一ページのページリスト"
+
+#: .\templates\administration\base.html:488
+#: .\templates\administration\page_list.html:30
+msgid "新建页面"
+msgstr "新しいページを作成する"
+
+#: .\templates\administration\base.html:488
+msgid "页面 新建 新增"
+msgstr "ページの新規追加"
+
+#: .\templates\administration\base.html:489
+#: .\templates\administration\navigation_form.html:14
+#: .\templates\administration\navigation_list.html:4
+#: .\templates\administration\navigation_list.html:32
+msgid "导航管理"
+msgstr "ナビゲーション管理"
+
+#: .\templates\administration\base.html:489
+#: .\templates\administration\base.html:490
+#: .\templates\administration\base.html:491
+#: .\templates\administration\base.html:492
+#: .\templates\administration\base.html:495
+#: .\templates\administration\base.html:496
+#: .\templates\administration\base.html:497
+#: .\templates\administration\base.html:498
+#: .\templates\administration\base.html:499
+#: .\templates\administration\base.html:500
+#: .\templates\administration\base.html:501
+#: .\templates\administration\base.html:502
+msgid "外观"
+msgstr "外観"
+
+#: .\templates\administration\base.html:489
+msgid "导航 菜单 列表"
+msgstr "ナビゲーションメニューリスト"
+
+#: .\templates\administration\base.html:490
+#: .\templates\administration\navigation_list.html:25
+msgid "新建导航"
+msgstr "新しいナビゲーション"
+
+#: .\templates\administration\base.html:490
+msgid "导航 新建 新增"
+msgstr "ナビゲーションの新規追加"
+
+#: .\templates\administration\base.html:491
+msgid "导出导航"
+msgstr "ナビゲーションのエクスポート"
+
+#: .\templates\administration\base.html:491
+msgid "导航 导出"
+msgstr "ナビゲーションのエクスポート"
+
+#: .\templates\administration\base.html:492
+msgid "导入导航"
+msgstr "インポートナビゲーション"
+
+#: .\templates\administration\base.html:492
+msgid "导航 导入"
+msgstr "ナビゲーションインポート"
+
+#: .\templates\administration\base.html:493
+#: .\templates\administration\poll_list.html:51
+#: .\templates\voting\poll_list.html:5
+msgid "投票列表"
+msgstr "投票リスト"
+
+#: .\templates\administration\base.html:493
+msgid "投票 问卷 列表"
+msgstr "世論調査アンケート一覧"
+
+#: .\templates\administration\base.html:494
+#: .\templates\administration\poll_list.html:12
+msgid "新建投票"
+msgstr "新しい投票を作成する"
+
+#: .\templates\administration\base.html:494
+msgid "投票 新建 新增"
+msgstr "新規追加に投票する"
+
+#: .\templates\administration\base.html:495
+msgid "友情链接管理"
+msgstr "フレンドリーなリンク管理"
+
+#: .\templates\administration\base.html:495
+msgid "友链 列表"
+msgstr "フレンドリーリンクリスト"
+
+#: .\templates\administration\base.html:496
+msgid "新建友情链接"
+msgstr "新しいフレンドリーリンクを作成する"
+
+#: .\templates\administration\base.html:496
+msgid "友链 新建 新增"
+msgstr "フレンドリーリンクを新規追加しました"
+
+#: .\templates\administration\base.html:497
+msgid "导出友情链接"
+msgstr "フレンドリーリンクをエクスポートする"
+
+#: .\templates\administration\base.html:497
+msgid "友链 导出"
+msgstr "フレンドリーリンクのエクスポート"
+
+#: .\templates\administration\base.html:498
+msgid "导入友情链接"
+msgstr "フレンドリーリンクをインポートする"
+
+#: .\templates\administration\base.html:498
+msgid "友链 导入"
+msgstr "フレンドリーリンクのインポート"
+
+#: .\templates\administration\base.html:499
+msgid "搜索 占位符 列表"
+msgstr "プレースホルダリストを検索"
+
+#: .\templates\administration\base.html:500
+msgid "新建搜索占位符"
+msgstr "新しい検索プレースホルダー"
+
+#: .\templates\administration\base.html:500
+msgid "占位符 新建 新增"
+msgstr "プレースホルダーの新規追加"
+
+#: .\templates\administration\base.html:501
+msgid "导出搜索占位符"
+msgstr "検索プレースホルダーをエクスポートする"
+
+#: .\templates\administration\base.html:501
+msgid "占位符 导出"
+msgstr "プレースホルダーのエクスポート"
+
+#: .\templates\administration\base.html:502
+msgid "导入搜索占位符"
+msgstr "検索プレースホルダーをインポートする"
+
+#: .\templates\administration\base.html:502
+msgid "占位符 导入"
+msgstr "プレースホルダーのインポート"
+
+#: .\templates\administration\base.html:503
+#: .\templates\administration\user_list.html:186
+msgid "用户列表"
+msgstr "ユーザーリスト"
+
+#: .\templates\administration\base.html:503
+#: .\templates\administration\base.html:504
+#: .\templates\administration\base.html:505
+#: .\templates\administration\base.html:506
+#: .\templates\administration\base.html:507
+#: .\templates\administration\base.html:508
+#: .\templates\administration\base.html:509
+#: .\templates\administration\base.html:510
+#: .\templates\administration\base.html:511
+#: .\templates\administration\base.html:512
+#: .\templates\administration\base.html:513
+#: .\templates\administration\base.html:514
+msgid "用户与权限"
+msgstr "ユーザーと権限"
+
+#: .\templates\administration\base.html:503
+msgid "用户 列表"
+msgstr "ユーザーリスト"
+
+#: .\templates\administration\base.html:504
+#: .\templates\administration\user_list.html:62
+msgid "新建用户"
+msgstr "新しいユーザーを作成する"
+
+#: .\templates\administration\base.html:504
+msgid "用户 新建 新增"
+msgstr "ユーザーの新規追加"
+
+#: .\templates\administration\base.html:505
+msgid "导出用户"
+msgstr "ユーザーをエクスポートする"
+
+#: .\templates\administration\base.html:505
+msgid "用户 导出"
+msgstr "ユーザーのエクスポート"
+
+#: .\templates\administration\base.html:506
+msgid "导入用户"
+msgstr "ユーザーをインポートする"
+
+#: .\templates\administration\base.html:506
+msgid "用户 导入"
+msgstr "ユーザーインポート"
+
+#: .\templates\administration\base.html:507
+#: .\templates\administration\user_form.html:75
+msgid "用户称号"
+msgstr "ユーザー名"
+
+#: .\templates\administration\base.html:507
+msgid "称号 头衔 列表"
+msgstr "タイトル タイトル リスト"
+
+#: .\templates\administration\base.html:508
+msgid "新建用户称号"
+msgstr "新しいユーザー名を作成する"
+
+#: .\templates\administration\base.html:508
+msgid "称号 新建 新增"
+msgstr "タイトル新規追加"
+
+#: .\templates\administration\base.html:509
+msgid "导出用户称号"
+msgstr "ユーザー名をエクスポートする"
+
+#: .\templates\administration\base.html:509
+msgid "称号 导出"
+msgstr "タイトルのエクスポート"
+
+#: .\templates\administration\base.html:510
+msgid "导入用户称号"
+msgstr "ユーザー名をインポートする"
+
+#: .\templates\administration\base.html:510
+msgid "称号 导入"
+msgstr "タイトルインポート"
+
+#: .\templates\administration\base.html:511
+#: .\templates\administration\group_list.html:4
+#: .\templates\administration\group_list.html:30
+msgid "用户组管理"
+msgstr "ユーザーグループ管理"
+
+#: .\templates\administration\base.html:511
+msgid "用户组 列表"
+msgstr "ユーザーグループ一覧"
+
+#: .\templates\administration\base.html:512
+#: .\templates\administration\group_list.html:23
+msgid "新建用户组"
+msgstr "新しいユーザーグループを作成する"
+
+#: .\templates\administration\base.html:512
+msgid "用户组 新建 新增"
+msgstr "ユーザーグループの新規追加"
+
+#: .\templates\administration\base.html:513
+msgid "导出用户组"
+msgstr "ユーザーグループのエクスポート"
+
+#: .\templates\administration\base.html:513
+msgid "用户组 导出"
+msgstr "ユーザーグループのエクスポート"
+
+#: .\templates\administration\base.html:514
+msgid "导入用户组"
+msgstr "ユーザーグループをインポートする"
+
+#: .\templates\administration\base.html:514
+msgid "用户组 导入"
+msgstr "ユーザーグループのインポート"
+
+#: .\templates\administration\base.html:515
+#: .\templates\administration\base.html:516
+#: .\templates\administration\base.html:517
+msgid "日志"
+msgstr "ログ"
+
+#: .\templates\administration\base.html:515
+msgid "审计 日志 操作记录"
+msgstr "監査ログ操作記録"
+
+#: .\templates\administration\base.html:516
+msgid "导出操作日志"
+msgstr "操作ログのエクスポート"
+
+#: .\templates\administration\base.html:516
+msgid "日志 导出"
+msgstr "ログのエクスポート"
+
+#: .\templates\administration\base.html:517
+msgid "系统 日志 文件"
+msgstr "システムログファイル"
+
+#: .\templates\administration\base.html:518
+msgid "系统 维护 索引 图片"
+msgstr "システムメンテナンスインデックス画像"
+
+#: .\templates\administration\base.html:519
+msgid "设置 配置 参数"
+msgstr "構成パラメータを設定する"
+
+#: .\templates\administration\base.html:520
+msgid "调试面板"
+msgstr "デバッグパネル"
+
+#: .\templates\administration\base.html:520
+#: .\templates\administration\base.html:521
+#: .\templates\administration\base.html:522
+#: .\templates\administration\base.html:523
+#: .\templates\administration\base.html:524
+#: .\templates\administration\base.html:525
+msgid "调试"
+msgstr "デバッグ"
+
+#: .\templates\administration\base.html:520
+msgid "调试 面板"
+msgstr "デバッグパネル"
+
+#: .\templates\administration\base.html:521
+msgid "调试 UI 测试"
+msgstr "UIテストのデバッグ"
+
+#: .\templates\administration\base.html:521
+msgid "调试 UI 组件"
+msgstr "UIコンポーネントのデバッグ"
+
+#: .\templates\administration\base.html:522
+msgid "调试 权限检查"
+msgstr "デバッグ許可チェック"
+
+#: .\templates\administration\base.html:522
+msgid "调试 权限"
+msgstr "デバッグ権限"
+
+#: .\templates\administration\base.html:523
+msgid "调试 模拟数据"
+msgstr "シミュレートされたデータのデバッグ"
+
+#: .\templates\administration\base.html:523
+msgid "调试 模拟"
+msgstr "デバッグシミュレーション"
+
+#: .\templates\administration\base.html:524
+msgid "调试 缓存状态"
+msgstr "デバッグキャッシュのステータス"
+
+#: .\templates\administration\base.html:524
+msgid "调试 缓存"
+msgstr "デバッグキャッシュ"
+
+#: .\templates\administration\base.html:525
+msgid "调试 邮件发送"
+msgstr "電子メール送信のデバッグ"
+
+#: .\templates\administration\base.html:525
+msgid "调试 邮件"
+msgstr "デバッグメール"
+
+#: .\templates\administration\base.html:526
+#: .\templates\administration\base.html:527
+msgid "账户"
+msgstr "アカウント"
+
+#: .\templates\administration\base.html:526
+msgid "资料 账户"
+msgstr "情報アカウント"
+
+#: .\templates\administration\base.html:527
+msgid "登出 退出"
+msgstr "ログアウト 終了"
+
+#: .\templates\administration\base.html:528
+msgid "外部"
+msgstr "外部の"
+
+#: .\templates\administration\base.html:528
+msgid "前台 站点 首页"
+msgstr "フロントサイトホームページ"
+
+#: .\templates\administration\base.html:592
+#| msgid "搜索命令或页面…"
+msgid "搜索命令或页面…（Ctrl+K）"
+msgstr "コマンドまたはページを検索... (Ctrl+K)"
+
+#: .\templates\administration\base.html:618
+msgid "未找到匹配结果"
+msgstr "一致する結果が見つかりません"
+
+#: .\templates\administration\base.html:619
+msgid "没有找到对应的命令，请尝试更换关键词。"
+msgstr "一致するコマンドが見つかりません。別のキーワードを試してください。"
+
+#: .\templates\administration\base.html:625
+msgid "切换"
+msgstr "切り替え"
+
+#: .\templates\administration\base.html:627
+msgid "进入"
+msgstr "選択"
+
+#: .\templates\administration\base.html:629
+#: .\templates\administration\category_form.html:286
+#: .\templates\administration\logfile_list.html:147
+#: .\templates\partials\navbar.html:411
+msgid "关闭"
+msgstr "閉じる"
+
+#: .\templates\administration\category_form.html:11
+msgid "编辑分类"
+msgstr "カテゴリを編集する"
+
+#: .\templates\administration\category_form.html:24
+#: .\templates\administration\comment_form.html:33
+#: .\templates\administration\friendlink_form.html:36
+#: .\templates\administration\generic_form.html:23
+#: .\templates\administration\group_form.html:26
+#: .\templates\administration\navigation_form.html:36
+#: .\templates\administration\poll_form.html:25
+#: .\templates\administration\searchplaceholder_form.html:23
+#: .\templates\administration\tag_form.html:24
+#: .\templates\administration\user_form.html:28
+msgid "表单错误"
+msgstr "フォームエラー"
+
+#: .\templates\administration\category_form.html:35
+#: .\templates\administration\tag_form.html:35
+msgid "名称 (中文)"
+msgstr "名前（中国語）"
+
+#: .\templates\administration\category_form.html:47
+#: .\templates\administration\tag_form.html:47
+#| msgid "English"
+msgid "Name (English)"
+msgstr "名前 (英語)"
+
+#: .\templates\administration\category_form.html:56
+#: .\templates\administration\tag_form.html:56
+msgid "这将是它在站点上显示的名字。"
+msgstr "これがサイト上で表示される名前になります。"
+
+#: .\templates\administration\category_form.html:62
+#: .\templates\administration\tag_form.html:62
+msgid "名前 (Japanese)"
+msgstr "名前 (日本語)"
+
+#: .\templates\administration\category_form.html:74
+#: .\templates\administration\tag_form.html:69
+msgid "名稱 (Traditional Chinese)"
+msgstr "名稱 (繁体字中国語)"
+
+#: .\templates\administration\category_form.html:87
+#: .\templates\administration\page_form.html:122
+#: .\templates\administration\tag_form.html:77
+msgid "别名 (Slug)"
+msgstr "別名（ナメクジ）"
+
+#: .\templates\administration\category_form.html:96
+#: .\templates\administration\tag_form.html:86
+msgid "“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。"
+msgstr "「エイリアス」は URL で使用されるエイリアスで、通常は小文字で、文字、数字、およびハイフン (-) のみを含めることができます。"
+
+#: .\templates\administration\category_form.html:103
+msgid "描述 (中文)"
+msgstr "説明（中国語）"
+
+#: .\templates\administration\category_form.html:115
+msgid "Description (English)"
+msgstr "説明（英語）"
+
+#: .\templates\administration\category_form.html:127
+msgid "説明 (Japanese)"
+msgstr "説明 (日本語)"
+
+#: .\templates\administration\category_form.html:139
+msgid "描述 (Traditional Chinese)"
+msgstr "説明"
+
+#: .\templates\administration\category_form.html:148
+msgid "描述默认只在后台显示，部分主题可能会显示。"
+msgstr "説明はデフォルトでは背景にのみ表示されますが、一部のトピックでは表示される場合があります。"
+
+#: .\templates\administration\category_form.html:152
+#: .\templates\administration\debug\permission.html:37
+#: .\templates\administration\friendlink_form.html:29
+#: .\templates\administration\group_form.html:51
+#: .\templates\administration\navigation_form.html:29
+#: .\templates\administration\poll_form.html:86
+#: .\templates\administration\searchplaceholder_form.html:16
+#: .\templates\administration\tag_form.html:90
+#: .\templates\administration\usertitle_form.html:109
+#: .\templates\users\includes\edit_profile_modal.html:95
+msgid "基本信息"
+msgstr "基本情報"
+
+#: .\templates\administration\category_form.html:159
+msgid "图标 (Material Symbols)"
+msgstr "アイコン（マテリアルシンボル）"
+
+#: .\templates\administration\category_form.html:180
+#| msgid "Material Symbols 图标代码"
+msgid "使用 Google Material Symbols 代码。"
+msgstr "Google Material Symbols コードを使用します。"
+
+#: .\templates\administration\category_form.html:188
+msgid "颜色设置"
+msgstr "色の設定"
+
+#: .\templates\administration\category_form.html:197
+msgid "选择分类的主题颜色。"
+msgstr "カテゴリのテーマカラーを選択します。"
+
+#: .\templates\administration\category_form.html:202
+#: .\templates\administration\tag_form.html:156
+msgid "外观设置"
+msgstr "外観設定"
+
+#: .\templates\administration\category_form.html:213
+#: .\templates\administration\comment_list.html:32
+#: .\templates\administration\friendlink_form.html:160
+#: .\templates\administration\group_form.html:81
+#: .\templates\administration\navigation_form.html:150
+#: .\templates\administration\poll_form.html:170
+#: .\templates\administration\post_form.html:227
+#: .\templates\administration\searchplaceholder_form.html:100
+#: .\templates\administration\tag_form.html:101
+#: .\templates\administration\usertitle_form.html:157
+#: .\templates\users\includes\edit_profile_modal.html:155
+msgid "保存更改"
+msgstr "変更を保存"
+
+#: .\templates\administration\category_form.html:217
+#: .\templates\administration\friendlink_form.html:164
+#: .\templates\administration\generic_form.html:68
+#: .\templates\administration\group_form.html:85
+#: .\templates\administration\navigation_form.html:154
+#: .\templates\administration\page_form.html:96
+#: .\templates\administration\poll_form.html:176
+#: .\templates\administration\post_form.html:233
+#: .\templates\administration\searchplaceholder_form.html:104
+#: .\templates\administration\tag_form.html:105
+#: .\templates\administration\user_form.html:208
+msgid "保存并新增"
+msgstr "保存して追加"
+
+#: .\templates\administration\category_form.html:218
+#: .\templates\administration\friendlink_form.html:165
+#: .\templates\administration\group_form.html:86
+#: .\templates\administration\navigation_form.html:155
+#: .\templates\administration\page_form.html:97
+#: .\templates\administration\poll_form.html:180
+#: .\templates\administration\post_form.html:232
+#: .\templates\administration\searchplaceholder_form.html:105
+#: .\templates\administration\tag_form.html:106
+#: .\templates\administration\user_form.html:209
+msgid "保存并继续"
+msgstr "保存して続行"
+
+#: .\templates\administration\category_form.html:224
+#: .\templates\administration\category_form.html:231
+#: .\templates\administration\category_list.html:42
+#: .\templates\administration\comment_form.html:99
+#: .\templates\administration\comment_list.html:31
+#: .\templates\administration\comment_list.html:61
+#: .\templates\administration\comment_list.html:85
+#: .\templates\administration\friendlink_form.html:171
+#: .\templates\administration\friendlink_form.html:178
+#: .\templates\administration\friendlink_list.html:101
+#: .\templates\administration\generic_confirm_delete.html:23
+#: .\templates\administration\generic_form.html:67
+#: .\templates\administration\group_form.html:93
+#: .\templates\administration\group_form.html:103
+#: .\templates\administration\group_list.html:83
+#: .\templates\administration\logfile_list.html:141
+#: .\templates\administration\navigation_form.html:161
+#: .\templates\administration\navigation_form.html:168
+#: .\templates\administration\navigation_list.html:101
+#: .\templates\administration\page_form.html:103
+#: .\templates\administration\page_form.html:110
+#: .\templates\administration\page_list.html:112
+#: .\templates\administration\poll_form.html:188
+#: .\templates\administration\poll_form.html:200
+#: .\templates\administration\post_list.html:42
+#: .\templates\administration\searchplaceholder_form.html:111
+#: .\templates\administration\searchplaceholder_form.html:119
+#: .\templates\administration\searchplaceholder_list.html:99
+#: .\templates\administration\tag_form.html:112
+#: .\templates\administration\tag_form.html:119
+#: .\templates\administration\tag_list.html:48
+#: .\templates\administration\user_form.html:215
+#: .\templates\administration\user_form.html:222
+#: .\templates\administration\user_list.html:202
+#: .\templates\administration\usertitle_form.html:159
+#: .\templates\administration\usertitle_list.html:85
+#: .\templates\components\confirm_modal.html:11
+#: .\templates\users\includes\edit_profile_modal.html:152
+#: .\templates\users\includes\edit_profile_modal.html:170
+#: .\templates\users\register.html:82
+msgid "取消"
+msgstr "キャンセル"
+
+#: .\templates\administration\category_form.html:225
+msgid "确定要删除分类"
+msgstr "カテゴリを削除することを確認します"
+
+#: .\templates\administration\category_form.html:225
+#: .\templates\administration\tag_form.html:113
+msgid "吗？"
+msgstr "?"
+
+#: .\templates\administration\category_form.html:226
+msgid "删除分类"
+msgstr "カテゴリの削除"
+
+#: .\templates\administration\category_form.html:235
+#: .\templates\administration\comment_form.html:88
+#: .\templates\administration\comment_list.html:222
+#: .\templates\administration\friendlink_form.html:155
+#: .\templates\administration\navigation_form.html:145
+#: .\templates\administration\page_form.html:114
+#: .\templates\administration\partials\comment_list_rows.html:74
+#: .\templates\administration\poll_form.html:205
+#: .\templates\administration\post_form.html:237
+#: .\templates\administration\post_list.html:61
+#: .\templates\administration\searchplaceholder_form.html:95
+#: .\templates\administration\tag_form.html:123
+#| msgid "发布时间"
+msgid "发布"
+msgstr "公開"
+
+#: .\templates\administration\category_form.html:246
+msgid "选择图标"
+msgstr "アイコンを選択"
+
+#: .\templates\administration\category_form.html:250
+msgid "搜索图标 (如: user, edit)..."
+msgstr "検索アイコン (例: ユーザー、編集)..."
+
+#: .\templates\administration\category_form.html:269
+msgid "加载图标库..."
+msgstr "アイコンライブラリをロード..."
+
+#: .\templates\administration\category_form.html:275
+msgid "未找到匹配的图标"
+msgstr "一致するアイコンが見つかりませんでした"
+
+#: .\templates\administration\category_form.html:281
+msgid "图标库: Material Symbols"
+msgstr "アイコン ライブラリ: マテリアル シンボル"
+
+#: .\templates\administration\category_form.html:282
+msgid "共"
+msgstr "合計"
+
+#: .\templates\administration\category_form.html:282
+#| msgid "图标"
+msgid "个图标"
+msgstr "個のアイコン"
+
+#: .\templates\administration\category_list.html:4
+#: .\templates\administration\category_list.html:26
+msgid "分类管理"
+msgstr "分類管理"
+
+#: .\templates\administration\category_list.html:12
+#: .\templates\administration\comment_list.html:154
+#: .\templates\administration\friendlink_list.html:12
+#: .\templates\administration\group_list.html:12
+#: .\templates\administration\navigation_list.html:12
+#: .\templates\administration\page_list.html:12
+#: .\templates\administration\post_list.html:12
+#: .\templates\administration\searchplaceholder_list.html:13
+#: .\templates\administration\tag_list.html:12
+#: .\templates\administration\user_list.html:47
+#: .\templates\administration\usertitle_list.html:13
+msgid "更多"
+msgstr "もっと"
+
+#: .\templates\administration\category_list.html:16
+#: .\templates\administration\page_list.html:18
+msgid "导出全部 (JSON)"
+msgstr "すべてエクスポート (JSON)"
+
+#: .\templates\administration\category_list.html:17
+#: .\templates\administration\category_list.html:35
+#: .\templates\administration\page_list.html:24
+#: .\templates\administration\page_list.html:105
+#: .\templates\administration\post_list.html:35
+#: .\templates\administration\tag_list.html:41
+#: .\templates\administration\user_list.html:195
+msgid "导入数据 (JSON)"
+msgstr "データのインポート(JSON)"
+
+#: .\templates\administration\category_list.html:26
+msgid "管理文章分类体系"
+msgstr "管理物品分類体系"
+
+#: .\templates\administration\category_list.html:37
+#: .\templates\administration\comment_list.html:80
+#: .\templates\administration\friendlink_list.html:96
+#: .\templates\administration\group_list.html:78
+#: .\templates\administration\navigation_list.html:96
+#: .\templates\administration\page_list.html:107
+#: .\templates\administration\post_list.html:37
+#: .\templates\administration\searchplaceholder_list.html:94
+#: .\templates\administration\tag_list.html:43
+#: .\templates\administration\user_list.html:197
+#: .\templates\administration\usertitle_list.html:80
+msgid "请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。"
+msgstr "インポートする JSON ファイルを選択してください。注: インポートすると、同じ ID を持つ既存のデータが上書きされます。"
+
+#: .\templates\administration\category_list.html:43
+#: .\templates\administration\comment_list.html:86
+#: .\templates\administration\friendlink_list.html:102
+#: .\templates\administration\group_list.html:84
+#: .\templates\administration\navigation_list.html:102
+#: .\templates\administration\page_list.html:113
+#: .\templates\administration\post_list.html:43
+#: .\templates\administration\searchplaceholder_list.html:100
+#: .\templates\administration\tag_list.html:49
+#: .\templates\administration\user_list.html:203
+#: .\templates\administration\usertitle_list.html:86
+msgid "开始导入"
+msgstr "インポートを開始する"
+
+#: .\templates\administration\category_list.html:55
+#: .\templates\administration\comment_list.html:228
+#: .\templates\administration\friendlink_list.html:50
+#: .\templates\administration\group_list.html:35
+#: .\templates\administration\navigation_list.html:51
+#: .\templates\administration\page_list.html:64
+#: .\templates\administration\partials\category_list_rows.html:56
+#: .\templates\administration\partials\comment_list_rows.html:89
+#: .\templates\administration\partials\friendlink_list_rows.html:59
+#: .\templates\administration\partials\group_list_rows.html:42
+#: .\templates\administration\partials\logentry_list_rows.html:35
+#: .\templates\administration\partials\logentry_list_rows.html:64
+#: .\templates\administration\partials\navigation_list_rows.html:48
+#: .\templates\administration\partials\page_list_rows.html:57
+#: .\templates\administration\partials\poll_list_rows.html:85
+#: .\templates\administration\partials\post_list_rows.html:107
+#: .\templates\administration\partials\searchplaceholder_list_rows.html:42
+#: .\templates\administration\partials\tag_list_rows.html:60
+#: .\templates\administration\partials\user_list_rows.html:90
+#: .\templates\administration\partials\usertitle_list_rows.html:59
+#: .\templates\administration\poll_form.html:105
+#: .\templates\administration\poll_list.html:21
+#: .\templates\administration\post_list.html:67
+#: .\templates\administration\searchplaceholder_form.html:114
+#: .\templates\administration\searchplaceholder_list.html:50
+#: .\templates\administration\system_tools.html:262
+#: .\templates\administration\tag_list.html:74
+#: .\templates\administration\user_list.html:129
+#: .\templates\administration\usertitle_list.html:35
+#: .\templates\blog\post_detail.html:405
+#: .\templates\users\includes\comments_list.html:24
+#: .\templates\users\includes\profile_content.html:197
+msgid "删除"
+msgstr "消去"
+
+#: .\templates\administration\category_list.html:71
+msgid "名称 / 描述"
+msgstr "名前/説明"
+
+#: .\templates\administration\category_list.html:73
+#: .\templates\administration\tag_list.html:95
+msgid "文章数"
+msgstr "記事数"
+
+#: .\templates\administration\category_list.html:74
+#: .\templates\administration\comment_list.html:249
+#: .\templates\administration\friendlink_list.html:73
+#: .\templates\administration\group_form.html:107
+#: .\templates\administration\group_list.html:55
+#: .\templates\administration\logentry_list.html:61
+#: .\templates\administration\navigation_list.html:73
+#: .\templates\administration\page_list.html:86
+#: .\templates\administration\poll_list.html:41
+#: .\templates\administration\post_list.html:92
+#: .\templates\administration\searchplaceholder_list.html:71
+#: .\templates\administration\system_tools.html:236
+#: .\templates\administration\tag_list.html:96
+#: .\templates\administration\user_form.html:226
+#: .\templates\administration\user_list.html:174
+#: .\templates\administration\usertitle_form.html:180
+#: .\templates\administration\usertitle_list.html:57
+#: .\templates\users\includes\profile_content.html:130
+msgid "操作"
+msgstr "操作する"
+
+#: .\templates\administration\category_list.html:90
+#: .\templates\administration\comment_list.html:123
+#: .\templates\administration\friendlink_list.html:115
+#: .\templates\administration\group_list.html:97
+#: .\templates\administration\navigation_list.html:115
+#: .\templates\administration\page_list.html:126
+#: .\templates\administration\poll_list.html:57
+#: .\templates\administration\post_list.html:110
+#: .\templates\administration\searchplaceholder_list.html:113
+#: .\templates\administration\tag_list.html:114
+#: .\templates\administration\user_list.html:11
+#: .\templates\administration\usertitle_list.html:99
+msgid "请至少选择一项进行操作"
+msgstr "続行するには少なくとも 1 つ選択してください"
+
+#: .\templates\administration\category_list.html:95
+#: .\templates\administration\comment_list.html:128
+#: .\templates\administration\comment_list.html:163
+#: .\templates\administration\friendlink_list.html:21
+#: .\templates\administration\friendlink_list.html:120
+#: .\templates\administration\group_list.html:19
+#: .\templates\administration\group_list.html:102
+#: .\templates\administration\navigation_list.html:21
+#: .\templates\administration\navigation_list.html:120
+#: .\templates\administration\page_list.html:131
+#: .\templates\administration\poll_list.html:62
+#: .\templates\administration\post_list.html:115
+#: .\templates\administration\searchplaceholder_list.html:22
+#: .\templates\administration\searchplaceholder_list.html:118
+#: .\templates\administration\tag_list.html:21
+#: .\templates\administration\tag_list.html:119
+#: .\templates\administration\user_list.html:16
+#: .\templates\administration\user_list.html:58
+#: .\templates\administration\usertitle_list.html:20
+#: .\templates\administration\usertitle_list.html:104
+msgid "批量删除"
+msgstr "一括削除"
+
+#: .\templates\administration\category_list.html:99
+#: .\templates\administration\comment_list.html:134
+#: .\templates\administration\friendlink_list.html:126
+#: .\templates\administration\poll_list.html:66
+#: .\templates\administration\post_list.html:122
+#: .\templates\administration\searchplaceholder_list.html:124
+#: .\templates\administration\tag_list.html:125
+#: .\templates\administration\usertitle_list.html:108
+msgid "确定要对选中的"
+msgstr "選択した内容を確認してください"
+
+#: .\templates\administration\category_list.html:99
+#: .\templates\administration\comment_list.html:134
+#: .\templates\administration\friendlink_list.html:126
+#: .\templates\administration\poll_list.html:66
+#: .\templates\administration\post_list.html:122
+#: .\templates\administration\searchplaceholder_list.html:124
+#: .\templates\administration\tag_list.html:125
+#: .\templates\administration\usertitle_list.html:108
+msgid "项执行此操作吗？"
+msgstr "アイテムはこのアクションを実行しますか?"
+
+#: .\templates\administration\comment_form.html:10
+#: .\templates\administration\friendlink_form.html:13
+#: .\templates\administration\navigation_form.html:13
+#: .\templates\partials\footer.html:45 .\templates\partials\navbar.html:25
+#: .\templates\partials\navbar.html:107 .\templates\voting\poll_detail.html:11
+msgid "首页"
+msgstr "ホーム"
+
+#: .\templates\administration\comment_form.html:11
+#: .\templates\administration\comment_list.html:4
+#: .\templates\administration\comment_list.html:169
+msgid "评论管理"
+msgstr "コメント管理"
+
+#: .\templates\administration\comment_form.html:12
+#: .\templates\administration\comment_list.html:12
+#: .\templates\administration\partials\comment_list_rows.html:35
+msgid "编辑评论"
+msgstr "編集者のコメント"
+
+#: .\templates\administration\comment_form.html:26
+#: .\templates\administration\comment_list.html:18
+msgid "评论内容"
+msgstr "コメント内容"
+
+#: .\templates\administration\comment_form.html:61
+msgid "作者信息"
+msgstr "著者情報"
+
+#: .\templates\administration\comment_form.html:76
+msgid "查看用户"
+msgstr "ユーザーを表示する"
+
+#: .\templates\administration\comment_form.html:93
+msgid "更新评论"
+msgstr "コメントを更新"
+
+#: .\templates\administration\comment_form.html:100
+#: .\templates\administration\partials\comment_list_rows.html:87
+#: .\templates\users\includes\comments_list.html:22
+msgid "确定要删除这条评论吗？"
+msgstr "このコメントを削除してもよろしいですか?"
+
+#: .\templates\administration\comment_form.html:101
+#: .\templates\blog\post_detail.html:402
+#: .\templates\users\includes\comments_list.html:22
+msgid "删除评论"
+msgstr "コメントを削除"
+
+#: .\templates\administration\comment_form.html:111
+msgid "元数据"
+msgstr "メタデータ"
+
+#: .\templates\administration\comment_form.html:116
+#: .\templates\administration\comment_list.html:25
+msgid "公开可见"
+msgstr "公に見える"
+
+#: .\templates\administration\comment_form.html:123
+#| msgid "允许评论"
+msgid "评论于"
+msgstr "にコメント"
+
+#: .\templates\administration\comment_form.html:128
+msgid "所属文章"
+msgstr "所属記事"
+
+#: .\templates\administration\comment_form.html:136
+msgid "回复给"
+msgstr "に返信する"
+
+#: .\templates\administration\comment_list.html:46
+msgid "回复评论"
+msgstr "コメントに返信する"
+
+#: .\templates\administration\comment_list.html:57
+msgid "输入你的回复..."
+msgstr "返信を入力してください..."
+
+#: .\templates\administration\comment_list.html:62
+msgid "发送回复"
+msgstr "返信を送信"
+
+#: .\templates\administration\comment_list.html:78
+msgid "导入评论数据 (JSON)"
+msgstr "レビューデータ（JSON）のインポート"
+
+#: .\templates\administration\comment_list.html:129
+#: .\templates\administration\page_list.html:132
+#: .\templates\administration\post_list.html:116
+msgid "批量发布"
+msgstr "バッチパブリッシング"
+
+#: .\templates\administration\comment_list.html:130
+#: .\templates\administration\comment_list.html:162
+msgid "批量待审"
+msgstr "レビュー保留中のバッチ"
+
+#: .\templates\administration\comment_list.html:158
+#: .\templates\administration\friendlink_list.html:16
+#: .\templates\administration\group_list.html:16
+#: .\templates\administration\navigation_list.html:16
+#: .\templates\administration\post_list.html:16
+#: .\templates\administration\searchplaceholder_list.html:17
+#: .\templates\administration\tag_list.html:16
+#: .\templates\administration\user_list.html:51
+#: .\templates\administration\usertitle_list.html:17
+msgid "导出 JSON"
+msgstr "JSONのエクスポート"
+
+#: .\templates\administration\comment_list.html:159
+#: .\templates\administration\friendlink_list.html:17
+#: .\templates\administration\group_list.html:17
+#: .\templates\administration\navigation_list.html:17
+#: .\templates\administration\post_list.html:17
+#: .\templates\administration\searchplaceholder_list.html:18
+#: .\templates\administration\tag_list.html:17
+#: .\templates\administration\user_list.html:52
+#: .\templates\administration\usertitle_list.html:18
+msgid "导入 JSON"
+msgstr "JSONをインポートする"
+
+#: .\templates\administration\comment_list.html:161
+msgid "批量通过"
+msgstr "バッチで渡す"
+
+#: .\templates\administration\comment_list.html:169
+msgid "管理用户评论与互动"
+msgstr "ユーザーのコメントとインタラクションを管理する"
+
+#: .\templates\administration\comment_list.html:178
+#: .\templates\administration\index.html:64
+msgid "总评论数"
+msgstr "総コメント数"
+
+#: .\templates\administration\comment_list.html:180
+msgid "所有评论总和"
+msgstr "すべてのコメントの合計"
+
+#: .\templates\administration\comment_list.html:191
+msgid "前台可见的评论"
+msgstr "フロントデスクにコメントが表示されます"
+
+#: .\templates\administration\comment_list.html:200
+#: .\templates\administration\comment_list.html:211
+#: .\templates\administration\index.html:160
+#: .\templates\administration\partials\comment_list_rows.html:58
+msgid "待审核"
+msgstr "承認待ち"
+
+#: .\templates\administration\comment_list.html:202
+msgid "需要管理员处理"
+msgstr "管理者の処理が必要"
+
+#: .\templates\administration\comment_list.html:209
+#: .\templates\administration\friendlink_list.html:36
+#: .\templates\administration\navigation_list.html:36
+#: .\templates\administration\page_list.html:43
+#: .\templates\administration\post_list.html:54
+#: .\templates\administration\searchplaceholder_list.html:36
+#: .\templates\administration\tag_list.html:60
+#: .\templates\administration\user_list.html:109
+#: .\templates\blog\search_results.html:12
+msgid "全部"
+msgstr "全て"
+
+#: .\templates\administration\comment_list.html:225
+#: .\templates\administration\index.html:70
+#: .\templates\administration\index.html:248
+msgid "待审"
+msgstr "承認待ち"
+
+#: .\templates\administration\comment_list.html:246
+msgid "用户 / 内容"
+msgstr "ユーザー/コンテンツ"
+
+#: .\templates\administration\comment_list.html:247
+msgid "文章 / 时间"
+msgstr "記事・時間"
+
+#: .\templates\administration\components\empty_state.html:6
+msgid "暂无数据"
+msgstr "まだデータがありません"
+
+#: .\templates\administration\components\empty_state.html:8
+msgid "当前列表没有任何数据。"
+msgstr "現在のリストにはデータがありません。"
+
+#: .\templates\administration\components\list_container.html:33
+#: .\templates\blog\search_results.html:22
+msgid "搜索..."
+msgstr "検索..."
+
+#: .\templates\administration\components\list_container.html:53
+msgid "项已选择"
+msgstr "項目を選択しました"
+
+#: .\templates\administration\components\pagination.html:12
+#: .\templates\administration\logentry_list.html:83
+#: .\templates\voting\poll_list.html:57
+msgid "第"
+msgstr "第"
+
+#: .\templates\administration\components\pagination.html:12
+msgid "页 / 共"
+msgstr "ページ数 / 合計"
+
+#: .\templates\administration\components\pagination.html:12
+#: .\templates\administration\logentry_list.html:83
+#: .\templates\voting\poll_list.html:57
+#| msgid "首页"
+msgid "页"
+msgstr "ページ"
+
+#: .\templates\administration\debug.html:14
+msgid "数据库连接"
+msgstr "データベース接続"
+
+#: .\templates\administration\debug.html:20
+msgid "正常 (Connected)"
+msgstr "通常（接続済み）"
+
+#: .\templates\administration\debug.html:26
+msgid "异常 (Error)"
+msgstr "エラー"
+
+#: .\templates\administration\debug.html:42
+msgid "系统环境"
+msgstr "システム環境"
+
+#: .\templates\administration\debug.html:69
+msgid "数据统计"
+msgstr "統計"
+
+#: .\templates\administration\debug.html:97
+msgid "系统路由表"
+msgstr "システムルーティングテーブル"
+
+#: .\templates\administration\debug.html:99
+msgid "仅显示已命名路由，部分带参数路由不可点击"
+msgstr "名前付きルートのみが表示され、パラメータを持つ一部のルートはクリックできません。"
+
+#: .\templates\administration\debug.html:105
+msgid "路由信息 (Route Info)"
+msgstr "ルート情報"
+
+#: .\templates\administration\debug.html:106
+msgid "功能描述 (Description)"
+msgstr "説明"
+
+#: .\templates\administration\debug.html:107
+msgid "操作 (Action)"
+msgstr "アクション"
+
+#: .\templates\administration\debug.html:134
+msgid "带参数路由无法直接访问"
+msgstr "パラメーターを含むルートには直接アクセスできません"
+
+#: .\templates\administration\debug.html:138
+#| msgid "访问密码"
+msgid "访问"
+msgstr "アクセス"
+
+#: .\templates\administration\debug\base_debug.html:14
+msgid "调试工具箱"
+msgstr "デバッグツールボックス"
+
+#: .\templates\administration\debug\base_debug.html:15
+msgid "系统诊断与开发辅助工具"
+msgstr "システム診断および開発支援"
+
+#: .\templates\administration\debug\base_debug.html:27
+msgid "UI 测试"
+msgstr "UIテスト"
+
+#: .\templates\administration\debug\base_debug.html:31
+msgid "权限检查"
+msgstr "権限チェック"
+
+#: .\templates\administration\debug\base_debug.html:35
+msgid "Mock 数据"
+msgstr "モックデータ"
+
+#: .\templates\administration\debug\base_debug.html:39
+#: .\templates\administration\debug\cache.html:5
+#: .\templates\administration\debug\cache.html:12
+msgid "缓存管理"
+msgstr "キャッシュ管理"
+
+#: .\templates\administration\debug\base_debug.html:43
+#: .\templates\administration\debug\email.html:5
+msgid "邮件测试"
+msgstr "メールテスト"
+
+#: .\templates\administration\debug\cache.html:18
+msgid "缓存说明"
+msgstr "キャッシュ命令"
+
+#: .\templates\administration\debug\cache.html:20
+msgid "系统使用 Django 默认缓存后端。清理缓存可能会导致短暂的性能下降，因为系统需要重新生成缓存数据。"
+msgstr ""
+"システムは、Django のデフォルトのキャッシュ バックエンドを使用します。キャッシュをクリーニングすると、システムがキャッシュ "
+"データを再生成する必要があるため、一時的にパフォーマンスが低下する可能性があります。"
+
+#: .\templates\administration\debug\cache.html:30
+msgid "清理所有缓存"
+msgstr "すべてのキャッシュをクリアする"
+
+#: .\templates\administration\debug\cache.html:31
+msgid "清除系统中的所有缓存数据，包括页面缓存、数据库查询缓存等。"
+msgstr "ページ キャッシュ、データベース クエリ キャッシュなど、システム内のすべてのキャッシュ データをクリアします。"
+
+#: .\templates\administration\debug\cache.html:36
+#: .\templates\administration\index.html:106
+msgid "清理缓存"
+msgstr "キャッシュクリア"
+
+#: .\templates\administration\debug\cache.html:36
+msgid "确定要清理所有缓存吗？"
+msgstr "すべてのキャッシュをクリアしてもよろしいですか?"
+
+#: .\templates\administration\debug\cache.html:36
+#: .\templates\administration\system_tools.html:204
+msgid "立即清理"
+msgstr "今すぐ掃除してください"
+
+#: .\templates\administration\debug\cache.html:44
+msgid "清理模板缓存"
+msgstr "テンプレートキャッシュをクリアする"
+
+#: .\templates\administration\debug\cache.html:45
+msgid "仅清除编译后的模板缓存。如果在修改模板后未生效，请尝试此操作。"
+msgstr "コンパイルされたテンプレート キャッシュのみがクリアされます。テンプレートを変更しても有効にならない場合は、これを試してください。"
+
+#: .\templates\administration\debug\cache.html:50
+msgid "清理模板"
+msgstr "クリーンなテンプレート"
+
+#: .\templates\administration\debug\email.html:12
+msgid "邮件发送测试"
+msgstr "メール送信テスト"
+
+#: .\templates\administration\debug\email.html:18
+msgid "SMTP 配置信息"
+msgstr "SMTP設定情報"
+
+#: .\templates\administration\debug\email.html:33
+msgid "接收邮箱"
+msgstr "メールを受信する"
+
+#: .\templates\administration\debug\email.html:37
+msgid "默认发送给当前登录用户"
+msgstr "デフォルトで現在ログインしているユーザーに送信されます"
+
+#: .\templates\administration\debug\email.html:43
+msgid "邮件主题"
+msgstr "メールの件名"
+
+#: .\templates\administration\debug\email.html:45
+msgid "Rosetta 邮件发送测试"
+msgstr "ロゼッタメール送信テスト"
+
+#: .\templates\administration\debug\email.html:51
+msgid "邮件内容"
+msgstr "メール内容"
+
+#: .\templates\administration\debug\email.html:53
+msgid "这是一条来自 Rosetta 管理后台的测试邮件。如果您收到这封邮件，说明系统的邮件发送功能配置正确。"
+msgstr ""
+"これは、Rosetta "
+"管理バックエンドからのテスト電子メールです。このメールを受信した場合は、システムのメール送信機能が正しく設定されていることを意味します。"
+
+#: .\templates\administration\debug\email.html:58
+msgid "发送测试邮件"
+msgstr "テストメールを送信する"
+
+#: .\templates\administration\debug\mock.html:5
+msgid "Mock 数据生成"
+msgstr "モックデータの生成"
+
+#: .\templates\administration\debug\mock.html:11
+msgid "高级 Mock 数据生成器"
+msgstr "高度なモックデータジェネレーター"
+
+#: .\templates\administration\debug\mock.html:13
+msgid "生成丰富的博客测试数据，包括长篇文章、用户资料、评论互动及站点配置。"
+msgstr "長文記事、ユーザー プロフィール、コメントのやりとり、サイト構成などの豊富なブログ テスト データを生成します。"
+
+#: .\templates\administration\debug\mock.html:24
+msgid "用户数据"
+msgstr "ユーザーデータ"
+
+#: .\templates\administration\debug\mock.html:27
+msgid "生成用户数量"
+msgstr "ユーザー数の生成"
+
+#: .\templates\administration\debug\mock.html:29
+msgid "包含头像、简介、社交链接"
+msgstr "アバター、紹介文、ソーシャルリンクが含まれます"
+
+#: .\templates\administration\debug\mock.html:32
+msgid "默认密码"
+msgstr "デフォルトのパスワード"
+
+#: .\templates\administration\debug\mock.html:45
+#: .\templates\blog\category_list.html:21
+msgid "内容分类"
+msgstr "カテゴリー"
+
+#: .\templates\administration\debug\mock.html:49
+msgid "分类数量"
+msgstr "カテゴリの数"
+
+#: .\templates\administration\debug\mock.html:53
+msgid "标签数量"
+msgstr "タグの数"
+
+#: .\templates\administration\debug\mock.html:67
+msgid "文章与互动"
+msgstr "記事とやり取り"
+
+#: .\templates\administration\debug\mock.html:71
+msgid "文章数量"
+msgstr "記事数"
+
+#: .\templates\administration\debug\mock.html:73
+msgid "生成包含代码块、表格、长文本的 Markdown 文章"
+msgstr "コードブロック、表、長いテキストを含むMarkdown記事を生成"
+
+#: .\templates\administration\debug\mock.html:76
+msgid "评论数量"
+msgstr "コメント数"
+
+#: .\templates\administration\debug\mock.html:78
+msgid "生成多级嵌套评论与通知"
+msgstr "複数レベルのネストされたコメントと通知を生成する"
+
+#: .\templates\administration\debug\mock.html:93
+msgid "站点配置"
+msgstr "サイト構成"
+
+#: .\templates\administration\debug\mock.html:98
+msgid "生成附加数据"
+msgstr "追加データを生成する"
+
+#: .\templates\administration\debug\mock.html:100
+msgid "包含：友情链接、导航菜单、搜索框占位符"
+msgstr "含まれるもの: フレンドリー リンク、ナビゲーション メニュー、検索ボックス プレースホルダー"
+
+#: .\templates\administration\debug\mock.html:112
+msgid "重置"
+msgstr "リセット"
+
+#: .\templates\administration\debug\mock.html:113
+msgid "生成数据"
+msgstr "データの生成"
+
+#: .\templates\administration\debug\mock.html:113
+msgid "确定要生成数据吗？这将向数据库添加新记录。"
+msgstr "データを生成してもよろしいですか?これにより、データベースに新しいレコードが追加されます。"
+
+#: .\templates\administration\debug\mock.html:115
+msgid "开始生成"
+msgstr "生成を開始する"
+
+#: .\templates\administration\debug\permission.html:5
+msgid "权限调试"
+msgstr "権限のデバッグ"
+
+#: .\templates\administration\debug\permission.html:13
+msgid "用户查询"
+msgstr "ユーザークエリ"
+
+#: .\templates\administration\debug\permission.html:17
+msgid "用户名 (Username)"
+msgstr "ユーザー名"
+
+#: .\templates\administration\debug\permission.html:18
+msgid "输入用户名..."
+msgstr "ユーザー名を入力してください..."
+
+#: .\templates\administration\debug\permission.html:20
+msgid "查询权限"
+msgstr "権限のクエリ"
+
+#: .\templates\administration\debug\permission.html:63
+#: .\templates\administration\debug\permission.html:105
+#: .\templates\administration\user_form.html:280
+msgid "超级用户"
+msgstr "スーパーユーザー"
+
+#: .\templates\administration\debug\permission.html:69
+msgid "员工状态"
+msgstr "従業員のステータス"
+
+#: .\templates\administration\debug\permission.html:79
+#: .\templates\administration\user_form.html:166
+msgid "所属用户组"
+msgstr "所属するユーザーグループ"
+
+#: .\templates\administration\debug\permission.html:88
+msgid "无用户组"
+msgstr "ユーザーグループがありません"
+
+#: .\templates\administration\debug\permission.html:97
+msgid "有效权限列表 (Effective Permissions)"
+msgstr "有効な権限"
+
+#: .\templates\administration\debug\permission.html:99
+msgid "包含直接分配的权限和从用户组继承的权限。"
+msgstr "直接割り当てられた権限とユーザー グループから継承された権限が含まれます。"
+
+#: .\templates\administration\debug\permission.html:106
+msgid "该用户拥有所有权限 (Superuser status implies all permissions)."
+msgstr "このユーザーはすべての権限を持っています (スーパーユーザー ステータスはすべての権限を意味します)。"
+
+#: .\templates\administration\debug\permission.html:115
+msgid "Permission Code"
+msgstr "許可コード"
+
+#: .\templates\administration\debug\permission.html:116
+msgid "Source"
+msgstr "ソース"
+
+#: .\templates\administration\debug\permission.html:125
+msgid "Group"
+msgstr "グループ"
+
+#: .\templates\administration\debug\permission.html:127
+msgid "Direct"
+msgstr "直接"
+
+#: .\templates\administration\debug\permission.html:133
+#: .\templates\administration\partials\group_list_rows.html:23
+msgid "无特定权限"
+msgstr "特定の権限はありません"
+
+#: .\templates\administration\debug\ui_test.html:5
+msgid "UI 组件测试"
+msgstr "UIコンポーネントのテスト"
+
+#: .\templates\administration\debug\ui_test.html:11
+msgid "排版 (Typography)"
+msgstr "タイポグラフィ"
+
+#: .\templates\administration\debug\ui_test.html:13
+msgid "Heading 1"
+msgstr "見出し1"
+
+#: .\templates\administration\debug\ui_test.html:14
+msgid "Heading 2"
+msgstr "見出し2"
+
+#: .\templates\administration\debug\ui_test.html:15
+msgid "Heading 3"
+msgstr "見出し 3"
+
+#: .\templates\administration\debug\ui_test.html:16
+msgid "Heading 4"
+msgstr "見出し 4"
+
+#: .\templates\administration\debug\ui_test.html:17
+msgid ""
+"Standard paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing "
+"elit."
+msgstr "標準の段落テキスト。顧客は非常に重要であり、顧客は顧客に続きます。"
+
+#: .\templates\administration\debug\ui_test.html:18
+msgid "Small text with opacity."
+msgstr "不透明度のある小さなテキスト。"
+
+#: .\templates\administration\debug\ui_test.html:19
+msgid "Extra small text."
+msgstr "非常に小さなテキスト。"
+
+#: .\templates\administration\debug\ui_test.html:21
+msgid "Primary Link"
+msgstr "プライマリリンク"
+
+#: .\templates\administration\debug\ui_test.html:22
+msgid "Secondary Link"
+msgstr "セカンダリリンク"
+
+#: .\templates\administration\debug\ui_test.html:23
+msgid "Accent Link"
+msgstr "アクセントリンク"
+
+#: .\templates\administration\debug\ui_test.html:30
+msgid "按钮 (Buttons)"
+msgstr "ボタン"
+
+#: .\templates\administration\debug\ui_test.html:60
+msgid "警告框 (Alerts)"
+msgstr "アラート"
+
+#: .\templates\administration\debug\ui_test.html:64
+msgid "New software update available."
+msgstr "新しいソフトウェアアップデートが利用可能です。"
+
+#: .\templates\administration\debug\ui_test.html:68
+msgid "Your purchase has been confirmed!"
+msgstr "ご購入が確認されました！"
+
+#: .\templates\administration\debug\ui_test.html:72
+msgid "Warning: Invalid email address!"
+msgstr "警告: 電子メール アドレスが無効です。"
+
+#: .\templates\administration\debug\ui_test.html:76
+msgid "Error! Task failed successfully."
+msgstr "エラー！タスクは正常に失敗しました。"
+
+#: .\templates\administration\debug\ui_test.html:83
+msgid "徽章 (Badges)"
+msgstr "バッジ"
+
+#: .\templates\administration\debug\ui_test.html:104
+msgid "表单 (Forms)"
+msgstr "フォーム"
+
+#: .\templates\administration\debug\ui_test.html:107
+msgid "Text Input"
+msgstr "テキスト入力"
+
+#: .\templates\administration\debug\ui_test.html:108
+msgid "Type here"
+msgstr "ここに入力してください"
+
+#: .\templates\administration\debug\ui_test.html:111
+msgid "Select"
+msgstr "選択"
+
+#: .\templates\administration\debug\ui_test.html:113
+msgid "Pick one"
+msgstr "1 つ選択してください"
+
+#: .\templates\administration\debug\ui_test.html:114
+msgid "Star Wars"
+msgstr "スター・ウォーズ"
+
+#: .\templates\administration\debug\ui_test.html:115
+msgid "Harry Potter"
+msgstr "ハリー・ポッター"
+
+#: .\templates\administration\debug\ui_test.html:116
+msgid "Lord of the Rings"
+msgstr "ロード・オブ・ザ・リング"
+
+#: .\templates\administration\debug\ui_test.html:120
+msgid "Checkbox"
+msgstr "チェックボックス"
+
+#: .\templates\administration\debug\ui_test.html:124
+msgid "Toggle"
+msgstr "トグル"
+
+#: .\templates\administration\debug\ui_test.html:128
+msgid "Range"
+msgstr "範囲"
+
+#: .\templates\administration\friendlink_form.html:6
+#: .\templates\administration\friendlink_form.html:15
+msgid "编辑友链"
+msgstr "友達リンクを編集する"
+
+#: .\templates\administration\friendlink_form.html:47
+msgid "网站名称 (中文)"
+msgstr "ウェブサイト名（中国語）"
+
+#: .\templates\administration\friendlink_form.html:49
+msgid "输入网站名称 (中文)"
+msgstr "ウェブサイト名を入力してください（中国語）"
+
+#: .\templates\administration\friendlink_form.html:60
+msgid "Website Name (English)"
+msgstr "ウェブサイト名（英語）"
+
+#: .\templates\administration\friendlink_form.html:62
+msgid "Enter website name (English)"
+msgstr "ウェブサイト名を入力してください（英語）"
+
+#: .\templates\administration\friendlink_form.html:87
+msgid "网站描述 (中文)"
+msgstr "ウェブサイトの説明（中国語）"
+
+#: .\templates\administration\friendlink_form.html:89
+msgid "简短描述该网站 (中文)..."
+msgstr "ウェブサイトについて簡単に説明します（中国語）..."
+
+#: .\templates\administration\friendlink_form.html:95
+msgid "Website Description (English)"
+msgstr "ウェブサイトの説明 (英語)"
+
+#: .\templates\administration\friendlink_form.html:97
+msgid "Short description (English)..."
+msgstr "簡単な説明（英語）..."
+
+#: .\templates\administration\friendlink_form.html:103
+msgid "ウェブサイトの説明 (Japanese)"
+msgstr "ウェブサイトの説明 (日本語)"
+
+#: .\templates\administration\friendlink_form.html:105
+msgid "ウェブサイトの簡単な説明 (Japanese)..."
+msgstr "ウェブサイトの簡単な説明 (日本語)..."
+
+#: .\templates\administration\friendlink_form.html:112
+msgid "網站描述 (Traditional Chinese)"
+msgstr "網站説明 (繁体字中国語)"
+
+#: .\templates\administration\friendlink_form.html:114
+msgid "簡短描述該網站 (繁體中文)..."
+msgstr "簡略説明この網站 (繁體中文)..."
+
+#: .\templates\administration\friendlink_form.html:125
+msgid "Logo 设置"
+msgstr "ロゴの設定"
+
+#: .\templates\administration\friendlink_form.html:130
+msgid "网站 Logo"
+msgstr "ウェブサイトのロゴ"
+
+#: .\templates\administration\friendlink_form.html:143
+msgid "建议尺寸: 64x64px 或 128x128px"
+msgstr "推奨サイズ: 64x64px または 128x128px"
+
+#: .\templates\administration\friendlink_form.html:172
+#: .\templates\administration\partials\friendlink_list_rows.html:57
+#, python-format
+msgid "确定要删除友情链接《%(name)s》吗？"
+msgstr "フレンドリ リンク「%(name)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\friendlink_form.html:173
+msgid "删除友链"
+msgstr "フレンドリーリンクを削除する"
+
+#: .\templates\administration\friendlink_form.html:187
+#: .\templates\administration\navigation_form.html:177
+#: .\templates\administration\searchplaceholder_form.html:128
+#: .\templates\administration\tag_form.html:137
+msgid "状态设置"
+msgstr "ステータス設定"
+
+#: .\templates\administration\friendlink_form.html:191
+#: .\templates\administration\navigation_form.html:181
+#: .\templates\administration\searchplaceholder_form.html:132
+msgid "启用显示"
+msgstr "表示を有効にする"
+
+#: .\templates\administration\friendlink_form.html:200
+#: .\templates\administration\navigation_form.html:128
+#: .\templates\administration\searchplaceholder_form.html:141
+msgid "排序权重"
+msgstr "選別重量"
+
+#: .\templates\administration\friendlink_form.html:204
+#: .\templates\administration\navigation_form.html:132
+#: .\templates\administration\searchplaceholder_form.html:145
+msgid "数字越小越靠前 (默认 0)"
+msgstr "小さい数字が最初に来ます (デフォルトは 0)"
+
+#: .\templates\administration\friendlink_list.html:19
+#: .\templates\administration\navigation_list.html:19
+#: .\templates\administration\tag_list.html:19
+msgid "设为可见"
+msgstr "見えるようにする"
+
+#: .\templates\administration\friendlink_list.html:20
+#: .\templates\administration\navigation_list.html:20
+#: .\templates\administration\tag_list.html:20
+msgid "设为隐藏"
+msgstr "非表示として設定"
+
+#: .\templates\administration\friendlink_list.html:25
+msgid "添加友链"
+msgstr "友達リンクを追加"
+
+#: .\templates\administration\friendlink_list.html:32
+msgid "管理友情链接展示"
+msgstr "フレンドリーリンクの表示を管理する"
+
+#: .\templates\administration\friendlink_list.html:37
+#: .\templates\administration\friendlink_list.html:44
+#: .\templates\administration\navigation_list.html:45
+#: .\templates\administration\partials\friendlink_list_rows.html:37
+#: .\templates\administration\partials\navigation_list_rows.html:26
+#: .\templates\administration\partials\tag_list_rows.html:32
+#: .\templates\administration\tag_list.html:61
+#: .\templates\administration\tag_list.html:68
+#| msgid "是否可见"
+msgid "可见"
+msgstr "表示"
+
+#: .\templates\administration\friendlink_list.html:38
+#: .\templates\administration\friendlink_list.html:47
+#: .\templates\administration\navigation_list.html:48
+#: .\templates\administration\partials\comment_list_rows.html:74
+#: .\templates\administration\partials\friendlink_list_rows.html:42
+#: .\templates\administration\partials\navigation_list_rows.html:31
+#: .\templates\administration\partials\tag_list_rows.html:37
+#: .\templates\administration\tag_list.html:62
+#: .\templates\administration\tag_list.html:71
+msgid "隐藏"
+msgstr "隠れる"
+
+#: .\templates\administration\friendlink_list.html:85
+msgid "友链列表"
+msgstr "フレンドリーリンクリスト"
+
+#: .\templates\administration\friendlink_list.html:94
+msgid "导入友链数据 (JSON)"
+msgstr "フレンドリンクデータ(JSON)のインポート"
+
+#: .\templates\administration\friendlink_list.html:121
+#: .\templates\administration\navigation_list.html:121
+msgid "批量设为可见"
+msgstr "バッチを見えるようにする"
+
+#: .\templates\administration\friendlink_list.html:122
+#: .\templates\administration\navigation_list.html:122
+msgid "批量设为隐藏"
+msgstr "一括で非表示に設定する"
+
+#: .\templates\administration\generic_confirm_delete.html:4
+#: .\templates\administration\generic_confirm_delete.html:26
+#: .\templates\administration\system_tools.html:263
+msgid "确认删除"
+msgstr "削除の確認"
+
+#: .\templates\administration\generic_confirm_delete.html:14
+msgid "确认删除?"
+msgstr "削除を確認しますか?"
+
+#: .\templates\administration\generic_confirm_delete.html:16
+#, python-format
+msgid "您确定要删除 <span class=\"font-bold text-base-content\">\"%(obj)s\"</span> 吗？"
+msgstr ""
+"<span class=\"font-bold text-base-content\">「%(obj)s」</span> を削除してもよろしいですか?"
+
+#: .\templates\administration\generic_confirm_delete.html:17
+msgid "此操作无法撤销。"
+msgstr "この操作は元に戻すことができません。"
+
+#: .\templates\administration\generic_form.html:12
+#: .\templates\administration\partials\category_list_rows.html:46
+#: .\templates\administration\partials\comment_list_rows.html:67
+#: .\templates\administration\partials\friendlink_list_rows.html:49
+#: .\templates\administration\partials\group_list_rows.html:32
+#: .\templates\administration\partials\navigation_list_rows.html:38
+#: .\templates\administration\partials\page_list_rows.html:41
+#: .\templates\administration\partials\poll_list_rows.html:75
+#: .\templates\administration\partials\post_list_rows.html:101
+#: .\templates\administration\partials\searchplaceholder_list_rows.html:32
+#: .\templates\administration\partials\tag_list_rows.html:50
+#: .\templates\administration\partials\user_list_rows.html:80
+#: .\templates\administration\partials\usertitle_list_rows.html:49
+#: .\templates\blog\post_detail.html:150
+msgid "编辑"
+msgstr "編集"
+
+#: .\templates\administration\generic_form.html:69
+msgid "保存并继续编辑"
+msgstr "保存して編集を続ける"
+
+#: .\templates\administration\generic_form.html:72
+msgid "保存"
+msgstr "保存"
+
+#: .\templates\administration\group_form.html:12
+msgid "编辑用户组"
+msgstr "ユーザーグループの編集"
+
+#: .\templates\administration\group_form.html:37
+msgid "用户组名称"
+msgstr "ユーザーグループ名"
+
+#: .\templates\administration\group_form.html:41
+msgid "例如：编辑人员"
+msgstr "例: エディター"
+
+#: .\templates\administration\group_form.html:58
+msgid "选中的权限将被授予该组内的所有用户。按住 Ctrl/Command 可多选。"
+msgstr "選択した権限は、グループ内のすべてのユーザーに付与されます。 Ctrl/Command キーを押したままにして、複数の選択を行います。"
+
+#: .\templates\administration\group_form.html:70
+msgid "权限分配"
+msgstr "権限の割り当て"
+
+#: .\templates\administration\group_form.html:94
+#: .\templates\administration\partials\group_list_rows.html:40
+#, python-format
+msgid "确定要删除用户组《%(name)s》吗？"
+msgstr "ユーザーグループ「%(name)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\group_form.html:95
+msgid "删除用户组"
+msgstr "ユーザーグループの削除"
+
+#: .\templates\administration\group_form.html:99
+msgid "成员数量"
+msgstr "会員数"
+
+#: .\templates\administration\group_list.html:30
+msgid "管理用户角色与权限"
+msgstr "ユーザーの役割と権限を管理する"
+
+#: .\templates\administration\group_list.html:52
+msgid "组名"
+msgstr "グループ名"
+
+#: .\templates\administration\group_list.html:53
+msgid "成员数"
+msgstr "会員数"
+
+#: .\templates\administration\group_list.html:54
+msgid "权限预览"
+msgstr "権限のプレビュー"
+
+#: .\templates\administration\group_list.html:67
+msgid "用户组列表"
+msgstr "ユーザーグループ一覧"
+
+#: .\templates\administration\group_list.html:76
+msgid "导入用户组数据 (JSON)"
+msgstr "ユーザーグループデータ(JSON)のインポート"
+
+#: .\templates\administration\group_list.html:104
+#: .\templates\administration\navigation_list.html:124
+#: .\templates\administration\page_list.html:135
+#: .\templates\administration\user_list.html:22
+#, python-brace-format
+msgid "确定要对选中的 {count} 项执行此操作吗？"
+msgstr "選択した {count} 項目に対してこの操作を実行してもよろしいですか?"
+
+#: .\templates\administration\index.html:12
+msgid "Hello,"
+msgstr "こんにちは、"
+
+#: .\templates\administration\index.html:17
+msgid "欢迎回到 Rosetta 控制台。这里是您的数字指挥中心。"
+msgstr "Rosetta コンソールへようこそ。ここはあなたのデジタル指令センターです。"
+
+#: .\templates\administration\index.html:21
+#: .\templates\administration\post_list.html:22
+msgid "写文章"
+msgstr "記事を書く"
+
+#: .\templates\administration\index.html:37
+msgid "总文章数"
+msgstr "総記事数"
+
+#: .\templates\administration\index.html:45
+#: .\templates\administration\index.html:51
+msgid "较上月"
+msgstr "先月比"
+
+#: .\templates\administration\index.html:75
+msgid "全部已审"
+msgstr "すべて承認済み"
+
+#: .\templates\administration\index.html:89
+msgid "系统健康度"
+msgstr "システム健全性"
+
+#: .\templates\administration\index.html:91
+msgid "运行正常"
+msgstr "正常稼働中"
+
+#: .\templates\administration\index.html:102
+msgid "快捷操作"
+msgstr "クイックアクション"
+
+#: .\templates\administration\index.html:128
+msgid "活跃趋势"
+msgstr "アクティビティ傾向"
+
+#: .\templates\administration\index.html:148
+msgid "评论分布"
+msgstr "コメント分布"
+
+#: .\templates\administration\index.html:168
+msgid "热门文章 TOP 5"
+msgstr "人気記事 TOP 5"
+
+#: .\templates\administration\index.html:197
+msgid "分类分布"
+msgstr "カテゴリ分布"
+
+#: .\templates\administration\index.html:212
+#: .\templates\blog\search_index.html:72
+msgid "热门标签"
+msgstr "人気タグ"
+
+#: .\templates\administration\index.html:230
+msgid "最近评论"
+msgstr "最近のコメント"
+
+#: .\templates\administration\index.html:232
+msgid "查看全部"
+msgstr "すべて見る"
+
+#: .\templates\administration\index.html:265
+msgid "暂无活动"
+msgstr "最近のアクティビティはありません"
+
+#: .\templates\administration\index.html:283
+msgid "系统状态"
+msgstr "システムステータス"
+
+#: .\templates\administration\index.html:292
+msgid "CPU"
+msgstr "CPU"
+
+#: .\templates\administration\index.html:301
+msgid "内存"
+msgstr "メモリ"
+
+#: .\templates\administration\index.html:310
+msgid "存储"
+msgstr "ストレージ"
+
+#: .\templates\administration\index.html:322
+msgid "Python 版本"
+msgstr "Pythonのバージョン"
+
+#: .\templates\administration\index.html:326
+msgid "Django 版本"
+msgstr "ジャンゴのバージョン"
+
+#: .\templates\administration\index.html:330
+msgid "系统"
+msgstr "システム"
+
+#: .\templates\administration\index.html:334
+msgid "运行时间"
+msgstr "走行時間"
+
+#: .\templates\administration\logentry_list.html:17
+msgid "日志记录"
+msgstr "ロギング"
+
+#: .\templates\administration\logentry_list.html:18
+msgid "追踪系统内的所有操作"
+msgstr "システム内のすべての操作を追跡する"
+
+#: .\templates\administration\logentry_list.html:25
+msgid "用户筛选"
+msgstr "ユーザーフィルタリング"
+
+#: .\templates\administration\logentry_list.html:29
+msgid "全部用户"
+msgstr "すべてのユーザー"
+
+#: .\templates\administration\logentry_list.html:41
+msgid "搜索操作对象..."
+msgstr "アクション オブジェクトを検索します..."
+
+#: .\templates\administration\logentry_list.html:44
+msgid "导出日志"
+msgstr "ログのエクスポート"
+
+#: .\templates\administration\logentry_list.html:46
+msgid "导出"
+msgstr "輸出"
+
+#: .\templates\administration\logentry_list.html:55
+#| msgid "创建时间"
+msgid "时间"
+msgstr "時間"
+
+#: .\templates\administration\logentry_list.html:57
+msgid "动作"
+msgstr "アクション"
+
+#: .\templates\administration\logentry_list.html:58
+msgid "对象类型"
+msgstr "オブジェクトの種類"
+
+#: .\templates\administration\logentry_list.html:59
+msgid "对象"
+msgstr "物体"
+
+#: .\templates\administration\logentry_list.html:60
+msgid "变更信息"
+msgstr "変更情報"
+
+#: .\templates\administration\logentry_list.html:74
+#, python-format
+msgid "显示第 %(start)s 到 %(end)s 条，共 %(count)s 条"
+msgstr "%(count)s の %(start)s から %(end)s を表示しています"
+
+#: .\templates\administration\logfile_detail.html:5
+msgid "查看日志"
+msgstr "ログを表示する"
+
+#: .\templates\administration\logfile_detail.html:15
+#: .\templates\administration\logfile_list.html:89
+#: .\templates\administration\system_tools.html:246
+msgid "下载"
+msgstr "ダウンロード"
+
+#: .\templates\administration\logfile_detail.html:17
+msgid "返回列表"
+msgstr "リストに戻る"
+
+#: .\templates\administration\logfile_list.html:27
+msgid "日志文件"
+msgstr "ログファイル"
+
+#: .\templates\administration\logfile_list.html:49
+msgid "无日志文件"
+msgstr "ログファイルがありません"
+
+#: .\templates\administration\logfile_list.html:68
+#: .\templates\administration\system_tools.html:234
+msgid "大小"
+msgstr "サイズ"
+
+#: .\templates\administration\logfile_list.html:69
+#: .\templates\administration\partials\logentry_list_rows.html:30
+msgid "修改"
+msgstr "改訂"
+
+#: .\templates\administration\logfile_list.html:76
+msgid "请选择一个文件查看"
+msgstr "表示するファイルを選択してください"
+
+#: .\templates\administration\logfile_list.html:83
+#: .\templates\administration\logfile_list.html:85
+msgid "刷新"
+msgstr "リフレッシュする"
+
+#: .\templates\administration\logfile_list.html:94
+msgid "清空"
+msgstr "クリア"
+
+#: .\templates\administration\logfile_list.html:108
+msgid "文件为空"
+msgstr "ファイルが空です"
+
+#: .\templates\administration\logfile_list.html:111
+msgid "请选择左侧文件查看详情"
+msgstr "詳細を表示するには、左側のファイルを選択してください"
+
+#: .\templates\administration\logfile_list.html:130
+msgid "确认清空日志?"
+msgstr "ログをクリアしますか?"
+
+#: .\templates\administration\logfile_list.html:133
+#, python-format
+msgid ""
+"您确定要清空 <span class=\"font-mono font-bold bg-base-200 px-1 "
+"rounded\">%(filename)s</span> 的内容吗？"
+msgstr ""
+"<span class=\"font-mono font-bold bg-base-200 "
+"px-1rounded\">%(filename)s</span> の内容をクリアしてもよろしいですか?"
+
+#: .\templates\administration\logfile_list.html:135
+msgid "此操作不可恢复，请谨慎操作。"
+msgstr "この操作は元に戻すことができないため、注意して続行してください。"
+
+#: .\templates\administration\logfile_list.html:142
+msgid "确定清空"
+msgstr "OK クリアします"
+
+#: .\templates\administration\navigation_form.html:6
+#: .\templates\administration\navigation_form.html:15
+msgid "编辑导航"
+msgstr "ナビゲーションの編集"
+
+#: .\templates\administration\navigation_form.html:47
+msgid "导航标题 (中文)"
+msgstr "ナビゲーションタイトル（中国語）"
+
+#: .\templates\administration\navigation_form.html:49
+msgid "输入导航显示名称 (中文)"
+msgstr "ナビゲーション表示名を入力してください（中国語）"
+
+#: .\templates\administration\navigation_form.html:60
+msgid "Navigation Title (English)"
+msgstr "ナビゲーションタイトル（英語）"
+
+#: .\templates\administration\navigation_form.html:62
+msgid "Enter navigation title (English)"
+msgstr "ナビゲーションタイトルを入力（英語）"
+
+#: .\templates\administration\navigation_form.html:73
+msgid "タイトル (Japanese)"
+msgstr "タイトル (日本語)"
+
+#: .\templates\administration\navigation_form.html:75
+msgid "タイトルを入力 (Japanese)"
+msgstr "タイトルを入力 (日本語)"
+
+#: .\templates\administration\navigation_form.html:81
+msgid "標題 (Traditional Chinese)"
+msgstr "標題 (繁体字中国語)"
+
+#: .\templates\administration\navigation_form.html:83
+#| msgid "繁體中文"
+msgid "輸入標題 (繁體中文)"
+msgstr "タイトルを入力 (繁体字中国語)"
+
+#: .\templates\administration\navigation_form.html:90
+msgid "链接地址 (URL)"
+msgstr "リンクアドレス（URL）"
+
+#: .\templates\administration\navigation_form.html:92
+msgid "输入链接地址 (如 /about/ 或 https://...)"
+msgstr "リンク アドレス (/about/ や https://... など) を入力します。"
+
+#: .\templates\administration\navigation_form.html:108
+msgid "配置选项"
+msgstr "構成オプション"
+
+#: .\templates\administration\navigation_form.html:115
+msgid "显示位置"
+msgstr "場所を表示"
+
+#: .\templates\administration\navigation_form.html:162
+#: .\templates\administration\partials\navigation_list_rows.html:46
+#, python-format
+msgid "确定要删除导航《%(title)s》吗？"
+msgstr "ナビゲーション「%(title)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\navigation_form.html:163
+msgid "删除导航"
+msgstr "ナビゲーションの削除"
+
+#: .\templates\administration\navigation_form.html:185
+msgid "禁用后，该导航将不会在前端显示。"
+msgstr "無効にすると、ナビゲーションはフロントエンドに表示されません。"
+
+#: .\templates\administration\navigation_list.html:32
+msgid "管理网站菜单导航"
+msgstr "Web サイトのメニュー ナビゲーションを管理する"
+
+#: .\templates\administration\navigation_list.html:37
+msgid "顶部"
+msgstr "トップ"
+
+#: .\templates\administration\navigation_list.html:38
+msgid "底部"
+msgstr "底"
+
+#: .\templates\administration\navigation_list.html:85
+msgid "导航列表"
+msgstr "ナビゲーションリスト"
+
+#: .\templates\administration\navigation_list.html:94
+msgid "导入导航数据 (JSON)"
+msgstr "ナビゲーションデータ（JSON）のインポート"
+
+#: .\templates\administration\page_form.html:5
+#: .\templates\administration\page_form.html:18
+msgid "编辑页面"
+msgstr "編集ページ"
+
+#: .\templates\administration\page_form.html:29
+msgid "页面标题 (中文)"
+msgstr "ページタイトル（中国語）"
+
+#: .\templates\administration\page_form.html:31
+msgid "输入页面标题 (中文)"
+msgstr "ページタイトルを入力してください（中国語）"
+
+#: .\templates\administration\page_form.html:42
+msgid "Page Title (English)"
+msgstr "ページタイトル（英語）"
+
+#: .\templates\administration\page_form.html:44
+msgid "Enter page title (English)"
+msgstr "ページタイトルを入力してください（英語）"
+
+#: .\templates\administration\page_form.html:50
+msgid "ページタイトル (Japanese)"
+msgstr "ページタイトル (日本語)"
+
+#: .\templates\administration\page_form.html:52
+msgid "ページタイトルを入力 (Japanese)"
+msgstr "ページタイトルを入力 (日本語)"
+
+#: .\templates\administration\page_form.html:58
+msgid "頁面標題 (Traditional Chinese)"
+msgstr "ページ面標題 (繁体字中国語)"
+
+#: .\templates\administration\page_form.html:60
+msgid "輸入頁面標題 (繁體中文)"
+msgstr "ページタイトルを入力 (繁体字中国語)"
+
+#: .\templates\administration\page_form.html:66
+#: .\templates\administration\post_form.html:80
+msgid "内容 (当前语言)"
+msgstr "コンテンツ (現在の言語)"
+
+#: .\templates\administration\page_form.html:92
+msgid "保存页面"
+msgstr "ページを保存"
+
+#: .\templates\administration\page_form.html:104
+#: .\templates\administration\partials\page_list_rows.html:55
+#, python-format
+msgid "确定要删除页面《%(title)s》吗？"
+msgstr "ページ「%(title)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\page_form.html:105
+msgid "删除页面"
+msgstr "ページを削除する"
+
+#: .\templates\administration\page_form.html:124
+msgid "输入URL别名"
+msgstr "URL エイリアスを入力してください"
+
+#: .\templates\administration\page_form.html:146
+msgid "页面属性"
+msgstr "ページのプロパティ"
+
+#: .\templates\administration\page_form.html:153
+msgid "创建于:"
+msgstr "作成日:"
+
+#: .\templates\administration\page_form.html:157
+msgid "更新于:"
+msgstr "更新日:"
+
+#: .\templates\administration\page_form.html:163
+msgid "查看页面"
+msgstr "ページを見る"
+
+#: .\templates\administration\page_list.html:58
+msgid "修改成发布"
+msgstr "公開するために変更する"
+
+#: .\templates\administration\page_list.html:61
+msgid "修改成草稿"
+msgstr "ドラフトに修正"
+
+#: .\templates\administration\page_list.html:133
+msgid "批量转草稿"
+msgstr "バッチでドラフトに転送"
+
+#: .\templates\administration\partials\category_list_rows.html:43
+#: .\templates\administration\partials\page_list_rows.html:38
+#: .\templates\administration\partials\post_list_rows.html:98
+#: .\templates\administration\partials\tag_list_rows.html:47
+#: .\templates\users\includes\profile_content.html:143
+#| msgid "查看站点"
+msgid "查看"
+msgstr "表示"
+
+#: .\templates\administration\partials\category_list_rows.html:54
+#, python-format
+msgid "确定要删除分类《%(name)s》吗？"
+msgstr "カテゴリ「%(name)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\partials\category_list_rows.html:67
+#: .\templates\blog\category_list.html:96
+msgid "暂无分类"
+msgstr "カテゴリーがありません"
+
+#: .\templates\administration\partials\comment_list_rows.html:21
+#: .\templates\administration\partials\user_list_rows.html:53
+#: .\templates\administration\user_list.html:100
+#: .\templates\administration\user_list.html:111
+#: .\templates\administration\usertitle_form.html:30
+#: .\templates\blog\post_detail.html:387 .\templates\blog\post_detail.html:454
+#: .\templates\guestbook\index.html:77
+#| msgid "管理后台"
+msgid "管理员"
+msgstr "管理者"
+
+#: .\templates\administration\partials\comment_list_rows.html:31
+#: .\templates\administration\partials\comment_list_rows.html:64
+#: .\templates\blog\post_detail.html:397
+msgid "回复"
+msgstr "返信"
+
+#: .\templates\administration\partials\comment_list_rows.html:100
+#: .\templates\blog\post_detail.html:485
+msgid "暂无评论"
+msgstr "コメントはありません"
+
+#: .\templates\administration\partials\friendlink_list_rows.html:72
+msgid "暂无友情链接"
+msgstr "フレンドリーリンクはまだありません"
+
+#: .\templates\administration\partials\friendlink_list_rows.html:73
+msgid "添加链接以与伙伴互联"
+msgstr "パートナーとつながるためのリンクを追加する"
+
+#: .\templates\administration\partials\group_list_rows.html:16
+msgid "成员"
+msgstr "メンバー"
+
+#: .\templates\administration\partials\group_list_rows.html:53
+msgid "暂无用户组"
+msgstr "ユーザーグループはまだありません"
+
+#: .\templates\administration\partials\logentry_list_rows.html:25
+msgid "新增"
+msgstr "新しい"
+
+#: .\templates\administration\partials\logentry_list_rows.html:62
+msgid "确定要删除这条日志吗？"
+msgstr "このログを削除してもよろしいですか?"
+
+#: .\templates\administration\partials\logentry_list_rows.html:75
+msgid "暂无日志记录"
+msgstr "まだログ記録がありません"
+
+#: .\templates\administration\partials\navigation_list_rows.html:59
+msgid "暂无导航数据"
+msgstr "まだナビゲーションデータがありません"
+
+#: .\templates\administration\partials\page_list_rows.html:46
+msgid "复制页面"
+msgstr "ページをコピーする"
+
+#: .\templates\administration\partials\page_list_rows.html:46
+msgid "确定要复制这个页面吗？"
+msgstr "このページをコピーしてもよろしいですか?"
+
+#: .\templates\administration\partials\page_list_rows.html:46
+#: .\templates\administration\partials\post_list_rows.html:104
+msgid "复制"
+msgstr "コピー"
+
+#: .\templates\administration\partials\page_list_rows.html:68
+msgid "暂无页面"
+msgstr "まだページがありません"
+
+#: .\templates\administration\partials\poll_list_rows.html:21
+msgid "多选"
+msgstr "多肢選択"
+
+#: .\templates\administration\partials\poll_list_rows.html:23
+msgid "单选"
+msgstr "単一の選択"
+
+#: .\templates\administration\partials\poll_list_rows.html:43
+#: .\templates\administration\partials\searchplaceholder_list_rows.html:20
+#: .\templates\administration\searchplaceholder_list.html:20
+#: .\templates\administration\searchplaceholder_list.html:37
+#: .\templates\administration\searchplaceholder_list.html:44
+#: .\templates\administration\user_list.html:117
+msgid "启用"
+msgstr "有効にする"
+
+#: .\templates\administration\partials\poll_list_rows.html:50
+msgid "停用"
+msgstr "非アクティブ化する"
+
+#: .\templates\administration\partials\poll_list_rows.html:59
+msgid "已结束"
+msgstr "終わった"
+
+#: .\templates\administration\partials\poll_list_rows.html:63
+#: .\templates\voting\components\sidebar_card.html:26
+msgid "进行中"
+msgstr "進行中"
+
+#: .\templates\administration\partials\poll_list_rows.html:69
+msgid "永久有效"
+msgstr "永久に有効"
+
+#: .\templates\administration\partials\poll_list_rows.html:83
+#, python-format
+msgid "确定要删除投票《%(title)s》吗？"
+msgstr "投票「%(title)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\partials\poll_list_rows.html:96
+#: .\templates\voting\poll_list.html:41
+msgid "暂无投票"
+msgstr "まだ投票はありません"
+
+#: .\templates\administration\partials\post_list_rows.html:89
+msgid "禁评"
+msgstr "コメント禁止"
+
+#: .\templates\administration\partials\post_list_rows.html:104
+msgid "确定要复制这篇文章吗？"
+msgstr "この記事をコピーしてもよろしいですか?"
+
+#: .\templates\administration\partials\post_list_rows.html:107
+#, python-format
+msgid "确定要删除文章《%(title)s》吗？"
+msgstr "記事「%(title)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\partials\post_list_rows.html:118
+#: .\templates\blog\all_posts.html:161 .\templates\blog\post_list.html:177
+msgid "暂无文章"
+msgstr "記事がありません"
+
+#: .\templates\administration\partials\searchplaceholder_list_rows.html:25
+#: .\templates\administration\partials\user_list_rows.html:68
+#: .\templates\administration\searchplaceholder_list.html:21
+#: .\templates\administration\searchplaceholder_list.html:38
+#: .\templates\administration\searchplaceholder_list.html:47
+#: .\templates\administration\user_list.html:120
+msgid "禁用"
+msgstr "無効にする"
+
+#: .\templates\administration\partials\searchplaceholder_list_rows.html:40
+#, python-format
+msgid "确定要删除关键词《%(text)s》吗？"
+msgstr "キーワード「%(text)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\partials\searchplaceholder_list_rows.html:55
+msgid "暂无关键词"
+msgstr "キーワードはまだありません"
+
+#: .\templates\administration\partials\searchplaceholder_list_rows.html:56
+msgid "请添加搜索推荐关键词"
+msgstr "検索推奨キーワードを追加してください"
+
+#: .\templates\administration\partials\system_monitor.html:13
+msgid "CPU 使用率"
+msgstr "CPU使用率"
+
+#: .\templates\administration\partials\system_monitor.html:15
+msgid "系统负载"
+msgstr "システム負荷"
+
+#: .\templates\administration\partials\system_monitor.html:27
+msgid "内存使用率"
+msgstr "メモリ使用量"
+
+#: .\templates\administration\partials\system_monitor.html:41
+msgid "磁盘使用率"
+msgstr "ディスク使用量"
+
+#: .\templates\administration\partials\system_monitor.html:43
+msgid "可用"
+msgstr "利用可能"
+
+#: .\templates\administration\partials\tag_list_rows.html:58
+#, python-format
+msgid "确定要删除标签《%(name)s》吗？"
+msgstr "タグ「%(name)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\partials\tag_list_rows.html:71
+#: .\templates\blog\tag_list.html:75
+msgid "暂无标签"
+msgstr "タグがありません"
+
+#: .\templates\administration\partials\user_list_rows.html:48
+msgid "超级管理员"
+msgstr "スーパー管理者"
+
+#: .\templates\administration\partials\user_list_rows.html:56
+msgid "普通用户"
+msgstr "一般ユーザー"
+
+#: .\templates\administration\partials\user_list_rows.html:63
+msgid "正常"
+msgstr "普通"
+
+#: .\templates\administration\partials\user_list_rows.html:88
+#: .\templates\administration\user_form.html:216
+#, python-format
+msgid "确定要删除用户 %(username)s 吗？"
+msgstr "ユーザー %(username)s を削除してもよろしいですか?"
+
+#: .\templates\administration\partials\user_list_rows.html:101
+msgid "暂无用户"
+msgstr "まだユーザーがいません"
+
+#: .\templates\administration\partials\usertitle_list_rows.html:57
+#, python-format
+msgid "确定要删除称号《%(name)s》吗？"
+msgstr "タイトル「%(name)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\partials\usertitle_list_rows.html:70
+msgid "暂无称号"
+msgstr "まだタイトルがありません"
+
+#: .\templates\administration\poll_form.html:11
+msgid "编辑投票"
+msgstr "編集者の投票"
+
+#: .\templates\administration\poll_form.html:40
+msgid "输入投票标题"
+msgstr "投票のタイトルを入力してください"
+
+#: .\templates\administration\poll_form.html:57
+msgid "输入投票描述，详细说明投票目的..."
+msgstr "投票の目的を詳しく説明する投票の説明を入力してください..."
+
+#: .\templates\administration\poll_form.html:80
+msgid "可选：将投票关联到特定文章，投票将显示在该文章页面。"
+msgstr "オプション: アンケートを特定の記事に関連付けると、アンケートがその記事ページに表示されます。"
+
+#: .\templates\administration\poll_form.html:103
+msgid "选项内容"
+msgstr "オプション内容"
+
+#: .\templates\administration\poll_form.html:104
+msgid "当前票数"
+msgstr "現在の投票数"
+
+#: .\templates\administration\poll_form.html:119
+#| msgid "简体中文"
+msgid "简中"
+msgstr "簡体字"
+
+#: .\templates\administration\poll_form.html:125
+#| msgid "繁體中文"
+msgid "繁中"
+msgstr "繁体字"
+
+#: .\templates\administration\poll_form.html:134
+msgid "删除此选项"
+msgstr "このオプションを削除します"
+
+#: .\templates\administration\poll_form.html:151
+msgid "保存时将自动应用更改。"
+msgstr "変更は保存時に自動的に適用されます。"
+
+#: .\templates\administration\poll_form.html:155
+msgid "添加选项"
+msgstr "オプションの追加"
+
+#: .\templates\administration\poll_form.html:159
+msgid "投票选项"
+msgstr "投票オプション"
+
+#: .\templates\administration\poll_form.html:190
+msgid "确定要删除投票"
+msgstr "投票を削除してもよろしいですか"
+
+#: .\templates\administration\poll_form.html:191
+#, python-format
+msgid "确定要删除投票《%(object.title|escapejs)s》吗？"
+msgstr "投票「%(object.title|escapejs)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\poll_form.html:194
+msgid "删除投票"
+msgstr "投票の削除"
+
+#: .\templates\administration\poll_list.html:4
+#: .\templates\administration\poll_list.html:16
+msgid "投票管理"
+msgstr "投票管理"
+
+#: .\templates\administration\poll_list.html:16
+msgid "管理网站投票"
+msgstr "サイト投票を管理する"
+
+#: .\templates\administration\poll_list.html:37
+msgid "标题 / 描述"
+msgstr "タイトル/説明"
+
+#: .\templates\administration\poll_list.html:40
+msgid "截止日期"
+msgstr "有効期限"
+
+#: .\templates\administration\post_form.html:4
+#: .\templates\administration\post_form.html:13
+msgid "编辑文章"
+msgstr "記事を編集する"
+
+#: .\templates\administration\post_form.html:14
+msgid "编辑文章内容和设置"
+msgstr "記事の内容と設定を編集する"
+
+#: .\templates\administration\post_form.html:27
+msgid "文章标题 (中文)"
+msgstr "記事タイトル（中国語）"
+
+#: .\templates\administration\post_form.html:39
+msgid "文章标题 (英文)"
+msgstr "記事タイトル（英語）"
+
+#: .\templates\administration\post_form.html:51
+msgid "文章标题 (日文)"
+msgstr "記事タイトル（日本語）"
+
+#: .\templates\administration\post_form.html:58
+msgid "文章标题 (繁体中文)"
+msgstr "記事タイトル（繁体字）"
+
+#: .\templates\administration\post_form.html:66
+msgid "副标题 (中文)"
+msgstr "字幕（中国語）"
+
+#: .\templates\administration\post_form.html:72
+msgid "副标题 (英文)"
+msgstr "字幕（英語）"
+
+#: .\templates\administration\post_form.html:98
+msgid "摘要 (中文)"
+msgstr "抄録（中国語）"
+
+#: .\templates\administration\post_form.html:105
+msgid "摘要 (英文)"
+msgstr "抄録（英語）"
+
+#: .\templates\administration\post_form.html:112
+msgid "摘要 (日文)"
+msgstr "概要（日本語）"
+
+#: .\templates\administration\post_form.html:119
+msgid "摘要 (繁体中文)"
+msgstr "概要（繁体字中国語）"
+
+#: .\templates\administration\post_form.html:123
+msgid "可选，用于列表页展示"
+msgstr "オプション、リストページの表示に使用されます"
+
+#: .\templates\administration\post_form.html:133
+msgid "Slug (URL别名)"
+msgstr "Slug (URL エイリアス)"
+
+#: .\templates\administration\post_form.html:137
+msgid "留空将自动根据标题生成"
+msgstr "空白のままにすると、タイトルに基づいて自動的に生成されます"
+
+#: .\templates\administration\post_form.html:145
+#| msgid "Meta 标题"
+msgid "Meta 标题 (Title)"
+msgstr "Meta タイトル"
+
+#: .\templates\administration\post_form.html:149
+msgid "可选，覆盖默认标题"
+msgstr "オプション。デフォルトのタイトルを上書きします。"
+
+#: .\templates\administration\post_form.html:155
+#| msgid "Meta 描述"
+msgid "Meta 描述 (Description)"
+msgstr "Meta 説明"
+
+#: .\templates\administration\post_form.html:159
+msgid "可选，覆盖自动生成的摘要"
+msgstr "オプション。自動生成された概要を上書きします。"
+
+#: .\templates\administration\post_form.html:165
+#| msgid "Meta 关键词"
+msgid "Meta 关键词 (Keywords)"
+msgstr "Meta キーワード"
+
+#: .\templates\administration\post_form.html:169
+msgid "可选，逗号分隔"
+msgstr "オプション、カンマ区切り"
+
+#: .\templates\administration\post_form.html:173
+msgid "SEO 设置"
+msgstr "SEO設定"
+
+#: .\templates\administration\post_form.html:199
+msgid "留空将使用当前时间"
+msgstr "現在の時刻を使用するには空白のままにします"
+
+#: .\templates\administration\post_form.html:206
+msgid "是否置顶"
+msgstr "上部に固定するかどうか"
+
+#: .\templates\administration\post_form.html:224
+msgid "预览/查看"
+msgstr "プレビュー/表示"
+
+#: .\templates\administration\post_form.html:247
+#| msgid "设置此密码后，访问文章需要输入密码"
+msgid "设置此密码后，访问文章需要输入密码。留空则公开访问。"
+msgstr "パスワードを設定すると、閲覧時に入力が必要になります。空欄の場合は公開されます。"
+
+#: .\templates\administration\post_form.html:251
+msgid "访问控制"
+msgstr "アクセス制御"
+
+#: .\templates\administration\post_form.html:314
+msgid "输入标签..."
+msgstr "タグを入力してください..."
+
+#: .\templates\administration\post_form.html:321
+msgid "输入标签后按回车或逗号添加"
+msgstr "タグを入力し、Enter またはカンマを押して追加します"
+
+#: .\templates\administration\post_form.html:325
+msgid "分类与标签"
+msgstr "分類とタグ"
+
+#: .\templates\administration\post_form.html:333
+msgid "封面图片"
+msgstr "表紙画像"
+
+#: .\templates\administration\post_list.html:4
+#: .\templates\administration\post_list.html:26
+msgid "文章管理"
+msgstr "記事管理"
+
+#: .\templates\administration\post_list.html:26
+msgid "管理和发布您的博客文章"
+msgstr "ブログ投稿を管理および公開する"
+
+#: .\templates\administration\post_list.html:84
+#| msgid "封面图"
+msgid "封面"
+msgstr "カバー画像"
+
+#: .\templates\administration\post_list.html:85
+msgid "标题 / 摘要"
+msgstr "タイトル/要約"
+
+#: .\templates\administration\post_list.html:91
+#| msgid "浏览历史"
+msgid "浏览"
+msgstr "閲覧"
+
+#: .\templates\administration\post_list.html:117
+msgid "批量设为草稿"
+msgstr "バッチでドラフトするように設定する"
+
+#: .\templates\administration\searchplaceholder_form.html:34
+msgid "关键词内容 (中文)"
+msgstr "キーワード内容（中国語）"
+
+#: .\templates\administration\searchplaceholder_form.html:36
+msgid "输入搜索框提示文字 (中文)"
+msgstr "検索ボックスのプロンプトテキストを入力してください (中国語)"
+
+#: .\templates\administration\searchplaceholder_form.html:49
+msgid "Enter placeholder text (English)"
+msgstr "プレースホルダーテキストを入力してください (英語)"
+
+#: .\templates\administration\searchplaceholder_form.html:62
+msgid "プレースホルダーテキストを入力 (Japanese)"
+msgstr "プレースホルダーテキストを入力 (日本語)"
+
+#: .\templates\administration\searchplaceholder_form.html:75
+msgid "輸入搜索框提示文字 (繁體中文)"
+msgstr "輸入搜索框提案文字 (繁體中文)"
+
+#: .\templates\administration\searchplaceholder_form.html:83
+msgid "这将作为搜索框的 placeholder 属性显示。"
+msgstr "これは、検索ボックスのプレースホルダー属性として表示されます。"
+
+#: .\templates\administration\searchplaceholder_form.html:112
+#, python-format
+msgid "确定要删除关键词《%(object.text|escapejs)s》吗？"
+msgstr "キーワード「%(object.text|escapejs)s」を削除してもよろしいですか?"
+
+#: .\templates\administration\searchplaceholder_list.html:26
+msgid "添加关键词"
+msgstr "キーワードを追加する"
+
+#: .\templates\administration\searchplaceholder_list.html:32
+msgid "管理搜索框推荐词"
+msgstr "検索ボックスの推奨ワードを管理する"
+
+#: .\templates\administration\searchplaceholder_list.html:67
+msgid "关键词内容"
+msgstr "キーワードの内容"
+
+#: .\templates\administration\searchplaceholder_list.html:83
+msgid "关键词列表"
+msgstr "キーワードリスト"
+
+#: .\templates\administration\searchplaceholder_list.html:92
+msgid "导入占位符数据 (JSON)"
+msgstr "プレースホルダー データ (JSON) をインポートする"
+
+#: .\templates\administration\searchplaceholder_list.html:119
+#: .\templates\administration\user_list.html:17
+#: .\templates\administration\user_list.html:54
+msgid "批量启用"
+msgstr "バッチで有効にする"
+
+#: .\templates\administration\searchplaceholder_list.html:120
+#: .\templates\administration\user_list.html:18
+#: .\templates\administration\user_list.html:55
+msgid "批量禁用"
+msgstr "バッチ無効化"
+
+#: .\templates\administration\settings.html:12
+msgid "管理网站的全局配置参数"
+msgstr "Web サイトのグローバル構成パラメータを管理する"
+
+#: .\templates\administration\settings.html:48
+msgid "站点识别 (Sites Framework)"
+msgstr "サイトフレームワーク"
+
+#: .\templates\administration\settings.html:53
+msgid "域名 (Domain)"
+msgstr "ドメイン名（ドメイン）"
+
+#: .\templates\administration\settings.html:57
+msgid "用于生成 Sitemap 和邮件链接。"
+msgstr "サイトマップと電子メール リンクを生成するために使用されます。"
+
+#: .\templates\administration\settings.html:62
+msgid "显示名称 (Display Name)"
+msgstr "表示名"
+
+#: .\templates\administration\settings.html:86
+#, python-format
+msgid "配置 %(title)s 相关的系统参数"
+msgstr "%(title)s 関連のシステム パラメータを構成する"
+
+#: .\templates\administration\settings.html:105
+msgid "已启用"
+msgstr "有効"
+
+#: .\templates\administration\settings.html:105
+msgid "已禁用"
+msgstr "無効"
+
+#: .\templates\administration\settings.html:131
+msgid "输入欢迎词后按回车添加..."
+msgstr "ウェルカム メッセージを入力し、Enter キーを押して追加します..."
+
+#: .\templates\administration\settings.html:152
+msgid "图片预览"
+msgstr "画像プレビュー"
+
+#: .\templates\administration\settings.html:177
+msgid "保存所有设置"
+msgstr "すべての設定を保存する"
+
+#: .\templates\administration\system_tools.html:13
+msgid "全站索引重建与图片处理服务"
+msgstr "サイト全体のインデックス再構築と画像処理サービス"
+
+#: .\templates\administration\system_tools.html:22
+msgid "实时系统监控"
+msgstr "リアルタイムのシステム監視"
+
+#: .\templates\administration\system_tools.html:44
+#| msgid "隐私政策"
+msgid "隐私政策初始化"
+msgstr "プライバシーポリシーの初期化"
+
+#: .\templates\administration\system_tools.html:48
+msgid "已创建"
+msgstr "作成されました"
+
+#: .\templates\administration\system_tools.html:48
+msgid "未创建"
+msgstr "作成されていません"
+
+#: .\templates\administration\system_tools.html:52
+msgid "如果系统中缺少隐私政策页面（URL: privacy-policy），可以点击下方按钮自动创建默认的隐私政策页面。"
+msgstr ""
+"プライバシー ポリシー ページ (URL:privacy-policy) がシステムにない場合は、下のボタンをクリックしてデフォルトのプライバシー "
+"ポリシー ページを自動的に作成できます。"
+
+#: .\templates\administration\system_tools.html:59
+msgid "页面已存在"
+msgstr "ページはすでに存在します"
+
+#: .\templates\administration\system_tools.html:59
+#| msgid "隐私政策"
+msgid "初始化隐私政策"
+msgstr "プライバシーポリシーを初期化"
+
+#: .\templates\administration\system_tools.html:71
+msgid "全站搜索索引"
+msgstr "サイト全体の検索インデックス"
+
+#: .\templates\administration\system_tools.html:81
+msgid "如果用户在前台搜索不到最新的文章或内容，请尝试重建索引。这通常在大量导入数据后需要手动执行。"
+msgstr ""
+"最新の記事やコンテンツを最前面で検索できない場合は、インデックスを再構築してみてください。通常、これは大量のデータをインポートした後に手動で行う必要があります。"
+
+#: .\templates\administration\system_tools.html:84
+#: .\templates\administration\system_tools.html:126
+#: .\templates\administration\system_tools.html:183
+msgid "无记录"
+msgstr "記録なし"
+
+#: .\templates\administration\system_tools.html:85
+#: .\templates\administration\system_tools.html:127
+msgid "上次任务"
+msgstr "最後のミッション"
+
+#: .\templates\administration\system_tools.html:92
+msgid "立即更新搜索数据"
+msgstr "今すぐ検索データを更新してください"
+
+#: .\templates\administration\system_tools.html:104
+msgid "图片预处理服务"
+msgstr "画像前処理サービス"
+
+#: .\templates\administration\system_tools.html:111
+msgid "后台自动生成文章封面图的缩略图，提升前台页面加载速度。建议在上传大量图片后执行。"
+msgstr ""
+"背景では、記事の表紙画像のサムネイルが自動的に生成され、フロント "
+"ページの読み込み速度が向上します。大量の画像をアップロードした後にこれを実行することをお勧めします。"
+
+#: .\templates\administration\system_tools.html:115
+msgid "待优化图片"
+msgstr "最適化する画像"
+
+#: .\templates\administration\system_tools.html:119
+msgid "处理进度"
+msgstr "処理の進行状況"
+
+#: .\templates\administration\system_tools.html:133
+msgid "每次处理的数量"
+msgstr "1回あたりの処理量"
+
+#: .\templates\administration\system_tools.html:134
+msgid "数量"
+msgstr "量"
+
+#: .\templates\administration\system_tools.html:136
+msgid "任务开始前的延迟(秒)"
+msgstr "タスク開始までの遅延 (秒)"
+
+#: .\templates\administration\system_tools.html:137
+msgid "延迟"
+msgstr "遅れ"
+
+#: .\templates\administration\system_tools.html:142
+msgid "启动处理任务"
+msgstr "タスクの処理を開始する"
+
+#: .\templates\administration\system_tools.html:153
+msgid "媒体文件清理"
+msgstr "メディアファイルのクリーニング"
+
+#: .\templates\administration\system_tools.html:166
+msgid "扫描并清理未被数据库引用的'孤儿'媒体文件，释放存储空间。请谨慎操作。"
+msgstr ""
+"データベースによって参照されていない「孤立した」メディア ファイルをスキャンしてクリーンアップし、ストレージ領域を解放します。慎重に進めてください。"
+
+#: .\templates\administration\system_tools.html:171
+msgid "孤儿文件"
+msgstr "孤立したファイル"
+
+#: .\templates\administration\system_tools.html:176
+msgid "已清理"
+msgstr "掃除済み"
+
+#: .\templates\administration\system_tools.html:184
+msgid "上次扫描"
+msgstr "最後のスキャン"
+
+#: .\templates\administration\system_tools.html:193
+msgid "扫描文件"
+msgstr "文書をスキャンする"
+
+#: .\templates\administration\system_tools.html:201
+msgid "确认清理"
+msgstr "クリーンアップの確認"
+
+#: .\templates\administration\system_tools.html:201
+msgid "确定要永久删除这些文件吗？此操作不可撤销。"
+msgstr "これらのファイルを完全に削除してもよろしいですか?この操作は元に戻すことができません。"
+
+#: .\templates\administration\system_tools.html:217
+msgid "数据库备份与恢复"
+msgstr "データベースのバックアップとリカバリ"
+
+#: .\templates\administration\system_tools.html:224
+msgid "创建新备份"
+msgstr "新しいバックアップを作成する"
+
+#: .\templates\administration\system_tools.html:233
+msgid "文件名"
+msgstr "ファイル名"
+
+#: .\templates\administration\system_tools.html:253
+msgid "恢复"
+msgstr "回復する"
+
+#: .\templates\administration\system_tools.html:254
+msgid "确认恢复"
+msgstr "回復の確認"
+
+#: .\templates\administration\system_tools.html:254
+msgid "警告：这将覆盖当前数据库所有数据！确定要恢复吗？"
+msgstr "警告: これにより、現在のデータベース内のすべてのデータが上書きされます。復元してもよろしいですか?"
+
+#: .\templates\administration\system_tools.html:263
+msgid "确定要删除此备份吗？"
+msgstr "このバックアップを削除してもよろしいですか?"
+
+#: .\templates\administration\system_tools.html:272
+msgid "暂无备份文件"
+msgstr "バックアップファイルはまだありません"
+
+#: .\templates\administration\tag_form.html:11
+msgid "编辑标签"
+msgstr "タグを編集する"
+
+#: .\templates\administration\tag_form.html:113
+msgid "确定要删除标签"
+msgstr "ラベルを削除してもよろしいですか?"
+
+#: .\templates\administration\tag_form.html:114
+msgid "删除标签"
+msgstr "タグの削除"
+
+#: .\templates\administration\tag_form.html:129
+msgid "启用状态"
+msgstr "有効ステータス"
+
+#: .\templates\administration\tag_form.html:133
+msgid "禁用后，该标签将不会在前端显示。"
+msgstr "無効にすると、ラベルはフロントエンドに表示されません。"
+
+#: .\templates\administration\tag_form.html:143
+msgid "颜色标识"
+msgstr "色の識別"
+
+#: .\templates\administration\tag_form.html:147
+msgid "直接使用自定义颜色，建议选择清晰耐看的色值。"
+msgstr "カスタムカラーを直接使用します。クリアで耐久性のあるカラー値を選択することをお勧めします。"
+
+#: .\templates\administration\tag_list.html:4
+#: .\templates\administration\tag_list.html:32
+msgid "标签管理"
+msgstr "タグ管理"
+
+#: .\templates\administration\tag_list.html:32
+msgid "管理文章标签体系"
+msgstr "記事タグシステムの管理"
+
+#: .\templates\administration\tag_list.html:92
+msgid "名称 / 样式"
+msgstr "名前/スタイル"
+
+#: .\templates\administration\tag_list.html:120
+msgid "批量可见"
+msgstr "バッチで表示可能"
+
+#: .\templates\administration\tag_list.html:121
+msgid "批量隐藏"
+msgstr "バッチで隠す"
+
+#: .\templates\administration\user_form.html:5
+#: .\templates\administration\user_form.html:14
+msgid "编辑用户"
+msgstr "ユーザーの編集"
+
+#: .\templates\administration\user_form.html:39
+#: .\templates\users\login.html:34
+msgid "用户名"
+msgstr "ユーザー名"
+
+#: .\templates\administration\user_form.html:63
+msgid "电子邮箱"
+msgstr "電子メール"
+
+#: .\templates\administration\user_form.html:90
+msgid "设置新密码"
+msgstr "新しいパスワードを設定する"
+
+#: .\templates\administration\user_form.html:92
+msgid "留空则保持不变"
+msgstr "変更しない場合は空白のままにします"
+
+#: .\templates\administration\user_form.html:95
+msgid "如需修改用户密码，请在此输入新密码。"
+msgstr "ユーザーパスワードを変更する必要がある場合は、ここに新しいパスワードを入力してください。"
+
+#: .\templates\administration\user_form.html:99
+msgid "账户信息"
+msgstr "アカウント情報"
+
+#: .\templates\administration\user_form.html:107
+#: .\templates\users\includes\edit_profile_modal.html:31
+#: .\templates\users\register.html:41
+msgid "头像"
+msgstr "アバター"
+
+#: .\templates\administration\user_form.html:138
+#: .\templates\users\includes\edit_profile_modal.html:114
+#: .\templates\users\includes\user_info.html:22
+msgid "个人简介"
+msgstr "プロフィール"
+
+#: .\templates\administration\user_form.html:140
+msgid "输入个人简介..."
+msgstr "プロフィールを入力してください..."
+
+#: .\templates\administration\user_form.html:147
+#: .\templates\users\includes\edit_profile_modal.html:134
+#: .\templates\users\includes\user_info.html:32
+msgid "个人网站"
+msgstr "個人のウェブサイト"
+
+#: .\templates\administration\user_form.html:177
+msgid "用户将获得所选组的所有权限。"
+msgstr "ユーザーは、選択したグループのすべての権限を取得します。"
+
+#: .\templates\administration\user_form.html:185
+msgid "个人权限"
+msgstr "個人の権限"
+
+#: .\templates\administration\user_form.html:189
+msgid "按住 Ctrl (或 Cmd) 可多选。通常建议通过用户组管理权限。"
+msgstr ""
+"Ctrl (または Cmd) を押したままにして、複数の選択を行います。一般に、ユーザー グループを通じて権限を管理することをお勧めします。"
+
+#: .\templates\administration\user_form.html:193
+msgid "权限与分组"
+msgstr "権限とグループ化"
+
+#: .\templates\administration\user_form.html:204
+msgid "保存用户"
+msgstr "ユーザーを保存する"
+
+#: .\templates\administration\user_form.html:217
+msgid "删除用户"
+msgstr "ユーザーの削除"
+
+#: .\templates\administration\user_form.html:235
+msgid "激活状态"
+msgstr "アクティブ状態"
+
+#: .\templates\administration\user_form.html:240
+msgid "取消激活可禁止用户登录，建议代替删除。"
+msgstr "非アクティブ化はユーザーのログインを無効にするため、削除の代わりに推奨されます。"
+
+#: .\templates\administration\user_form.html:250
+msgid "封禁账户"
+msgstr "アカウントの禁止"
+
+#: .\templates\administration\user_form.html:256
+msgid "状态控制"
+msgstr "ステータス制御"
+
+#: .\templates\administration\user_form.html:265
+msgid "职员状态"
+msgstr "スタッフのステータス"
+
+#: .\templates\administration\user_form.html:270
+msgid "指明用户是否可以登录到这个管理后台。"
+msgstr "ユーザーがこの管理バックグラウンドにログインできるかどうかを示します。"
+
+#: .\templates\administration\user_form.html:285
+msgid "指明该用户缺省拥有所有权限。"
+msgstr "ユーザーがデフォルトですべての権限を持っていることを示します。"
+
+#: .\templates\administration\user_form.html:289
+msgid "角色权限"
+msgstr "役割の権限"
+
+#: .\templates\administration\user_form.html:296
+msgid "加入时间:"
+msgstr "参加時間:"
+
+#: .\templates\administration\user_form.html:300
+msgid "最近登录:"
+msgstr "最近ログインしました:"
+
+#: .\templates\administration\user_form.html:305
+msgid "注册信息"
+msgstr "登録情報"
+
+#: .\templates\administration\user_list.html:4
+#: .\templates\administration\user_list.html:69
+msgid "用户管理"
+msgstr "ユーザー管理"
+
+#: .\templates\administration\user_list.html:19
+msgid "批量设为管理员"
+msgstr "管理者として一括設定する"
+
+#: .\templates\administration\user_list.html:20
+msgid "批量取消管理员"
+msgstr "管理者を一括でキャンセルする"
+
+#: .\templates\administration\user_list.html:56
+#: .\templates\administration\user_list.html:123
+msgid "设为管理"
+msgstr "管理するように設定する"
+
+#: .\templates\administration\user_list.html:57
+#: .\templates\administration\user_list.html:126
+msgid "取消管理"
+msgstr "管理を解除する"
+
+#: .\templates\administration\user_list.html:69
+msgid "管理注册用户与权限"
+msgstr "登録ユーザーと権限を管理する"
+
+#: .\templates\administration\user_list.html:78
+msgid "总用户数"
+msgstr "総ユーザー数"
+
+#: .\templates\administration\user_list.html:80
+msgid "所有注册用户"
+msgstr "登録ユーザー全員"
+
+#: .\templates\administration\user_list.html:89
+#: .\templates\administration\user_list.html:110
+msgid "已激活"
+msgstr "アクティブ化された"
+
+#: .\templates\administration\user_list.html:91
+msgid "账户状态正常"
+msgstr "アカウントのステータスは正常です"
+
+#: .\templates\administration\user_list.html:102
+msgid "拥有后台权限"
+msgstr "バックグラウンド権限がある"
+
+#: .\templates\administration\user_list.html:156
+msgid "角色"
+msgstr "役割"
+
+#: .\templates\administration\user_list.html:160
+#: .\templates\users\includes\profile_card.html:87
+msgid "加入时间"
+msgstr "参加時間"
+
+#: .\templates\administration\user_list.html:168
+msgid "最近登录"
+msgstr "最近ログインしました"
+
+#: .\templates\administration\usertitle_form.html:4
+#: .\templates\administration\usertitle_form.html:11
+msgid "编辑称号"
+msgstr "編集者のタイトル"
+
+#: .\templates\administration\usertitle_form.html:4
+#: .\templates\administration\usertitle_list.html:24
+msgid "新建称号"
+msgstr "新しいタイトルを作成する"
+
+#: .\templates\administration\usertitle_form.html:20
+msgid "认证"
+msgstr "認証"
+
+#: .\templates\administration\usertitle_form.html:21
+msgid "皇冠"
+msgstr "クラウン"
+
+#: .\templates\administration\usertitle_form.html:22
+msgid "星星"
+msgstr "星"
+
+#: .\templates\administration\usertitle_form.html:23
+msgid "闪电"
+msgstr "稲妻"
+
+#: .\templates\administration\usertitle_form.html:24
+msgid "钻石"
+msgstr "ダイヤモンド"
+
+#: .\templates\administration\usertitle_form.html:25
+msgid "盾牌"
+msgstr "シールド"
+
+#: .\templates\administration\usertitle_form.html:26
+msgid "奖章"
+msgstr "メダル"
+
+#: .\templates\administration\usertitle_form.html:27
+msgid "火焰"
+msgstr "炎"
+
+#: .\templates\administration\usertitle_form.html:28
+msgid "心形"
+msgstr "ハートの形"
+
+#: .\templates\administration\usertitle_form.html:29
+msgid "火箭"
+msgstr "ロケット"
+
+#: .\templates\administration\usertitle_form.html:31
+msgid "贡献者"
+msgstr "投稿者"
+
+#: .\templates\administration\usertitle_form.html:33
+msgid "Bug 猎手"
+msgstr "バグハンター"
+
+#: .\templates\administration\usertitle_form.html:34
+msgid "代码"
+msgstr "コード"
+
+#: .\templates\administration\usertitle_form.html:35
+msgid "魔法"
+msgstr "魔法"
+
+#: .\templates\administration\usertitle_form.html:36
+msgid "地球"
+msgstr "地球"
+
+#: .\templates\administration\usertitle_form.html:37
+msgid "灯泡"
+msgstr "電球"
+
+#: .\templates\administration\usertitle_form.html:38
+msgid "书本"
+msgstr "本"
+
+#: .\templates\administration\usertitle_form.html:39
+msgid "咖啡"
+msgstr "コーヒー"
+
+#: .\templates\administration\usertitle_form.html:40
+msgid "音乐"
+msgstr "音楽"
+
+#: .\templates\administration\usertitle_form.html:41
+msgid "相机"
+msgstr "カメラ"
+
+#: .\templates\administration\usertitle_form.html:42
+msgid "调色板"
+msgstr "カラーパレット"
+
+#: .\templates\administration\usertitle_form.html:43
+msgid "手柄"
+msgstr "ハンドル"
+
+#: .\templates\administration\usertitle_form.html:44
+msgid "叶子"
+msgstr "葉"
+
+#: .\templates\administration\usertitle_form.html:66
+#: .\templates\administration\usertitle_form.html:174
+msgid "称号名称"
+msgstr "タイトル名"
+
+#: .\templates\administration\usertitle_form.html:68
+msgid "例如：VIP"
+msgstr "例: VIP"
+
+#: .\templates\administration\usertitle_form.html:80
+#: .\templates\administration\usertitle_list.html:54
+msgid "颜色风格"
+msgstr "カラースタイル"
+
+#: .\templates\administration\usertitle_form.html:85
+msgid "选择一个醒目的颜色来区分不同类型的称号"
+msgstr "異なるタイプのタイトルを区別するには、太字の色を選択してください"
+
+#: .\templates\administration\usertitle_form.html:98
+msgid "称号说明"
+msgstr "タイトルの説明"
+
+#: .\templates\administration\usertitle_form.html:100
+msgid "简短描述该称号的获取条件或含义"
+msgstr "タイトルの条件や意味を簡単に説明します"
+
+#: .\templates\administration\usertitle_form.html:117
+msgid "预设图标"
+msgstr "デフォルトのアイコン"
+
+#: .\templates\administration\usertitle_form.html:135
+msgid "自定义 SVG 代码"
+msgstr "カスタムSVGコード"
+
+#: .\templates\administration\usertitle_form.html:136
+msgid "推荐尺寸 24x24"
+msgstr "推奨サイズ 24x24"
+
+#: .\templates\administration\usertitle_form.html:146
+msgid "图标设置"
+msgstr "アイコンセット"
+
+#: .\templates\administration\usertitle_form.html:162
+#: .\templates\administration\usertitle_list.html:52
+msgid "预览"
+msgstr "プレビュー"
+
+#: .\templates\administration\usertitle_form.html:177
+#: .\templates\blog\post_list.html:45 .\templates\blog\search_results.html:84
+msgid "暂无描述"
+msgstr "まだ説明がありません"
+
+#: .\templates\administration\usertitle_list.html:5
+msgid "用户称号管理"
+msgstr "ユーザー名の管理"
+
+#: .\templates\administration\usertitle_list.html:30
+#: .\templates\administration\usertitle_list.html:69
+msgid "称号列表"
+msgstr "タイトル一覧"
+
+#: .\templates\administration\usertitle_list.html:30
+msgid "管理用户特殊身份标识"
+msgstr "ユーザーの特別な ID を管理する"
+
+#: .\templates\administration\usertitle_list.html:55
+msgid "说明"
+msgstr "説明する"
+
+#: .\templates\administration\usertitle_list.html:56
+msgid "用户数"
+msgstr "ユーザー数"
+
+#: .\templates\administration\usertitle_list.html:78
+msgid "导入称号数据 (JSON)"
+msgstr "タイトルデータ(JSON)のインポート"
+
+#: .\templates\base.html:7
+msgid "RSS Feed"
+msgstr "RSSフィード"
+
+#: .\templates\blog\all_posts.html:26
+msgid "知识库"
+msgstr "ナレッジベース"
+
+#: .\templates\blog\all_posts.html:30
+msgid "全部文章"
+msgstr "すべての記事"
+
+#: .\templates\blog\all_posts.html:35
+#, python-format
+msgid ""
+"\n"
+"                    共收录 <span class=\"font-bold text-base-content\">%(counter)s</span> 篇文章\n"
+"                    "
+msgid_plural ""
+"\n"
+"                    共收录 <span class=\"font-bold text-base-content\">%(counter)s</span> 篇文章\n"
+"                    "
+msgstr[0] ""
+"\n"
+"                    <span class=\"font-bold text-base-content\">%(counter)s</span> 件の記事を収録\n"
+"                    "
+
+#: .\templates\blog\all_posts.html:47 .\templates\blog\post_list.html:60
+#: .\templates\blog\post_list.html:79
+#: .\templates\users\includes\profile_content.html:31
+msgid "网格视图"
+msgstr "グリッド表示"
+
+#: .\templates\blog\all_posts.html:53 .\templates\blog\post_list.html:66
+#: .\templates\blog\post_list.html:73
+#: .\templates\users\includes\profile_content.html:37
+msgid "列表视图"
+msgstr "リスト表示"
+
+#: .\templates\blog\all_posts.html:162
+msgid "这里还是一片荒原，等待知识的种子发芽。"
+msgstr "ここはまだ荒野です。知識の種が芽吹くのを待っています。"
+
+#: .\templates\blog\all_posts.html:175 .\templates\blog\all_posts.html:180
+#: .\templates\blog\post_list.html:187 .\templates\blog\post_list.html:189
+#: .\templates\guestbook\index.html:126 .\templates\guestbook\index.html:128
+msgid "上一页"
+msgstr "前へ"
+
+#: .\templates\blog\all_posts.html:190 .\templates\blog\all_posts.html:195
+#: .\templates\blog\post_list.html:193 .\templates\blog\post_list.html:195
+#: .\templates\guestbook\index.html:132 .\templates\guestbook\index.html:134
+msgid "下一页"
+msgstr "次へ"
+
+#: .\templates\blog\archive.html:4 .\templates\blog\archive.html:24
+msgid "文章归档"
+msgstr "アーカイブ"
+
+#: .\templates\blog\archive.html:20
+msgid "时光轴"
+msgstr "タイムライン"
+
+#: .\templates\blog\archive.html:28
+#, python-format
+msgid ""
+"\n"
+"                共 <span class=\"font-bold text-base-content\">%(counter)s</span> 篇文章，记录成长的足迹。\n"
+"                "
+msgid_plural ""
+"\n"
+"                共 <span class=\"font-bold text-base-content\">%(counter)s</span> 篇文章，记录成长的足迹。\n"
+"                "
+msgstr[0] ""
+"\n"
+"                合計 <span class=\"font-bold text-base-content\">%(counter)s</span> 件の記事で、成長の足跡を記録。\n"
+"                "
+
+#: .\templates\blog\archive.html:104
+msgid "暂无历史文章"
+msgstr "履歴記事がありません"
+
+#: .\templates\blog\archive.html:105
+msgid "开始创作，记录第一笔足迹吧！"
+msgstr "創作を始めて、最初の足跡を記録しましょう！"
+
+#: .\templates\blog\category_list.html:17
+msgid "探索知识库"
+msgstr "ナレッジベースを探索"
+
+#: .\templates\blog\category_list.html:26
+#, python-format
+msgid ""
+"\n"
+"                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span class=\"font-bold text-base-content\">%(counter)s</span> 个分类。\n"
+"                "
+msgid_plural ""
+"\n"
+"                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span class=\"font-bold text-base-content\">%(counter)s</span> 个分类。\n"
+"                "
+msgstr[0] ""
+"\n"
+"                テーマ別に記事を探索。厳選された <span class=\"font-bold text-base-content\">%(counter)s</span> 個のカテゴリがあります。\n"
+"                "
+
+#: .\templates\blog\category_list.html:39
+msgid "搜索感兴趣的分类..."
+msgstr "カテゴリーを検索..."
+
+#: .\templates\blog\category_list.html:80
+msgid "探索该分类下的所有精彩文章，发现更多有趣内容。"
+msgstr "このカテゴリの優れた記事をすべて調べて、さらに興味深いコンテンツを見つけてください。"
+
+#: .\templates\blog\category_list.html:86
+msgid "Explore"
+msgstr "探索"
+
+#: .\templates\blog\category_list.html:98
+msgid "还没有添加任何分类，或者没有找到匹配的结果。"
+msgstr "カテゴリーが追加されていないか、一致する結果が見つかりませんでした。"
+
+#: .\templates\blog\partials\pin_button.html:2
+msgid "取消置顶"
+msgstr "固定解除"
+
+#: .\templates\blog\partials\pin_button.html:3
+msgid "置顶文章"
+msgstr "記事を固定"
+
+#: .\templates\blog\partials\sidebar.html:10
+#: .\templates\blog\search_index.html:4
+msgid "搜索"
+msgstr "検索"
+
+#: .\templates\blog\partials\sidebar.html:46
+msgid "热门文章"
+msgstr "人気の記事"
+
+#: .\templates\blog\partials\sidebar.html:87 .\templates\blog\tag_list.html:21
+#| msgid "标签"
+msgid "标签云"
+msgstr "タグクラウド"
+
+#: .\templates\blog\partials\sidebar.html:119
+msgid "最新评论"
+msgstr "最新のコメント"
+
+#: .\templates\blog\partials\sidebar.html:132
+#: .\templates\users\includes\profile_content.html:186
+msgid "前"
+msgstr "前"
+
+#: .\templates\blog\password_required.html:4
+msgid "需要密码"
+msgstr "パスワードが必要です"
+
+#: .\templates\blog\password_required.html:10
+msgid "文章受密码保护"
+msgstr "記事はパスワードで保護されています"
+
+#: .\templates\blog\password_required.html:11
+msgid "该文章设置了访问密码，请输入密码继续阅读。"
+msgstr "この記事はパスワードで保護されています。続きを読むにはパスワードを入力してください。"
+
+#: .\templates\blog\password_required.html:16
+msgid "在此输入密码"
+msgstr "パスワードを入力"
+
+#: .\templates\blog\password_required.html:20
+msgid "验证密码"
+msgstr "パスワードを認証"
+
+#: .\templates\blog\post_detail.html:137
+msgid "阅读时间"
+msgstr "読書時間"
+
+#: .\templates\blog\post_detail.html:139 .\templates\blog\post_detail.html:242
+msgid "分钟阅读"
+msgstr " 分で読める"
+
+#: .\templates\blog\post_detail.html:143 .\templates\blog\post_detail.html:547
+#| msgid "阅读量"
+msgid "阅读"
+msgstr "閲覧"
+
+#: .\templates\blog\post_detail.html:200
+msgid "分享"
+msgstr "共有"
+
+#: .\templates\blog\post_detail.html:202
+msgid "分享到 X"
+msgstr "Xで共有"
+
+#: .\templates\blog\post_detail.html:205
+msgid "链接已复制！"
+msgstr "リンクをコピーしました！"
+
+#: .\templates\blog\post_detail.html:205
+msgid "复制链接"
+msgstr "リンクをコピー"
+
+#: .\templates\blog\post_detail.html:215
+msgid "相关阅读"
+msgstr "関連記事"
+
+#: .\templates\blog\post_detail.html:267
+msgid "上一篇"
+msgstr "前の記事"
+
+#: .\templates\blog\post_detail.html:278
+msgid "下一篇"
+msgstr "次の記事"
+
+#: .\templates\blog\post_detail.html:296
+msgid "发表你的观点"
+msgstr "意見を投稿する"
+
+#: .\templates\blog\post_detail.html:310
+msgid "正在回复"
+msgstr "返信中"
+
+#: .\templates\blog\post_detail.html:313
+msgid "取消回复"
+msgstr "返信をキャンセル"
+
+#: .\templates\blog\post_detail.html:323
+msgid "发布评论"
+msgstr "コメントを投稿"
+
+#: .\templates\blog\post_detail.html:331
+msgid "需要登录"
+msgstr "ログインが必要です"
+
+#: .\templates\blog\post_detail.html:332
+#, python-format
+msgid ""
+"请 <a href=\"%(login_url)s?next=%(request.path)s\" class=\"link link-primary "
+"font-bold\">登录</a> 或 <a href=\"%(register_url)s\" class=\"link link-"
+"primary\">注册</a> 后参与讨论。"
+msgstr ""
+"ディスカッションに参加するには、<a href=\"%(login_url)s?next=%(request.path)s\" class=\"link"
+" link-primary font-bold\">ログイン</a>するか、<a href=\"%(register_url)s\" "
+"class=\"link link-primary\">登録</a>してください。"
+
+#: .\templates\blog\post_detail.html:341
+msgid "评论已关闭"
+msgstr "コメントは閉じられました"
+
+#: .\templates\blog\post_detail.html:342
+msgid "管理员已暂时关闭评论功能。"
+msgstr "管理者がコメント機能を一時的に停止しています。"
+
+#: .\templates\blog\post_detail.html:356
+#, python-format
+msgid "查看 %(name)s 的主页"
+msgstr "%(name)s のホームページを見る"
+
+#: .\templates\blog\post_detail.html:390 .\templates\blog\post_detail.html:457
+#, python-format
+msgid "• %(time)s前"
+msgstr "• %(time)s前"
+
+#: .\templates\blog\post_detail.html:402
+msgid "确定要删除这条评论及其所有回复吗？"
+msgstr "このコメントとすべての返信を削除してもよろしいですか？"
+
+#: .\templates\blog\post_detail.html:439
+#, python-format
+msgid "回复 @%(name)s"
+msgstr "返信 @%(name)s"
+
+#: .\templates\blog\post_detail.html:462
+msgid "确定要删除这条回复吗？"
+msgstr "この返信を削除してもよろしいですか？"
+
+#: .\templates\blog\post_detail.html:462
+msgid "删除回复"
+msgstr "返信を削除"
+
+#: .\templates\blog\post_detail.html:486
+msgid "你的观点很有价值，快来抢沙发吧！"
+msgstr "あなたの意見は貴重です。最初のコメントを投稿しましょう！"
+
+#: .\templates\blog\post_detail.html:501
+#| msgid "退出登录"
+msgid "目录"
+msgstr "目次"
+
+#: .\templates\blog\post_detail.html:536
+msgid "这个作者很懒，什么都没写~"
+msgstr "この著者は怠け者で、何も書いていません〜"
+
+#: .\templates\blog\post_detail.html:551
+msgid "访问主页"
+msgstr "プロフィールを見る"
+
+#: .\templates\blog\post_list.html:30
+#, python-format
+msgid ""
+"\n"
+"                    共 %(counter)s 篇文章\n"
+"                    "
+msgid_plural ""
+"\n"
+"                    共 %(counter)s 篇文章\n"
+"                    "
+msgstr[0] ""
+"\n"
+"                    全 %(counter)s 記事\n"
+"                    "
+
+#: .\templates\blog\post_list.html:51
+msgid "最新文章"
+msgstr "最新記事"
+
+#: .\templates\blog\post_list.html:136
+msgid "最新"
+msgstr "最新"
+
+#: .\templates\blog\post_list.html:178
+msgid "敬请期待更多精彩内容！"
+msgstr "さらなる素晴らしいコンテンツにご期待ください！"
+
+#: .\templates\blog\search_index.html:14
+#, python-format
+msgid "探索 %(site_name)s"
+msgstr "%(site_name)s を探索する"
+
+#: .\templates\blog\search_index.html:18
+#| msgid "搜索文章、标签、分类..."
+msgid "搜索文章、标签、分类或用户..."
+msgstr "記事、タグ、カテゴリ、またはユーザーを検索..."
+
+#: .\templates\blog\search_index.html:34
+#: .\templates\components\inspira\placeholders_and_vanish_input.html:33
+msgid "输入关键词..."
+msgstr "キーワードを入力..."
+
+#: .\templates\blog\search_results.html:7
+#, python-format
+msgid "\"%(query)s\" 的搜索结果"
+msgstr "「%(query)s」の検索結果"
+
+#: .\templates\blog\search_results.html:47
+msgid "查看主页"
+msgstr "ホームページを見る"
+
+#: .\templates\blog\search_results.html:68
+#, python-format
+msgid "%(count)s 人参与"
+msgstr "%(count)s人が参加しています"
+
+#: .\templates\blog\search_results.html:69
+#: .\templates\voting\poll_list.html:10 .\templates\voting\poll_list.html:33
+msgid "参与投票"
+msgstr "投票に参加する"
+
+#: .\templates\blog\search_results.html:87
+msgid "查看文章"
+msgstr "記事を見る"
+
+#: .\templates\blog\search_results.html:128
+#| msgid "未找到相关结果"
+msgid "没有找到相关结果"
+msgstr "結果が見つかりませんでした"
+
+#: .\templates\blog\search_results.html:129
+msgid "请尝试其他关键词或切换搜索类型。"
+msgstr "他のキーワードを試すか、検索タイプを切り替えてください。"
+
+#: .\templates\blog\tag_list.html:17
+msgid "话题索引"
+msgstr "トピックインデックス"
+
+#: .\templates\blog\tag_list.html:26
+#, python-format
+msgid ""
+"\n"
+"                探索 <span class=\"font-bold text-base-content\">%(counter)s</span> 个精彩话题，发现更多相关内容。\n"
+"                "
+msgid_plural ""
+"\n"
+"                探索 <span class=\"font-bold text-base-content\">%(counter)s</span> 个精彩话题，发现更多相关内容。\n"
+"                "
+msgstr[0] ""
+"\n"
+"                <span class=\"font-bold text-base-content\">%(counter)s</span> 個のトピックを探索し、関連コンテンツを発見。\n"
+"                "
+
+#: .\templates\blog\tag_list.html:39
+msgid "查找标签..."
+msgstr "タグを検索..."
+
+#: .\templates\components\confirm_modal.html:7
+msgid "确认操作"
+msgstr "操作の確認"
+
+#: .\templates\components\confirm_modal.html:9
+msgid "确定要执行此操作吗？"
+msgstr "この操作を実行してもよろしいですか？"
+
+#: .\templates\components\confirm_modal.html:12
+#: .\templates\components\confirm_modal.html:29
+#: .\templates\users\includes\edit_profile_modal.html:171
+#: .\templates\users\register.html:83
+msgid "确定"
+msgstr "確認"
+
+#: .\templates\components\confirm_modal.html:25
+msgid "提示"
+msgstr "ヒント"
+
+#: .\templates\components\inspira\placeholders_and_vanish_input.html:31
+msgid "搜索文章..."
+msgstr "記事を検索..."
+
+#: .\templates\components\inspira\placeholders_and_vanish_input.html:32
+msgid "搜索标签..."
+msgstr "タグを検索..."
+
+#: .\templates\guestbook\index.html:6 .\templates\guestbook\index.html:19
+#: .\templates\partials\footer.html:65 .\templates\partials\navbar.html:30
+#: .\templates\partials\navbar.html:132
+msgid "留言板"
+msgstr "掲示板"
+
+#: .\templates\guestbook\index.html:22
+msgid "无论是建议、反馈，还是仅仅想打个招呼，<br>这里都是属于您的空间。"
+msgstr "提案、フィードバック、または単に挨拶したい場合でも、<br>ここはあなたのスペースです。"
+
+#: .\templates\guestbook\index.html:27 .\templates\guestbook\index.html:145
+msgid "写留言"
+msgstr "メッセージを書く"
+
+#: .\templates\guestbook\index.html:102
+msgid "站长回复"
+msgstr "ウェブマスターの返信"
+
+#: .\templates\guestbook\index.html:116
+msgid "暂无留言"
+msgstr "まだメッセージはありません"
+
+#: .\templates\guestbook\index.html:117
+msgid "快来抢占沙发，成为第一个留言的人！"
+msgstr "ソファに座って誰よりも早くメッセージを残してください!"
+
+#: .\templates\guestbook\index.html:146
+msgid "期待听到您的声音"
+msgstr "あなたからの返信を楽しみにしています"
+
+#: .\templates\guestbook\index.html:171
+msgid "(保密)"
+msgstr "（機密）"
+
+#: .\templates\guestbook\index.html:182
+msgid "在留言中公开显示邮箱"
+msgstr "コメントで電子メールを公開する"
+
+#: .\templates\guestbook\index.html:193
+msgid "(可选)"
+msgstr "(オプション)"
+
+#: .\templates\guestbook\index.html:213
+msgid "以登录身份留言"
+msgstr "ログインした状態でメッセージを残す"
+
+#: .\templates\guestbook\index.html:238
+msgid "请输入右侧字符"
+msgstr "右側の文字を入力してください"
+
+#: .\templates\guestbook\index.html:251
+msgid "发布留言"
+msgstr "メッセージを投稿する"
+
+#: .\templates\guestbook\index.html:268
+msgid "点击刷新验证码"
+msgstr "クリックして確認コードを更新します"
+
+#: .\templates\maintenance.html:7 .\templates\maintenance.html:22
+msgid "系统维护中"
+msgstr "システムメンテナンス中"
+
+#: .\templates\maintenance.html:24
+msgid "为了提供更好的服务，我们正在进行系统升级维护。"
+msgstr "より良いサービスをご提供するため、システムの改修・メンテナンスを行っております。"
+
+#: .\templates\maintenance.html:26
+msgid "预计很快恢复，请稍后再试。"
+msgstr "すぐに復旧する予定ですので、しばらくしてからもう一度お試しください。"
+
+#: .\templates\partials\footer.html:23
+msgid "RSS 订阅"
+msgstr "RSS購読"
+
+#: .\templates\partials\footer.html:61 .\templates\partials\navbar.html:29
+#: .\templates\partials\navbar.html:127
+msgid "归档"
+msgstr "アーカイブ"
+
+#: .\templates\partials\footer.html:69 .\templates\partials\navbar.html:31
+#: .\templates\partials\navbar.html:137
+msgid "关于"
+msgstr "について"
+
+#: .\templates\partials\footer.html:73 .\templates\partials\navbar.html:32
+#: .\templates\partials\navbar.html:142
+msgid "联系"
+msgstr "接続する"
+
+#: .\templates\partials\footer.html:77
+msgid "网站地图"
+msgstr "サイトマップ"
+
+#: .\templates\partials\footer.html:106
+msgid "All rights reserved."
+msgstr "無断転載を禁じます。"
+
+#: .\templates\partials\footer.html:115
+msgid "隐私政策"
+msgstr "プライバシーポリシー"
+
+#: .\templates\partials\footer.html:119
+msgid "Powered by"
+msgstr "搭載"
+
+#: .\templates\partials\navbar.html:81 .\templates\partials\navbar.html:291
+#: .\templates\users\includes\profile_content.html:275
+msgid "偏好设置"
+msgstr "設定"
+
+#: .\templates\partials\navbar.html:83
+msgid "管理后台"
+msgstr "管理画面"
+
+#: .\templates\partials\navbar.html:96 .\templates\partials\navbar.html:332
+#: .\templates\users\login.html:4 .\templates\users\login.html:19
+#: .\templates\users\login.html:90
+#| msgid "退出登录"
+msgid "登录"
+msgstr "ログイン"
+
+#: .\templates\partials\navbar.html:270
+msgid "通知中心"
+msgstr "通知センター"
+
+#: .\templates\partials\navbar.html:302
+msgid "个人主页"
+msgstr "マイページ"
+
+#: .\templates\partials\navbar.html:312
+msgid "后台管理"
+msgstr "バックエンド管理"
+
+#: .\templates\partials\navbar.html:325
+msgid "注销登录"
+msgstr "ログアウト"
+
+#: .\templates\partials\navbar.html:333 .\templates\users\register.html:4
+msgid "注册"
+msgstr "登録"
+
+#: .\templates\partials\navbar.html:347
+msgid "全站搜索"
+msgstr "サイト内検索"
+
+#: .\templates\partials\navbar.html:362
+msgid "搜索文章、标签、分类..."
+msgstr "記事、タグ、カテゴリを検索..."
+
+#: .\templates\partials\navbar.html:405
+msgid "未找到相关结果"
+msgstr "結果が見つかりません"
+
+#: .\templates\users\includes\comments_list.html:8
+msgid "评论了文章："
+msgstr "記事について次のようにコメントしました。"
+
+#: .\templates\users\includes\comments_list.html:27
+msgid "查看详情"
+msgstr "詳細を確認する"
+
+#: .\templates\users\includes\comments_list.html:37
+msgid "该用户暂时没有发表评论"
+msgstr "このユーザーはまだコメントしていません"
+
+#: .\templates\users\includes\edit_profile_modal.html:9
+msgid "编辑个人资料"
+msgstr "プロフィールの編集"
+
+#: .\templates\users\includes\edit_profile_modal.html:10
+msgid "管理员模式"
+msgstr "管理者モード"
+
+#: .\templates\users\includes\edit_profile_modal.html:25
+msgid "个人形象"
+msgstr "個人的なイメージ"
+
+#: .\templates\users\includes\edit_profile_modal.html:46
+msgid "更换头像"
+msgstr "アバターの変更"
+
+#: .\templates\users\includes\edit_profile_modal.html:49
+msgid "支持 JPG, PNG, GIF (推荐 1:1)"
+msgstr "JPG、PNG、GIF をサポート (1:1 を推奨)"
+
+#: .\templates\users\includes\edit_profile_modal.html:64
+msgid "暂无封面"
+msgstr "まだカバーがありません"
+
+#: .\templates\users\includes\edit_profile_modal.html:74
+msgid "更换封面"
+msgstr "カバーを変更する"
+
+#: .\templates\users\includes\edit_profile_modal.html:82
+msgid "上传新封面"
+msgstr "新しいカバーをアップロードする"
+
+#: .\templates\users\includes\edit_profile_modal.html:84
+msgid "建议尺寸 1200x300px，支持拖拽上传"
+msgstr "推奨サイズ 1200x300px、ドラッグ＆ドロップ対応"
+
+#: .\templates\users\includes\edit_profile_modal.html:118
+msgid "简短的自我介绍"
+msgstr "短い自己紹介"
+
+#: .\templates\users\includes\edit_profile_modal.html:128
+msgid "社交链接"
+msgstr "ソーシャルリンク"
+
+#: .\templates\users\includes\edit_profile_modal.html:163
+msgid "裁剪图片"
+msgstr "写真をトリミングする"
+
+#: .\templates\users\includes\profile_card.html:48
+#: .\templates\users\includes\user_info.html:24
+msgid "这位用户很懒，什么都没写~"
+msgstr "このユーザーは怠け者で何も書いていません~"
+
+#: .\templates\users\includes\profile_card.html:53
+msgid "访问个人网站"
+msgstr "個人のウェブサイトにアクセスする"
+
+#: .\templates\users\includes\profile_card.html:69
+#: .\templates\users\includes\profile_content.html:112
+msgid "编辑资料"
+msgstr "プロフィールの編集"
+
+#: .\templates\users\includes\profile_card.html:74
+#: .\templates\users\includes\profile_content.html:219
+msgid "修改密码"
+msgstr "パスワードを変更する"
+
+#: .\templates\users\includes\profile_card.html:82
+msgid "评论数"
+msgstr "コメント数"
+
+#: .\templates\users\includes\profile_content.html:11
+msgid "该用户已开启隐私保护"
+msgstr "このユーザーはプライバシー保護をオンにしています"
+
+#: .\templates\users\includes\profile_content.html:12
+msgid "详细资料仅对用户本人可见"
+msgstr "詳細はユーザーのみに表示されます"
+
+#: .\templates\users\includes\profile_content.html:24
+msgid "发布文章"
+msgstr "記事を投稿する"
+
+#: .\templates\users\includes\profile_content.html:96
+msgid "暂无发布的文章"
+msgstr "公開された記事はまだありません"
+
+#: .\templates\users\includes\profile_content.html:103
+msgid "评论记录"
+msgstr "コメント記録"
+
+#: .\templates\users\includes\profile_content.html:109
+msgid "个人信息"
+msgstr "個人情報"
+
+#: .\templates\users\includes\profile_content.html:121
+msgid "仅显示最近20条记录"
+msgstr "最近の20件のみ表示"
+
+#: .\templates\users\includes\profile_content.html:128
+msgid "文章标题"
+msgstr "記事タイトル"
+
+#: .\templates\users\includes\profile_content.html:153
+msgid "暂无浏览记录"
+msgstr "閲覧履歴はまだありません"
+
+#: .\templates\users\includes\profile_content.html:160
+msgid "消息通知"
+msgstr "通知"
+
+#: .\templates\users\includes\profile_content.html:192
+msgid "标为已读"
+msgstr "既読にする"
+
+#: .\templates\users\includes\profile_content.html:208
+msgid "暂无新通知"
+msgstr "新しい通知はありません"
+
+#: .\templates\users\includes\profile_content.html:214
+msgid "账号安全"
+msgstr "アカウントセキュリティ"
+
+#: .\templates\users\includes\profile_content.html:267
+#: .\templates\users\password_change.html:73
+msgid "保存修改"
+msgstr "変更を保存する"
+
+#: .\templates\users\includes\profile_content.html:284
+msgid "界面主题"
+msgstr "テーマ設定"
+
+#: .\templates\users\includes\profile_content.html:295
+msgid "暗黑模式"
+msgstr "ダークモード"
+
+#: .\templates\users\includes\profile_content.html:296
+msgid "切换明亮/暗黑主题"
+msgstr "ライト/ダークテーマを切り替え"
+
+#: .\templates\users\includes\profile_content.html:313
+msgid "公开个人资料"
+msgstr "プロフィールを公開"
+
+#: .\templates\users\includes\profile_content.html:314
+msgid "允许其他人查看您的个人资料和浏览历史"
+msgstr "他のユーザーがあなたのプロフィールと閲覧履歴を見ることを許可します"
+
+#: .\templates\users\includes\profile_content.html:329
+msgid "保存设置"
+msgstr "設定を保存"
+
+#: .\templates\users\includes\profile_tabs.html:11
+msgid "资料"
+msgstr "プロフィール"
+
+#: .\templates\users\includes\profile_tabs.html:14
+#| msgid "浏览历史"
+msgid "历史"
+msgstr "履歴"
+
+#: .\templates\users\includes\profile_tabs.html:23
+msgid "安全"
+msgstr "セキュリティ"
+
+#: .\templates\users\includes\profile_tabs.html:26
+#| msgid "偏好设置"
+msgid "设置"
+msgstr "設定"
+
+#: .\templates\users\includes\user_info.html:16
+#: .\templates\users\includes\user_info.html:41
+#: .\templates\users\includes\user_info.html:57
+msgid "未设置"
+msgstr "設定されていません"
+
+#: .\templates\users\includes\user_info.html:64
+msgid "注册时间"
+msgstr "登録時間"
+
+#: .\templates\users\includes\user_info.html:71
+msgid "最后登录"
+msgstr "最終ログイン"
+
+#: .\templates\users\includes\user_info.html:73
+msgid "从未登录"
+msgstr "ログインしたことがない"
+
+#: .\templates\users\login.html:18
+msgid "欢迎回来"
+msgstr "おかえり"
+
+#: .\templates\users\login.html:37
+msgid "请输入用户名"
+msgstr "ユーザー名を入力してください"
+
+#: .\templates\users\login.html:55
+#| msgid "访问密码"
+msgid "密码"
+msgstr "パスワード"
+
+#: .\templates\users\login.html:58
+msgid "请输入密码"
+msgstr "パスワードを入力してください"
+
+#: .\templates\users\login.html:77
+msgid "忘记密码？"
+msgstr "パスワードを忘れましたか?"
+
+#: .\templates\users\login.html:84
+msgid "记住我"
+msgstr "私を覚えてますか"
+
+#: .\templates\users\login.html:96 .\templates\users\register.html:127
+msgid "或"
+msgstr "または"
+
+#: .\templates\users\login.html:99
+msgid "还没有账号？"
+msgstr "まだアカウントをお持ちでない場合は、"
+
+#: .\templates\users\login.html:99 .\templates\users\register.html:121
+msgid "立即注册"
+msgstr "今すぐ登録"
+
+#: .\templates\users\public_profile.html:4
+msgid "的个人主页"
+msgstr "さんの個人ホームページ"
+
+#: .\templates\users\register.html:18
+msgid "注册新账号"
+msgstr "新規アカウント登録"
+
+#: .\templates\users\register.html:19
+msgid "加入"
+msgstr "参加する"
+
+#: .\templates\users\register.html:52
+msgid "点击图片刷新验证码"
+msgstr "画像をクリックして認証コードを更新"
+
+#: .\templates\users\register.html:67
+msgid "支持 JPG, PNG, WebP 格式 (推荐 1:1)"
+msgstr "JPG, PNG, WebP形式をサポート (1:1推奨)"
+
+#: .\templates\users\register.html:76
+msgid "裁剪头像"
+msgstr "アバターを切り抜く"
+
+#: .\templates\users\register.html:93
+msgid "请输入"
+msgstr "入力してください："
+
+#: .\templates\users\register.html:130
+msgid "已有账号？"
+msgstr "すでにアカウントをお持ちですか？"
+
+#: .\templates\users\register.html:130
+msgid "立即登录"
+msgstr "今すぐログイン"
+
+#: .\templates\voting\components\sidebar_card.html:19
+#: .\templates\voting\partials\poll_results.html:30
+msgid "票"
+msgstr "チケット"
+
+#: .\templates\voting\components\sidebar_card.html:23
+#: .\templates\voting\partials\poll_results.html:9
+msgid "已投票"
+msgstr "投票済み"
+
+#: .\templates\voting\partials\poll_results.html:27
+msgid "领先"
+msgstr "先頭に立って"
+
+#: .\templates\voting\partials\poll_results.html:47
+msgid "总票数:"
+msgstr "総投票数:"
+
+#: .\templates\voting\partials\poll_results.html:49
+msgid "感谢您的参与！"
+msgstr "ご参加いただきありがとうございました！"
+
+#: .\templates\voting\partials\poll_results.html:71
+msgid "投 票"
+msgstr "投票する"
+
+#: .\templates\voting\partials\poll_results.html:77
+msgid "登录后参与投票"
+msgstr "ログインして投票してください"
+
+#: .\templates\voting\poll_detail.html:13
+msgid "详情"
+msgstr "詳細"
+
+#: .\templates\voting\poll_detail.html:25
+msgid "返回投票列表"
+msgstr "投票リストに戻る"
+
+#: .\templates\voting\poll_list.html:11
+msgid "浏览并参与最新的社区投票，发表您的观点"
+msgstr "最新のコミュニティ投票を参照して参加し、意見を表明してください"
+
+#: .\templates\voting\poll_list.html:30
+msgid "人参与"
+msgstr "人々が参加する"
+
+#: .\templates\voting\poll_list.html:42
+msgid "目前没有任何正在进行的投票活动。"
+msgstr "現在、実施中の投票はありません。"
+
+#~ msgid "喜欢"
+#~ msgstr "いいね"

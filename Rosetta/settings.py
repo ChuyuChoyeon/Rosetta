@@ -137,6 +137,8 @@ if DEBUG and "memory://" in CELERY_BROKER_URL:
 # ------------------------------------------------------------------------------
 INSTALLED_APPS = [
     # --- 本地业务应用 ---
+    "modeltranslation",  # 必须在 admin 之前
+    "rosetta",  # django-rosetta (Translation UI)
     "administration",  # 自定义管理后台
     # --- Django 内置组件 ---
     "django.contrib.admin",
@@ -178,6 +180,7 @@ MIDDLEWARE = [
     "core.middleware.RateLimitMiddleware",
     "core.logging.RequestIDMiddleware",  # 请求 ID
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",  # I18N
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -211,6 +214,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "django.template.context_processors.i18n",
                 "core.context_processors.site_settings",
                 "constance.context_processors.config",
             ],
@@ -259,6 +263,22 @@ LANGUAGE_CODE = "zh-hans"
 TIME_ZONE = "Asia/Shanghai"
 USE_I18N = True
 USE_TZ = True
+
+from django.utils.translation import gettext_lazy as _
+
+LANGUAGES = [
+    ("zh-hans", _("简体中文")),
+    ("zh-hant", _("繁體中文")),
+    ("en", _("English")),
+    ("ja", _("日本語")),
+]
+
+LOCALE_PATHS = [BASE_DIR / "locale"]
+
+# ModelTranslation
+MODELTRANSLATION_DEFAULT_LANGUAGE = 'zh-hans'
+MODELTRANSLATION_LANGUAGES = ('zh-hans', 'en', 'zh-hant', 'ja')
+MODELTRANSLATION_FALLBACK_LANGUAGES = ('zh-hans', 'en')
 
 # ------------------------------------------------------------------------------
 # 静态资源与媒体 (Static & Media)
@@ -376,6 +396,7 @@ CONSTANCE_CONFIG = {
     "SITE_FAVICON": ("/static/core/img/favicon.ico", "站点 Favicon URL"),
     "SITE_HEADER": ("Rosetta Dashboard", "后台头部标题"),
     "SITE_ADMIN_SUFFIX": (" - Rosetta Dashboard", "后台页面标题后缀"),
+    "SITE_TITLE_SUFFIX": (" - Rosetta", "站点标题后缀"),
     "ADMIN_NAVBAR_TITLE": ("Rosetta 管理后台", "后台导航栏标题"),
     "DASHBOARD_WELCOME_TEXT": (
         "这里是您的站点概览，祝您有美好的一天。",

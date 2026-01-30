@@ -1,3 +1,4 @@
+{% load i18n %}
 <div class="stats stats-vertical lg:stats-horizontal shadow-sm bg-base-100 border border-base-content/5 w-full">
     
     <!-- CPU Usage -->
@@ -9,9 +10,9 @@
                 {{ cpu_percent|default:0 }}%
             </div>
         </div>
-        <div class="stat-title text-xs font-bold uppercase opacity-60">CPU 使用率</div>
+        <div class="stat-title text-xs font-bold uppercase opacity-60">{% trans "CPU 使用率" %}</div>
         <div class="stat-value text-primary text-2xl">{{ cpu_percent|default:0 }}%</div>
-        <div class="stat-desc">系统负载</div>
+        <div class="stat-desc">{% trans "系统负载" %}</div>
     </div>
     
     <!-- Memory Usage -->
@@ -23,7 +24,7 @@
                 {{ memory_percent|default:0 }}%
             </div>
         </div>
-        <div class="stat-title text-xs font-bold uppercase opacity-60">内存使用率</div>
+        <div class="stat-title text-xs font-bold uppercase opacity-60">{% trans "内存使用率" %}</div>
         <div class="stat-value text-secondary text-2xl">{{ memory_percent|default:0 }}%</div>
         <div class="stat-desc">{{ memory_used|filesizeformat }} / {{ memory_total|filesizeformat }}</div>
     </div>
@@ -37,9 +38,9 @@
                 {{ disk_percent|default:0 }}%
             </div>
         </div>
-        <div class="stat-title text-xs font-bold uppercase opacity-60">磁盘使用率</div>
+        <div class="stat-title text-xs font-bold uppercase opacity-60">{% trans "磁盘使用率" %}</div>
         <div class="stat-value text-accent text-2xl">{{ disk_percent|default:0 }}%</div>
-        <div class="stat-desc">{{ disk_free|filesizeformat }} 可用</div>
+        <div class="stat-desc">{{ disk_free|filesizeformat }} {% trans "可用" %}</div>
     </div>
 
 </div>

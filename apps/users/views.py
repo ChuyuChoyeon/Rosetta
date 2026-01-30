@@ -1,6 +1,7 @@
 import json
 import re
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, PasswordChangeView
 from django.http import HttpResponse, JsonResponse
@@ -36,12 +37,12 @@ class RegisterView(CreateView):
 
     def dispatch(self, request, *args, **kwargs):
         if not getattr(config, "ENABLE_REGISTRATION", True):
-            messages.warning(request, "本站目前暂停开放注册。")
+            messages.warning(request, _("本站目前暂停开放注册。"))
             return redirect("home")
         return super().dispatch(request, *args, **kwargs)
 
     def form_valid(self, form):
-        messages.success(self.request, "注册成功，请登录")
+        messages.success(self.request, _("注册成功，请登录"))
         return super().form_valid(form)
 
 
@@ -63,7 +64,7 @@ class CustomLoginView(LoginView):
     def form_valid(self, form):
         user = form.get_user()
         if user.is_banned:
-            messages.error(self.request, "您的账号已被封禁，禁止登录。")
+            messages.error(self.request, _("您的账号已被封禁，禁止登录。"))
             return self.form_invalid(form)
         return super().form_valid(form)
 
@@ -217,13 +218,6 @@ class UnifiedProfileView(View):
                     .select_related("post")
                     .order_by("-created_at")[:20]
                 )
-            elif active_tab == "likes":
-                context["liked_posts"] = (
-                    profile_user.liked_posts.filter(status="published")
-                    .select_related("author", "category")
-                    .prefetch_related("tags")
-                    .order_by("-id")[:20]
-                )
 
         # --- 私有数据 (仅限本人查看) ---
         if is_me:
@@ -268,7 +262,7 @@ class UnifiedProfileView(View):
 
         # 权限检查：只能编辑自己的资料
         if profile_user != request.user:
-            messages.error(request, "您只能编辑自己的资料")
+            messages.error(request, _("您只能编辑自己的资料"))
             return redirect(
                 "users:user_public_profile",
                 username=profile_user.username,
@@ -286,9 +280,9 @@ class UnifiedProfileView(View):
             )
             if preference_form.is_valid():
                 preference_form.save()
-                messages.success(request, "偏好设置已更新")
+                messages.success(request, _("偏好设置已更新"))
             else:
-                messages.error(request, "偏好设置更新失败")
+                messages.error(request, _("偏好设置更新失败"))
             return redirect(f"{profile_url}?tab=settings")
         
         # --- 处理密码修改 ---
@@ -297,10 +291,10 @@ class UnifiedProfileView(View):
             if password_form.is_valid():
                 user = password_form.save()
                 update_session_auth_hash(request, user)  # Important!
-                messages.success(request, "密码修改成功")
+                messages.success(request, _("密码修改成功"))
                 return redirect(f"{profile_url}?tab=security")
             else:
-                messages.error(request, "密码修改失败，请检查输入")
+                messages.error(request, _("密码修改失败，请检查输入"))
                 # 重新渲染页面以显示表单错误
                 # 我们需要重新构建上下文，这有点麻烦，但为了显示错误是必须的
                 # 或者我们可以简单地重定向并带上错误（但这不会显示具体的字段错误）
@@ -324,9 +318,9 @@ class UnifiedProfileView(View):
         form = UserProfileForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             form.save()
-            messages.success(request, "个人信息更新成功")
+            messages.success(request, _("个人信息更新成功"))
         else:
-            messages.error(request, "个人信息更新失败，请检查输入")
+            messages.error(request, _("个人信息更新失败，请检查输入"))
 
         # 保持在当前页面或重定向
         next_url = request.GET.get("next")
@@ -348,7 +342,7 @@ class CustomPasswordChangeView(LoginRequiredMixin, PasswordChangeView):
     success_url = reverse_lazy("users:profile")
 
     def form_valid(self, form):
-        messages.success(self.request, "密码修改成功")
+        messages.success(self.request, _("密码修改成功"))
         return super().form_valid(form)
 
 
@@ -405,7 +399,7 @@ class DeleteNotificationView(LoginRequiredMixin, View):
         if request.headers.get("HX-Request"):
             return HttpResponse("")
 
-        messages.success(request, "通知已删除")
+        messages.success(request, _("通知已删除"))
         return redirect("users:profile")
 
     def post(self, request, pk):

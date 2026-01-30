@@ -61,6 +61,7 @@ import uuid
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import force_str
 import logging
+from django.utils.translation import gettext as _
 
 logger = logging.getLogger(__name__)
 
@@ -146,10 +147,15 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
         context: Dict[str, Any] = super().get_context_data(**kwargs)
+        # Use gettext_lazy if imported as _, otherwise standard gettext
+        from django.utils.translation import gettext
+        context["dashboard_title"] = gettext("Rosetta Dashboard")
 
         # 1. 关键指标统计 (Key Metrics)
         today = timezone.now()
         last_month = today - timedelta(days=30)
+        # 活动趋势默认显示 7 天
+        trend_start_date = today - timedelta(days=7)
 
         post_counts = Post.objects.aggregate(
             total=Count("id"),
@@ -198,9 +204,9 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         normal_users = user_counts["normal"] or 0
         context["user_role_data"] = [superusers, staff, normal_users]
 
-        # 评论趋势 (折线图) - 最近30天
+        # 评论趋势 (折线图) - 最近7天
         trend_data = (
-            Comment.objects.filter(created_at__gte=last_month)
+            Comment.objects.filter(created_at__gte=trend_start_date)
             .annotate(date=TruncDate("created_at"))
             .values("date")
             .annotate(count=Count("id"))
@@ -209,7 +215,7 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 
         # 用户注册趋势
         user_trend = (
-            User.objects.filter(date_joined__gte=last_month)
+            User.objects.filter(date_joined__gte=trend_start_date)
             .annotate(date=TruncDate("date_joined"))
             .values("date")
             .annotate(count=Count("id"))
@@ -224,8 +230,8 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         counts = []
         user_counts = []
         
-        for i in range(30):
-            d = (last_month + timedelta(days=i)).date()
+        for i in range(7):
+            d = (trend_start_date + timedelta(days=i)).date()
             dates.append(d.strftime("%m-%d"))
             counts.append(date_map.get(d, 0))
             user_counts.append(user_date_map.get(d, 0))
@@ -287,12 +293,12 @@ class IndexView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
 
             uptime_str = ""
             if days > 0:
-                uptime_str += f"{days}天 "
+                uptime_str += f"{days}{_('天')} "
             if hours > 0:
-                uptime_str += f"{hours}小时 "
-            uptime_str += f"{minutes}分钟"
+                uptime_str += f"{hours}{_('小时')} "
+            uptime_str += f"{minutes}{_('分钟')}"
             if not uptime_str:
-                uptime_str = "刚刚启动"
+                uptime_str = _("刚刚启动")
 
             context["system_info"] = {
                 "cpu_percent": cpu_usage,
@@ -397,14 +403,14 @@ class BaseCreateView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Crea
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, f"{self.model._meta.verbose_name} 创建成功")
-        self.log_action(ADDITION, change_message="通过管理后台创建")
+        messages.success(self.request, _("{name} 创建成功").format(name=self.model._meta.verbose_name))
+        self.log_action(ADDITION, change_message=_("通过管理后台创建"))
         return response
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         verbose_name = self.model._meta.verbose_name
-        context["title"] = f"新建{verbose_name}"
+        context["title"] = _("新建{name}").format(name=verbose_name)
         return context
 
 
@@ -436,13 +442,13 @@ class BaseUpdateView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Upda
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, f"{self.model._meta.verbose_name} 更新成功")
+        messages.success(self.request, _("{name} 更新成功").format(name=self.model._meta.verbose_name))
         
         # 尝试检测变更字段 (简单的实现)
         changed_data = form.changed_data
-        msg = "通过管理后台更新"
+        msg = _("通过管理后台更新")
         if changed_data:
-            msg = f"更新字段: {', '.join(changed_data)}"
+            msg = _("更新字段: {fields}").format(fields=', '.join(changed_data))
         
         self.log_action(CHANGE, change_message=msg)
         return response
@@ -450,7 +456,7 @@ class BaseUpdateView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Upda
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         verbose_name = self.model._meta.verbose_name
-        context["title"] = f"编辑{verbose_name}"
+        context["title"] = _("编辑{name}").format(name=verbose_name)
         return context
 
 
@@ -495,14 +501,14 @@ class BaseImportView(LoginRequiredMixin, StaffRequiredMixin, View):
             raise NotImplementedError("BaseImportView requires a model definition")
 
         if "json_file" not in request.FILES:
-            messages.error(request, "请上传 JSON 文件")
+            messages.error(request, _("请上传 JSON 文件"))
             return redirect(self.success_url)
 
         json_file = request.FILES["json_file"]
         try:
             data = json.load(json_file)
             if not isinstance(data, list):
-                raise ValueError("JSON 格式错误：根元素应为列表")
+                raise ValueError(_("JSON 格式错误：根元素应为列表"))
 
             success_count = 0
             for item in data:
@@ -529,10 +535,10 @@ class BaseImportView(LoginRequiredMixin, StaffRequiredMixin, View):
                     self.model.objects.create(**item)
                     success_count += 1
 
-            messages.success(request, f"成功导入 {success_count} 条数据")
+            messages.success(request, _("成功导入 {count} 条数据").format(count=success_count))
 
         except Exception as e:
-            messages.error(request, f"导入失败: {str(e)}")
+            messages.error(request, _("导入失败: {error}").format(error=str(e)))
 
         return redirect(self.success_url)
 
@@ -553,7 +559,7 @@ class BaseDeleteView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Dele
         # 在删除前记录日志
         try:
             self.object = self.get_object()
-            self.log_action(DELETION, change_message="通过管理后台删除")
+            self.log_action(DELETION, change_message=_("通过管理后台删除"))
         except Exception:
             pass
 
@@ -566,14 +572,14 @@ class BaseDeleteView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Dele
             response["HX-Trigger"] = json.dumps(
                 {
                     "show-toast": {
-                        "message": f"{self.model._meta.verbose_name} 删除成功",
+                        "message": _("{name} 删除成功").format(name=self.model._meta.verbose_name),
                         "type": "success",
                     }
                 }
             )
             return response
 
-        messages.success(self.request, f"{self.model._meta.verbose_name} 删除成功")
+        messages.success(self.request, _("{name} 删除成功").format(name=self.model._meta.verbose_name))
         return HttpResponseRedirect(success_url)
 
 
@@ -733,6 +739,32 @@ class CategoryCreateView(BaseCreateView):
     model = Category
     form_class = CategoryForm
     success_url = reverse_lazy("administration:category_list")
+
+
+from django.http import JsonResponse
+from django.views import View
+
+class CategoryQuickCreateView(View):
+    """
+    分类快速创建视图 (AJAX)
+    """
+
+    def post(self, request, *args, **kwargs):
+        form = CategoryForm(request.POST, request.FILES)
+        if form.is_valid():
+            category = form.save()
+            return JsonResponse({
+                "status": "success",
+                "id": category.id,
+                "name": category.name,
+                "icon": category.icon,
+                "color": category.color,
+            })
+        else:
+            return JsonResponse({
+                "status": "error",
+                "errors": form.errors
+            }, status=400)
 
 
 class CategoryUpdateView(BaseUpdateView):
@@ -2940,9 +2972,9 @@ class PollCreateView(LoginRequiredMixin, UserPassesTestMixin, AuditLogMixin, Cre
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         if self.request.POST:
-            data["choice_formset"] = ChoiceFormSet(self.request.POST)
+            data["choice_formset"] = ChoiceFormSet(self.request.POST, prefix="choices")
         else:
-            data["choice_formset"] = ChoiceFormSet()
+            data["choice_formset"] = ChoiceFormSet(prefix="choices")
         return data
 
     def form_valid(self, form):
@@ -2977,9 +3009,9 @@ class PollUpdateView(LoginRequiredMixin, UserPassesTestMixin, AuditLogMixin, Upd
     def get_context_data(self, **kwargs):
         data = super().get_context_data(**kwargs)
         if self.request.POST:
-            data["choice_formset"] = ChoiceFormSet(self.request.POST, instance=self.object)
+            data["choice_formset"] = ChoiceFormSet(self.request.POST, instance=self.object, prefix="choices")
         else:
-            data["choice_formset"] = ChoiceFormSet(instance=self.object)
+            data["choice_formset"] = ChoiceFormSet(instance=self.object, prefix="choices")
         return data
 
     def form_valid(self, form):

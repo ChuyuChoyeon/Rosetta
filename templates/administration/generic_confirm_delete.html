@@ -1,7 +1,7 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
+{% load capture_tags i18n %}
 
-{% block title %}确认删除{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{% trans "确认删除" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 <div class="max-w-lg mx-auto mt-10">
@@ -11,16 +11,19 @@
             <span class="material-symbols-outlined text-error text-3xl">warning</span>
         </div>
         
-        <h2 class="card-title text-2xl mb-2">确认删除?</h2>
-        <p class="text-base-content/70">您确定要删除 <span class="font-bold text-base-content">"{{ object }}"</span> 吗？<br>此操作无法撤销。</p>
+        <h2 class="card-title text-2xl mb-2">{% trans "确认删除?" %}</h2>
+        <p class="text-base-content/70">
+            {% blocktrans with obj=object %}您确定要删除 <span class="font-bold text-base-content">"{{ obj }}"</span> 吗？{% endblocktrans %}<br>
+            {% trans "此操作无法撤销。" %}
+        </p>
         
         <form method="post" class="mt-8 w-full">
             {% csrf_token %}
             <div class="flex gap-3 justify-center">
-                <a href="javascript:history.back()" class="btn btn-ghost">取消</a>
+                <a href="javascript:history.back()" class="btn btn-ghost">{% trans "取消" %}</a>
                 <button type="submit" class="btn btn-error gap-2">
                     <span class="material-symbols-outlined">delete</span>
-                    确认删除
+                    {% trans "确认删除" %}
                 </button>
             </div>
         </form>

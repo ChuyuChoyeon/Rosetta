@@ -1,14 +1,15 @@
 <!-- Global Confirmation Modal -->
+{% load i18n %}
 <dialog id="global_confirm_modal" class="modal">
     <div class="modal-box">
         <h3 class="font-bold text-lg flex items-center gap-2 text-warning" id="global_confirm_title">
             <span class="material-symbols-outlined">warning</span>
-            <span id="confirm_title_text">确认操作</span>
+            <span id="confirm_title_text">{% trans "确认操作" %}</span>
         </h3>
-        <p class="py-4 text-base-content/80" id="global_confirm_message">确定要执行此操作吗？</p>
+        <p class="py-4 text-base-content/80" id="global_confirm_message">{% trans "确定要执行此操作吗？" %}</p>
         <div class="modal-action">
-            <button type="button" class="btn btn-ghost" data-modal-close="global_confirm_modal">取消</button>
-            <button type="button" id="global_confirm_btn" class="btn btn-error text-white shadow-lg shadow-error/20">确定</button>
+            <button type="button" class="btn btn-ghost" data-modal-close="global_confirm_modal">{% trans "取消" %}</button>
+            <button type="button" id="global_confirm_btn" class="btn btn-error text-white shadow-lg shadow-error/20">{% trans "确定" %}</button>
         </div>
     </div>
     <form method="dialog" class="modal-backdrop">
@@ -21,11 +22,11 @@
     <div class="modal-box">
         <h3 class="font-bold text-lg flex items-center gap-2 text-info">
             <span class="material-symbols-outlined">info</span>
-            提示
+            {% trans "提示" %}
         </h3>
         <p class="py-4 text-base-content/80" id="global_alert_message"></p>
         <div class="modal-action">
-            <button type="button" class="btn btn-primary" data-modal-close="global_alert_modal">确定</button>
+            <button type="button" class="btn btn-primary" data-modal-close="global_alert_modal">{% trans "确定" %}</button>
         </div>
     </div>
     <form method="dialog" class="modal-backdrop">

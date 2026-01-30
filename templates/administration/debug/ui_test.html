@@ -1,32 +1,33 @@
 {% extends "administration/debug/base_debug.html" %}
 {% load capture_tags %}
+{% load i18n %}
 
-{% block debug_title %}UI 组件测试{% endblock %}
+{% block debug_title %}{% trans "UI 组件测试" %}{% endblock %}
 
 {% block debug_content %}
 <div class="space-y-8">
     <!-- Typography -->
     <section>
-        <h2 class="text-2xl font-bold mb-4 border-b pb-2">排版 (Typography)</h2>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">{% trans "排版 (Typography)" %}</h2>
         <div class="p-6 bg-base-100 rounded-xl border border-base-content/10">
-            <h1 class="text-4xl font-bold mb-2">Heading 1</h1>
-            <h2 class="text-3xl font-bold mb-2">Heading 2</h2>
-            <h3 class="text-2xl font-bold mb-2">Heading 3</h3>
-            <h4 class="text-xl font-bold mb-2">Heading 4</h4>
-            <p class="mb-4">Standard paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-            <p class="text-sm opacity-70">Small text with opacity.</p>
-            <p class="text-xs opacity-50">Extra small text.</p>
+            <h1 class="text-4xl font-bold mb-2">{% trans "Heading 1" %}</h1>
+            <h2 class="text-3xl font-bold mb-2">{% trans "Heading 2" %}</h2>
+            <h3 class="text-2xl font-bold mb-2">{% trans "Heading 3" %}</h3>
+            <h4 class="text-xl font-bold mb-2">{% trans "Heading 4" %}</h4>
+            <p class="mb-4">{% trans "Standard paragraph text. Lorem ipsum dolor sit amet, consectetur adipiscing elit." %}</p>
+            <p class="text-sm opacity-70">{% trans "Small text with opacity." %}</p>
+            <p class="text-xs opacity-50">{% trans "Extra small text." %}</p>
             <div class="mt-4">
-                <span class="link link-primary">Primary Link</span>
-                <span class="link link-secondary ml-4">Secondary Link</span>
-                <span class="link link-accent ml-4">Accent Link</span>
+                <span class="link link-primary">{% trans "Primary Link" %}</span>
+                <span class="link link-secondary ml-4">{% trans "Secondary Link" %}</span>
+                <span class="link link-accent ml-4">{% trans "Accent Link" %}</span>
             </div>
         </div>
     </section>
 
     <!-- Buttons -->
     <section>
-        <h2 class="text-2xl font-bold mb-4 border-b pb-2">按钮 (Buttons)</h2>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">{% trans "按钮 (Buttons)" %}</h2>
         <div class="p-6 bg-base-100 rounded-xl border border-base-content/10 space-y-4">
             <div class="flex flex-wrap gap-2">
                 <button class="btn">Default</button>
@@ -56,30 +57,30 @@
 
     <!-- Alerts -->
     <section>
-        <h2 class="text-2xl font-bold mb-4 border-b pb-2">警告框 (Alerts)</h2>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">{% trans "警告框 (Alerts)" %}</h2>
         <div class="flex flex-col gap-4">
             <div class="alert alert-info">
                 <span class="material-symbols-outlined">info</span>
-                <span>New software update available.</span>
+                <span>{% trans "New software update available." %}</span>
             </div>
             <div class="alert alert-success">
                 <span class="material-symbols-outlined">check_circle</span>
-                <span>Your purchase has been confirmed!</span>
+                <span>{% trans "Your purchase has been confirmed!" %}</span>
             </div>
             <div class="alert alert-warning">
                 <span class="material-symbols-outlined">warning</span>
-                <span>Warning: Invalid email address!</span>
+                <span>{% trans "Warning: Invalid email address!" %}</span>
             </div>
             <div class="alert alert-error">
                 <span class="material-symbols-outlined">error</span>
-                <span>Error! Task failed successfully.</span>
+                <span>{% trans "Error! Task failed successfully." %}</span>
             </div>
         </div>
     </section>
 
     <!-- Badges -->
     <section>
-        <h2 class="text-2xl font-bold mb-4 border-b pb-2">徽章 (Badges)</h2>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">{% trans "徽章 (Badges)" %}</h2>
         <div class="p-6 bg-base-100 rounded-xl border border-base-content/10">
             <div class="flex gap-2">
                 <div class="badge">Default</div>
@@ -100,31 +101,31 @@
 
     <!-- Form Inputs -->
     <section>
-        <h2 class="text-2xl font-bold mb-4 border-b pb-2">表单 (Forms)</h2>
+        <h2 class="text-2xl font-bold mb-4 border-b pb-2">{% trans "表单 (Forms)" %}</h2>
         <div class="p-6 bg-base-100 rounded-xl border border-base-content/10 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="form-control w-full">
-                <label class="label"><span class="label-text">Text Input</span></label>
-                <input type="text" placeholder="Type here" class="input input-bordered w-full" />
+                <label class="label"><span class="label-text">{% trans "Text Input" %}</span></label>
+                <input type="text" placeholder="{% trans 'Type here' %}" class="input input-bordered w-full" />
             </div>
             <div class="form-control w-full">
-                <label class="label"><span class="label-text">Select</span></label>
+                <label class="label"><span class="label-text">{% trans "Select" %}</span></label>
                 <select class="select select-bordered">
-                    <option disabled selected>Pick one</option>
-                    <option>Star Wars</option>
-                    <option>Harry Potter</option>
-                    <option>Lord of the Rings</option>
+                    <option disabled selected>{% trans "Pick one" %}</option>
+                    <option>{% trans "Star Wars" %}</option>
+                    <option>{% trans "Harry Potter" %}</option>
+                    <option>{% trans "Lord of the Rings" %}</option>
                 </select>
             </div>
             <div class="form-control w-full">
-                <label class="label"><span class="label-text">Checkbox</span></label>
+                <label class="label"><span class="label-text">{% trans "Checkbox" %}</span></label>
                 <input type="checkbox" class="checkbox" checked />
             </div>
             <div class="form-control w-full">
-                <label class="label"><span class="label-text">Toggle</span></label>
+                <label class="label"><span class="label-text">{% trans "Toggle" %}</span></label>
                 <input type="checkbox" class="toggle" checked />
             </div>
             <div class="form-control w-full">
-                <label class="label"><span class="label-text">Range</span></label>
+                <label class="label"><span class="label-text">{% trans "Range" %}</span></label>
                 <input type="range" min="0" max="100" value="40" class="range" />
             </div>
         </div>

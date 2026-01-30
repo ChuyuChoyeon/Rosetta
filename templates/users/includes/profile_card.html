@@ -1,4 +1,4 @@
-{% load capture_tags core_extras %}
+{% load capture_tags core_extras i18n %}
 {% captureas card_content %}
 <div class="h-full flex flex-col justify-between relative z-20">
     <!-- 封面图片 -->
@@ -45,12 +45,12 @@
         {% if profile_user.bio %}
         <p class="mt-4 text-base-content/80 italic">"{{ profile_user.bio }}"</p>
         {% else %}
-        <p class="mt-4 text-base-content/40 italic">这位用户很懒，什么都没写~</p>
+        <p class="mt-4 text-base-content/40 italic">{% trans "这位用户很懒，什么都没写~" %}</p>
         {% endif %}
         
         <div class="flex gap-3 mt-6 justify-center">
             {% if profile_user.website %}
-            <a href="{{ profile_user.website }}" target="_blank" class="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-110" title="访问个人网站">
+            <a href="{{ profile_user.website }}" target="_blank" class="btn btn-circle btn-ghost hover:bg-primary/10 hover:text-primary transition-all hover:scale-110" title="{% trans '访问个人网站' %}">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9 9 0 100-18 9 9 0 000 18z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.6 9h16.8M3.6 15h16.8M12 3a15.3 15.3 0 010 18M12 3a15.3 15.3 0 000 18" /></svg>
             </a>
             {% endif %}
@@ -66,12 +66,12 @@
         <div class="mt-6 w-full px-4 space-y-2">
             <button onclick="profile_edit_modal.showModal()" class="btn btn-primary btn-outline btn-sm w-full gap-2 rounded-full hover:shadow-lg transition-all">
                 <span class="material-symbols-outlined text-lg">edit</span>
-                编辑资料
+                {% trans "编辑资料" %}
             </button>
             {% if user == profile_user %}
             <a href="?tab=security" class="btn btn-ghost btn-xs w-full gap-1 text-base-content/60 hover:text-primary">
                 <span class="material-symbols-outlined text-sm">lock_reset</span>
-                修改密码
+                {% trans "修改密码" %}
             </a>
             {% endif %}
         </div>
@@ -79,12 +79,12 @@
         
         <div class="stats stats-vertical lg:stats-horizontal shadow mt-8 w-full bg-base-200/50">
             <div class="stat place-items-center">
-                <div class="stat-title">评论数</div>
+                <div class="stat-title">{% trans "评论数" %}</div>
                 <div class="stat-value text-primary">{{ comments_count|default:"0" }}</div>
             </div>
             
             <div class="stat place-items-center">
-                <div class="stat-title">加入时间</div>
+                <div class="stat-title">{% trans "加入时间" %}</div>
                 <div class="stat-value text-lg">{{ profile_user.date_joined|date:"Y-m-d" }}</div>
             </div>
         </div>

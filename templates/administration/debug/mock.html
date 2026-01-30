@@ -1,15 +1,16 @@
 {% extends "administration/debug/base_debug.html" %}
 {% load capture_tags %}
+{% load i18n %}
 
-{% block debug_title %}Mock 数据生成{% endblock %}
+{% block debug_title %}{% trans "Mock 数据生成" %}{% endblock %}
 
 {% block debug_content %}
 <div class="p-6 bg-base-100 rounded-xl border border-base-content/10 shadow-sm">
     <h2 class="card-title mb-4 flex items-center gap-2">
         <span class="material-symbols-outlined text-primary">science</span>
-        高级 Mock 数据生成器
+        {% trans "高级 Mock 数据生成器" %}
     </h2>
-    <p class="text-sm text-base-content/70 mb-6">生成丰富的博客测试数据，包括长篇文章、用户资料、评论互动及站点配置。</p>
+    <p class="text-sm text-base-content/70 mb-6">{% trans "生成丰富的博客测试数据，包括长篇文章、用户资料、评论互动及站点配置。" %}</p>
     
     <form method="post" class="space-y-6">
         {% csrf_token %}
@@ -20,15 +21,15 @@
             {% captureas user_card %}
             <div class="h-full p-4">
                 <h3 class="card-title text-base flex items-center gap-2 mb-2">
-                    <span class="material-symbols-outlined text-info text-lg">group</span> 用户数据
+                    <span class="material-symbols-outlined text-info text-lg">group</span> {% trans "用户数据" %}
                 </h3>
                 <div class="form-control w-full">
-                    <label class="label"><span class="label-text">生成用户数量</span></label>
+                    <label class="label"><span class="label-text">{% trans "生成用户数量" %}</span></label>
                     <input type="number" name="users_count" value="5" min="0" max="50" class="input input-bordered focus:input-primary">
-                    <label class="label"><span class="label-text-alt opacity-70">包含头像、简介、社交链接</span></label>
+                    <label class="label"><span class="label-text-alt opacity-70">{% trans "包含头像、简介、社交链接" %}</span></label>
                 </div>
                 <div class="form-control w-full mt-2">
-                    <label class="label"><span class="label-text">默认密码</span></label>
+                    <label class="label"><span class="label-text">{% trans "默认密码" %}</span></label>
                     <input type="text" name="password" value="password123" class="input input-bordered focus:input-primary font-mono">
                 </div>
             </div>
@@ -41,15 +42,15 @@
             {% captureas taxonomy_card %}
             <div class="h-full p-4">
                 <h3 class="card-title text-base flex items-center gap-2 mb-2">
-                    <span class="material-symbols-outlined text-success text-lg">category</span> 内容分类
+                    <span class="material-symbols-outlined text-success text-lg">category</span> {% trans "内容分类" %}
                 </h3>
                 <div class="grid grid-cols-2 gap-4">
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">分类数量</span></label>
+                        <label class="label"><span class="label-text">{% trans "分类数量" %}</span></label>
                         <input type="number" name="categories_count" value="5" min="0" max="20" class="input input-bordered focus:input-primary">
                     </div>
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">标签数量</span></label>
+                        <label class="label"><span class="label-text">{% trans "标签数量" %}</span></label>
                         <input type="number" name="tags_count" value="10" min="0" max="50" class="input input-bordered focus:input-primary">
                     </div>
                 </div>
@@ -63,18 +64,18 @@
             {% captureas content_card %}
             <div class="h-full p-4">
                 <h3 class="card-title text-base flex items-center gap-2 mb-2">
-                    <span class="material-symbols-outlined text-accent text-lg">article</span> 文章与互动
+                    <span class="material-symbols-outlined text-accent text-lg">article</span> {% trans "文章与互动" %}
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">文章数量</span></label>
+                        <label class="label"><span class="label-text">{% trans "文章数量" %}</span></label>
                         <input type="number" name="posts_count" value="10" min="0" max="50" class="input input-bordered focus:input-primary">
-                        <label class="label"><span class="label-text-alt opacity-70">生成包含代码块、表格、长文本的 Markdown 文章</span></label>
+                        <label class="label"><span class="label-text-alt opacity-70">{% trans "生成包含代码块、表格、长文本的 Markdown 文章" %}</span></label>
                     </div>
                     <div class="form-control w-full">
-                        <label class="label"><span class="label-text">评论数量</span></label>
+                        <label class="label"><span class="label-text">{% trans "评论数量" %}</span></label>
                         <input type="number" name="comments_count" value="30" min="0" max="200" class="input input-bordered focus:input-primary">
-                        <label class="label"><span class="label-text-alt opacity-70">生成多级嵌套评论与通知</span></label>
+                        <label class="label"><span class="label-text-alt opacity-70">{% trans "生成多级嵌套评论与通知" %}</span></label>
                     </div>
                 </div>
             </div>
@@ -89,14 +90,14 @@
             {% captureas config_card %}
             <div class="h-full p-4">
                 <h3 class="card-title text-base flex items-center gap-2 mb-2">
-                    <span class="material-symbols-outlined text-warning text-lg">settings_applications</span> 站点配置
+                    <span class="material-symbols-outlined text-warning text-lg">settings_applications</span> {% trans "站点配置" %}
                 </h3>
                 <div class="form-control">
                     <label class="label cursor-pointer justify-start gap-4">
                         <input type="checkbox" name="generate_extras" class="checkbox checkbox-primary" checked>
-                        <span class="label-text">生成附加数据</span>
+                        <span class="label-text">{% trans "生成附加数据" %}</span>
                     </label>
-                    <p class="text-xs text-base-content/70 ml-10 mt-1">包含：友情链接、导航菜单、搜索框占位符</p>
+                    <p class="text-xs text-base-content/70 ml-10 mt-1">{% trans "包含：友情链接、导航菜单、搜索框占位符" %}</p>
                 </div>
             </div>
             {% endcaptureas %}
@@ -108,10 +109,10 @@
         </div>
 
         <div class="flex justify-end gap-4 pt-4 border-t border-base-200 mt-6">
-            <button type="reset" class="btn btn-ghost">重置</button>
-            <button type="button" class="btn btn-primary gap-2" onclick="showConfirmModal('生成数据', '确定要生成数据吗？这将向数据库添加新记录。', () => this.form.submit())">
+            <button type="reset" class="btn btn-ghost">{% trans "重置" %}</button>
+            <button type="button" class="btn btn-primary gap-2" onclick="showConfirmModal('{% trans "生成数据"|escapejs %}', '{% trans "确定要生成数据吗？这将向数据库添加新记录。"|escapejs %}', () => this.form.submit())">
                 <span class="material-symbols-outlined">play_circle</span>
-                开始生成
+                {% trans "开始生成" %}
             </button>
         </div>
     </form>

@@ -1,3 +1,4 @@
+{% load i18n %}
 <div id="poll-container-{{ poll.id }}" class="card bg-base-100 shadow-lg border border-base-content/5 transition-all duration-300 hover:shadow-xl">
     <div class="card-body p-6">
         <div class="flex items-start justify-between mb-2">
@@ -5,7 +6,7 @@
             {% if has_voted %}
             <div class="badge badge-success gap-1 text-white">
                 <span class="material-symbols-outlined text-[14px]">check</span>
-                已投票
+                {% trans "已投票" %}
             </div>
             {% endif %}
         </div>
@@ -23,10 +24,10 @@
                         <span class="flex items-center gap-2">
                             {{ choice.text }}
                             {% if choice.votes_count == poll.get_max_votes %}
-                            <span class="material-symbols-outlined text-warning text-[16px]" title="领先">trophy</span>
+                            <span class="material-symbols-outlined text-warning text-[16px]" title="{% trans '领先' %}">trophy</span>
                             {% endif %}
                         </span>
-                        <span class="opacity-70 group-hover:opacity-100 transition-opacity">{{ choice.votes_count }} 票</span>
+                        <span class="opacity-70 group-hover:opacity-100 transition-opacity">{{ choice.votes_count }} {% trans "票" %}</span>
                     </div>
                     <div class="relative w-full bg-base-200 rounded-full h-3 overflow-hidden">
                         <div class="absolute top-0 left-0 h-full bg-primary rounded-full transition-all duration-1000 ease-out" 
@@ -43,9 +44,9 @@
                 <div class="flex justify-between items-center text-sm text-base-content/50">
                     <span class="flex items-center gap-1">
                         <span class="material-symbols-outlined text-[16px]">how_to_vote</span>
-                        总票数: {{ poll.total_votes }}
+                        {% trans "总票数:" %} {{ poll.total_votes }}
                     </span>
-                    <span>感谢您的参与！</span>
+                    <span>{% trans "感谢您的参与！" %}</span>
                 </div>
             </div>
         {% else %}
@@ -67,13 +68,13 @@
                 
                 {% if user.is_authenticated %}
                     <button type="submit" class="btn btn-primary w-full shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all">
-                        投 票
+                        {% trans "投 票" %}
                         <span class="material-symbols-outlined text-sm">send</span>
                     </button>
                 {% else %}
                     <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-outline w-full gap-2 group">
                         <span class="material-symbols-outlined group-hover:animate-bounce">login</span>
-                        登录后参与投票
+                        {% trans "登录后参与投票" %}
                     </a>
                 {% endif %}
             </form>

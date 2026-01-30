@@ -1,7 +1,7 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
+{% load capture_tags i18n %}
 
-{% block title %}分类管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{% trans "分类管理" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
     <!-- Header -->
@@ -9,21 +9,21 @@
     {% captureas actions_block %}
         <div class="dropdown dropdown-end">
             <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal hover:bg-base-200">
-                更多
+                {% trans "更多" %}
                 <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
             </div>
             <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-xl bg-base-100 rounded-2xl w-52 border border-base-content/5 mt-2">
-                <li><a href="{% url 'administration:category_export' %}" target="_blank" class="rounded-xl"><span class="material-symbols-outlined">file_download</span> 导出全部 (JSON)</a></li>
-                <li><button onclick="import_modal.showModal()" class="rounded-xl"><span class="material-symbols-outlined">file_upload</span> 导入数据 (JSON)</button></li>
+                <li><a href="{% url 'administration:category_export' %}" target="_blank" class="rounded-xl"><span class="material-symbols-outlined">file_download</span> {% trans "导出全部 (JSON)" %}</a></li>
+                <li><button onclick="import_modal.showModal()" class="rounded-xl"><span class="material-symbols-outlined">file_upload</span> {% trans "导入数据 (JSON)" %}</button></li>
             </ul>
         </div>
         <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-2 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105">
             <span class="material-symbols-outlined text-lg">add_circle</span>
-            新建分类
+            {% trans "新建分类" %}
         </a>
     {% endcaptureas %}
 
-    {% include "administration/components/header.html" with title="分类管理" subtitle="管理文章分类体系" breadcrumbs=None actions=actions_block %}
+    {% include "administration/components/header.html" with title=_("分类管理") subtitle=_("管理文章分类体系") breadcrumbs=None actions=actions_block %}
 
     <!-- Import Modal -->
     <dialog id="import_modal" class="modal">
@@ -32,15 +32,15 @@
             <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <span class="material-symbols-outlined">file_upload</span>
             </div>
-            导入数据 (JSON)
+            {% trans "导入数据 (JSON)" %}
         </h3>
-        <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
+        <p class="py-4 text-sm opacity-70">{% trans "请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。" %}</p>
         <form action="{% url 'administration:category_import' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="file" name="json_file" class="file-input file-input-bordered file-input-sm w-full rounded-lg mb-6" accept=".json" required />
             <div class="modal-action">
-                <button type="button" class="btn btn-sm btn-ghost rounded-lg" onclick="import_modal.close()">取消</button>
-                <button type="submit" class="btn btn-sm btn-primary rounded-lg">开始导入</button>
+                <button type="button" class="btn btn-sm btn-ghost rounded-lg" onclick="import_modal.close()">{% trans "取消" %}</button>
+                <button type="submit" class="btn btn-sm btn-primary rounded-lg">{% trans "开始导入" %}</button>
             </div>
         </form>
       </div>
@@ -52,7 +52,7 @@
     <!-- Main List Container -->
     {% captureas bulk_actions_block %}
         <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error-focus text-white border-none gap-2 rounded-lg">
-            <span class="material-symbols-outlined text-[16px]">delete</span> 删除
+            <span class="material-symbols-outlined text-[16px]">delete</span> {% trans "删除" %}
         </button>
     {% endcaptureas %}
 
@@ -68,10 +68,10 @@
                             </label>
                         </th>
                         <th class="w-16 font-mono hidden md:table-cell">ID</th>
-                        <th>名称 / 描述</th>
+                        <th>{% trans "名称 / 描述" %}</th>
                         <th class="hidden lg:table-cell">Slug</th>
-                        <th class="w-24 text-center hidden sm:table-cell">文章数</th>
-                        <th class="w-24 text-center pr-6">操作</th>
+                        <th class="w-24 text-center hidden sm:table-cell">{% trans "文章数" %}</th>
+                        <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
                     </tr>
                 </thead>
                 <tbody id="category-table-body" class="divide-y divide-base-content/5">
@@ -81,22 +81,22 @@
         </form>
     {% endcaptureas %}
 
-    {% include "administration/components/list_container.html" with title="分类列表" icon="category" search_url="." bulk_actions=bulk_actions_block content=table_content %}
+    {% include "administration/components/list_container.html" with title=_("分类列表") icon="category" search_url="." bulk_actions=bulk_actions_block content=table_content %}
 
     <script>
         function submitBulkAction(action) {
             const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
             if (checkedBoxes.length === 0) {
-                showGlobalAlert('请至少选择一项进行操作');
+                showGlobalAlert('{% trans "请至少选择一项进行操作"|escapejs %}');
                 return;
             }
 
-            let actionName = '批量操作';
-            if (action === 'delete') actionName = '批量删除';
+            let actionName = '{% trans "批量操作"|escapejs %}';
+            if (action === 'delete') actionName = '{% trans "批量删除"|escapejs %}';
 
             showConfirmModal(
                 actionName,
-                `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+                `{% trans "确定要对选中的"|escapejs %} ${checkedBoxes.length} {% trans "项执行此操作吗？"|escapejs %}`,
                 () => {
                     const form = document.getElementById('bulk-form');
                     const actionInput = document.createElement('input');

@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from captcha.fields import CaptchaField
+from django.utils.translation import gettext_lazy as _
 from .models import User, UserPreference
 
 
@@ -15,7 +16,7 @@ class RegisterForm(UserCreationForm):
     - captcha: 验证码 (防止机器人注册)
     """
 
-    captcha = CaptchaField(label="验证码")
+    captcha = CaptchaField(label=_("验证码"))
 
     class Meta(UserCreationForm.Meta):
         model = User
@@ -28,7 +29,7 @@ class RegisterForm(UserCreationForm):
         """
         email = self.cleaned_data.get("email")
         if email and User.objects.filter(email=email).exists():
-            raise forms.ValidationError("该邮箱已被注册")
+            raise forms.ValidationError(_("该邮箱已被注册"))
         return email
 
 

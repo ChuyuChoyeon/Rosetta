@@ -1,7 +1,7 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
+{% load capture_tags i18n %}
 
-{% block title %}页面管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{% trans "页面管理" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 <!-- Header Actions -->
@@ -9,58 +9,59 @@
     <div class="dropdown dropdown-end">
         <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
             <span class="material-symbols-outlined text-lg">more_vert</span>
-            更多
+            {% trans "更多" %}
         </div>
         <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-content/5">
             <li>
                 <a href="{% url 'administration:export_all' 'Page' %}" target="_blank">
                     <span class="material-symbols-outlined">file_download</span>
-                    导出全部 (JSON)
+                    {% trans "导出全部 (JSON)" %}
                 </a>
             </li>
             <li>
                 <button onclick="import_modal.showModal()">
                     <span class="material-symbols-outlined">file_upload</span>
-                    导入数据 (JSON)
+                    {% trans "导入数据 (JSON)" %}
                 </button>
             </li>
         </ul>
     </div>
     {% url 'administration:page_create' as create_url %}
-    {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建页面' extra_classes='px-4 !h-8 text-xs' href=create_url %}
+    {% captureas btn_text %}{% trans "新建页面" %}{% endcaptureas %}
+    {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>'|add:btn_text extra_classes='px-4 !h-8 text-xs' href=create_url %}
         {% include 'components/inspira/rainbow_button.html' %}
     {% endwith %}
 {% endcaptureas %}
 
 <!-- Header -->
-{% include "administration/components/header.html" with title="页面管理" icon="description" breadcrumbs=breadcrumbs actions=header_actions %}
+{% include "administration/components/header.html" with title=_("页面管理") icon="description" breadcrumbs=breadcrumbs actions=header_actions %}
 
 <!-- Filter Tabs -->
 {% captureas filter_tabs %}
     <a href="?{% if request.GET.q %}q={{ request.GET.q }}{% endif %}" 
        class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if not request.GET.status %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
-       全部
+       {% trans "全部" %}
     </a>
     <a href="?status=published{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
        class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if request.GET.status == 'published' %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
-       已发布
+       {% trans "已发布" %}
     </a>
     <a href="?status=draft{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
        class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if request.GET.status == 'draft' %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
-       草稿
+       {% trans "草稿" %}
     </a>
 {% endcaptureas %}
 
 <!-- Bulk Actions -->
 {% captureas bulk_actions %}
     <button type="button" onclick="submitBulkAction('published')" class="btn btn-sm btn-primary gap-2">
-        <span class="material-symbols-outlined text-[18px]">check_circle</span> 修改成发布
+        <span class="material-symbols-outlined text-[18px]">check_circle</span> {% trans "修改成发布" %}
     </button>
     <button type="button" onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral gap-2">
-        <span class="material-symbols-outlined text-[18px]">drafts</span> 修改成草稿
+        <span class="material-symbols-outlined text-[18px]">drafts</span> {% trans "修改成草稿" %}
     </button>
     <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1">
-        <span class="material-symbols-outlined text-[16px]">delete</span> 删除
+        <span class="material-symbols-outlined text-[16px]">delete</span> {% trans "删除" %}
     </button>
 {% endcaptureas %}
 
@@ -78,11 +79,11 @@
                         </label>
                     </th>
                     <th class="w-16 font-mono hidden md:table-cell">ID</th>
-                    <th>标题</th>
+                    <th>{% trans "标题" %}</th>
                     <th class="hidden lg:table-cell">Slug</th>
-                    <th class="w-32 text-center hidden sm:table-cell whitespace-nowrap">状态</th>
-                    <th class="w-32 hidden lg:table-cell">创建时间</th>
-                    <th class="w-24 text-center pr-6">操作</th>
+                    <th class="w-32 text-center hidden sm:table-cell whitespace-nowrap">{% trans "状态" %}</th>
+                    <th class="w-32 hidden lg:table-cell">{% trans "创建时间" %}</th>
+                    <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
                 </tr>
             </thead>
             <!-- Body (HTMX Target) -->
@@ -94,22 +95,22 @@
 {% endcaptureas %}
 
 <!-- List Container -->
-{% include "administration/components/list_container.html" with title="页面列表" icon="list" search_url="." filter_tabs=filter_tabs bulk_actions=bulk_actions content=list_content %}
+{% include "administration/components/list_container.html" with title=_("页面列表") icon="list" search_url="." filter_tabs=filter_tabs bulk_actions=bulk_actions content=list_content %}
 
 <!-- Import Modal -->
 <dialog id="import_modal" class="modal">
   <div class="modal-box rounded-2xl">
     <h3 class="font-bold text-lg flex items-center gap-2">
         <span class="material-symbols-outlined text-primary">file_upload</span>
-        导入数据 (JSON)
+        {% trans "导入数据 (JSON)" %}
     </h3>
-    <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
+    <p class="py-4 text-sm opacity-70">{% trans "请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。" %}</p>
     <form action="{% url 'administration:import_json' 'Page' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="file" name="json_file" class="file-input file-input-bordered w-full file-input-sm" accept=".json" required />
         <div class="modal-action">
-            <button type="button" class="btn btn-sm" onclick="import_modal.close()">取消</button>
-            <button type="submit" class="btn btn-sm btn-primary">开始导入</button>
+            <button type="button" class="btn btn-sm" onclick="import_modal.close()">{% trans "取消" %}</button>
+            <button type="submit" class="btn btn-sm btn-primary">{% trans "开始导入" %}</button>
         </div>
     </form>
   </div>
@@ -122,18 +123,20 @@
     function submitBulkAction(action) {
         const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
         if (checkedBoxes.length === 0) {
-            showGlobalAlert('请至少选择一项进行操作');
+            showGlobalAlert('{% trans "请至少选择一项进行操作"|escapejs %}');
             return;
         }
 
-        let actionName = '批量操作';
-        if (action === 'delete') actionName = '批量删除';
-        else if (action === 'published') actionName = '批量发布';
-        else if (action === 'draft') actionName = '批量转草稿';
+        let actionName = '{% trans "批量操作"|escapejs %}';
+        if (action === 'delete') actionName = '{% trans "批量删除"|escapejs %}';
+        else if (action === 'published') actionName = '{% trans "批量发布"|escapejs %}';
+        else if (action === 'draft') actionName = '{% trans "批量转草稿"|escapejs %}';
+
+        const message = "{% trans '确定要对选中的 {count} 项执行此操作吗？'|escapejs %}".replace('{count}', checkedBoxes.length);
 
         showConfirmModal(
             actionName,
-            `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+            message,
             () => {
                 const form = document.getElementById('bulk-form');
                 const actionInput = document.createElement('input');
@@ -146,4 +149,5 @@
         );
     }
 </script>
+
 {% endblock %}

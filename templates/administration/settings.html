@@ -1,14 +1,15 @@
 {% extends "administration/base.html" %}
 {% load capture_tags %}
+{% load i18n %}
 
-{% block title %}站点设置{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{% trans "站点设置" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 <!-- Header -->
 {% captureas header_actions %}
 {% endcaptureas %}
 
-{% include "administration/components/header.html" with title="站点设置" subtitle="管理网站的全局配置参数" breadcrumbs=breadcrumbs actions=header_actions %}
+{% include "administration/components/header.html" with title=_("站点设置") subtitle=_("管理网站的全局配置参数") breadcrumbs=breadcrumbs actions=header_actions %}
 
 <div class="w-full" x-data="{ activeTab: 'general' }">
     <!-- Tabs Navigation -->
@@ -20,7 +21,7 @@
                :class="{ 'tab-active [--tab-bg:theme(colors.base-100)] font-bold text-primary': activeTab === '{{ group.slug }}' }"
                @click="activeTab = '{{ group.slug }}'">
                 <span class="material-symbols-outlined text-lg mr-2" :class="{ 'text-primary': activeTab === '{{ group.slug }}' }">{{ group.icon }}</span> 
-                {{ group.title }}
+                {% trans group.title %}
             </a>
             {% endfor %}
             <!-- Filler tab to extend the border -->
@@ -44,21 +45,21 @@
                     <div class="card-body p-6">
                         <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
                             <span class="material-symbols-outlined text-primary">public</span>
-                            站点识别 (Sites Framework)
+                            {% trans "站点识别 (Sites Framework)" %}
                         </h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="form-control w-full">
                                 <label class="label">
-                                    <span class="label-text font-bold">域名 (Domain)</span>
+                                    <span class="label-text font-bold">{% trans "域名 (Domain)" %}</span>
                                 </label>
                                 <input type="text" name="site_domain" value="{{ current_site.domain }}" class="input input-bordered w-full focus:input-primary" placeholder="example.com" />
                                 <label class="label">
-                                    <span class="label-text-alt text-base-content/60">用于生成 Sitemap 和邮件链接。</span>
+                                    <span class="label-text-alt text-base-content/60">{% trans "用于生成 Sitemap 和邮件链接。" %}</span>
                                 </label>
                             </div>
                             <div class="form-control w-full">
                                 <label class="label">
-                                    <span class="label-text font-bold">显示名称 (Display Name)</span>
+                                    <span class="label-text font-bold">{% trans "显示名称 (Display Name)" %}</span>
                                 </label>
                                 <input type="text" name="site_name" value="{{ current_site.name }}" class="input input-bordered w-full focus:input-primary" placeholder="My Site" />
                             </div>
@@ -80,9 +81,9 @@
                         <div class="p-2 bg-primary/10 rounded-lg text-primary">
                             <span class="material-symbols-outlined text-2xl">{{ group.icon }}</span>
                         </div>
-                        {{ group.title }}
+                        {% trans group.title %}
                     </h2>
-                    <p class="text-base-content/60 mt-2 text-sm ml-1">配置 {{ group.title }} 相关的系统参数</p>
+                    <p class="text-base-content/60 mt-2 text-sm ml-1">{% blocktrans with title=group.title %}配置 {{ title }} 相关的系统参数{% endblocktrans %}</p>
                 </div>
 
                 <div class="grid grid-cols-1 gap-6">
@@ -90,7 +91,7 @@
                     <div class="form-control w-full group p-4 rounded-xl hover:bg-base-200/30 transition-colors border border-transparent hover:border-base-200">
                         <div class="flex flex-col gap-2">
                             <label class="label p-0 justify-start gap-2 mb-1">
-                                <span class="label-text font-bold text-lg">{{ item.help_text|default:item.key }}</span>
+                                <span class="label-text font-bold text-lg">{% trans item.help_text|default:item.key %}</span>
                                 {% if item.type == 'bool' %}
                                     <span class="badge badge-sm badge-ghost font-mono text-xs opacity-50">Boolean</span>
                                 {% endif %}
@@ -101,7 +102,7 @@
                                     <div x-data="{ enabled: {{ item.value|yesno:'true,false' }} }">
                                         <label class="cursor-pointer label justify-start gap-4 p-0">
                                             <input type="checkbox" name="{{ item.key }}" class="toggle toggle-primary toggle-lg" x-model="enabled">
-                                            <span class="label-text text-base-content/60" x-text="enabled ? '已启用' : '已禁用'"></span>
+                                            <span class="label-text text-base-content/60" x-text="enabled ? '{% trans "已启用" %}' : '{% trans "已禁用" %}'"></span>
                                         </label>
                                     </div>
                                 {% elif item.type == 'int' %}
@@ -127,7 +128,7 @@
                                             </div>
                                             
                                             <div class="join w-full max-w-md">
-                                                <input type="text" x-model="newWord" @keydown.enter.prevent="if(newWord.trim()) { words.push(newWord.trim()); newWord = ''; }" class="input input-bordered join-item w-full focus:input-primary" placeholder="输入欢迎词后按回车添加...">
+                                                <input type="text" x-model="newWord" @keydown.enter.prevent="if(newWord.trim()) { words.push(newWord.trim()); newWord = ''; }" class="input input-bordered join-item w-full focus:input-primary" placeholder="{% trans '输入欢迎词后按回车添加...' %}">
                                                 <button type="button" @click="if(newWord.trim()) { words.push(newWord.trim()); newWord = ''; }" class="btn btn-primary join-item">
                                                     <span class="material-symbols-outlined">add</span>
                                                 </button>
@@ -148,7 +149,7 @@
                                                     <img :src="imgUrl" class="max-h-full max-w-full object-contain" @error="$el.style.display='none'">
                                                 </template>
                                                 <div class="absolute inset-0 flex items-center justify-center text-base-content/30 pointer-events-none" x-show="!imgUrl">
-                                                    <span>图片预览</span>
+                                                    <span>{% trans "图片预览" %}</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -173,10 +174,11 @@
             <div class="flex justify-end sticky bottom-6 z-20">
                 <button type="submit" class="btn btn-primary btn-lg shadow-xl shadow-primary/20 gap-3">
                     <span class="material-symbols-outlined">save</span>
-                    保存所有设置
+                    {% trans "保存所有设置" %}
                 </button>
             </div>
         </form>
     </div>
 </div>
 {% endblock %}
+

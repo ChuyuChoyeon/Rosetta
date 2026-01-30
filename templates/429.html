@@ -1,10 +1,10 @@
-{% load static tailwind_tags %}
+{% load static tailwind_tags i18n %}
 <!DOCTYPE html>
-<html lang="zh-Hans">
+<html lang="{{ LANGUAGE_CODE|default:'zh-Hans' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>请求过于频繁 - {{ config.SITE_NAME|default:"Rosetta" }}</title>
+    <title>{% trans "请求过于频繁" %} - {{ config.SITE_NAME|default:"Rosetta" }}</title>
     <link rel="shortcut icon" href="{{ config.SITE_FAVICON|default:'/static/core/img/favicon.ico' }}">
     <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">
     {% tailwind_css %}
@@ -19,16 +19,16 @@
                     </svg>
                 </div>
                 <div class="space-y-2">
-                    <h1 class="text-3xl font-bold">请求过于频繁</h1>
+                    <h1 class="text-3xl font-bold">{% trans "请求过于频繁" %}</h1>
                     <p class="text-base-content/70 leading-relaxed">
-                        您的操作速度太快了，请喝杯咖啡稍作休息。
+                        {% trans "您的操作速度太快了，请喝杯咖啡稍作休息。" %}
                         <br>
-                        请在 <span id="countdown" class="font-bold font-mono text-warning">60</span> 秒后重试。
+                        {% blocktrans %}请在 <span id="countdown" class="font-bold font-mono text-warning">60</span> 秒后重试。{% endblocktrans %}
                     </p>
                 </div>
                 <div class="flex flex-col sm:flex-row gap-4">
-                    <button onclick="location.reload()" class="btn btn-primary btn-lg px-10 min-h-12">刷新页面</button>
-                    <a href="/" class="btn btn-outline btn-lg px-10 min-h-12">返回首页</a>
+                    <button onclick="location.reload()" class="btn btn-primary btn-lg px-10 min-h-12">{% trans "刷新页面" %}</button>
+                    <a href="/" class="btn btn-outline btn-lg px-10 min-h-12">{% trans "返回首页" %}</a>
                 </div>
                 <div class="text-sm text-base-content/50">
                     &copy; {% now "Y" %} {{ config.SITE_NAME|default:"Rosetta" }}

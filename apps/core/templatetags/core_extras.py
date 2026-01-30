@@ -3,8 +3,20 @@ from django.utils import timezone
 from datetime import timedelta
 import bleach
 from django.utils.safestring import mark_safe
+from django.urls import translate_url as django_translate_url
 
 register = template.Library()
+
+@register.simple_tag(takes_context=True)
+def translate_url(context, language_code):
+    """
+    Get the current URL in the specified language.
+    """
+    request = context.get('request')
+    if not request:
+        return ""
+    path = request.get_full_path()
+    return django_translate_url(path, language_code)
 
 @register.filter
 def time_ago(value):

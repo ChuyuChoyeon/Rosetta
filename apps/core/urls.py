@@ -8,6 +8,7 @@ from .views import (
     debug_execute_command,
     health_check,
     robots_txt,
+    translate_text,
     upload_image,
 )
 
@@ -15,6 +16,8 @@ urlpatterns = [
     # SEO & Utils
     path("robots.txt", robots_txt, name="robots_txt"),
     path("upload/image/", upload_image, name="upload_image"),
+    # Translation API
+    path("api/translate/", translate_text, name="translate_text"),
     # 健康检查
     path("health/", health_check, name="health_check"),
     # 调试 API

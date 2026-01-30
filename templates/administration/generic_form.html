@@ -1,5 +1,5 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
+{% load capture_tags i18n %}
 
 {% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
@@ -9,7 +9,8 @@
 {% endcaptureas %}
 
 <div class="max-w-4xl mx-auto">
-    {% include "administration/components/header.html" with title=title|default:"编辑" icon="edit" breadcrumbs=breadcrumbs actions=header_actions %}
+    {% trans "编辑" as default_title %}
+    {% include "administration/components/header.html" with title=title|default:default_title icon="edit" breadcrumbs=breadcrumbs actions=header_actions %}
 
     {% captureas form_content %}
     <form method="post" class="space-y-6" enctype="multipart/form-data">
@@ -19,7 +20,7 @@
         <div class="alert alert-error mb-4 shadow-sm">
             <span class="material-symbols-outlined">error</span>
             <div class="flex flex-col">
-                <span class="font-bold">表单错误</span>
+                <span class="font-bold">{% trans "表单错误" %}</span>
                 {% for error in form.non_field_errors %}
                 <span class="text-sm">{{ error }}</span>
                 {% endfor %}
@@ -63,12 +64,12 @@
         <div class="divider my-4"></div>
         
         <div class="flex items-center justify-end gap-3">
-            <a href="javascript:history.back()" class="btn btn-ghost hover:bg-base-200">取消</a>
-            <button type="submit" name="_addanother" class="btn btn-ghost hover:bg-base-200">保存并新增</button>
-            <button type="submit" name="_continue" class="btn btn-ghost hover:bg-base-200">保存并继续编辑</button>
+            <a href="javascript:history.back()" class="btn btn-ghost hover:bg-base-200">{% trans "取消" %}</a>
+            <button type="submit" name="_addanother" class="btn btn-ghost hover:bg-base-200">{% trans "保存并新增" %}</button>
+            <button type="submit" name="_continue" class="btn btn-ghost hover:bg-base-200">{% trans "保存并继续编辑" %}</button>
             <button type="submit" class="btn btn-primary gap-2 shadow-lg shadow-primary/20">
                 <span class="material-symbols-outlined">save</span>
-                保存
+                {% trans "保存" %}
             </button>
         </div>
     </form>

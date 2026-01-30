@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
-{% block title %}{{ profile_user.nickname|default:profile_user.username }} 的个人主页 - {{ config.SITE_NAME|default:"Rosetta" }}{% endblock %}
+{% block title %}{{ profile_user.nickname|default:profile_user.username }} {% trans "的个人主页" %} - {{ config.SITE_NAME|default:"Rosetta" }}{% endblock %}
 
 {% block content %}
 {% load capture_tags %}

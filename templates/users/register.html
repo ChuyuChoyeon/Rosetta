@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}注册 - {{ config.SITE_NAME|default:"Rosetta" }}{% endblock %}
+{% block title %}{% trans "注册" %}{% endblock %}
 
 {% block content %}
 <div class="min-h-[calc(100vh-16rem)] flex items-center justify-center px-4 py-12 bg-base-200/30">
@@ -15,8 +15,8 @@
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4 shadow-sm">
                         <span class="material-symbols-outlined text-3xl">person_add</span>
                     </div>
-                    <h2 class="text-3xl font-heading font-extrabold text-base-content">注册新账号</h2>
-                    <p class="text-base-content/60 mt-2 font-medium">加入 {{ config.SITE_NAME|default:"Rosetta" }}。</p>
+                    <h2 class="text-3xl font-heading font-extrabold text-base-content">{% trans "注册新账号" %}</h2>
+                    <p class="text-base-content/60 mt-2 font-medium">{% trans "加入" %} {{ config.SITE_NAME|default:"Rosetta" }}。</p>
                 </header>
 
                 <form method="post" enctype="multipart/form-data" class="space-y-6">
@@ -38,7 +38,7 @@
                                     {% elif field.name == 'avatar' %}
                                         <span class="material-symbols-outlined text-[18px] text-base-content/50">account_circle</span>
                                     {% endif %}
-                                    {% if field.name == 'nickname' %}昵称{% elif field.name == 'email' %}邮箱{% elif field.name == 'avatar' %}头像{% else %}{{ field.label }}{% endif %}
+                                    {% if field.name == 'nickname' %}{% trans "昵称" %}{% elif field.name == 'email' %}{% trans "邮箱" %}{% elif field.name == 'avatar' %}{% trans "头像" %}{% else %}{{ field.label }}{% endif %}
                                 </span>
                             </label>
 
@@ -49,7 +49,7 @@
                                 <label class="label">
                                     <span class="label-text-alt text-base-content/60 flex items-center gap-1 cursor-pointer hover:text-primary transition-colors" onclick="document.querySelector('.captcha').click()">
                                         <span class="material-symbols-outlined text-[14px]">refresh</span>
-                                        点击图片刷新验证码
+                                        {% trans "点击图片刷新验证码" %}
                                     </span>
                                 </label>
                             {% elif field.name == 'avatar' %}
@@ -64,7 +64,7 @@
                                             <input type="file" name="{{ field.name }}" id="id_avatar" class="file-input file-input-bordered file-input-primary w-full file-input-sm rounded-xl" accept="image/*" onchange="previewImage(this)" />
                                             <div class="text-xs text-base-content/50 flex items-center gap-1">
                                                 <span class="material-symbols-outlined text-[12px]">info</span>
-                                                支持 JPG, PNG, WebP 格式 (推荐 1:1)
+                                                {% trans "支持 JPG, PNG, WebP 格式 (推荐 1:1)" %}
                                             </div>
                                         </div>
                                     </div>
@@ -73,14 +73,14 @@
                                     <div class="modal-box rounded-3xl">
                                         <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
                                             <span class="material-symbols-outlined text-primary">crop</span>
-                                            裁剪头像
+                                            {% trans "裁剪头像" %}
                                         </h3>
                                         <div class="w-full h-64 bg-base-300 rounded-2xl overflow-hidden relative">
                                             <img id="cropper-image" src="" class="max-w-full" style="display:none;" />
                                         </div>
                                         <div class="modal-action">
-                                            <button type="button" class="btn rounded-xl" onclick="closeCropper()">取消</button>
-                                            <button type="button" class="btn btn-primary rounded-xl" onclick="saveCroppedImage()">确定</button>
+                                            <button type="button" class="btn rounded-xl" onclick="closeCropper()">{% trans "取消" %}</button>
+                                            <button type="button" class="btn btn-primary rounded-xl" onclick="saveCroppedImage()">{% trans "确定" %}</button>
                                         </div>
                                     </div>
                                 </dialog>
@@ -90,7 +90,7 @@
                                        id="{{ field.id_for_label }}"
                                        class="input input-bordered w-full rounded-xl bg-base-200/30 focus:bg-base-100 focus:input-primary transition-all duration-300 {% if field.errors %}input-error{% endif %}"
                                        value="{{ field.value|default:'' }}"
-                                       placeholder="请输入{{ field.label }}"
+                                       placeholder="{% trans '请输入' %}{{ field.label }}"
                                        autocomplete="{% if field.name == 'username' %}username{% elif field.name == 'email' %}email{% elif 'password' in field.name %}new-password{% else %}off{% endif %}"
                                        {% if field.field.required %}required{% endif %}>
                             {% endif %}
@@ -118,16 +118,16 @@
 
                     <div class="pt-4">
                         <button type="submit" class="btn btn-primary w-full text-lg font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 hover:scale-[1.02]">
-                            立即注册
+                            {% trans "立即注册" %}
                             <span class="material-symbols-outlined">rocket_launch</span>
                         </button>
                     </div>
                 </form>
 
-                <div class="divider text-xs text-base-content/40 my-8 font-medium">或</div>
+                <div class="divider text-xs text-base-content/40 my-8 font-medium">{% trans "或" %}</div>
 
                 <div class="text-center text-sm">
-                    <p class="text-base-content/70">已有账号？ <a href="{% url 'users:login' %}" class="link link-primary font-bold hover:text-primary-focus transition-colors">立即登录</a></p>
+                    <p class="text-base-content/70">{% trans "已有账号？" %} <a href="{% url 'users:login' %}" class="link link-primary font-bold hover:text-primary-focus transition-colors">{% trans "立即登录" %}</a></p>
                 </div>
             </div>
         </div>

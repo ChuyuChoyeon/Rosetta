@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}禁止访问 - 403{% endblock %}
+{% block title %}{% trans "禁止访问" %} - 403{% endblock %}
 
 {% block content %}
 <div class="hero min-h-screen bg-base-200">
@@ -15,19 +16,19 @@
           </div>
       </div>
 
-      <h1 class="text-5xl font-bold mb-8 tracking-tight">禁止访问</h1>
+      <h1 class="text-5xl font-bold mb-8 tracking-tight">{% trans "禁止访问" %}</h1>
       <p class="py-6 text-base-content/70 text-xl leading-relaxed max-w-lg mx-auto">
-        抱歉，您没有权限访问此页面。
+        {% trans "抱歉，您没有权限访问此页面。" %}
         <br>
-        这可能是一个受保护的区域，或者您的权限不足。
+        {% trans "这可能是一个受保护的区域，或者您的权限不足。" %}
       </p>
       
       <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
-          <a href="/" class="btn btn-primary btn-lg px-10 min-h-12 shadow-lg hover:shadow-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">返回首页</a>
+          <a href="/" class="btn btn-primary btn-lg px-10 min-h-12 shadow-lg hover:shadow-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">{% trans "返回首页" %}</a>
           {% if not user.is_authenticated %}
           <a href="{% url 'users:login' %}?next={{ request.path }}" class="btn btn-outline btn-lg px-10 min-h-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-              登录账号
+              {% trans "登录账号" %}
           </a>
           {% endif %}
       </div>

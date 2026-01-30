@@ -20,6 +20,8 @@ from .schemas import CommentCreateSchema
 from constance import config
 
 
+from django.utils.translation import gettext as _
+
 def _parse_keywords(value):
     if not value:
         return []
@@ -405,10 +407,10 @@ class PostDetailView(DetailView):
 
             if is_valid:
                 request.session[f"post_unlocked_{self.object.pk}"] = True
-                messages.success(request, "密码验证通过")
+                messages.success(request, _("密码验证通过"))
                 return redirect("post_detail", slug=self.object.slug)
             else:
-                messages.error(request, "密码错误，请重试")
+                messages.error(request, _("密码错误，请重试"))
                 return render(
                     request, "blog/password_required.html", {"post": self.object}
                 )
@@ -442,10 +444,10 @@ class PostDetailView(DetailView):
 
                 create_comment(post=self.object, user=request.user, data=comment_data)
 
-                messages.success(request, "您的评论已发布！")
+                messages.success(request, _("您的评论已发布！"))
                 return redirect("post_detail", slug=self.object.slug)
             except ValueError as e:
-                messages.error(request, f"评论创建失败: {str(e)}")
+                messages.error(request, _("评论创建失败: {error}").format(error=str(e)))
                 return redirect("post_detail", slug=self.object.slug)
         else:
             context = self.get_context_data()
@@ -624,10 +626,10 @@ class SearchView(SidebarContextMixin, ListView):
         seen = set()
         
         # Helper to add unique results
-        def add_result(text, url, type_name):
+        def add_result(text, url, type_code, type_label):
             if text not in seen:
                 seen.add(text)
-                results.append({'text': text, 'url': url, 'type': type_name})
+                results.append({'text': text, 'url': url, 'type': type_code, 'type_label': type_label})
 
         # 1. Pinyin Search (if query is ASCII)
         if all(ord(c) < 128 for c in query):
@@ -651,13 +653,13 @@ class SearchView(SidebarContextMixin, ListView):
                 # Search Tags
                 for tag in Tag.objects.all():
                     if match_pinyin(tag.name, query):
-                        add_result(tag.name, f"{request.path}?q={tag.name}&type=tag", "标签")
+                        add_result(tag.name, f"{request.path}?q={tag.name}&type=tag", "tag", _("标签"))
                         if len(results) >= 5: break
                 
                 # Search Posts
                 for post in Post.objects.filter(status='published'):
                     if match_pinyin(post.title, query):
-                        add_result(post.title, post.get_absolute_url(), "文章")
+                        add_result(post.title, post.get_absolute_url(), "post", _("文章"))
                         if len(results) >= 10: break
                         
             except ImportError:
@@ -667,11 +669,11 @@ class SearchView(SidebarContextMixin, ListView):
         if len(results) < 10:
             # Tags
             for tag in Tag.objects.filter(name__icontains=query)[:5]:
-                add_result(tag.name, f"{request.path}?q={tag.name}&type=tag", "标签")
+                add_result(tag.name, f"{request.path}?q={tag.name}&type=tag", "tag", _("标签"))
             
             # Posts
             for post in Post.objects.filter(title__icontains=query, status='published')[:5]:
-                add_result(post.title, post.get_absolute_url(), "文章")
+                add_result(post.title, post.get_absolute_url(), "post", _("文章"))
 
         return JsonResponse({'results': results[:10]})
 
@@ -820,7 +822,7 @@ def delete_comment(request, pk):
 
     # 权限检查
     if request.user != comment.user and not request.user.is_staff:
-        messages.error(request, "您没有权限删除此评论")
+        messages.error(request, _("您没有权限删除此评论"))
         return redirect(comment.post.get_absolute_url())
 
     post_url = comment.post.get_absolute_url()
@@ -830,5 +832,5 @@ def delete_comment(request, pk):
     if request.headers.get("HX-Request"):
         return HttpResponse("")
 
-    messages.success(request, "评论已删除")
+    messages.success(request, _("评论已删除"))
     return redirect(post_url)

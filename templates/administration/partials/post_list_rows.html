@@ -1,3 +1,4 @@
+{% load i18n %}
 {% for post in posts %}
 <tr class="hover">
     <th class="pl-6">
@@ -22,7 +23,7 @@
     <td>
         <div class="flex items-start gap-1">
             {% if post.is_pinned %}
-                <span class="material-symbols-outlined text-info text-sm mt-0.5 shrink-0 animate-pulse" title="置顶">push_pin</span>
+                <span class="material-symbols-outlined text-info text-sm mt-0.5 shrink-0 animate-pulse" title="{% trans '置顶' %}">push_pin</span>
             {% endif %}
             <div class="min-w-0">
                 <a href="{% url 'administration:post_edit' post.pk %}" class="font-bold text-base hover:text-primary transition-colors block leading-snug mb-0.5 break-words line-clamp-2" title="{{ post.title }}">
@@ -71,12 +72,12 @@
             {% if post.status == 'published' %}
                 <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/10 whitespace-nowrap">
                     <span class="w-1.5 h-1.5 rounded-full bg-success animate-[pulse_2s_infinite]"></span>
-                    已发布
+                    {% trans "已发布" %}
                 </div>
             {% elif post.status == 'draft' %}
                 <div class="badge badge-warning badge-sm gap-1 badge-outline bg-warning/10 whitespace-nowrap">
                     <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
-                    草稿
+                    {% trans "草稿" %}
                 </div>
             {% else %}
                  <div class="badge badge-outline badge-sm whitespace-nowrap">{{ post.status }}</div>
@@ -85,7 +86,7 @@
             {% if not post.allow_comments %}
                 <div class="badge badge-ghost badge-outline badge-xs gap-1 opacity-60 whitespace-nowrap">
                     <span class="material-symbols-outlined text-[10px]">comments_disabled</span>
-                    禁评
+                    {% trans "禁评" %}
                 </div>
             {% endif %}
         </div>
@@ -94,16 +95,16 @@
     <td class="text-sm font-mono opacity-70 hidden md:table-cell text-center">{{ post.views }}</td>
     <td class="text-right pr-4">
         <div class="join">
-            <a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="查看">
+            <a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '查看' %}">
                 <span class="material-symbols-outlined text-base">visibility</span>
             </a>
-            <a href="{% url 'administration:post_edit' post.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
+            <a href="{% url 'administration:post_edit' post.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '编辑' %}">
                 <span class="material-symbols-outlined text-base">edit</span>
             </a>
-            <button type="button" onclick="confirmDelete('{% url 'administration:post_duplicate' post.pk %}', '确定要复制这篇文章吗？')" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="复制">
+            <button type="button" onclick="confirmDelete('{% url 'administration:post_duplicate' post.pk %}', '{% trans "确定要复制这篇文章吗？"|escapejs %}')" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '复制' %}">
                 <span class="material-symbols-outlined text-base">content_copy</span>
             </button>
-            <button type="button" onclick="confirmDelete('{% url 'administration:post_delete' post.pk %}', '确定要删除文章《{{ post.title|escapejs }}》吗？')" class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" data-tip="删除">
+            <button type="button" onclick="confirmDelete('{% url 'administration:post_delete' post.pk %}', '{% blocktrans with title=post.title|escapejs %}确定要删除文章《{{ title }}》吗？{% endblocktrans %}')" class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" data-tip="{% trans '删除' %}">
                 <span class="material-symbols-outlined text-base">delete</span>
             </button>
         </div>
@@ -114,8 +115,9 @@
     <td colspan="11" class="text-center py-10 text-base-content/50">
         <div class="flex flex-col items-center gap-2">
             <span class="material-symbols-outlined text-4xl opacity-20">article</span>
-            <span>暂无文章</span>
+            <span>{% trans "暂无文章" %}</span>
         </div>
     </td>
 </tr>
 {% endfor %}
+

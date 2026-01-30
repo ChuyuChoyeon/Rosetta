@@ -1,4 +1,4 @@
-{% load static markdown_extras %}
+{% load static markdown_extras i18n %}
 {% include 'users/includes/profile_tabs.html' %}
 
 <div id="profile-content-inner" class="fade-in">
@@ -8,8 +8,8 @@
         <div class="w-24 h-24 bg-base-200 rounded-full flex items-center justify-center mb-6">
             <span class="material-symbols-outlined text-5xl text-base-content/30">lock</span>
         </div>
-        <h3 class="text-xl font-bold mb-2">该用户已开启隐私保护</h3>
-        <p class="text-base-content/60">详细资料仅对用户本人可见</p>
+        <h3 class="text-xl font-bold mb-2">{% trans "该用户已开启隐私保护" %}</h3>
+        <p class="text-base-content/60">{% trans "详细资料仅对用户本人可见" %}</p>
     </div>
 {% elif active_tab == 'articles' %}
     <!-- 文章列表选项卡 -->
@@ -21,20 +21,20 @@
         }
     }">
         <div class="flex justify-between items-center mb-6">
-            <h2 class="card-title">发布文章</h2>
+            <h2 class="card-title">{% trans "发布文章" %}</h2>
             
             <!-- View Toggle -->
             <div class="flex items-center gap-1 p-1 bg-base-200/50 rounded-xl border border-base-content/5 backdrop-blur-sm">
                 <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
                         :class="viewMode === 'grid' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
                         @click="toggleView('grid')"
-                        title="网格视图">
+                        title="{% trans '网格视图' %}">
                         <span class="material-symbols-outlined text-lg">grid_view</span>
                 </button>
                 <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
                         :class="viewMode === 'list' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
                         @click="toggleView('list')"
-                        title="列表视图">
+                        title="{% trans '列表视图' %}">
                         <span class="material-symbols-outlined text-lg">view_list</span>
                 </button>
             </div>
@@ -93,60 +93,23 @@
         {% else %}
             <div class="flex flex-col items-center justify-center py-12 text-center opacity-50">
                 <span class="material-symbols-outlined text-6xl mb-4 text-base-content/20">article</span>
-                <p>暂无发布的文章</p>
+                <p>{% trans "暂无发布的文章" %}</p>
             </div>
         {% endif %}
     </div>
 
 {% elif active_tab == 'comments' %}
     <!-- 评论记录选项卡 -->
-    <h2 class="card-title mb-6">评论记录</h2>
+    <h2 class="card-title mb-6">{% trans "评论记录" %}</h2>
     {% include 'users/includes/comments_list.html' with comments=comments %}
-
-{% elif active_tab == 'likes' %}
-    <!-- 喜欢的文章选项卡 -->
-    <h2 class="card-title mb-6">喜欢的文章</h2>
-    {% if liked_posts %}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {% for post in liked_posts %}
-            <div class="card bg-base-100 shadow-sm hover:shadow-md transition-all border border-base-content/10 h-full">
-                {% if post.cover_image %}
-                <figure class="h-48 overflow-hidden relative">
-                    <img src="{{ post.cover_image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
-                </figure>
-                {% endif %}
-                <div class="card-body p-5">
-                    <h3 class="card-title text-lg font-bold">
-                        <a href="{{ post.get_absolute_url }}" class="hover:text-primary transition-colors line-clamp-2">{{ post.title }}</a>
-                    </h3>
-                    <p class="text-sm text-base-content/70 line-clamp-2 mt-2">{{ post.excerpt|default:post.content|striptags|truncatechars:60 }}</p>
-                    <div class="flex items-center justify-between mt-4 text-xs text-base-content/50">
-                        <div class="flex items-center gap-2">
-                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">calendar_today</span> {{ post.published_at|default:post.created_at|date:"Y-m-d" }}</span>
-                            <span class="flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">favorite</span> {{ post.likes.count }}</span>
-                        </div>
-                        {% if post.category %}
-                        <span class="badge badge-ghost badge-sm">{{ post.category.name }}</span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <div class="flex flex-col items-center justify-center py-12 text-center opacity-50">
-            <span class="material-symbols-outlined text-6xl mb-4 text-base-content/20">favorite</span>
-            <p>暂无喜欢的文章</p>
-        </div>
-    {% endif %}
 
 {% elif active_tab == 'info' and user == profile_user %}
     <!-- 个人资料选项卡（仅本人可见） -->
     <div class="flex justify-between items-center mb-6">
-        <h2 class="card-title">个人信息</h2>
+        <h2 class="card-title">{% trans "个人信息" %}</h2>
         <button class="btn btn-sm btn-outline btn-primary" onclick="profile_edit_modal.showModal()">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-            编辑资料
+            {% trans "编辑资料" %}
         </button>
     </div>
     {% include 'users/includes/user_info.html' %}
@@ -154,17 +117,17 @@
 {% elif active_tab == 'history' and user == profile_user %}
     <!-- 浏览历史选项卡（仅本人可见） -->
     <div class="flex justify-between items-center mb-6">
-        <h2 class="card-title">浏览历史</h2>
-        <span class="text-xs text-base-content/50">仅显示最近20条记录</span>
+        <h2 class="card-title">{% trans "浏览历史" %}</h2>
+        <span class="text-xs text-base-content/50">{% trans "仅显示最近20条记录" %}</span>
     </div>
     {% if view_history %}
         <div class="overflow-x-auto">
             <table class="table table-zebra w-full">
                 <thead>
                     <tr>
-                        <th>文章标题</th>
-                        <th>浏览时间</th>
-                        <th>操作</th>
+                        <th>{% trans "文章标题" %}</th>
+                        <th>{% trans "浏览时间" %}</th>
+                        <th>{% trans "操作" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -177,7 +140,7 @@
                         </td>
                         <td class="text-sm opacity-70">{{ item.viewed_at|date:"Y-m-d H:i" }}</td>
                         <td>
-                            <a href="{% url 'post_detail' item.post.slug %}" class="btn btn-ghost btn-xs">查看</a>
+                            <a href="{% url 'post_detail' item.post.slug %}" class="btn btn-ghost btn-xs">{% trans "查看" %}</a>
                         </td>
                     </tr>
                     {% endfor %}
@@ -187,14 +150,14 @@
     {% else %}
         <div class="flex flex-col items-center justify-center py-12 text-center opacity-50">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 bg-base-200 rounded-full p-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-            <p>暂无浏览记录</p>
+            <p>{% trans "暂无浏览记录" %}</p>
         </div>
     {% endif %}
 
 {% elif active_tab == 'notifications' and user == profile_user %}
     <!-- 通知消息选项卡（仅本人可见） -->
     <div class="flex justify-between items-center mb-6">
-        <h2 class="card-title">消息通知</h2>
+        <h2 class="card-title">{% trans "消息通知" %}</h2>
     </div>
     
     {% if notifications %}
@@ -220,18 +183,18 @@
                             <a href="{{ notification.target.get_absolute_url }}" class="link link-primary">{{ notification.target }}</a>
                             {% endif %}
                         </p>
-                        <div class="text-xs opacity-50 mt-1">{{ notification.timestamp|timesince }}前</div>
+                        <div class="text-xs opacity-50 mt-1">{{ notification.timestamp|timesince }}{% trans "前" %}</div>
                     </div>
                     <div class="flex flex-col gap-2">
                         {% if not notification.is_read %}
                         <!-- HTMX 操作：标记为已读 -->
                         <button hx-post="{% url 'users:mark_notification_read' notification.pk %}" hx-swap="outerHTML" class="btn btn-xs btn-ghost text-primary">
-                            标为已读
+                            {% trans "标为已读" %}
                         </button>
                         {% endif %}
                         <!-- HTMX 操作：删除 -->
                         <button hx-delete="{% url 'users:delete_notification' notification.pk %}" hx-target="closest .card" hx-swap="outerHTML" class="btn btn-xs btn-ghost text-error">
-                            删除
+                            {% trans "删除" %}
                         </button>
                     </div>
                 </div>
@@ -242,18 +205,18 @@
     {% else %}
         <div class="flex flex-col items-center justify-center py-12 text-center opacity-50">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-4 bg-base-200 rounded-full p-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-            <p>暂无新通知</p>
+            <p>{% trans "暂无新通知" %}</p>
         </div>
     {% endif %}
 
 {% elif active_tab == 'security' and user == profile_user %}
     <!-- 安全设置选项卡（仅本人可见） -->
-    <h2 class="card-title mb-6">账号安全</h2>
+    <h2 class="card-title mb-6">{% trans "账号安全" %}</h2>
     
     <div class="max-w-xl">
         <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">lock</span>
-            修改密码
+            {% trans "修改密码" %}
         </h3>
         <form action="{% url 'users:user_public_profile' user.username %}" method="post" class="space-y-6">
             {% csrf_token %}
@@ -301,7 +264,7 @@
             <div class="card-actions justify-end mt-8">
                 <button type="submit" class="btn btn-primary px-8 gap-2">
                     <span class="material-symbols-outlined text-sm">save</span>
-                    保存修改
+                    {% trans "保存修改" %}
                 </button>
             </div>
         </form>
@@ -309,7 +272,7 @@
 
 {% elif active_tab == 'settings' and user == profile_user %}
     <!-- 偏好设置选项卡（仅本人可见） -->
-    <h2 class="card-title mb-6">偏好设置</h2>
+    <h2 class="card-title mb-6">{% trans "偏好设置" %}</h2>
     <form action="{% url 'users:user_public_profile' user.username %}" method="post">
         {% csrf_token %}
         <input type="hidden" name="save_preferences" value="true">
@@ -318,7 +281,7 @@
             <!-- 主题选择 -->
             <div class="form-control w-full">
                 <label class="label">
-                    <span class="label-text font-bold">界面主题</span>
+                    <span class="label-text font-bold">{% trans "界面主题" %}</span>
                 </label>
                 
                 <!-- 实际表单输入项（隐藏） -->
@@ -329,8 +292,8 @@
                 
                 <label class="flex items-center justify-between p-4 border border-base-300 rounded-lg hover:bg-base-200/50 transition-all cursor-pointer">
                     <div class="flex flex-col gap-1">
-                        <span class="font-bold text-sm">暗黑模式</span>
-                        <span class="text-xs text-base-content/60">切换明亮/暗黑主题</span>
+                        <span class="font-bold text-sm">{% trans "暗黑模式" %}</span>
+                        <span class="text-xs text-base-content/60">{% trans "切换明亮/暗黑主题" %}</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-warning text-sm">light_mode</span>
@@ -347,8 +310,8 @@
             <div class="form-control w-full">
                 <label class="flex items-center justify-between p-4 border border-base-300 rounded-lg hover:bg-base-200/50 transition-all cursor-pointer">
                     <div class="flex flex-col gap-1">
-                        <span class="font-bold text-sm">公开个人资料</span>
-                        <span class="text-xs text-base-content/60">允许其他人查看您的个人资料和浏览历史</span>
+                        <span class="font-bold text-sm">{% trans "公开个人资料" %}</span>
+                        <span class="text-xs text-base-content/60">{% trans "允许其他人查看您的个人资料和浏览历史" %}</span>
                     </div>
                     <div class="flex items-center gap-3">
                         <span class="material-symbols-outlined text-base-content/50 text-sm">lock</span>
@@ -363,7 +326,7 @@
         </div>
 
         <div class="card-actions justify-end mt-8">
-            <button type="submit" class="btn btn-primary px-8">保存设置</button>
+            <button type="submit" class="btn btn-primary px-8">{% trans "保存设置" %}</button>
         </div>
     </form>
 

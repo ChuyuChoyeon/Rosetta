@@ -1,7 +1,8 @@
 {% extends "administration/base.html" %}
 {% load capture_tags %}
+{% load i18n %}
 
-{% block title %}操作日志{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{% trans "操作日志" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 {% captureas card_content %}
@@ -13,19 +14,19 @@
                     <span class="material-symbols-outlined text-warning">history</span>
                 </div>
                 <div>
-                    <h2 class="font-bold text-base">日志记录</h2>
-                    <p class="text-xs text-base-content/60">追踪系统内的所有操作</p>
+                    <h2 class="font-bold text-base">{% trans "日志记录" %}</h2>
+                    <p class="text-xs text-base-content/60">{% trans "追踪系统内的所有操作" %}</p>
                 </div>
                 
                 <!-- Filter by User -->
                 <div class="dropdown dropdown-hover ml-2">
                     <div tabindex="0" role="button" class="btn btn-sm btn-ghost gap-2 font-normal">
                         <span class="material-symbols-outlined text-xs">filter_list</span>
-                        用户筛选 
+                        {% trans "用户筛选" %} 
                         <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
                     </div>
                     <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 rounded-box w-52 max-h-60 overflow-y-auto border border-base-200">
-                        <li><a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}">全部用户</a></li>
+                        <li><a href="?{% if request.GET.q %}q={{ request.GET.q }}&{% endif %}">{% trans "全部用户" %}</a></li>
                         {% for user in users_with_logs %}
                         <li><a href="?user={{ user.id }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" {% if request.GET.user == user.id|stringformat:"i" %}class="active"{% endif %}>{{ user.username }}</a></li>
                         {% endfor %}
@@ -37,12 +38,12 @@
                 <form action="." method="get" class="relative flex-1 sm:w-64">
                     {% if request.GET.user %}<input type="hidden" name="user" value="{{ request.GET.user }}">{% endif %}
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-sm">search</span>
-                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="搜索操作对象..." class="input input-sm input-bordered pl-9 w-full focus:input-primary transition-all" />
+                    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="{% trans '搜索操作对象...' %}" class="input input-sm input-bordered pl-9 w-full focus:input-primary transition-all" />
                 </form>
                 
-                <a href="{% url 'administration:logentry_export' %}" class="btn btn-sm btn-outline gap-1 hidden sm:flex" title="导出日志">
+                <a href="{% url 'administration:logentry_export' %}" class="btn btn-sm btn-outline gap-1 hidden sm:flex" title="{% trans '导出日志' %}">
                     <span class="material-symbols-outlined text-base">download</span>
-                    导出
+                    {% trans "导出" %}
                 </a>
             </div>
         </div>
@@ -51,13 +52,13 @@
             <table class="table table-sm table-pin-rows table-hover w-full">
                 <thead class="bg-base-200/50 text-base-content/60 font-medium sticky top-0 z-30">
                     <tr>
-                        <th class="w-32 pl-4">时间</th>
-                        <th class="w-48">用户</th>
-                        <th class="w-24">动作</th>
-                        <th class="hidden md:table-cell w-40">对象类型</th>
-                        <th class="hidden lg:table-cell w-40">对象</th>
-                        <th class="hidden sm:table-cell">变更信息</th>
-                        <th class="w-16 text-center">操作</th>
+                        <th class="w-32 pl-4">{% trans "时间" %}</th>
+                        <th class="w-48">{% trans "用户" %}</th>
+                        <th class="w-24">{% trans "动作" %}</th>
+                        <th class="hidden md:table-cell w-40">{% trans "对象类型" %}</th>
+                        <th class="hidden lg:table-cell w-40">{% trans "对象" %}</th>
+                        <th class="hidden sm:table-cell">{% trans "变更信息" %}</th>
+                        <th class="w-16 text-center">{% trans "操作" %}</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-base-200/50">
@@ -70,7 +71,7 @@
         {% if is_paginated %}
         <div class="p-4 border-t border-base-200 flex justify-between items-center bg-base-100/30">
             <div class="text-xs text-base-content/50 hidden sm:block">
-                显示第 {{ page_obj.start_index }} 到 {{ page_obj.end_index }} 条，共 {{ page_obj.paginator.count }} 条
+                {% blocktrans with start=page_obj.start_index end=page_obj.end_index count=page_obj.paginator.count %}显示第 {{ start }} 到 {{ end }} 条，共 {{ count }} 条{% endblocktrans %}
             </div>
             <div class="join w-full justify-center sm:w-auto">
                 {% if page_obj.has_previous %}
@@ -79,7 +80,7 @@
                 <button class="join-item btn btn-xs btn-outline btn-disabled">«</button>
                 {% endif %}
                 
-                <button class="join-item btn btn-xs btn-outline no-animation bg-base-200 border-base-300 text-base-content/70">第 {{ page_obj.number }} 页</button>
+                <button class="join-item btn btn-xs btn-outline no-animation bg-base-200 border-base-300 text-base-content/70">{% trans "第" %} {{ page_obj.number }} {% trans "页" %}</button>
                 
                 {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}{% if request.GET.user %}&user={{ request.GET.user }}{% endif %}" class="join-item btn btn-xs btn-outline">»</a>
@@ -91,6 +92,7 @@
         {% endif %}
     </div>
 {% endcaptureas %}
+
 
 {% include "administration/components/card.html" with content=card_content class="col-span-12" %}
 {% endblock %}

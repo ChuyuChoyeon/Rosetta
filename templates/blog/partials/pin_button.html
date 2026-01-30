@@ -1,7 +1,10 @@
+{% load i18n %}
+{% trans "取消置顶" as unpin_text %}
+{% trans "置顶文章" as pin_text %}
 <button hx-post="{% url 'toggle_pin_post' post.id %}" 
         hx-swap="outerHTML"
         class="btn btn-ghost btn-circle btn-sm {{ post.is_pinned|yesno:'text-warning,text-gray-400' }}"
-        title="{{ post.is_pinned|yesno:'取消置顶,置顶文章' }}">
+        title="{{ post.is_pinned|yesno:unpin_text|add:','|add:pin_text }}">
     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 {{ post.is_pinned|yesno:'fill-current,' }}" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
         <path stroke-linecap="round" stroke-linejoin="round" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
     </svg>

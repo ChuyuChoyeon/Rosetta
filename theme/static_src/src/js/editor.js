@@ -177,12 +177,22 @@ window.initByteMD = function(elementId, inputId, initialValue) {
     },
   });
 
-  if (input) {
-      editor.$on('change', (e) => {
-        editor.$set({ value: e.detail.value });
-        input.value = e.detail.value;
-      });
-  }
+  let currentInput = input;
+
+  editor.$on('change', (e) => {
+    editor.$set({ value: e.detail.value });
+    if (currentInput) {
+        currentInput.value = e.detail.value;
+        currentInput.dispatchEvent(new Event('input'));
+    }
+  });
+
+  editor.setTargetInput = function(newInputId) {
+      const newInput = document.getElementById(newInputId);
+      if (newInput) {
+          currentInput = newInput;
+      }
+  };
 
   const bytemdElement = container.querySelector('.bytemd');
   if (bytemdElement) {

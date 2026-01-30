@@ -1,7 +1,7 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
+{% load capture_tags i18n %}
 
-{% block title %}投票管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{% trans "投票管理" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
     <!-- Header -->
@@ -9,16 +9,16 @@
     {% captureas actions_block %}
         <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-2 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105">
             <span class="material-symbols-outlined text-lg">add_circle</span>
-            新建投票
+            {% trans "新建投票" %}
         </a>
     {% endcaptureas %}
 
-    {% include "administration/components/header.html" with title="投票管理" subtitle="管理网站投票" breadcrumbs=None actions=actions_block %}
+    {% include "administration/components/header.html" with title=_("投票管理") subtitle=_("管理网站投票") breadcrumbs=None actions=actions_block %}
 
     <!-- Main List Container -->
     {% captureas bulk_actions_block %}
         <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error-focus text-white border-none gap-2 rounded-lg">
-            <span class="material-symbols-outlined text-[16px]">delete</span> 删除
+            <span class="material-symbols-outlined text-[16px]">delete</span> {% trans "删除" %}
         </button>
     {% endcaptureas %}
 
@@ -34,11 +34,11 @@
                             </label>
                         </th>
                         <th class="w-16 font-mono hidden md:table-cell">ID</th>
-                        <th>标题 / 描述</th>
-                        <th class="hidden lg:table-cell">关联文章</th>
-                        <th class="w-24 text-center hidden sm:table-cell">状态</th>
-                        <th class="w-32 text-center hidden lg:table-cell">截止日期</th>
-                        <th class="w-24 text-center pr-6">操作</th>
+                        <th>{% trans "标题 / 描述" %}</th>
+                        <th class="hidden lg:table-cell">{% trans "关联文章" %}</th>
+                        <th class="w-24 text-center hidden sm:table-cell">{% trans "状态" %}</th>
+                        <th class="w-32 text-center hidden lg:table-cell">{% trans "截止日期" %}</th>
+                        <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
                     </tr>
                 </thead>
                 <tbody id="poll-table-body" class="divide-y divide-base-content/5">
@@ -48,22 +48,22 @@
         </form>
     {% endcaptureas %}
 
-    {% include "administration/components/list_container.html" with title="投票列表" icon="poll" search_url="." bulk_actions=bulk_actions_block content=table_content %}
+    {% include "administration/components/list_container.html" with title=_("投票列表") icon="poll" search_url="." bulk_actions=bulk_actions_block content=table_content %}
 
     <script>
         function submitBulkAction(action) {
             const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
             if (checkedBoxes.length === 0) {
-                showGlobalAlert('请至少选择一项进行操作');
+                showGlobalAlert('{% trans "请至少选择一项进行操作"|escapejs %}');
                 return;
             }
 
-            let actionName = '批量操作';
-            if (action === 'delete') actionName = '批量删除';
+            let actionName = '{% trans "批量操作"|escapejs %}';
+            if (action === 'delete') actionName = '{% trans "批量删除"|escapejs %}';
 
             showConfirmModal(
                 actionName,
-                `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+                `{% trans "确定要对选中的"|escapejs %} ${checkedBoxes.length} {% trans "项执行此操作吗？"|escapejs %}`,
                 () => {
                     const form = document.getElementById('bulk-form');
                     const actionInput = document.createElement('input');

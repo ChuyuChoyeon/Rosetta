@@ -1,5 +1,5 @@
 <div class="space-y-8">
-    {% load capture_tags cache %}
+    {% load capture_tags cache i18n %}
 
     <!-- Search Widget -->
     <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
@@ -7,7 +7,7 @@
             <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                 <span class="material-symbols-outlined text-lg">search</span>
             </span>
-            搜索
+            {% trans "搜索" %}
         </h3>
         {% url 'search' as search_url %}
         {% include 'components/inspira/placeholders_and_vanish_input.html' with action=search_url placeholders=search_placeholders|default:"['搜索文章...', 'Python', 'Django', 'Tailwind']" %}
@@ -20,7 +20,7 @@
             <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                 <span class="material-symbols-outlined text-lg">menu_open</span>
             </span>
-            导航菜单
+            {% trans "导航菜单" %}
         </h3>
         <ul class="flex flex-col gap-2">
             {% for nav in nav_sidebar %}
@@ -43,7 +43,7 @@
             <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
                 <span class="material-symbols-outlined text-lg">trending_up</span>
             </span>
-            热门文章
+            {% trans "热门文章" %}
         </h3>
         <div class="flex flex-col gap-5">
             {% for post in sidebar_popular_posts %}
@@ -84,7 +84,7 @@
             <span class="w-8 h-8 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
                 <span class="material-symbols-outlined text-lg">label</span>
             </span>
-            标签云
+            {% trans "标签云" %}
         </h3>
         <div class="flex flex-wrap gap-2">
             {% for tag in sidebar_tags %}
@@ -109,13 +109,14 @@
 
     <!-- Recent Comments -->
     {% if sidebar_comments %}
-    {% cache sidebar_cache_ttl "sidebar_comments" %}
+    {% get_current_language as LANGUAGE_CODE %}
+    {% cache sidebar_cache_ttl "sidebar_comments" LANGUAGE_CODE %}
     <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-info/20 hover:shadow-xl hover:shadow-info/5 transition-all duration-300">
         <h3 class="font-bold text-lg mb-5 flex items-center gap-2 font-heading">
             <span class="w-8 h-8 rounded-lg bg-info/10 text-info flex items-center justify-center">
                 <span class="material-symbols-outlined text-lg">forum</span>
             </span>
-            最新评论
+            {% trans "最新评论" %}
         </h3>
         <div class="flex flex-col gap-5">
             {% for comment in sidebar_comments %}
@@ -128,7 +129,7 @@
                 <div class="flex flex-col flex-1 min-w-0 bg-base-200/30 p-3 rounded-2xl rounded-tl-none hover:bg-base-200/60 transition-colors">
                     <div class="flex justify-between items-center w-full mb-1">
                         <span class="font-bold text-sm truncate">{{ comment.user.nickname|default:comment.user.username }}</span>
-                        <span class="text-[10px] text-base-content/40 whitespace-nowrap">{{ comment.created_at|timesince }}前</span>
+                        <span class="text-[10px] text-base-content/40 whitespace-nowrap">{{ comment.created_at|timesince }}{% trans "前" %}</span>
                     </div>
                     <a href="{% url 'post_detail' comment.post.slug %}#comment-{{ comment.id }}" class="text-xs text-base-content/70 line-clamp-2 hover:text-info transition-colors leading-relaxed">
                         {{ comment.content|striptags }}
@@ -149,7 +150,7 @@
             <span class="w-8 h-8 rounded-lg bg-success/10 text-success flex items-center justify-center">
                 <span class="material-symbols-outlined text-lg">link</span>
             </span>
-            友情链接
+            {% trans "友情链接" %}
         </h3>
         <div class="grid grid-cols-2 gap-3">
             {% for link in friend_links %}

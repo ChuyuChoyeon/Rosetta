@@ -1,5 +1,5 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
+{% load capture_tags i18n %}
 {% load widget_tweaks %}
 
 {% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
@@ -9,7 +9,8 @@
 {% captureas header_actions %}
 {% endcaptureas %}
 
-{% include "administration/components/header.html" with title=title|default:"编辑用户组" icon="groups" breadcrumbs=breadcrumbs actions=header_actions %}
+{% trans "编辑用户组" as default_title %}
+{% include "administration/components/header.html" with title=title|default:default_title icon="groups" breadcrumbs=breadcrumbs actions=header_actions %}
 
 <form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-6" novalidate>
     {% csrf_token %}
@@ -22,7 +23,7 @@
             <div class="alert alert-error mb-4 shadow-sm">
                 <span class="material-symbols-outlined">error</span>
                 <div class="flex flex-col">
-                    <span class="font-bold">表单错误</span>
+                    <span class="font-bold">{% trans "表单错误" %}</span>
                     {% for error in form.non_field_errors %}
                     <span class="text-sm">{{ error }}</span>
                     {% endfor %}
@@ -33,11 +34,12 @@
             <!-- Name -->
             <div class="form-control w-full">
                 <label class="label">
-                    <span class="label-text font-bold text-base">用户组名称 <span class="text-error">*</span></span>
+                    <span class="label-text font-bold text-base">{% trans "用户组名称" %} <span class="text-error">*</span></span>
                 </label>
                 <div class="relative">
                     <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 text-lg">badge</span>
-                    {% render_field form.name class+="input input-bordered w-full pl-10 focus:input-primary transition-all" placeholder="例如：编辑人员" %}
+                    {% trans "例如：编辑人员" as ph_name %}
+                    {% render_field form.name class+="input input-bordered w-full pl-10 focus:input-primary transition-all" placeholder=ph_name %}
                 </div>
                 {% if form.name.errors %}
                 <label class="label">
@@ -46,13 +48,14 @@
                 {% endif %}
             </div>
         {% endcaptureas %}
-        {% include "administration/components/form_card.html" with title="基本信息" icon="groups" content=info_content %}
+        {% trans "基本信息" as card_title %}
+        {% include "administration/components/form_card.html" with title=card_title icon="groups" content=info_content %}
 
         <!-- Permissions -->
         {% captureas perm_content %}
             <div class="alert alert-info shadow-sm mb-4">
                 <span class="material-symbols-outlined">info</span>
-                <span class="text-sm">选中的权限将被授予该组内的所有用户。按住 Ctrl/Command 可多选。</span>
+                <span class="text-sm">{% trans "选中的权限将被授予该组内的所有用户。按住 Ctrl/Command 可多选。" %}</span>
             </div>
 
             <div class="form-control w-full">
@@ -64,7 +67,8 @@
                 {% endif %}
             </div>
         {% endcaptureas %}
-        {% include "administration/components/form_card.html" with title="权限分配" icon="security" icon_class="text-secondary" content=perm_content %}
+        {% trans "权限分配" as perm_title %}
+        {% include "administration/components/form_card.html" with title=perm_title icon="security" icon_class="text-secondary" content=perm_content %}
     </div>
 
     <!-- Right Column: Sidebar -->
@@ -74,33 +78,35 @@
             <div class="flex flex-col gap-3">
                 <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
                     <span class="material-symbols-outlined">save</span>
-                    保存更改
+                    {% trans "保存更改" %}
                 </button>
                 
                 <div class="grid grid-cols-2 gap-2">
-                    <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">保存并新增</button>
-                    <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">保存并继续</button>
+                    <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">{% trans "保存并新增" %}</button>
+                    <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">{% trans "保存并继续" %}</button>
                 </div>
 
                 <div class="divider my-1"></div>
                 
                 {% if object %}
                     <div class="flex justify-between items-center">
-                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">取消</a>
-                        <button type="button" onclick="confirmDelete('{% url 'administration:group_delete' object.pk %}', '确定要删除用户组《{{ object.name|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
-                            删除用户组
+                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">{% trans "取消" %}</a>
+                        <button type="button" onclick="confirmDelete('{% url 'administration:group_delete' object.pk %}', '{% blocktrans with name=object.name|escapejs %}确定要删除用户组《{{ name }}》吗？{% endblocktrans %}')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
+                            {% trans "删除用户组" %}
                         </button>
                     </div>
                     <div class="mt-4 text-xs text-base-content/50 bg-base-200/50 p-3 rounded-lg flex justify-between items-center">
-                        <span>成员数量</span>
+                        <span>{% trans "成员数量" %}</span>
                         <span class="font-mono font-bold">{{ object.user_set.count }}</span>
                     </div>
                 {% else %}
-                    <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">取消</a>
+                    <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">{% trans "取消" %}</a>
                 {% endif %}
             </div>
         {% endcaptureas %}
-        {% include "administration/components/form_card.html" with title="操作" icon="settings" content=publish_content %}
+        {% trans "操作" as op_title %}
+        {% include "administration/components/form_card.html" with title=op_title icon="settings" content=publish_content %}
     </div>
 </form>
+
 {% endblock %}

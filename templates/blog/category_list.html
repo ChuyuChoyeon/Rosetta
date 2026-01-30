@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static %}
+{% load static i18n %}
 
 {% block content %}
 <div class="min-h-[80vh] px-4 py-16 md:py-24 bg-base-100 relative overflow-hidden" x-data="{ searchQuery: '' }">
@@ -14,16 +14,20 @@
         <div class="text-center mb-20 space-y-6">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-200/50 border border-base-content/5 text-xs font-medium text-base-content/60 mb-4 backdrop-blur-sm">
                 <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                <span>探索知识库</span>
+                <span>{% trans "探索知识库" %}</span>
             </div>
             
             <h1 class="text-4xl md:text-6xl font-bold font-heading tracking-tight">
-                内容分类
+                {% trans "内容分类" %}
                 <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">.</span>
             </h1>
             
             <p class="text-lg md:text-xl text-base-content/60 max-w-2xl mx-auto leading-relaxed">
-                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span class="font-bold text-base-content">{{ categories|length }}</span> 个分类。
+                {% blocktrans count counter=categories|length %}
+                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span class="font-bold text-base-content">{{ counter }}</span> 个分类。
+                {% plural %}
+                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span class="font-bold text-base-content">{{ counter }}</span> 个分类。
+                {% endblocktrans %}
             </p>
 
             <!-- Search Bar -->
@@ -32,7 +36,7 @@
                 <div class="relative bg-base-100/80 backdrop-blur-xl rounded-2xl shadow-lg border border-base-content/10 flex items-center p-2 transition-all group-focus-within:shadow-primary/20 group-focus-within:border-primary/50 group-focus-within:ring-4 group-focus-within:ring-primary/10">
                     <span class="material-symbols-outlined text-base-content/40 ml-3">search</span>
                     <input type="text" 
-                           placeholder="搜索感兴趣的分类..." 
+                           placeholder="{% trans '搜索感兴趣的分类...' %}" 
                            class="w-full bg-transparent border-none focus:ring-0 text-base-content placeholder:text-base-content/40 h-10 px-3"
                            x-model="searchQuery">
                     <kbd class="kbd kbd-sm font-mono text-xs hidden md:inline-flex bg-base-200/50 border-base-content/10">ESC</kbd>
@@ -55,7 +59,9 @@
                 
                 <!-- Icon & Count -->
                 <div class="relative z-10 flex items-start justify-between mb-4">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center bg-base-200/50 group-hover:bg-white/80 dark:group-hover:bg-base-300 transition-colors duration-300 shadow-sm group-hover:shadow-md">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-300 shadow-sm group-hover:shadow-md
+                        {% if category.color and category.color|first != '#' %}bg-{{ category.color }}/10{% else %}bg-base-200/50{% endif %}"
+                        {% if category.color and category.color|first == '#' %}style="background-color: {{ category.color }}1a"{% endif %}>
                         <!-- Use category.color for text color if it matches standard tailwind colors, else fallback to primary -->
                         <span class="material-symbols-outlined text-2xl transition-transform duration-300 group-hover:scale-110
                             {% if category.color and category.color|first != '#' %}text-{{ category.color }}{% elif not category.color %}text-primary{% endif %}"
@@ -73,12 +79,13 @@
                     <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-1">
                         {{ category.name }}
                     </h3>
+                    {% trans "探索该分类下的所有精彩文章，发现更多有趣内容。" as default_description %}
                     <p class="text-sm text-base-content/60 line-clamp-2 mb-4 min-h-[2.5em] group-hover:text-base-content/80 transition-colors">
-                        {{ category.description|default:"探索该分类下的所有精彩文章，发现更多有趣内容。" }}
+                        {{ category.description|default:default_description }}
                     </p>
                     
                     <div class="flex items-center text-xs font-bold text-base-content/40 uppercase tracking-wider group-hover:text-primary transition-colors duration-300">
-                        <span>Explore</span>
+                        <span>{% trans "Explore" %}</span>
                         <span class="material-symbols-outlined text-sm ml-1 transform transition-transform duration-300 group-hover:translate-x-1">arrow_forward</span>
                     </div>
                 </div>
@@ -88,9 +95,9 @@
                 <div class="w-20 h-20 bg-base-200 rounded-full flex items-center justify-center mb-6 animate-bounce">
                     <span class="material-symbols-outlined text-4xl text-base-content/20">search_off</span>
                 </div>
-                <h3 class="text-xl font-bold text-base-content/70 mb-2">暂无分类</h3>
+                <h3 class="text-xl font-bold text-base-content/70 mb-2">{% trans "暂无分类" %}</h3>
                 <p class="text-base-content/40 max-w-sm">
-                    还没有添加任何分类，或者没有找到匹配的结果。
+                    {% trans "还没有添加任何分类，或者没有找到匹配的结果。" %}
                 </p>
             </div>
             {% endfor %}

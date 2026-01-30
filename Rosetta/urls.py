@@ -9,11 +9,21 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.conf.urls.i18n import i18n_patterns
 
 # ------------------------------------------------------------------------------
 # 核心业务路由
 # ------------------------------------------------------------------------------
+# 非多语言路由 (Non-i18n URLs)
 urlpatterns = [
+    path("i18n/", include("django.conf.urls.i18n")), # 语言切换 endpoint
+]
+
+# 多语言路由 (i18n URLs)
+urlpatterns += i18n_patterns(
+    path("sitemap.xml", include("core.sitemaps")),  # 站点地图索引
+    # --- 翻译管理 (django-rosetta) ---
+    path("rosetta/", include("rosetta.urls")),
     # --- 管理后台 ---
     path(
         "admin/", include("administration.urls")
@@ -28,9 +38,9 @@ urlpatterns = [
     # 注意：core 和 blog 的路由包含空路径 ""，应放在特定前缀路由之后
     path("", include("core.urls")),  # 首页、静态页、通用功能
     path("", include("blog.urls")),  # 博客文章、分类、标签检索
-    # --- SEO 支持 ---
-    path("sitemap.xml", include("core.sitemaps")),  # 站点地图索引
-]
+    
+    prefix_default_language=False,
+)
 
 
 # ------------------------------------------------------------------------------

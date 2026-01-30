@@ -1,27 +1,29 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
+{% load capture_tags i18n %}
 
-{% block title %}用户管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{% trans "用户管理" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block extra_js %}
 <script>
     function submitBulkAction(action) {
             const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
             if (checkedBoxes.length === 0) {
-                showGlobalAlert('请至少选择一项进行操作');
+                showGlobalAlert('{% trans "请至少选择一项进行操作"|escapejs %}');
                 return;
             }
 
-        let actionName = '批量操作';
-        if (action === 'delete') actionName = '批量删除';
-        else if (action === 'active') actionName = '批量启用';
-        else if (action === 'inactive') actionName = '批量禁用';
-        else if (action === 'set_staff') actionName = '批量设为管理员';
-        else if (action === 'remove_staff') actionName = '批量取消管理员';
+        let actionName = '{% trans "批量操作"|escapejs %}';
+        if (action === 'delete') actionName = '{% trans "批量删除"|escapejs %}';
+        else if (action === 'active') actionName = '{% trans "批量启用"|escapejs %}';
+        else if (action === 'inactive') actionName = '{% trans "批量禁用"|escapejs %}';
+        else if (action === 'set_staff') actionName = '{% trans "批量设为管理员"|escapejs %}';
+        else if (action === 'remove_staff') actionName = '{% trans "批量取消管理员"|escapejs %}';
+
+        const message = "{% trans '确定要对选中的 {count} 项执行此操作吗？'|escapejs %}".replace('{count}', checkedBoxes.length);
 
         showConfirmModal(
             actionName,
-            `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+            message,
             () => {
                 const form = document.getElementById('bulk-form');
                 const actionInput = document.createElement('input');
@@ -42,28 +44,29 @@
     {% captureas actions_block %}
         <div class="dropdown dropdown-end">
             <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal hover:bg-base-200">
-                更多
+                {% trans "更多" %}
                 <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
             </div>
             <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-xl bg-base-100 rounded-2xl w-52 border border-base-content/5 mt-2">
-                <li><a href="{% url 'administration:user_export' %}" target="_blank" class="rounded-xl"><span class="material-symbols-outlined">download</span> 导出 JSON</a></li>
-                <li><button onclick="import_modal.showModal()" class="rounded-xl"><span class="material-symbols-outlined">upload</span> 导入 JSON</button></li>
+                <li><a href="{% url 'administration:user_export' %}" target="_blank" class="rounded-xl"><span class="material-symbols-outlined">download</span> {% trans "导出 JSON" %}</a></li>
+                <li><button onclick="import_modal.showModal()" class="rounded-xl"><span class="material-symbols-outlined">upload</span> {% trans "导入 JSON" %}</button></li>
                 <div class="divider my-1"></div>
-                <li><button onclick="submitBulkAction('active')" class="rounded-xl"><span class="material-symbols-outlined text-success">person_check</span> 批量启用</button></li>
-                <li><button onclick="submitBulkAction('inactive')" class="rounded-xl"><span class="material-symbols-outlined text-warning">person_off</span> 批量禁用</button></li>
-                <li><button onclick="submitBulkAction('set_staff')" class="rounded-xl"><span class="material-symbols-outlined text-info">admin_panel_settings</span> 设为管理</button></li>
-                <li><button onclick="submitBulkAction('remove_staff')" class="rounded-xl"><span class="material-symbols-outlined">person</span> 取消管理</button></li>
-                <li><button onclick="submitBulkAction('delete')" class="text-error rounded-xl"><span class="material-symbols-outlined">delete</span> 批量删除</button></li>
+                <li><button onclick="submitBulkAction('active')" class="rounded-xl"><span class="material-symbols-outlined text-success">person_check</span> {% trans "批量启用" %}</button></li>
+                <li><button onclick="submitBulkAction('inactive')" class="rounded-xl"><span class="material-symbols-outlined text-warning">person_off</span> {% trans "批量禁用" %}</button></li>
+                <li><button onclick="submitBulkAction('set_staff')" class="rounded-xl"><span class="material-symbols-outlined text-info">admin_panel_settings</span> {% trans "设为管理" %}</button></li>
+                <li><button onclick="submitBulkAction('remove_staff')" class="rounded-xl"><span class="material-symbols-outlined">person</span> {% trans "取消管理" %}</button></li>
+                <li><button onclick="submitBulkAction('delete')" class="text-error rounded-xl"><span class="material-symbols-outlined">delete</span> {% trans "批量删除" %}</button></li>
             </ul>
         </div>
 
-        {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>新建用户' extra_classes='px-4 !h-8 text-xs min-h-0 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105' href=create_url %}
+        {% captureas btn_text %}{% trans "新建用户" %}{% endcaptureas %}
+        {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>'|add:btn_text extra_classes='px-4 !h-8 text-xs min-h-0 shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105' href=create_url %}
             {% include 'components/inspira/rainbow_button.html' %}
         {% endwith %}
     {% endcaptureas %}
 
     <!-- Header -->
-    {% include "administration/components/header.html" with title="用户管理" subtitle="管理注册用户与权限" breadcrumbs=None actions=actions_block %}
+    {% include "administration/components/header.html" with title=_("用户管理") subtitle=_("管理注册用户与权限") breadcrumbs=None actions=actions_block %}
 
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -72,9 +75,9 @@
                 <div class="stat-figure text-primary bg-primary/10 p-2 rounded-xl">
                     <span class="material-symbols-outlined text-2xl">group</span>
                 </div>
-                <div class="stat-title">总用户数</div>
+                <div class="stat-title">{% trans "总用户数" %}</div>
                 <div class="stat-value text-primary text-3xl">{{ total_count }}</div>
-                <div class="stat-desc">所有注册用户</div>
+                <div class="stat-desc">{% trans "所有注册用户" %}</div>
             </div>
         </div>
         
@@ -83,9 +86,9 @@
                 <div class="stat-figure text-success bg-success/10 p-2 rounded-xl">
                     <span class="material-symbols-outlined text-2xl">how_to_reg</span>
                 </div>
-                <div class="stat-title">已激活</div>
+                <div class="stat-title">{% trans "已激活" %}</div>
                 <div class="stat-value text-success text-3xl">{{ active_count }}</div>
-                <div class="stat-desc">账户状态正常</div>
+                <div class="stat-desc">{% trans "账户状态正常" %}</div>
             </div>
         </div>
         
@@ -94,36 +97,36 @@
                 <div class="stat-figure text-secondary bg-secondary/10 p-2 rounded-xl">
                     <span class="material-symbols-outlined text-2xl">verified_user</span>
                 </div>
-                <div class="stat-title">管理员</div>
+                <div class="stat-title">{% trans "管理员" %}</div>
                 <div class="stat-value text-secondary text-3xl">{{ staff_count }}</div>
-                <div class="stat-desc">拥有后台权限</div>
+                <div class="stat-desc">{% trans "拥有后台权限" %}</div>
             </div>
         </div>
     </div>
 
     <!-- Filter Tabs -->
     {% captureas filter_tabs_block %}
-        <a href="{% url 'administration:user_list' %}" class="tab tab-sm {% if not request.GET.is_active and not request.GET.is_staff %}tab-active bg-base-100 shadow-sm text-base-content font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">全部</a>
-        <a href="{% url 'administration:user_list' %}?is_active=true" class="tab tab-sm {% if request.GET.is_active == 'true' %}tab-active bg-success text-success-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">已激活</a>
-        <a href="{% url 'administration:user_list' %}?is_staff=true" class="tab tab-sm {% if request.GET.is_staff == 'true' %}tab-active bg-secondary text-secondary-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">管理员</a>
+        <a href="{% url 'administration:user_list' %}" class="tab tab-sm {% if not request.GET.is_active and not request.GET.is_staff %}tab-active bg-base-100 shadow-sm text-base-content font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">{% trans "全部" %}</a>
+        <a href="{% url 'administration:user_list' %}?is_active=true" class="tab tab-sm {% if request.GET.is_active == 'true' %}tab-active bg-success text-success-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">{% trans "已激活" %}</a>
+        <a href="{% url 'administration:user_list' %}?is_staff=true" class="tab tab-sm {% if request.GET.is_staff == 'true' %}tab-active bg-secondary text-secondary-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">{% trans "管理员" %}</a>
     {% endcaptureas %}
 
     <!-- Bulk Actions -->
     {% captureas bulk_actions_block %}
         <button type="button" onclick="submitBulkAction('active')" class="btn btn-sm btn-success gap-1 text-white rounded-lg">
-            <span class="material-symbols-outlined text-[16px]">person_check</span> 启用
+            <span class="material-symbols-outlined text-[16px]">person_check</span> {% trans "启用" %}
         </button>
         <button type="button" onclick="submitBulkAction('inactive')" class="btn btn-sm btn-warning gap-1 rounded-lg">
-            <span class="material-symbols-outlined text-[16px]">person_off</span> 禁用
+            <span class="material-symbols-outlined text-[16px]">person_off</span> {% trans "禁用" %}
         </button>
         <button type="button" onclick="submitBulkAction('set_staff')" class="btn btn-sm btn-info gap-1 text-white rounded-lg">
-            <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span> 设为管理
+            <span class="material-symbols-outlined text-[16px]">admin_panel_settings</span> {% trans "设为管理" %}
         </button>
         <button type="button" onclick="submitBulkAction('remove_staff')" class="btn btn-sm btn-ghost gap-1 hover:bg-base-content/10 rounded-lg">
-            <span class="material-symbols-outlined text-[16px]">person</span> 取消管理
+            <span class="material-symbols-outlined text-[16px]">person</span> {% trans "取消管理" %}
         </button>
         <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error-focus text-white border-none gap-1 rounded-lg">
-            <span class="material-symbols-outlined text-[16px]">delete</span> 删除
+            <span class="material-symbols-outlined text-[16px]">delete</span> {% trans "删除" %}
         </button>
     {% endcaptureas %}
 
@@ -142,19 +145,19 @@
                         </th>
                         <th class="w-[200px]">
                             <a href="?sort=username&order={% if request.GET.sort == 'username' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
-                                用户
+                                {% trans "用户" %}
                                 {% if request.GET.sort == 'username' %}
                                     <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
                                 {% endif %}
                             </a>
                         </th>
-                        <th class="hidden lg:table-cell">邮箱</th>
-                        <th class="w-28 hidden sm:table-cell">称号</th>
-                        <th class="w-28 hidden md:table-cell">角色</th>
-                        <th class="w-32">状态</th>
+                        <th class="hidden lg:table-cell">{% trans "邮箱" %}</th>
+                        <th class="w-28 hidden sm:table-cell">{% trans "称号" %}</th>
+                        <th class="w-28 hidden md:table-cell">{% trans "角色" %}</th>
+                        <th class="w-32">{% trans "状态" %}</th>
                         <th class="w-32 hidden xl:table-cell">
                             <a href="?sort=date_joined&order={% if request.GET.sort == 'date_joined' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
-                                加入时间
+                                {% trans "加入时间" %}
                                 {% if request.GET.sort == 'date_joined' %}
                                     <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
                                 {% endif %}
@@ -162,13 +165,13 @@
                         </th>
                         <th class="w-32 hidden xl:table-cell">
                             <a href="?sort=last_login&order={% if request.GET.sort == 'last_login' and request.GET.order == 'asc' %}desc{% else %}asc{% endif %}{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" class="flex items-center gap-1 hover:text-primary transition-colors">
-                                最近登录
+                                {% trans "最近登录" %}
                                 {% if request.GET.sort == 'last_login' %}
                                     <span class="material-symbols-outlined text-xs">{% if request.GET.order == 'asc' %}arrow_drop_up{% else %}arrow_drop_down{% endif %}</span>
                                 {% endif %}
                             </a>
                         </th>
-                        <th class="w-24 text-center pr-6">操作</th>
+                        <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
                     </tr>
                 </thead>
                 <!-- Body (HTMX Target) -->
@@ -180,7 +183,7 @@
     {% endcaptureas %}
 
     <!-- List Container -->
-    {% include "administration/components/list_container.html" with title="用户列表" icon="group" search_url="." filter_tabs=filter_tabs_block bulk_actions=bulk_actions_block content=table_content %}
+    {% include "administration/components/list_container.html" with title=_("用户列表") icon="group" search_url="." filter_tabs=filter_tabs_block bulk_actions=bulk_actions_block content=table_content %}
 
     <!-- Import Modal -->
     <dialog id="import_modal" class="modal">
@@ -189,15 +192,15 @@
             <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <span class="material-symbols-outlined">file_upload</span>
             </div>
-            导入数据 (JSON)
+            {% trans "导入数据 (JSON)" %}
         </h3>
-        <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
+        <p class="py-4 text-sm opacity-70">{% trans "请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。" %}</p>
         <form action="{% url 'administration:user_import' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="file" name="json_file" class="file-input file-input-bordered file-input-sm w-full rounded-lg mb-6" accept=".json" required />
             <div class="modal-action">
-                <button type="button" class="btn btn-sm btn-ghost rounded-lg" onclick="import_modal.close()">取消</button>
-                <button type="submit" class="btn btn-sm btn-primary rounded-lg">开始导入</button>
+                <button type="button" class="btn btn-sm btn-ghost rounded-lg" onclick="import_modal.close()">{% trans "取消" %}</button>
+                <button type="submit" class="btn btn-sm btn-primary rounded-lg">{% trans "开始导入" %}</button>
             </div>
         </form>
       </div>

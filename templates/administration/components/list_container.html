@@ -1,4 +1,5 @@
 {% load capture_tags %}
+{% load i18n %}
 
 <div class="bg-base-100 rounded-2xl border border-base-content/5 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
     <!-- Toolbar: Title & Search -->
@@ -29,7 +30,7 @@
             <input type="text" 
                    name="q" 
                    value="{{ request.GET.q }}" 
-                   placeholder="搜索..." 
+                   placeholder="{% trans '搜索...' %}" 
                    class="input input-sm input-bordered w-full sm:w-64 pl-10 focus:input-primary transition-all rounded-lg bg-base-200/50 focus:bg-base-100" 
             />
         </form>
@@ -49,7 +50,7 @@
     <div id="bulk-actions" class="hidden bg-primary/5 p-3 px-4 flex justify-between items-center border-b border-primary/10 animate-in slide-in-from-top-2 duration-200">
         <div class="flex items-center gap-2">
             <div class="w-1 h-4 rounded-full bg-primary"></div>
-            <span class="text-sm font-medium text-primary"><span id="selected-count" class="font-bold text-lg">0</span> 项已选择</span>
+            <span class="text-sm font-medium text-primary"><span id="selected-count" class="font-bold text-lg">0</span> {% trans "项已选择" %}</span>
         </div>
         <div class="flex gap-2">
             {{ bulk_actions }}

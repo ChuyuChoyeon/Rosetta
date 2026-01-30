@@ -2,6 +2,7 @@ from django.views.generic import DetailView, View, ListView
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse, HttpResponseForbidden
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.translation import gettext as _
 from django.db.models import F
 from .models import Poll, Choice, Vote
 
@@ -43,7 +44,7 @@ class PollVoteView(LoginRequiredMixin, View):
 
         choice_id = request.POST.get("choice")
         if not choice_id:
-            return HttpResponse('<div class="alert alert-warning">请选择一个选项！</div>')
+            return HttpResponse(f'<div class="alert alert-warning">{_("请选择一个选项！")}</div>')
 
         choice = get_object_or_404(Choice, pk=choice_id, poll=poll)
 

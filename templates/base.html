@@ -1,10 +1,10 @@
-{% load static tailwind_tags meta %}
+{% load static tailwind_tags meta i18n %}
 <!DOCTYPE html>
-<html lang="zh-Hans">
+<html lang="{{ LANGUAGE_CODE }}">
 <head>
-    <title>{% block title %}{{ meta.title|default:config.SITE_NAME }}{% endblock %}</title>
+    <title>{% block title %}{{ meta.title|default:config.SITE_NAME }}{% endblock %}{{ config.SITE_TITLE_SUFFIX }}</title>
     <link rel="shortcut icon" href="{{ config.SITE_FAVICON|default:'/static/core/img/favicon.ico' }}">
-    <link rel="alternate" type="application/rss+xml" title="RSS Feed" href="{% url 'post_feed' %}">
+    <link rel="alternate" type="application/rss+xml" title="{% trans 'RSS Feed' %}" href="{% url 'post_feed' %}">
     
     <!-- Google 字体：Poppins & Open Sans (本地化) -->
     <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">

@@ -1,15 +1,16 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}{{ poll.title }} - {{ block.super }}{% endblock %}
+{% block title %}{{ poll.title }}{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-12 max-w-3xl">
     <!-- Breadcrumbs -->
     <div class="text-sm breadcrumbs mb-8 text-base-content/60">
         <ul>
-            <li><a href="/">首页</a></li>
-            <li><a href="{% url 'voting:list' %}">投票</a></li>
-            <li>详情</li>
+            <li><a href="/">{% trans "首页" %}</a></li>
+            <li><a href="{% url 'voting:list' %}">{% trans "投票" %}</a></li>
+            <li>{% trans "详情" %}</li>
         </ul>
     </div>
 
@@ -21,7 +22,7 @@
     <div class="mt-8 text-center">
         <a href="{% url 'voting:list' %}" class="btn btn-ghost gap-2">
             <span class="material-symbols-outlined">arrow_back</span>
-            返回投票列表
+            {% trans "返回投票列表" %}
         </a>
     </div>
 </div>

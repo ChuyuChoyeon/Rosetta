@@ -1,7 +1,7 @@
 {% extends "administration/base.html" %}
-{% load static capture_tags core_extras %}
+{% load static capture_tags core_extras i18n %}
 
-{% block title %}{{ config.SITE_HEADER|default:"Rosetta Dashboard" }}{% endblock %}
+{% block title %}{{ config.SITE_HEADER|default:dashboard_title }}{% endblock %}
 
 {% block content %}
 <div class="space-y-8">
@@ -9,16 +9,17 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div>
             <h1 class="text-4xl font-bold font-heading mb-2 flex items-center gap-2">
-                Hello, 
+                {% trans "Hello," %} 
                 {% with words=config.DASHBOARD_WELCOME_WORDS|default:"['Creator', 'Admin', 'Master', 'Manager']" %}
                     {% include "components/inspira/flip_words.html" with words=words extra_classes="text-primary" %}
                 {% endwith %}
             </h1>
-            <p class="text-base-content/60 text-lg">{{ config.DASHBOARD_WELCOME_TEXT|default:"欢迎回到 Rosetta 控制台。这里是您的数字指挥中心。" }}</p>
+            <p class="text-base-content/60 text-lg">{% if config.DASHBOARD_WELCOME_TEXT %}{{ config.DASHBOARD_WELCOME_TEXT }}{% else %}{% trans "欢迎回到 Rosetta 控制台。这里是您的数字指挥中心。" %}{% endif %}</p>
         </div>
         <div class="flex gap-3">
             {% url 'administration:post_create' as create_url %}
-            {% with text="写文章" icon="edit_note" href=create_url %}
+            {% captureas btn_text %}{% trans "写文章" %}{% endcaptureas %}
+            {% with text=btn_text icon="edit_note" href=create_url %}
                 {% include "components/inspira/rainbow_button.html" %}
             {% endwith %}
         </div>
@@ -33,7 +34,7 @@
                 <div class="stat-figure text-primary">
                     <span class="material-symbols-outlined text-3xl">article</span>
                 </div>
-                <div class="stat-title font-bold text-base-content/60">总文章数</div>
+                <div class="stat-title font-bold text-base-content/60">{% trans "总文章数" %}</div>
                 <div class="stat-value text-primary text-4xl font-heading mt-1">{{ total_posts }}</div>
                 <div class="stat-desc mt-2 flex items-center gap-1 font-medium">
                     {% if post_growth >= 0 %}
@@ -41,13 +42,13 @@
                         <span class="material-symbols-outlined text-sm">trending_up</span>
                         {{ post_growth }}%
                     </span>
-                    <span class="opacity-60">较上月</span>
+                    <span class="opacity-60">{% trans "较上月" %}</span>
                     {% else %}
                     <span class="text-error flex items-center bg-error/10 px-1.5 py-0.5 rounded-md">
                         <span class="material-symbols-outlined text-sm">trending_down</span>
                         {{ post_growth }}%
                     </span>
-                    <span class="opacity-60">较上月</span>
+                    <span class="opacity-60">{% trans "较上月" %}</span>
                     {% endif %}
                 </div>
             </div>
@@ -60,18 +61,18 @@
                 <div class="stat-figure text-secondary">
                     <span class="material-symbols-outlined text-3xl">comment</span>
                 </div>
-                <div class="stat-title font-bold text-base-content/60">总评论数</div>
+                <div class="stat-title font-bold text-base-content/60">{% trans "总评论数" %}</div>
                 <div class="stat-value text-secondary text-4xl font-heading mt-1">{{ total_comments }}</div>
                 <div class="stat-desc mt-2 flex items-center gap-1 font-medium">
                     {% if pending_comments > 0 %}
                     <span class="text-warning flex items-center bg-warning/10 px-1.5 py-0.5 rounded-md animate-pulse">
                         <span class="material-symbols-outlined text-sm">pending</span>
-                        {{ pending_comments }} 待审
+                        {{ pending_comments }} {% trans "待审" %}
                     </span>
                     {% else %}
                     <span class="text-success flex items-center bg-success/10 px-1.5 py-0.5 rounded-md">
                         <span class="material-symbols-outlined text-sm">check_circle</span>
-                        全部已审
+                        {% trans "全部已审" %}
                     </span>
                     {% endif %}
                 </div>
@@ -85,9 +86,9 @@
                 <div class="stat-figure text-success">
                     <div class="radial-progress text-success bg-success/10 border-4 border-transparent text-xs font-bold" style="--value:{{ system_health }}; --size:2.5rem; --thickness: 4px;">{{ system_health }}%</div>
                 </div>
-                <div class="stat-title font-bold text-base-content/60">系统健康度</div>
+                <div class="stat-title font-bold text-base-content/60">{% trans "系统健康度" %}</div>
                 <div class="stat-value text-success text-4xl font-heading mt-1">{{ system_health }}%</div>
-                <div class="stat-desc mt-2 font-medium opacity-60">运行正常</div>
+                <div class="stat-desc mt-2 font-medium opacity-60">{% trans "运行正常" %}</div>
             </div>
         </div>
 
@@ -98,15 +99,15 @@
                 <div class="stat-figure text-info">
                     <span class="material-symbols-outlined text-3xl">bolt</span>
                 </div>
-                <div class="stat-title font-bold text-base-content/60">快捷操作</div>
+                <div class="stat-title font-bold text-base-content/60">{% trans "快捷操作" %}</div>
                 <div class="mt-3 flex gap-2">
                     <a href="{% url 'administration:debug_cache' %}" class="btn btn-sm btn-outline btn-info gap-1 h-9 min-h-0">
                         <span class="material-symbols-outlined text-base">cleaning_services</span>
-                        清理缓存
+                        {% trans "清理缓存" %}
                     </a>
                     <a href="{% url 'administration:settings' %}" class="btn btn-sm btn-ghost gap-1 h-9 min-h-0 bg-base-200/50 hover:bg-base-200">
                         <span class="material-symbols-outlined text-base">settings</span>
-                        站点设置
+                        {% trans "站点设置" %}
                     </a>
                 </div>
             </div>
@@ -124,11 +125,11 @@
                          <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                              <span class="material-symbols-outlined text-lg">ssid_chart</span>
                          </span>
-                         活跃趋势
+                         {% trans "活跃趋势" %}
                      </h3>
                      <div class="flex gap-2">
                          <span class="badge badge-sm badge-ghost gap-1">
-                             <span class="w-2 h-2 rounded-full bg-primary"></span> 评论
+                             <span class="w-2 h-2 rounded-full bg-primary"></span> {% trans "评论" %}
                          </span>
                      </div>
                  </div>
@@ -144,7 +145,7 @@
         <div class="flex flex-col gap-6">
             <!-- Comment Status -->
             <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden">
-                <h3 class="font-bold text-sm mb-4 opacity-70 uppercase tracking-wider">评论分布</h3>
+                <h3 class="font-bold text-sm mb-4 opacity-70 uppercase tracking-wider">{% trans "评论分布" %}</h3>
                 <div class="flex items-center justify-between">
                     <div id="commentDonut"
                          class="flex-1 min-w-0"
@@ -152,11 +153,11 @@
                     <div class="flex flex-col gap-3 text-xs shrink-0 whitespace-nowrap pl-4 border-l border-base-content/5">
                         <div class="flex items-center gap-2">
                             <div class="w-2.5 h-2.5 rounded-full bg-success shadow-sm shadow-success/50"></div>
-                            <span class="font-medium">已发布</span>
+                            <span class="font-medium">{% trans "已发布" %}</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="w-2.5 h-2.5 rounded-full bg-warning shadow-sm shadow-warning/50"></div>
-                            <span class="font-medium">待审核</span>
+                            <span class="font-medium">{% trans "待审核" %}</span>
                         </div>
                     </div>
                 </div>
@@ -164,7 +165,7 @@
             
             <!-- Top Posts List -->
             <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 flex-1 relative overflow-hidden">
-                 <h3 class="font-bold text-sm mb-5 opacity-70 uppercase tracking-wider">热门文章 TOP 5</h3>
+                 <h3 class="font-bold text-sm mb-5 opacity-70 uppercase tracking-wider">{% trans "热门文章 TOP 5" %}</h3>
                  <div class="flex flex-col gap-4">
                      {% for post in top_posts %}
                      <a href="{% url 'post_detail' post.slug %}" target="_blank" class="group block relative">
@@ -193,7 +194,7 @@
                 <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
                     <span class="material-symbols-outlined text-lg">pie_chart</span>
                 </span>
-                分类分布
+                {% trans "分类分布" %}
             </h3>
             <div id="categoryChart" 
                  class="w-full h-[300px]"
@@ -208,7 +209,7 @@
                 <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
                     <span class="material-symbols-outlined text-lg">tag</span>
                 </span>
-                热门标签
+                {% trans "热门标签" %}
             </h3>
             <div id="tagChart" 
                  class="w-full h-[300px]"
@@ -226,9 +227,9 @@
                     <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
                         <span class="material-symbols-outlined text-lg">forum</span>
                     </span>
-                    最近评论
+                    {% trans "最近评论" %}
                 </h3>
-                <a href="{% url 'administration:comment_list' %}" class="btn btn-sm btn-ghost hover:bg-base-200">查看全部</a>
+                <a href="{% url 'administration:comment_list' %}" class="btn btn-sm btn-ghost hover:bg-base-200">{% trans "查看全部" %}</a>
             </div>
             
             {% captureas list_content %}
@@ -244,7 +245,7 @@
                             <div class="flex items-center gap-2">
                                 <span class="font-bold text-sm">{{ comment.user.nickname|default:comment.user.username }}</span>
                                 {% if not comment.active %}
-                                <span class="badge badge-xs badge-warning font-bold">待审</span>
+                                <span class="badge badge-xs badge-warning font-bold">{% trans "待审" %}</span>
                                 {% endif %}
                             </div>
                             <span class="text-xs font-mono opacity-40">{{ comment.created_at|time_ago }}</span>
@@ -261,7 +262,7 @@
                 {% empty %}
                 <div class="text-center opacity-50 py-10 flex flex-col items-center gap-2">
                     <span class="material-symbols-outlined text-4xl">inbox</span>
-                    <span>暂无活动</span>
+                    <span>{% trans "暂无活动" %}</span>
                 </div>
                 {% endfor %}
             {% endcaptureas %}
@@ -279,7 +280,7 @@
                 <span class="w-8 h-8 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
                     <span class="material-symbols-outlined text-lg">memory</span>
                 </span>
-                系统状态
+                {% trans "系统状态" %}
             </h3>
             
             <div class="space-y-6 relative z-10">
@@ -288,7 +289,7 @@
                     <!-- CPU -->
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
-                            <span class="text-xs font-bold opacity-70">CPU</span>
+                            <span class="text-xs font-bold opacity-70">{% trans "CPU" %}</span>
                             <span class="font-mono text-xs font-bold">{{ system_info.cpu_percent }}%</span>
                         </div>
                         <progress class="progress progress-primary w-full h-2" value="{{ system_info.cpu_percent }}" max="100"></progress>
@@ -297,7 +298,7 @@
                     <!-- Memory -->
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
-                            <span class="text-xs font-bold opacity-70">内存</span>
+                            <span class="text-xs font-bold opacity-70">{% trans "内存" %}</span>
                             <span class="font-mono text-xs font-bold">{{ system_info.memory_percent }}%</span>
                         </div>
                         <progress class="progress progress-secondary w-full h-2" value="{{ system_info.memory_percent }}" max="100"></progress>
@@ -306,32 +307,32 @@
                     <!-- Disk -->
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
-                            <span class="text-xs font-bold opacity-70">存储</span>
+                            <span class="text-xs font-bold opacity-70">{% trans "存储" %}</span>
                             <span class="font-mono text-xs font-bold">{{ system_info.disk_percent }}%</span>
                         </div>
                         <progress class="progress progress-accent w-full h-2" value="{{ system_info.disk_percent }}" max="100"></progress>
                     </div>
                 </div>
-
-                <div class="divider my-2"></div>
-
-                <!-- Environment Info -->
+                
+                <div class="divider my-2 opacity-10"></div>
+                
+                <!-- Environment -->
                 <div class="grid grid-cols-2 gap-4 text-xs">
-                    <div class="flex flex-col gap-1">
-                        <span class="opacity-50">Python 版本</span>
+                    <div>
+                        <span class="block opacity-50 mb-1">{% trans "Python 版本" %}</span>
                         <span class="font-mono font-bold">{{ system_info.python_version }}</span>
                     </div>
-                    <div class="flex flex-col gap-1">
-                        <span class="opacity-50">Django 版本</span>
+                    <div>
+                        <span class="block opacity-50 mb-1">{% trans "Django 版本" %}</span>
                         <span class="font-mono font-bold">{{ system_info.django_version }}</span>
                     </div>
-                    <div class="flex flex-col gap-1 col-span-2">
-                        <span class="opacity-50">系统</span>
-                        <span class="font-mono font-bold truncate">{{ system_info.platform_system }} {{ system_info.platform_release }}</span>
+                    <div>
+                        <span class="block opacity-50 mb-1">{% trans "系统" %}</span>
+                        <span class="font-mono font-bold truncate" title="{{ system_info.platform_system }} {{ system_info.platform_release }}">{{ system_info.platform_system }}</span>
                     </div>
-                    <div class="flex flex-col gap-1 col-span-2">
-                        <span class="opacity-50">运行时间</span>
-                        <span class="font-mono font-bold text-success">{{ system_info.uptime }}</span>
+                    <div>
+                        <span class="block opacity-50 mb-1">{% trans "运行时间" %}</span>
+                        <span class="font-mono font-bold">{{ system_info.uptime }}</span>
                     </div>
                 </div>
             </div>

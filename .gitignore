@@ -99,3 +99,139 @@ uv.lock
 core/migrations/*
 */migrations/*
 theme/static_src/package-lock.json
+INDEX.md
+# --- Django 补充项 ---
+# 本地设置（多人协作时避免冲突）
+settings_local.py
+local.py
+# 收集静态文件时生成的映射文件
+staticfiles.json
+# Django 缓存框架本地缓存
+cache/
+*.cache
+
+# --- 数据库相关 ---
+# MySQL 本地套接字文件（如使用）
+*.sock
+# PostgreSQL 本地套接字文件
+*.s.PGSQL.*
+
+# --- Celery & 异步任务 ---
+celerybeat-schedule
+celerybeat.pid
+*.pid
+# Flower 监控数据库
+flower.db
+
+# --- 日志轮转 ---
+*.log.*
+*.log.[0-9]
+
+# --- 媒体文件保护 ---
+# 若媒体目录下含临时上传、缩略图缓存，可追加
+media/tmp/
+media/cache/
+media_thumbs/
+
+# --- 前端构建产物（通用） ---
+# Webpack / Vite / Parcel 输出目录
+dist/
+build/
+*.bundle.js
+*.chunk.js
+*.hot-update.*
+*.map
+# Sass / Less 缓存
+.sass-cache/
+*.css.map
+
+# --- Python 工具链 ---
+# pip-tools 输出
+requirements.txt.lock
+requirements-dev.txt.lock
+# Poetry
+poetry.lock
+poetry.toml
+# PDM
+.pdm.toml
+pdm.lock
+# Hatch
+.hatch/
+# Ruff 缓存
+.ruff_cache/
+# mypy 缓存
+.mypy_cache/
+.dmypy.json
+dmypy.json
+# Pyright
+pyrightconfig.json
+# bandit
+.bandit
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+*.ipynb
+
+# --- Docker ---
+.dockerignore
+docker-compose.override.yml
+# 本地卷映射产生的数据目录
+.docker/
+
+# --- 备份与打包 ---
+*.bak
+*.swp!
+*.orig
+*.rej
+*~
+# macOS
+.AppleDouble
+.LSOverride
+# Windows
+Thumbs.db
+Desktop.ini
+# Linux
+.directory
+.Trash-*
+
+# --- 证书与密钥 ---
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+# Let's Encrypt 本地验证
+.acme/
+
+# --- 临时文件 ---
+tmp/
+temp/
+*.tmp
+*.temp
+# 上传测试文件
+uploads/test/
+
+# --- 本地文档与笔记 ---
+docs/_build/
+docs/.doctrees/
+.notes/
+TODO.local.md
+ROADMAP.local.md
+
+# --- 其他 Python 框架兼容 ---
+# FastAPI / Starlette
+*.sqlite3-shm
+*.sqlite3-wal
+# Flask
+instance/
+.webassets-cache
+
+# --- 本地调试插件 ---
+# Django-Debug-Toolbar 本地 SQL 跟踪
+debug_toolbar/
+# Silk 性能分析
+silk/
+
+# --- 本地缓存与锁 ---
+*.lock
+*.pid.lock

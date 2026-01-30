@@ -1,7 +1,8 @@
 {% extends "administration/debug/base_debug.html" %}
 {% load capture_tags %}
+{% load i18n %}
 
-{% block debug_title %}概览{% endblock %}
+{% block debug_title %}{% trans "概览" %}{% endblock %}
 
 {% block debug_content %}
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -10,19 +11,19 @@
     <div class="h-full p-6 flex flex-col justify-between">
         <h2 class="card-title text-base mb-4">
             <span class="material-symbols-outlined text-secondary">database</span>
-            数据库连接
+            {% trans "数据库连接" %}
         </h2>
         <div class="flex items-center gap-4">
             {% if db_ok %}
                 <div class="radial-progress text-success" style="--value:100; --size:3rem;">100%</div>
                 <div>
-                    <div class="font-bold text-success">正常 (Connected)</div>
+                    <div class="font-bold text-success">{% trans "正常 (Connected)" %}</div>
                     <div class="text-xs opacity-50">Latency: < 1ms</div>
                 </div>
             {% else %}
                 <div class="radial-progress text-error" style="--value:100; --size:3rem;">!</div>
                 <div>
-                    <div class="font-bold text-error">异常 (Error)</div>
+                    <div class="font-bold text-error">{% trans "异常 (Error)" %}</div>
                     <div class="text-xs opacity-50">Check settings</div>
                 </div>
             {% endif %}
@@ -38,7 +39,7 @@
     <div class="h-full p-6 flex flex-col justify-between">
         <h2 class="card-title text-base mb-4">
             <span class="material-symbols-outlined text-info">dns</span>
-            系统环境
+            {% trans "系统环境" %}
         </h2>
         <div class="flex flex-col gap-2 text-sm">
             <div class="flex justify-between items-center border-b border-base-content/5 pb-2">
@@ -65,19 +66,19 @@
     <div class="p-6">
         <h2 class="card-title text-base mb-4">
             <span class="material-symbols-outlined text-success">dataset</span>
-            数据统计
+            {% trans "数据统计" %}
         </h2>
         <div class="grid grid-cols-2 gap-4">
             <div class="flex flex-col p-3 bg-base-200 rounded-lg">
-                <span class="text-xs opacity-70">用户</span>
+                <span class="text-xs opacity-70">{% trans "用户" %}</span>
                 <span class="text-xl font-bold">{{ counts.users }}</span>
             </div>
             <div class="flex flex-col p-3 bg-base-200 rounded-lg">
-                <span class="text-xs opacity-70">文章</span>
+                <span class="text-xs opacity-70">{% trans "文章" %}</span>
                 <span class="text-xl font-bold">{{ counts.posts }}</span>
             </div>
             <div class="flex flex-col p-3 bg-base-200 rounded-lg">
-                <span class="text-xs opacity-70">评论</span>
+                <span class="text-xs opacity-70">{% trans "评论" %}</span>
                 <span class="text-xl font-bold">{{ counts.comments }}</span>
             </div>
         </div>
@@ -93,17 +94,17 @@
         <div class="p-6 pb-2 border-b border-base-200">
             <h2 class="card-title flex items-center gap-2">
                 <span class="material-symbols-outlined text-primary">link</span>
-                系统路由表
+                {% trans "系统路由表" %}
             </h2>
-            <p class="text-xs text-base-content/50 mt-1">仅显示已命名路由，部分带参数路由不可点击</p>
+            <p class="text-xs text-base-content/50 mt-1">{% trans "仅显示已命名路由，部分带参数路由不可点击" %}</p>
         </div>
         <div class="overflow-x-auto overflow-y-auto max-h-[600px] p-0 flex-grow scrollbar-thin scrollbar-thumb-base-300">
             <table class="table table-pin-rows table-sm w-full">
                 <thead class="bg-base-200 z-30">
                     <tr>
-                        <th class="w-5/12 pl-6 min-w-[200px]">路由信息 (Route Info)</th>
-                        <th class="w-4/12 min-w-[150px]">功能描述 (Description)</th>
-                        <th class="w-3/12 text-right pr-6 min-w-[100px]">操作 (Action)</th>
+                        <th class="w-5/12 pl-6 min-w-[200px]">{% trans "路由信息 (Route Info)" %}</th>
+                        <th class="w-4/12 min-w-[150px]">{% trans "功能描述 (Description)" %}</th>
+                        <th class="w-3/12 text-right pr-6 min-w-[100px]">{% trans "操作 (Action)" %}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -130,11 +131,11 @@
                         </td>
                         <td class="text-right pr-6 align-middle">
                             {% if not pattern.sample_url %}
-                                <button class="btn btn-xs btn-disabled btn-ghost opacity-50" title="带参数路由无法直接访问">
+                                <button class="btn btn-xs btn-disabled btn-ghost opacity-50" title="{% trans '带参数路由无法直接访问' %}">
                                     <span class="material-symbols-outlined text-base">link_off</span>
                                 </button>
                             {% else %}
-                                <a href="{{ pattern.sample_url }}" target="_blank" class="btn btn-xs btn-ghost text-primary" title="访问">
+                                <a href="{{ pattern.sample_url }}" target="_blank" class="btn btn-xs btn-ghost text-primary" title="{% trans '访问' %}">
                                     <span class="material-symbols-outlined text-base">open_in_new</span>
                                 </a>
                             {% endif %}

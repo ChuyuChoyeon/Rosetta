@@ -1,4 +1,4 @@
-{% load static tailwind_tags %}
+{% load static tailwind_tags i18n core_extras %}
 <!DOCTYPE html>
 <html lang="zh-hans">
 <head>
@@ -44,10 +44,11 @@
     
     <!-- HTMX -->
     <script src="{% static 'theme/js/htmx.min.js' %}"></script>
-    <script src="{% static 'js/htmx-init.js' %}"></script>
+    <script src="{% static 'js/htmx-init.js' %}?v=4.2"></script>
     
     <!-- Global UI Helpers -->
     <script src="{% static 'js/ui-helpers.js' %}"></script>
+    <script src="{% static 'js/admin-translation.js' %}"></script>
     
     <!-- ApexCharts -->
     <script src="{% static 'theme/js/apexcharts.min.js' %}"></script>
@@ -116,7 +117,8 @@
                         <span class="material-symbols-outlined text-xl">admin_panel_settings</span>
                     </div>
                     {% endif %}
-                    <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-extrabold tracking-tight">{{ config.ADMIN_NAVBAR_TITLE|default:"Rosetta Admin" }}</span>
+                    {% trans "Rosetta Admin" as admin_title %}
+                    <span class="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent font-extrabold tracking-tight">{{ config.ADMIN_NAVBAR_TITLE|default:admin_title }}</span>
                 </a>
             </div>
             
@@ -147,8 +149,8 @@
                             </div>
                         </div>
                         <ul tabindex="0" class="mt-3 z-50 p-2 shadow menu menu-sm dropdown-content bg-base-100 rounded-box w-52">
-                            <li><a href="{% url 'users:profile' %}" hx-boost="false">个人资料</a></li>
-                            <li><a href="{% url 'users:logout' %}" hx-boost="false">退出登录</a></li>
+                            <li><a href="{% url 'users:profile' %}" hx-boost="false">{% trans "个人资料" %}</a></li>
+                            <li><a href="{% url 'users:logout' %}" hx-boost="false">{% trans "退出登录" %}</a></li>
                         </ul>
                     </div>
                 </div>
@@ -158,13 +160,32 @@
         <!-- Desktop Actions (Hidden on Mobile) -->
         <div class="hidden lg:flex flex-none gap-2 items-center">
             <a href="/" target="_blank" class="btn btn-ghost btn-sm" hx-boost="false">
-                查看站点
+                {% trans "查看站点" %}
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" class="w-4 h-4 stroke-current"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
             </a>
-            <button type="button" class="input input-sm input-bordered flex items-center gap-2 w-64 bg-base-100/70 hover:bg-base-100 transition-all" onclick="window.openCommandPalette && window.openCommandPalette(event)">
+            
+            <!-- Language Switcher (Desktop) -->
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            <div class="dropdown dropdown-end">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-[24px]">translate</span>
+                </div>
+                <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    {% for lang_code, lang_name in LANGUAGES %}
+                    <li>
+                        <a href="{% translate_url lang_code %}" class="{% if lang_code == LANGUAGE_CODE %}active{% endif %}">
+                            {{ lang_name }}
+                        </a>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+
+            <button type="button" class="input input-sm input-bordered flex items-center gap-2 w-80 bg-base-100/70 hover:bg-base-100 transition-all" onclick="window.openCommandPalette && window.openCommandPalette(event)">
                 <span class="material-symbols-outlined text-base text-base-content/50">search</span>
-                <span class="text-sm text-base-content/60">搜索命令或页面…</span>
-                <div class="ml-auto flex items-center gap-1 text-[10px] text-base-content/50">
+                <span class="text-sm text-base-content/60 truncate">{% trans "搜索命令或页面…" %}</span>
+                <div class="ml-auto flex items-center gap-1 text-[10px] text-base-content/50 shrink-0">
                     <kbd class="h-5 px-1.5 rounded border border-base-content/20 bg-base-100">Ctrl</kbd>
                     <kbd class="h-5 px-1.5 rounded border border-base-content/20 bg-base-100">K</kbd>
                 </div>
@@ -233,8 +254,8 @@
                             <span class="text-xs font-normal text-base-content/60">@{{ request.user.username }}</span>
                         </div>
                     </li>
-                    <li><a href="{% url 'users:profile' %}" hx-boost="false">个人资料</a></li>
-                    <li><a href="{% url 'users:logout' %}" hx-boost="false">退出登录</a></li>
+                    <li><a href="{% url 'users:profile' %}" hx-boost="false">{% trans "个人资料" %}</a></li>
+                    <li><a href="{% url 'users:logout' %}" hx-boost="false">{% trans "退出登录" %}</a></li>
                 </ul>
             </div>
         </div>
@@ -256,34 +277,34 @@
                 <li class="mb-2">
                     <a href="{% url 'administration:index' %}" class="{% if request.resolver_match.url_name == 'index' %}active bg-primary text-primary-content shadow-lg shadow-primary/20 scale-[1.02]{% else %}hover:bg-base-200 hover:scale-[1.02]{% endif %} transition-all duration-200 rounded-xl py-3 font-medium">
                         <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'index' %}text-primary-content{% else %}text-primary{% endif %}">dashboard</span>
-                        概览
+                        {% trans "概览" %}
                     </a>
                 </li>
                 
-                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">内容管理</li>
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">{% trans "内容管理" %}</li>
                 <li>
                     <a href="{% url 'administration:post_list' %}" class="{% if 'post' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'post' in request.resolver_match.url_name %}text-primary{% else %}text-secondary{% endif %}">article</span>
-                        文章
+                        {% trans "文章" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:category_list' %}" class="{% if 'category' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'category' in request.resolver_match.url_name %}text-primary{% else %}text-secondary{% endif %}">category</span>
-                        分类
+                        {% trans "分类" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:tag_list' %}" class="{% if 'tag' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'tag' in request.resolver_match.url_name %}text-primary{% else %}text-secondary{% endif %}">label</span>
-                        标签
+                        {% trans "标签" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:comment_list' %}" class="{% if 'comment' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5 justify-between">
                         <div class="flex items-center gap-2">
                             <span class="material-symbols-outlined {% if 'comment' in request.resolver_match.url_name %}text-primary{% else %}text-secondary{% endif %}">comment</span>
-                            评论
+                            {% trans "评论" %}
                         </div>
                         {% if pending_comments > 0 %}
                         <span class="badge badge-sm badge-error animate-pulse">{{ pending_comments }}</span>
@@ -293,87 +314,87 @@
                 <li>
                     <a href="{% url 'administration:poll_list' %}" class="{% if 'poll' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'poll' in request.resolver_match.url_name %}text-primary{% else %}text-secondary{% endif %}">poll</span>
-                        投票
+                        {% trans "投票" %}
                     </a>
                 </li>
 
-                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">页面管理</li>
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">{% trans "页面管理" %}</li>
                 <li>
                     <a href="{% url 'administration:page_list' %}" class="{% if 'page' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'page' in request.resolver_match.url_name %}text-primary{% else %}text-accent{% endif %}">description</span>
-                        页面
+                        {% trans "页面" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:navigation_list' %}" class="{% if 'navigation' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'navigation' in request.resolver_match.url_name %}text-primary{% else %}text-accent{% endif %}">menu</span>
-                        导航
+                        {% trans "导航" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:friendlink_list' %}" class="{% if 'friendlink' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'friendlink' in request.resolver_match.url_name %}text-primary{% else %}text-accent{% endif %}">link</span>
-                        友情链接
+                        {% trans "友情链接" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:searchplaceholder_list' %}" class="{% if 'searchplaceholder' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'searchplaceholder' in request.resolver_match.url_name %}text-primary{% else %}text-accent{% endif %}">manage_search</span>
-                        搜索占位符
+                        {% trans "搜索占位符" %}
                     </a>
                 </li>
 
-                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">系统管理</li>
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">{% trans "系统管理" %}</li>
                 <li>
                     <a href="{% url 'administration:user_list' %}" class="{% if 'user' in request.resolver_match.url_name and 'title' not in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'user' in request.resolver_match.url_name and 'title' not in request.resolver_match.url_name %}text-primary{% else %}text-info{% endif %}">group</span>
-                        用户
+                        {% trans "用户" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:usertitle_list' %}" class="{% if 'usertitle' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'usertitle' in request.resolver_match.url_name %}text-primary{% else %}text-info{% endif %}">badge</span>
-                        称号
+                        {% trans "称号" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:group_list' %}" class="{% if 'group' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'group' in request.resolver_match.url_name %}text-primary{% else %}text-info{% endif %}">groups</span>
-                        用户组
+                        {% trans "用户组" %}
                     </a>
                 </li>
 
-                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">日志与审计</li>
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">{% trans "日志与审计" %}</li>
                 <li>
                     <a href="{% url 'administration:logentry_list' %}" class="{% if 'logentry' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'logentry' in request.resolver_match.url_name %}text-primary{% else %}text-warning{% endif %}">history</span>
-                        操作日志
+                        {% trans "操作日志" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:logfile_list' %}" class="{% if 'logfile' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if 'logfile' in request.resolver_match.url_name %}text-primary{% else %}text-warning{% endif %}">description</span>
-                        系统日志
+                        {% trans "系统日志" %}
                     </a>
                 </li>
 
-                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">维护与工具</li>
+                <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">{% trans "维护与工具" %}</li>
                 <li>
                     <a href="{% url 'administration:system_tools' %}" class="{% if request.resolver_match.url_name == 'system_tools' %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'system_tools' %}text-primary{% else %}text-info{% endif %}">build_circle</span>
-                        系统工具
+                        {% trans "系统工具" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:settings' %}" class="{% if request.resolver_match.url_name == 'settings' %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'settings' %}text-primary{% else %}text-info{% endif %}">settings</span>
-                        站点设置
+                        {% trans "站点设置" %}
                     </a>
                 </li>
                 <li>
                     <a href="{% url 'administration:debug' %}" class="{% if request.resolver_match.url_name == 'debug' %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'debug' %}text-primary{% else %}text-warning{% endif %}">bug_report</span>
-                        调试工具
+                        {% trans "调试工具" %}
                     </a>
                 </li>
                 
@@ -382,7 +403,7 @@
                 <li>
                     <a href="{% url 'users:logout' %}" class="text-error hover:bg-error/10 transition-colors duration-200 rounded-lg mx-2">
                         <span class="material-symbols-outlined">logout</span>
-                        退出登录
+                        {% trans "退出登录" %}
                     </a>
                 </li>
             </ul>
@@ -391,17 +412,61 @@
     </div>
 
     {% block modal %}{% endblock %}
+    {% include "administration/components/icon_picker_modal.html" %}
     
     <!-- Footer -->
     <footer class="footer footer-center p-4 bg-base-100 text-base-content border-t border-base-200 mt-auto">
         <div>
-            <p class="text-sm opacity-70">{{ config.FOOTER_TEXT|default:"Copyright © 2026 - All rights reserved" }}</p>
+            <p class="text-sm opacity-70">{% if config.FOOTER_TEXT %}{{ config.FOOTER_TEXT }}{% else %}{% trans "Copyright © 2026 - All rights reserved" %}{% endif %}</p>
         </div>
     </footer>
 
     <script>
         document.body.addEventListener('htmx:configRequest', (event) => {
             event.detail.headers['X-CSRFToken'] = '{{ csrf_token }}';
+        });
+
+        // Global Form Error Toast
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check for alert-error elements inside forms
+            const errorAlerts = document.querySelectorAll('.alert.alert-error, .alert.text-error, .errorlist');
+            if (errorAlerts.length > 0) {
+                // Collect error messages
+                let messages = [];
+                errorAlerts.forEach(alert => {
+                    // Try to get text content, cleaning up whitespace
+                    const text = alert.innerText.replace(/\s+/g, ' ').trim();
+                    if (text && !messages.includes(text) && text.length < 100) {
+                        messages.push(text);
+                    }
+                });
+                
+                if (messages.length > 0) {
+                    let toastMsg = '{% trans "表单提交有误，请检查填写内容"|escapejs %}';
+                    // If we have a few specific errors, show them
+                    if (messages.length === 1) {
+                        toastMsg = messages[0];
+                    } else if (messages.length <= 3) {
+                        toastMsg = messages.join('\n');
+                    } else {
+                        toastMsg = `{% trans "表单提交有误，共有"|escapejs %} ${messages.length} {% trans "处错误，请检查填写内容"|escapejs %}`;
+                    }
+                    
+                    if (window.showToast) {
+                        window.showToast(toastMsg, 'error');
+                    }
+                } else {
+                     // Just show generic toast if we found error containers but couldn't parse text well
+                     if (window.showToast) {
+                        window.showToast('{% trans "表单提交有误，请检查填写内容"|escapejs %}', 'error');
+                    }
+                }
+            }
+            
+            // Also check for specific Django form errors in context (rendered as JSON script if needed, 
+            // but usually we rely on DOM presence of error classes)
+            // If the user provided input has "invalid form control", that's browser validation.
+            // With 'novalidate', browser validation is disabled, so we rely on server rendering errors.
         });
         
         // Bulk Actions Scripts
@@ -430,8 +495,8 @@
 
         function submitBulkAction(action) {
             showConfirmModal(
-                '批量操作',
-                '确定要执行此批量操作吗？',
+                '{% trans "批量操作"|escapejs %}',
+                '{% trans "确定要执行此批量操作吗？"|escapejs %}',
                 () => {
                     const form = document.getElementById('bulk-form');
                     const actionInput = document.createElement('input');
@@ -454,58 +519,58 @@
         search: '',
         activeIndex: 0,
         items: [
-            { id: 'dashboard', title: '管理后台首页', icon: 'dashboard', url: '{% url 'administration:index' %}', group: '导航', keywords: '首页 概览 仪表盘' },
-            { id: 'posts', title: '文章列表', icon: 'article', url: '{% url 'administration:post_list' %}', group: '内容', keywords: '文章 内容 列表' },
-            { id: 'new_post', title: '新建文章', icon: 'add_circle', url: '{% url 'administration:post_create' %}', group: '内容', keywords: '文章 新建 新增 写作' },
-            { id: 'categories', title: '分类列表', icon: 'category', url: '{% url 'administration:category_list' %}', group: '内容', keywords: '分类 列表' },
-            { id: 'category_create', title: '新建分类', icon: 'add_circle', url: '{% url 'administration:category_create' %}', group: '内容', keywords: '分类 新建 新增' },
-            { id: 'category_export', title: '导出分类', icon: 'download', url: '{% url 'administration:category_export' %}', group: '内容', keywords: '分类 导出' },
-            { id: 'category_import', title: '导入分类', icon: 'upload', url: '{% url 'administration:category_import' %}', group: '内容', keywords: '分类 导入' },
-            { id: 'tags', title: '标签列表', icon: 'label', url: '{% url 'administration:tag_list' %}', group: '内容', keywords: '标签 列表' },
-            { id: 'tag_create', title: '新建标签', icon: 'add_circle', url: '{% url 'administration:tag_create' %}', group: '内容', keywords: '标签 新建 新增' },
-            { id: 'comments', title: '评论列表', icon: 'comment', url: '{% url 'administration:comment_list' %}', group: '内容', keywords: '评论 审核 列表' },
-            { id: 'pages', title: '页面列表', icon: 'description', url: '{% url 'administration:page_list' %}', group: '页面', keywords: '单页 页面 列表' },
-            { id: 'page_create', title: '新建页面', icon: 'add_circle', url: '{% url 'administration:page_create' %}', group: '页面', keywords: '页面 新建 新增' },
-            { id: 'navigation', title: '导航管理', icon: 'menu', url: '{% url 'administration:navigation_list' %}', group: '外观', keywords: '导航 菜单 列表' },
-            { id: 'navigation_create', title: '新建导航', icon: 'add_circle', url: '{% url 'administration:navigation_create' %}', group: '外观', keywords: '导航 新建 新增' },
-            { id: 'navigation_export', title: '导出导航', icon: 'download', url: '{% url 'administration:navigation_export' %}', group: '外观', keywords: '导航 导出' },
-            { id: 'navigation_import', title: '导入导航', icon: 'upload', url: '{% url 'administration:navigation_import' %}', group: '外观', keywords: '导航 导入' },
-            { id: 'polls', title: '投票列表', icon: 'poll', url: '{% url 'administration:poll_list' %}', group: '内容', keywords: '投票 问卷 列表' },
-            { id: 'poll_create', title: '新建投票', icon: 'add_circle', url: '{% url 'administration:poll_create' %}', group: '内容', keywords: '投票 新建 新增' },
-            { id: 'friendlinks', title: '友情链接管理', icon: 'link', url: '{% url 'administration:friendlink_list' %}', group: '外观', keywords: '友链 列表' },
-            { id: 'friendlink_create', title: '新建友情链接', icon: 'add_circle', url: '{% url 'administration:friendlink_create' %}', group: '外观', keywords: '友链 新建 新增' },
-            { id: 'friendlink_export', title: '导出友情链接', icon: 'download', url: '{% url 'administration:friendlink_export' %}', group: '外观', keywords: '友链 导出' },
-            { id: 'friendlink_import', title: '导入友情链接', icon: 'upload', url: '{% url 'administration:friendlink_import' %}', group: '外观', keywords: '友链 导入' },
-            { id: 'placeholders', title: '搜索占位符', icon: 'manage_search', url: '{% url 'administration:searchplaceholder_list' %}', group: '外观', keywords: '搜索 占位符 列表' },
-            { id: 'placeholder_create', title: '新建搜索占位符', icon: 'add_circle', url: '{% url 'administration:searchplaceholder_create' %}', group: '外观', keywords: '占位符 新建 新增' },
-            { id: 'placeholder_export', title: '导出搜索占位符', icon: 'download', url: '{% url 'administration:searchplaceholder_export' %}', group: '外观', keywords: '占位符 导出' },
-            { id: 'placeholder_import', title: '导入搜索占位符', icon: 'upload', url: '{% url 'administration:searchplaceholder_import' %}', group: '外观', keywords: '占位符 导入' },
-            { id: 'users', title: '用户列表', icon: 'group', url: '{% url 'administration:user_list' %}', group: '用户与权限', keywords: '用户 列表' },
-            { id: 'user_create', title: '新建用户', icon: 'person_add', url: '{% url 'administration:user_create' %}', group: '用户与权限', keywords: '用户 新建 新增' },
-            { id: 'user_export', title: '导出用户', icon: 'download', url: '{% url 'administration:user_export' %}', group: '用户与权限', keywords: '用户 导出' },
-            { id: 'user_import', title: '导入用户', icon: 'upload', url: '{% url 'administration:user_import' %}', group: '用户与权限', keywords: '用户 导入' },
-            { id: 'usertitle', title: '用户称号', icon: 'badge', url: '{% url 'administration:usertitle_list' %}', group: '用户与权限', keywords: '称号 头衔 列表' },
-            { id: 'usertitle_create', title: '新建用户称号', icon: 'add_circle', url: '{% url 'administration:usertitle_create' %}', group: '用户与权限', keywords: '称号 新建 新增' },
-            { id: 'usertitle_export', title: '导出用户称号', icon: 'download', url: '{% url 'administration:usertitle_export' %}', group: '用户与权限', keywords: '称号 导出' },
-            { id: 'usertitle_import', title: '导入用户称号', icon: 'upload', url: '{% url 'administration:usertitle_import' %}', group: '用户与权限', keywords: '称号 导入' },
-            { id: 'groups', title: '用户组管理', icon: 'groups', url: '{% url 'administration:group_list' %}', group: '用户与权限', keywords: '用户组 列表' },
-            { id: 'group_create', title: '新建用户组', icon: 'add_circle', url: '{% url 'administration:group_create' %}', group: '用户与权限', keywords: '用户组 新建 新增' },
-            { id: 'group_export', title: '导出用户组', icon: 'download', url: '{% url 'administration:group_export' %}', group: '用户与权限', keywords: '用户组 导出' },
-            { id: 'group_import', title: '导入用户组', icon: 'upload', url: '{% url 'administration:group_import' %}', group: '用户与权限', keywords: '用户组 导入' },
-            { id: 'logentry', title: '操作日志', icon: 'history', url: '{% url 'administration:logentry_list' %}', group: '日志', keywords: '审计 日志 操作记录' },
-            { id: 'logentry_export', title: '导出操作日志', icon: 'download', url: '{% url 'administration:logentry_export' %}', group: '日志', keywords: '日志 导出' },
-            { id: 'logfile', title: '系统日志', icon: 'description', url: '{% url 'administration:logfile_list' %}', group: '日志', keywords: '系统 日志 文件' },
-            { id: 'system_tools', title: '系统工具', icon: 'build_circle', url: '{% url 'administration:system_tools' %}', group: '系统工具', keywords: '系统 维护 索引 图片' },
-            { id: 'settings', title: '站点设置', icon: 'settings', url: '{% url 'administration:settings' %}', group: '系统工具', keywords: '设置 配置 参数' },
-            { id: 'debug', title: '调试面板', icon: 'bug_report', url: '{% url 'administration:debug' %}', group: '调试', keywords: '调试 面板' },
-            { id: 'debug_ui', title: '调试 UI 测试', icon: 'design_services', url: '{% url 'administration:debug_ui_test' %}', group: '调试', keywords: '调试 UI 组件' },
-            { id: 'debug_permission', title: '调试 权限检查', icon: 'security', url: '{% url 'administration:debug_permission' %}', group: '调试', keywords: '调试 权限' },
-            { id: 'debug_mock', title: '调试 模拟数据', icon: 'science', url: '{% url 'administration:debug_mock' %}', group: '调试', keywords: '调试 模拟' },
-            { id: 'debug_cache', title: '调试 缓存状态', icon: 'memory', url: '{% url 'administration:debug_cache' %}', group: '调试', keywords: '调试 缓存' },
-            { id: 'debug_email', title: '调试 邮件发送', icon: 'mail', url: '{% url 'administration:debug_email' %}', group: '调试', keywords: '调试 邮件' },
-            { id: 'profile', title: '个人资料', icon: 'person', url: '{% url 'users:profile' %}', group: '账户', keywords: '资料 账户' },
-            { id: 'logout', title: '退出登录', icon: 'logout', url: '{% url 'users:logout' %}', group: '账户', keywords: '登出 退出' },
-            { id: 'site', title: '查看站点', icon: 'public', url: '/', group: '外部', keywords: '前台 站点 首页' }
+            { id: 'dashboard', title: '{% trans "管理后台首页"|escapejs %}', icon: 'dashboard', url: '{% url 'administration:index' %}', group: '{% trans "导航"|escapejs %}', keywords: '{% trans "首页 概览 仪表盘"|escapejs %}' },
+            { id: 'posts', title: '{% trans "文章列表"|escapejs %}', icon: 'article', url: '{% url 'administration:post_list' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "文章 内容 列表"|escapejs %}' },
+            { id: 'new_post', title: '{% trans "新建文章"|escapejs %}', icon: 'add_circle', url: '{% url 'administration:post_create' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "文章 新建 新增 写作"|escapejs %}' },
+            { id: 'categories', title: '{% trans "分类列表"|escapejs %}', icon: 'category', url: '{% url 'administration:category_list' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "分类 列表"|escapejs %}' },
+            { id: 'category_create', title: '{% trans "新建分类"|escapejs %}', icon: 'add_circle', url: '{% url 'administration:category_create' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "分类 新建 新增"|escapejs %}' },
+            { id: 'category_export', title: '{% trans "导出分类"|escapejs %}', icon: 'download', url: '{% url 'administration:category_export' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "分类 导出"|escapejs %}' },
+            { id: 'category_import', title: '{% trans "导入分类"|escapejs %}', icon: 'upload', url: '{% url 'administration:category_import' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "分类 导入"|escapejs %}' },
+            { id: 'tags', title: '{% trans "标签列表"|escapejs %}', icon: 'label', url: '{% url 'administration:tag_list' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "标签 列表"|escapejs %}' },
+            { id: 'tag_create', title: '{% trans "新建标签"|escapejs %}', icon: 'add_circle', url: '{% url 'administration:tag_create' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "标签 新建 新增"|escapejs %}' },
+            { id: 'comments', title: '{% trans "评论列表"|escapejs %}', icon: 'comment', url: '{% url 'administration:comment_list' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "评论 审核 列表"|escapejs %}' },
+            { id: 'pages', title: '{% trans "页面列表"|escapejs %}', icon: 'description', url: '{% url 'administration:page_list' %}', group: '{% trans "页面"|escapejs %}', keywords: '{% trans "单页 页面 列表"|escapejs %}' },
+            { id: 'page_create', title: '{% trans "新建页面"|escapejs %}', icon: 'add_circle', url: '{% url 'administration:page_create' %}', group: '{% trans "页面"|escapejs %}', keywords: '{% trans "页面 新建 新增"|escapejs %}' },
+            { id: 'navigation', title: '{% trans "导航管理"|escapejs %}', icon: 'menu', url: '{% url 'administration:navigation_list' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "导航 菜单 列表"|escapejs %}' },
+            { id: 'navigation_create', title: '{% trans "新建导航"|escapejs %}', icon: 'add_circle', url: '{% url 'administration:navigation_create' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "导航 新建 新增"|escapejs %}' },
+            { id: 'navigation_export', title: '{% trans "导出导航"|escapejs %}', icon: 'download', url: '{% url 'administration:navigation_export' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "导航 导出"|escapejs %}' },
+            { id: 'navigation_import', title: '{% trans "导入导航"|escapejs %}', icon: 'upload', url: '{% url 'administration:navigation_import' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "导航 导入"|escapejs %}' },
+            { id: 'polls', title: '{% trans "投票列表"|escapejs %}', icon: 'poll', url: '{% url 'administration:poll_list' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "投票 问卷 列表"|escapejs %}' },
+            { id: 'poll_create', title: '{% trans "新建投票"|escapejs %}', icon: 'add_circle', url: '{% url 'administration:poll_create' %}', group: '{% trans "内容"|escapejs %}', keywords: '{% trans "投票 新建 新增"|escapejs %}' },
+            { id: 'friendlinks', title: '{% trans "友情链接管理"|escapejs %}', icon: 'link', url: '{% url 'administration:friendlink_list' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "友链 列表"|escapejs %}' },
+            { id: 'friendlink_create', title: '{% trans "新建友情链接"|escapejs %}', icon: 'add_circle', url: '{% url 'administration:friendlink_create' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "友链 新建 新增"|escapejs %}' },
+            { id: 'friendlink_export', title: '{% trans "导出友情链接"|escapejs %}', icon: 'download', url: '{% url 'administration:friendlink_export' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "友链 导出"|escapejs %}' },
+            { id: 'friendlink_import', title: '{% trans "导入友情链接"|escapejs %}', icon: 'upload', url: '{% url 'administration:friendlink_import' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "友链 导入"|escapejs %}' },
+            { id: 'placeholders', title: '{% trans "搜索占位符"|escapejs %}', icon: 'manage_search', url: '{% url 'administration:searchplaceholder_list' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "搜索 占位符 列表"|escapejs %}' },
+            { id: 'placeholder_create', title: '{% trans "新建搜索占位符"|escapejs %}', icon: 'add_circle', url: '{% url 'administration:searchplaceholder_create' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "占位符 新建 新增"|escapejs %}' },
+            { id: 'placeholder_export', title: '{% trans "导出搜索占位符"|escapejs %}', icon: 'download', url: '{% url 'administration:searchplaceholder_export' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "占位符 导出"|escapejs %}' },
+            { id: 'placeholder_import', title: '{% trans "导入搜索占位符"|escapejs %}', icon: 'upload', url: '{% url 'administration:searchplaceholder_import' %}', group: '{% trans "外观"|escapejs %}', keywords: '{% trans "占位符 导入"|escapejs %}' },
+            { id: 'users', title: '{% trans "用户列表"|escapejs %}', icon: 'group', url: '{% url 'administration:user_list' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "用户 列表"|escapejs %}' },
+            { id: 'user_create', title: '{% trans "新建用户"|escapejs %}', icon: 'person_add', url: '{% url 'administration:user_create' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "用户 新建 新增"|escapejs %}' },
+            { id: 'user_export', title: '{% trans "导出用户"|escapejs %}', icon: 'download', url: '{% url 'administration:user_export' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "用户 导出"|escapejs %}' },
+            { id: 'user_import', title: '{% trans "导入用户"|escapejs %}', icon: 'upload', url: '{% url 'administration:user_import' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "用户 导入"|escapejs %}' },
+            { id: 'usertitle', title: '{% trans "用户称号"|escapejs %}', icon: 'badge', url: '{% url 'administration:usertitle_list' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "称号 头衔 列表"|escapejs %}' },
+            { id: 'usertitle_create', title: '{% trans "新建用户称号"|escapejs %}', icon: 'add_circle', url: '{% url 'administration:usertitle_create' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "称号 新建 新增"|escapejs %}' },
+            { id: 'usertitle_export', title: '{% trans "导出用户称号"|escapejs %}', icon: 'download', url: '{% url 'administration:usertitle_export' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "称号 导出"|escapejs %}' },
+            { id: 'usertitle_import', title: '{% trans "导入用户称号"|escapejs %}', icon: 'upload', url: '{% url 'administration:usertitle_import' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "称号 导入"|escapejs %}' },
+            { id: 'groups', title: '{% trans "用户组管理"|escapejs %}', icon: 'groups', url: '{% url 'administration:group_list' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "用户组 列表"|escapejs %}' },
+            { id: 'group_create', title: '{% trans "新建用户组"|escapejs %}', icon: 'add_circle', url: '{% url 'administration:group_create' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "用户组 新建 新增"|escapejs %}' },
+            { id: 'group_export', title: '{% trans "导出用户组"|escapejs %}', icon: 'download', url: '{% url 'administration:group_export' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "用户组 导出"|escapejs %}' },
+            { id: 'group_import', title: '{% trans "导入用户组"|escapejs %}', icon: 'upload', url: '{% url 'administration:group_import' %}', group: '{% trans "用户与权限"|escapejs %}', keywords: '{% trans "用户组 导入"|escapejs %}' },
+            { id: 'logentry', title: '{% trans "操作日志"|escapejs %}', icon: 'history', url: '{% url 'administration:logentry_list' %}', group: '{% trans "日志"|escapejs %}', keywords: '{% trans "审计 日志 操作记录"|escapejs %}' },
+            { id: 'logentry_export', title: '{% trans "导出操作日志"|escapejs %}', icon: 'download', url: '{% url 'administration:logentry_export' %}', group: '{% trans "日志"|escapejs %}', keywords: '{% trans "日志 导出"|escapejs %}' },
+            { id: 'logfile', title: '{% trans "系统日志"|escapejs %}', icon: 'description', url: '{% url 'administration:logfile_list' %}', group: '{% trans "日志"|escapejs %}', keywords: '{% trans "系统 日志 文件"|escapejs %}' },
+            { id: 'system_tools', title: '{% trans "系统工具"|escapejs %}', icon: 'build_circle', url: '{% url 'administration:system_tools' %}', group: '{% trans "系统工具"|escapejs %}', keywords: '{% trans "系统 维护 索引 图片"|escapejs %}' },
+            { id: 'settings', title: '{% trans "站点设置"|escapejs %}', icon: 'settings', url: '{% url 'administration:settings' %}', group: '{% trans "系统工具"|escapejs %}', keywords: '{% trans "设置 配置 参数"|escapejs %}' },
+            { id: 'debug', title: '{% trans "调试面板"|escapejs %}', icon: 'bug_report', url: '{% url 'administration:debug' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 面板"|escapejs %}' },
+            { id: 'debug_ui', title: '{% trans "调试 UI 测试"|escapejs %}', icon: 'design_services', url: '{% url 'administration:debug_ui_test' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 UI 组件"|escapejs %}' },
+            { id: 'debug_permission', title: '{% trans "调试 权限检查"|escapejs %}', icon: 'security', url: '{% url 'administration:debug_permission' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 权限"|escapejs %}' },
+            { id: 'debug_mock', title: '{% trans "调试 模拟数据"|escapejs %}', icon: 'science', url: '{% url 'administration:debug_mock' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 模拟"|escapejs %}' },
+            { id: 'debug_cache', title: '{% trans "调试 缓存状态"|escapejs %}', icon: 'memory', url: '{% url 'administration:debug_cache' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 缓存"|escapejs %}' },
+            { id: 'debug_email', title: '{% trans "调试 邮件发送"|escapejs %}', icon: 'mail', url: '{% url 'administration:debug_email' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 邮件"|escapejs %}' },
+            { id: 'profile', title: '{% trans "个人资料"|escapejs %}', icon: 'person', url: '{% url 'users:profile' %}', group: '{% trans "账户"|escapejs %}', keywords: '{% trans "资料 账户"|escapejs %}' },
+            { id: 'logout', title: '{% trans "退出登录"|escapejs %}', icon: 'logout', url: '{% url 'users:logout' %}', group: '{% trans "账户"|escapejs %}', keywords: '{% trans "登出 退出"|escapejs %}' },
+            { id: 'site', title: '{% trans "查看站点"|escapejs %}', icon: 'public', url: '/', group: '{% trans "外部"|escapejs %}', keywords: '{% trans "前台 站点 首页"|escapejs %}' }
         ],
         get filteredItems() {
             const query = this.search.trim();
@@ -569,7 +634,7 @@
                            @keydown.arrow-up.prevent="activeIndex = Math.max(activeIndex - 1, 0)"
                            @keydown.enter.prevent="selectItem(activeIndex)"
                            class="h-12 w-full border-0 bg-transparent pl-11 pr-4 text-base-content placeholder:text-base-content/40 focus:ring-0 sm:text-sm" 
-                           placeholder="搜索命令或页面…（Ctrl+K）">
+                           placeholder="{% trans "搜索命令或页面…（Ctrl+K）" %}">
                 </div>
 
                 <ul class="max-h-96 scroll-py-3 overflow-y-auto p-3" x-show="filteredItems.length > 0">
@@ -595,18 +660,18 @@
 
                 <div x-show="filteredItems.length === 0" class="py-14 px-6 text-center text-sm sm:px-14">
                     <span class="material-symbols-outlined mx-auto h-6 w-6 text-base-content/40">sentiment_dissatisfied</span>
-                    <p class="mt-4 font-semibold text-base-content">未找到匹配结果</p>
-                    <p class="mt-2 text-base-content/60">没有找到对应的命令，请尝试更换关键词。</p>
+                    <p class="mt-4 font-semibold text-base-content">{% trans "未找到匹配结果" %}</p>
+                    <p class="mt-2 text-base-content/60">{% trans "没有找到对应的命令，请尝试更换关键词。" %}</p>
                 </div>
                 
                 <div class="flex flex-wrap items-center bg-base-200/50 py-2.5 px-4 text-xs text-base-content/60">
                     <kbd class="mx-1 flex h-5 w-5 items-center justify-center rounded border border-base-content/20 bg-base-100 font-semibold text-base-content sm:mx-2"><span class="text-lg">↑</span></kbd>
                     <kbd class="mx-1 flex h-5 w-5 items-center justify-center rounded border border-base-content/20 bg-base-100 font-semibold text-base-content sm:mx-2"><span class="text-lg">↓</span></kbd>
-                    切换
+                    {% trans "切换" %}
                     <kbd class="mx-1 flex h-5 w-5 items-center justify-center rounded border border-base-content/20 bg-base-100 font-semibold text-base-content sm:mx-2">↵</kbd>
-                    进入
+                    {% trans "进入" %}
                     <kbd class="mx-1 flex h-5 px-2 items-center justify-center rounded border border-base-content/20 bg-base-100 font-semibold text-base-content sm:mx-2">esc</kbd>
-                    关闭
+                    {% trans "关闭" %}
                 </div>
             </div>
         </div>

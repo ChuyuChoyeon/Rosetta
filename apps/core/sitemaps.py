@@ -6,6 +6,7 @@ from blog.models import Post, Category, Tag
 class PostSitemap(sitemaps.Sitemap):
     changefreq = "weekly"
     priority = 0.8
+    i18n = True
 
     def items(self):
         return Post.objects.filter(status="published")
@@ -17,6 +18,7 @@ class PostSitemap(sitemaps.Sitemap):
 class CategorySitemap(sitemaps.Sitemap):
     changefreq = "weekly"
     priority = 0.6
+    i18n = True
 
     def items(self):
         return Category.objects.all()
@@ -28,6 +30,7 @@ class CategorySitemap(sitemaps.Sitemap):
 class TagSitemap(sitemaps.Sitemap):
     changefreq = "weekly"
     priority = 0.6
+    i18n = True
 
     def items(self):
         return Tag.objects.filter(is_active=True)
@@ -39,6 +42,7 @@ class TagSitemap(sitemaps.Sitemap):
 class StaticViewSitemap(sitemaps.Sitemap):
     priority = 0.5
     changefreq = "daily"
+    i18n = True
 
     def items(self):
         return [
@@ -47,9 +51,9 @@ class StaticViewSitemap(sitemaps.Sitemap):
             "contact",
             "users:login",
             "users:register",
-            "categories",
-            "tags",
-            "archives",
+            "category_list",
+            "tag_list",
+            "archive",
         ]
 
     def location(self, item):

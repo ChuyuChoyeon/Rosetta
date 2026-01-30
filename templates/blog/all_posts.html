@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static capture_tags %}
+{% load static capture_tags i18n %}
 
 {% block content %}
 <div class="min-h-[80vh] px-4 py-16 md:py-24 bg-base-100 relative overflow-hidden"
@@ -23,16 +23,20 @@
             <div class="space-y-4">
                 <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-200/50 border border-base-content/5 text-xs font-medium text-base-content/60 backdrop-blur-sm">
                     <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                    <span>知识库</span>
+                    <span>{% trans "知识库" %}</span>
                 </div>
                 
                 <h1 class="text-4xl md:text-5xl font-bold font-heading tracking-tight">
-                    全部文章
+                    {% trans "全部文章" %}
                     <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">.</span>
                 </h1>
                 
                 <p class="text-lg text-base-content/60 max-w-xl">
-                    共收录 <span class="font-bold text-base-content">{{ paginator.count|default:posts.count }}</span> 篇文章
+                    {% blocktrans count counter=paginator.count|default:posts.count %}
+                    共收录 <span class="font-bold text-base-content">{{ counter }}</span> 篇文章
+                    {% plural %}
+                    共收录 <span class="font-bold text-base-content">{{ counter }}</span> 篇文章
+                    {% endblocktrans %}
                 </p>
             </div>
             
@@ -40,13 +44,13 @@
                 <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
                         :class="viewMode === 'grid' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
                         @click="toggleView('grid')"
-                        title="网格视图">
+                        title="{% trans '网格视图' %}">
                     <span class="material-symbols-outlined text-lg">grid_view</span>
                 </button>
                 <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
                         :class="viewMode === 'list' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
                         @click="toggleView('list')"
-                        title="列表视图">
+                        title="{% trans '列表视图' %}">
                     <span class="material-symbols-outlined text-lg">view_list</span>
                 </button>
             </div>
@@ -100,7 +104,7 @@
                     {% if post.is_pinned %}
                     <div class="absolute top-4 right-4 z-20 badge badge-accent shadow-lg gap-1 border-none text-white">
                         <span class="material-symbols-outlined text-[14px] -rotate-45">push_pin</span>
-                        置顶
+                        {% trans "置顶" %}
                     </div>
                     {% endif %}
                 </div>
@@ -121,17 +125,17 @@
                     <!-- Meta Footer -->
                     <div class="mt-auto flex items-center justify-between pt-4 border-t border-base-content/5 text-xs font-medium text-base-content/50 relative z-20">
                         <div class="flex items-center gap-4">
-                            <div class="flex items-center gap-1.5" title="发布时间">
+                            <div class="flex items-center gap-1.5" title="{% trans '发布时间' %}">
                                 <span class="material-symbols-outlined text-[16px]">calendar_today</span>
                                 <span>{{ post.published_at|default:post.created_at|date:"Y-m-d" }}</span>
                             </div>
-                            <div class="flex items-center gap-1.5" title="阅读量">
+                            <div class="flex items-center gap-1.5" title="{% trans '阅读量' %}">
                                 <span class="material-symbols-outlined text-[16px]">visibility</span>
                                 <span>{{ post.views }}</span>
                             </div>
                         </div>
                         
-                        <div class="flex items-center gap-2 pl-4 border-l border-base-content/10" title="作者">
+                        <div class="flex items-center gap-2 pl-4 border-l border-base-content/10" title="{% trans '作者' %}">
                             <div class="avatar">
                                 <div class="w-6 h-6 rounded-full ring-1 ring-base-content/10">
                                     <img src="{{ post.author.get_avatar_url }}" alt="{{ post.author.username }}" class="rounded-full object-cover" loading="lazy" />
@@ -154,8 +158,8 @@
                     <div class="w-20 h-20 bg-base-100 rounded-2xl flex items-center justify-center mb-6 shadow-sm rotate-3">
                         <span class="material-symbols-outlined text-4xl text-base-content/20">article</span>
                     </div>
-                    <h3 class="text-xl font-bold text-base-content/80 mb-2">暂无文章</h3>
-                    <p class="text-base-content/50">这里还是一片荒原，等待知识的种子发芽。</p>
+                    <h3 class="text-xl font-bold text-base-content/80 mb-2">{% trans "暂无文章" %}</h3>
+                    <p class="text-base-content/50">{% trans "这里还是一片荒原，等待知识的种子发芽。" %}</p>
                 </div>
             </div>
             {% endfor %}
@@ -168,12 +172,12 @@
                 {% if page_obj.has_previous %}
                 <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-sm btn-ghost hover:bg-base-200">
                     <span class="material-symbols-outlined text-lg">chevron_left</span>
-                    上一页
+                    {% trans "上一页" %}
                 </a>
                 {% else %}
                 <button class="join-item btn btn-sm btn-ghost btn-disabled opacity-30">
                     <span class="material-symbols-outlined text-lg">chevron_left</span>
-                    上一页
+                    {% trans "上一页" %}
                 </button>
                 {% endif %}
                 
@@ -183,12 +187,12 @@
                 
                 {% if page_obj.has_next %}
                 <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-sm btn-ghost hover:bg-base-200">
-                    下一页
+                    {% trans "下一页" %}
                     <span class="material-symbols-outlined text-lg">chevron_right</span>
                 </a>
                 {% else %}
                 <button class="join-item btn btn-sm btn-ghost btn-disabled opacity-30">
-                    下一页
+                    {% trans "下一页" %}
                     <span class="material-symbols-outlined text-lg">chevron_right</span>
                 </button>
                 {% endif %}

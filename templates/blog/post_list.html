@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load static capture_tags markdown_extras %}
+{% load static capture_tags markdown_extras i18n %}
 
 {% block extra_head %}
     {% if website_schema %}
@@ -18,31 +18,45 @@
     }
 }">
 
-    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+    {% if category and category.cover_image %}
+    <!-- Category Cover Image Banner -->
+    <div class="relative w-full h-48 md:h-64 rounded-3xl overflow-hidden mb-6 group shadow-lg">
+        <img src="{{ category.cover_image.url }}" alt="{{ category.name }}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+    </div>
+    {% endif %}
+
+    <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
         {% if tag %}
         <div class="flex items-center gap-3">
-            <div class="p-3 rounded-xl bg-{{ tag.color|default:'neutral' }}/10 text-{{ tag.color|default:'neutral' }}">
+            <div class="p-3 rounded-xl flex items-center justify-center" style="background-color: {{ tag.color }}1a; color: {{ tag.color }}">
                 <span class="material-symbols-outlined text-3xl">label</span>
             </div>
             <div>
                 <h1 class="text-3xl font-bold font-heading">{{ tag.name }}</h1>
-                <p class="text-base-content/60 text-sm mt-1">共 {{ paginator.count|default:posts.count }} 篇文章</p>
+                <p class="text-base-content/60 text-sm mt-1">
+                    {% blocktrans count counter=paginator.count|default:posts.count %}
+                    共 {{ counter }} 篇文章
+                    {% plural %}
+                    共 {{ counter }} 篇文章
+                    {% endblocktrans %}
+                </p>
             </div>
         </div>
         {% elif category %}
         <div class="flex items-center gap-3">
-            <div class="p-3 rounded-xl bg-primary/10 text-primary">
-                <span class="material-symbols-outlined text-3xl">category</span>
+            <div class="p-3 rounded-xl flex items-center justify-center bg-{{ category.color|default:'primary' }}/10 text-{{ category.color|default:'primary' }}">
+                <span class="material-symbols-outlined text-3xl">{{ category.icon|default:'category' }}</span>
             </div>
             <div>
                 <h1 class="text-3xl font-bold font-heading">{{ category.name }}</h1>
-                <p class="text-base-content/60 text-sm mt-1">{{ category.description|default:"暂无描述" }}</p>
+                <p class="text-base-content/60 text-sm mt-1">{% if category.description %}{{ category.description }}{% else %}{% trans "暂无描述" %}{% endif %}</p>
             </div>
         </div>
         {% elif title %}
         <h1 class="text-3xl font-bold font-heading">{{ title }}</h1>
         {% else %}
-        <h1 class="text-3xl font-bold font-heading">最新文章</h1>
+        <h1 class="text-3xl font-bold font-heading">{% trans "最新文章" %}</h1>
         {% endif %}
 
         <!-- View Toggle -->
@@ -51,26 +65,26 @@
             <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
                     :class="viewMode === 'grid' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
                     @click="toggleView('grid')"
-                    title="网格视图">
+                    title="{% trans '网格视图' %}">
                     <span class="material-symbols-outlined text-lg">grid_view</span>
             </button>
             <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
                     :class="viewMode === 'list' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
                     @click="toggleView('list')"
-                    title="列表视图">
+                    title="{% trans '列表视图' %}">
                     <span class="material-symbols-outlined text-lg">view_list</span>
             </button>
             {% else %}
             <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
                     :class="viewMode === 'list' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
                     @click="toggleView('list')"
-                    title="列表视图">
+                    title="{% trans '列表视图' %}">
                     <span class="material-symbols-outlined text-lg">view_list</span>
             </button>
             <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300" 
                     :class="viewMode === 'grid' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'" 
                     @click="toggleView('grid')"
-                    title="网格视图">
+                    title="{% trans '网格视图' %}">
                     <span class="material-symbols-outlined text-lg">grid_view</span>
             </button>
             {% endif %}
@@ -83,7 +97,7 @@
             
             <!-- Post Grid -->
             <div id="post-grid" 
-                 class="grid gap-6 transition-all duration-500 ease-in-out"
+                 class="grid gap-6 transition-all duration-500 ease-in-out {% if category %}category-theme-{{ category.id }}{% endif %}"
                  :class="viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'">
                 {% for post in posts %}
                 
@@ -123,73 +137,73 @@
                                 {% if post.is_pinned %}
                                 <div class="badge badge-accent badge-outline badge-sm gap-1 pl-1.5 pr-2 h-6">
                                     <span class="material-symbols-outlined text-[14px] leading-none -rotate-45">push_pin</span>
-                                    <span class="text-xs font-medium">置顶</span>
-                                </div>
-                                {% endif %}
-                                {% if post.published_at|default:post.created_at|date:"Y-m-d" == now|date:"Y-m-d" %}
-                                <div class="badge badge-secondary badge-sm">最新</div>
-                                {% endif %}
-                                {% if post.category %}
-                                <a href="{% url 'post_by_category' post.category.slug %}" class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
-                                    {{ post.category.name }}
-                                </a>
-                                {% endif %}
-                            </div>
-
-                            <p class="text-base-content/70 text-sm line-clamp-3 mb-4">{{ post.excerpt|default:post.content|markdown_text|truncatechars:100 }}</p>
-                            
-                            <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
-                                <div class="flex items-center gap-3">
-                                    <div class="flex items-center gap-1" title="发布时间">
-                                        <span class="material-symbols-outlined text-[14px]">calendar_today</span>
-                                        <span>{{ post.published_at|default:post.created_at|date:"m-d" }}</span>
-                                    </div>
-                                    <div class="flex items-center gap-1" title="阅读量">
-                                        <span class="material-symbols-outlined text-[14px]">visibility</span>
-                                        <span>{{ post.views }}</span>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-1" title="作者">
-                                    <span class="material-symbols-outlined text-[14px]">person</span>
-                                    <span class="font-medium">{{ post.author.nickname|default:post.author.username }}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <span class="text-xs font-medium">{% trans "置顶" %}</span>
                 </div>
-                {% endcaptureas %}
-                
-                <div class="h-full">
-                    {{ card_content }}
-                </div>
-                
-                {% empty %}
-                <div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
-                    <div class="w-24 h-24 bg-base-200 rounded-full flex items-center justify-center mb-4">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
-                    </div>
-                    <h3 class="text-xl font-bold text-base-content/70">暂无文章</h3>
-                    <p class="text-base-content/50 mt-2">敬请期待更多精彩内容！</p>
-                </div>
-                {% endfor %}
-            </div>
-
-            <!-- Pagination -->
-            {% if is_paginated %}
-            <div class="join grid grid-cols-2 w-full max-w-xs mx-auto mt-12 shadow-sm">
-                {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-outline border-base-content/10 hover:bg-primary hover:border-primary hover:text-primary-content">上一页</a>
-                {% else %}
-                <button class="join-item btn btn-outline border-base-content/10 btn-disabled opacity-50">上一页</button>
                 {% endif %}
-                
-                {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-outline border-base-content/10 hover:bg-primary hover:border-primary hover:text-primary-content">下一页</a>
-                {% else %}
-                <button class="join-item btn btn-outline border-base-content/10 btn-disabled opacity-50">下一页</button>
+                {% if post.published_at|default:post.created_at|date:"Y-m-d" == now|date:"Y-m-d" %}
+                <div class="badge badge-secondary badge-sm">{% trans "最新" %}</div>
+                {% endif %}
+                {% if post.category %}
+                <a href="{% url 'post_by_category' post.category.slug %}" class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                    {{ post.category.name }}
+                </a>
                 {% endif %}
             </div>
-            {% endif %}
+
+            <p class="text-base-content/70 text-sm line-clamp-3 mb-4">{{ post.excerpt|default:post.content|markdown_text|truncatechars:100 }}</p>
+            
+            <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1" title="{% trans "发布时间" %}">
+                        <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                        <span>{{ post.published_at|default:post.created_at|date:"m-d" }}</span>
+                    </div>
+                    <div class="flex items-center gap-1" title="{% trans "阅读量" %}">
+                        <span class="material-symbols-outlined text-[14px]">visibility</span>
+                        <span>{{ post.views }}</span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-1" title="{% trans "作者" %}">
+                    <span class="material-symbols-outlined text-[14px]">person</span>
+                    <span class="font-medium">{{ post.author.nickname|default:post.author.username }}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endcaptureas %}
+
+<div class="h-full">
+    {{ card_content }}
+</div>
+
+{% empty %}
+<div class="col-span-full flex flex-col items-center justify-center py-20 text-center">
+    <div class="w-24 h-24 bg-base-200 rounded-full flex items-center justify-center mb-4">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-base-content/30" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
+    </div>
+    <h3 class="text-xl font-bold text-base-content/70">{% trans "暂无文章" %}</h3>
+    <p class="text-base-content/50 mt-2">{% trans "敬请期待更多精彩内容！" %}</p>
+</div>
+{% endfor %}
+</div>
+
+<!-- Pagination -->
+{% if is_paginated %}
+<div class="join grid grid-cols-2 w-full max-w-xs mx-auto mt-12 shadow-sm">
+{% if page_obj.has_previous %}
+<a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-outline border-base-content/10 hover:bg-primary hover:border-primary hover:text-primary-content">{% trans "上一页" %}</a>
+{% else %}
+<button class="join-item btn btn-outline border-base-content/10 btn-disabled opacity-50">{% trans "上一页" %}</button>
+{% endif %}
+
+{% if page_obj.has_next %}
+<a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-outline border-base-content/10 hover:bg-primary hover:border-primary hover:text-primary-content">{% trans "下一页" %}</a>
+{% else %}
+<button class="join-item btn btn-outline border-base-content/10 btn-disabled opacity-50">{% trans "下一页" %}</button>
+{% endif %}
+</div>
+{% endif %}
         </div>
 
         <!-- Sidebar (Visible only in List Mode) -->

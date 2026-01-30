@@ -1,4 +1,4 @@
-{% load static %}
+{% load static i18n core_extras %}
 <div class="navbar bg-base-100/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 border-b border-base-content/5 supports-[backdrop-filter]:bg-base-100/60" x-data="{ scrolled: false }" @scroll.window="scrolled = (window.pageYOffset > 20)" :class="{ 'shadow-md': scrolled, 'shadow-sm': !scrolled }">
   <div class="container mx-auto px-4 flex flex-col lg:flex-row w-full lg:items-center">
     
@@ -22,7 +22,14 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
                 </div>
                 <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
-                    <li><a href="{% url 'home' %}">首页</a></li>
+                    <li><a href="{% url 'home' %}">{% trans "首页" %}</a></li>
+                    <li><a href="{% url 'post_list' %}">{% trans "文章" %}</a></li>
+                    <li><a href="{% url 'category_list' %}">{% trans "分类" %}</a></li>
+                    <li><a href="{% url 'tag_list' %}">{% trans "标签" %}</a></li>
+                    <li><a href="{% url 'archive' %}">{% trans "归档" %}</a></li>
+                    <li><a href="{% url 'guestbook:index' %}">{% trans "留言板" %}</a></li>
+                    <li><a href="{% url 'about' %}">{% trans "关于" %}</a></li>
+                    <li><a href="{% url 'contact' %}">{% trans "联系" %}</a></li>
                     {% for nav in nav_header %}
                     <li><a href="{{ nav.url }}" {% if nav.open_in_new_tab %}target="_blank"{% endif %}>{{ nav.title }}</a></li>
                     {% endfor %}
@@ -35,6 +42,23 @@
                 <button class="btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors" onclick="search_modal.showModal()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </button>
+                <!-- 语言切换 (移动端) -->
+                {% get_current_language as LANGUAGE_CODE %}
+                {% get_available_languages as LANGUAGES %}
+                <div class="dropdown dropdown-end">
+                    <div tabindex="0" role="button" class="btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                        <span class="material-symbols-outlined text-[20px]">translate</span>
+                    </div>
+                    <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                        {% for lang_code, lang_name in LANGUAGES %}
+                        <li>
+                            <a href="{% translate_url lang_code %}" class="{% if lang_code == LANGUAGE_CODE %}active{% endif %}">
+                                {{ lang_name }}
+                            </a>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
                 <!-- 主题切换 -->
                 <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors grid place-items-center">
                     <input type="checkbox" class="theme-controller hidden" value="dark" onchange="updateTheme(this.checked ? 'dark' : 'light')" />
@@ -53,23 +77,23 @@
                         <li class="menu-title px-4 py-2 border-b border-base-content/10 mb-2">
                             <span class="text-primary font-bold">{{ user.nickname|default:user.username }}</span>
                         </li>
-                        <li><a href="{% url 'users:profile' %}?tab=history"><span class="material-symbols-outlined text-lg">history</span>浏览历史</a></li>
-                        <li><a href="{% url 'users:profile' %}?tab=settings"><span class="material-symbols-outlined text-lg">settings</span>偏好设置</a></li>
+                        <li><a href="{% url 'users:profile' %}?tab=history"><span class="material-symbols-outlined text-lg">history</span>{% trans "浏览历史" %}</a></li>
+                        <li><a href="{% url 'users:profile' %}?tab=settings"><span class="material-symbols-outlined text-lg">settings</span>{% trans "偏好设置" %}</a></li>
                         {% if user.is_staff %}
-                        <li><a href="{% url 'administration:index' %}"><span class="material-symbols-outlined text-lg">dashboard</span>管理后台</a></li>
+                        <li><a href="{% url 'administration:index' %}"><span class="material-symbols-outlined text-lg">dashboard</span>{% trans "管理后台" %}</a></li>
                         {% endif %}
                         <li class="mt-2 border-t border-base-content/10 pt-2">
                             <form action="{% url 'users:logout' %}" method="post" class="w-full">
                                 {% csrf_token %}
                                 <button type="submit" class="w-full text-left flex items-center gap-2 text-error hover:bg-error/10">
-                                    <span class="material-symbols-outlined text-lg">logout</span>退出登录
+                                    <span class="material-symbols-outlined text-lg">logout</span>{% trans "退出登录" %}
                                 </button>
                             </form>
                         </li>
                     </ul>
                 </div>
                 {% else %}
-                <a href="{% url 'users:login' %}" class="btn btn-primary btn-sm min-h-0 h-8 text-xs px-3">登录</a>
+                <a href="{% url 'users:login' %}" class="btn btn-primary btn-sm min-h-0 h-8 text-xs px-3">{% trans "登录" %}</a>
                 {% endif %}
             </div>
         </div>
@@ -80,7 +104,42 @@
       <ul class="menu menu-horizontal px-1 font-medium text-base gap-2">
           <li>
               <a href="{% url 'home' %}" class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group {% if request.resolver_match.url_name == 'home' %}bg-primary/10 text-primary font-bold{% endif %}">
-                  首页
+                  {% trans "首页" %}
+              </a>
+          </li>
+          <li>
+              <a href="{% url 'post_list' %}" class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group {% if request.resolver_match.url_name == 'post_list' %}bg-primary/10 text-primary font-bold{% endif %}">
+                  {% trans "文章" %}
+              </a>
+          </li>
+          <li>
+              <a href="{% url 'category_list' %}" class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group {% if request.resolver_match.url_name == 'category_list' %}bg-primary/10 text-primary font-bold{% endif %}">
+                  {% trans "分类" %}
+              </a>
+          </li>
+          <li>
+              <a href="{% url 'tag_list' %}" class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group {% if request.resolver_match.url_name == 'tag_list' %}bg-primary/10 text-primary font-bold{% endif %}">
+                  {% trans "标签" %}
+              </a>
+          </li>
+          <li>
+              <a href="{% url 'archive' %}" class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group {% if request.resolver_match.url_name == 'archive' %}bg-primary/10 text-primary font-bold{% endif %}">
+                  {% trans "归档" %}
+              </a>
+          </li>
+          <li>
+              <a href="{% url 'guestbook:index' %}" class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group {% if request.resolver_match.app_name == 'guestbook' %}bg-primary/10 text-primary font-bold{% endif %}">
+                  {% trans "留言板" %}
+              </a>
+          </li>
+          <li>
+              <a href="{% url 'about' %}" class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group {% if request.resolver_match.url_name == 'about' %}bg-primary/10 text-primary font-bold{% endif %}">
+                  {% trans "关于" %}
+              </a>
+          </li>
+          <li>
+              <a href="{% url 'contact' %}" class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group {% if request.resolver_match.url_name == 'contact' %}bg-primary/10 text-primary font-bold{% endif %}">
+                  {% trans "联系" %}
               </a>
           </li>
           {% for nav in nav_header %}
@@ -98,6 +157,24 @@
       <button class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors" onclick="search_modal.showModal()">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
       </button>
+
+      <!-- 语言切换 (桌面端) -->
+      {% get_current_language as LANGUAGE_CODE %}
+      {% get_available_languages as LANGUAGES %}
+      <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-[24px]">translate</span>
+          </div>
+          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+              {% for lang_code, lang_name in LANGUAGES %}
+              <li>
+                  <a href="{% translate_url lang_code %}" class="{% if lang_code == LANGUAGE_CODE %}active{% endif %}">
+                      {{ lang_name }}
+                  </a>
+              </li>
+              {% endfor %}
+          </ul>
+      </div>
       
       <!-- 主题切换 -->
       <label class="swap swap-rotate btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors grid place-items-center">
@@ -190,7 +267,7 @@
               <a href="{% url 'users:profile' %}?tab=notifications" class="py-2.5 flex justify-between active:bg-primary">
                   <span class="flex items-center gap-3">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                      通知中心
+                      {% trans "通知中心" %}
                   </span>
                   {% if user.unread_notification_count > 0 %}
                   <span class="badge badge-error badge-xs font-bold animate-pulse">{{ user.unread_notification_count }}</span>
@@ -202,12 +279,19 @@
               <a href="{% url 'users:profile' %}?tab=history" class="py-2.5 active:bg-primary">
                   <span class="flex items-center gap-3">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                      浏览历史
+                      {% trans "浏览历史" %}
                   </span>
               </a>
           </li>
 
-
+          <li>
+              <a href="{% url 'users:profile' %}?tab=settings" class="py-2.5 active:bg-primary">
+                  <span class="flex items-center gap-3">
+                      <span class="material-symbols-outlined text-[16px]">settings</span>
+                      {% trans "偏好设置" %}
+                  </span>
+              </a>
+          </li>
 
           <div class="h-px bg-base-content/10 my-1"></div>
 
@@ -215,7 +299,7 @@
               <a href="{% url 'users:user_public_profile' user.username %}" class="py-2.5 active:bg-primary">
                   <span class="flex items-center gap-3">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                      个人主页
+                      {% trans "个人主页" %}
                   </span>
               </a>
           </li>
@@ -225,7 +309,7 @@
               <a href="{% url 'administration:index' %}" class="py-2.5 text-warning active:bg-warning/20">
                   <span class="flex items-center gap-3">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
-                      后台管理
+                      {% trans "后台管理" %}
                   </span>
               </a>
           </li>
@@ -238,15 +322,15 @@
                   {% csrf_token %}
                   <button type="submit" class="w-full text-left py-2.5 flex items-center gap-3 text-error hover:bg-error/10 rounded-lg">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
-                      注销登录
+                      {% trans "注销登录" %}
                   </button>
               </form>
           </li>
         </ul>
       </div>
       {% else %}
-          <a href="{% url 'users:login' %}" class="btn btn-primary btn-sm px-6 rounded-full font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all">登录</a>
-          <a href="{% url 'users:register' %}" class="btn btn-ghost btn-sm">注册</a>
+          <a href="{% url 'users:login' %}" class="btn btn-primary btn-sm px-6 rounded-full font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all">{% trans "登录" %}</a>
+          <a href="{% url 'users:register' %}" class="btn btn-ghost btn-sm">{% trans "注册" %}</a>
       {% endif %}
     </div>
   </div>
@@ -260,7 +344,7 @@
 
     <h3 class="font-bold text-lg mb-6 flex items-center gap-2">
         <span class="material-symbols-outlined text-primary">search</span>
-        全站搜索
+        {% trans "全站搜索" %}
     </h3>
     
     <div class="py-4 relative">
@@ -275,7 +359,7 @@
                 @input.debounce.300ms="fetchSuggestions"
                 @keydown.enter="search"
                 class="input input-lg w-full pl-12 pr-4 rounded-xl bg-base-200/50 border-transparent focus:bg-base-100 focus:border-primary focus:outline-none transition-all duration-300"
-                placeholder="搜索文章、标签、分类..."
+                placeholder="{% trans '搜索文章、标签、分类...' %}"
                 autofocus
             >
             
@@ -305,7 +389,7 @@
                                 <span class="material-symbols-outlined text-base-content/50 group-hover:text-primary transition-colors text-xl" x-text="getIcon(item.type)"></span>
                                 <div class="flex flex-col">
                                     <span class="font-medium" x-html="highlightMatch(item.text)"></span>
-                                    <span class="text-xs text-base-content/50" x-text="item.type"></span>
+                                    <span class="text-xs text-base-content/50" x-text="item.type_label"></span>
                                 </div>
                             </div>
                             <span class="material-symbols-outlined text-base-content/30 group-hover:translate-x-1 transition-transform">arrow_forward</span>
@@ -318,13 +402,13 @@
         <!-- Empty State -->
         <div x-show="query.length > 0 && !loading && suggestions.length === 0" class="text-center py-8 text-base-content/60 animate-fade-in">
             <span class="material-symbols-outlined text-4xl mb-2 opacity-50">search_off</span>
-            <p>未找到相关结果</p>
+            <p>{% trans "未找到相关结果" %}</p>
         </div>
     </div>
 
     <div class="modal-action">
       <form method="dialog">
-        <button class="btn btn-ghost hover:bg-base-200">关闭</button>
+        <button class="btn btn-ghost hover:bg-base-200">{% trans "关闭" %}</button>
       </form>
     </div>
   </div>
@@ -369,10 +453,10 @@
 
             getIcon(type) {
                 const icons = {
-                    '文章': 'article',
-                    '标签': 'tag',
-                    '分类': 'category',
-                    '用户': 'person'
+                    'post': 'article',
+                    'tag': 'tag',
+                    'category': 'category',
+                    'user': 'person'
                 };
                 return icons[type] || 'search';
             },

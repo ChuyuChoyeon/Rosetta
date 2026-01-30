@@ -1,7 +1,7 @@
 {% extends "administration/base.html" %}
-{% load capture_tags %}
+{% load capture_tags i18n %}
 
-{% block title %}评论管理{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{% trans "评论管理" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block modal %}
 <!-- Comment Edit Modal -->
@@ -9,27 +9,27 @@
     <div class="modal-box rounded-2xl">
         <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">edit_note</span>
-            编辑评论
+            {% trans "编辑评论" %}
         </h3>
         <form method="post" id="comment_edit_form">
             {% csrf_token %}
             <div class="form-control w-full mb-4">
                 <label class="label">
-                    <span class="label-text font-medium">评论内容</span>
+                    <span class="label-text font-medium">{% trans "评论内容" %}</span>
                 </label>
                 <textarea name="content" id="comment_content" class="textarea textarea-bordered h-32 focus:textarea-primary transition-all rounded-xl" required></textarea>
             </div>
             
             <div class="form-control w-full mb-6">
                 <label class="label cursor-pointer justify-between p-3 border border-base-200 rounded-xl hover:border-primary/50 transition-all bg-base-100/50">
-                    <span class="label-text font-medium">公开可见</span> 
+                    <span class="label-text font-medium">{% trans "公开可见" %}</span> 
                     <input type="checkbox" name="active" id="comment_active" class="toggle toggle-success toggle-sm" />
                 </label>
             </div>
 
             <div class="modal-action">
-                <button type="button" class="btn btn-ghost rounded-lg" onclick="document.getElementById('comment_edit_modal').close()">取消</button>
-                <button type="submit" class="btn btn-primary shadow-lg shadow-primary/20 rounded-lg">保存更改</button>
+                <button type="button" class="btn btn-ghost rounded-lg" onclick="document.getElementById('comment_edit_modal').close()">{% trans "取消" %}</button>
+                <button type="submit" class="btn btn-primary shadow-lg shadow-primary/20 rounded-lg">{% trans "保存更改" %}</button>
             </div>
         </form>
     </div>
@@ -43,7 +43,7 @@
     <div class="modal-box rounded-2xl">
         <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
             <span class="material-symbols-outlined text-primary">reply</span>
-            回复评论
+            {% trans "回复评论" %}
         </h3>
         <div class="bg-base-200/50 p-4 rounded-xl mb-4 text-sm opacity-70 italic border-l-4 border-primary" id="reply_parent_content">
             <!-- Parent Content -->
@@ -52,14 +52,14 @@
             {% csrf_token %}
             <div class="form-control w-full mb-4">
                 <label class="label">
-                    <span class="label-text font-medium">回复内容</span>
+                    <span class="label-text font-medium">{% trans "回复内容" %}</span>
                 </label>
-                <textarea name="content" class="textarea textarea-bordered h-32 focus:textarea-primary transition-all rounded-xl" required placeholder="输入你的回复..."></textarea>
+                <textarea name="content" class="textarea textarea-bordered h-32 focus:textarea-primary transition-all rounded-xl" required placeholder="{% trans '输入你的回复...' %}"></textarea>
             </div>
             
             <div class="modal-action">
-                <button type="button" class="btn btn-ghost rounded-lg" onclick="document.getElementById('comment_reply_modal').close()">取消</button>
-                <button type="submit" class="btn btn-primary shadow-lg shadow-primary/20 rounded-lg">发送回复</button>
+                <button type="button" class="btn btn-ghost rounded-lg" onclick="document.getElementById('comment_reply_modal').close()">{% trans "取消" %}</button>
+                <button type="submit" class="btn btn-primary shadow-lg shadow-primary/20 rounded-lg">{% trans "发送回复" %}</button>
             </div>
         </form>
     </div>
@@ -75,15 +75,15 @@
         <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
             <span class="material-symbols-outlined">file_upload</span>
         </div>
-        导入评论数据 (JSON)
+        {% trans "导入评论数据 (JSON)" %}
     </h3>
-    <p class="py-4 text-sm opacity-70">请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。</p>
+    <p class="py-4 text-sm opacity-70">{% trans "请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。" %}</p>
     <form action="{% url 'administration:import_json' 'Comment' %}" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <input type="file" name="json_file" class="file-input file-input-bordered file-input-sm w-full rounded-lg mb-6" accept=".json" required />
         <div class="modal-action">
-            <button type="button" class="btn btn-sm btn-ghost rounded-lg" onclick="import_modal.close()">取消</button>
-            <button type="submit" class="btn btn-sm btn-primary rounded-lg">开始导入</button>
+            <button type="button" class="btn btn-sm btn-ghost rounded-lg" onclick="import_modal.close()">{% trans "取消" %}</button>
+            <button type="submit" class="btn btn-sm btn-primary rounded-lg">{% trans "开始导入" %}</button>
         </div>
     </form>
   </div>
@@ -120,18 +120,18 @@
     function submitBulkAction(action) {
             const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
             if (checkedBoxes.length === 0) {
-                showGlobalAlert('请至少选择一项进行操作');
+                showGlobalAlert('{% trans "请至少选择一项进行操作"|escapejs %}');
                 return;
             }
 
-        let actionName = '批量操作';
-        if (action === 'delete') actionName = '批量删除';
-        else if (action === 'active') actionName = '批量发布';
-        else if (action === 'inactive') actionName = '批量待审';
+        let actionName = '{% trans "批量操作"|escapejs %}';
+        if (action === 'delete') actionName = '{% trans "批量删除"|escapejs %}';
+        else if (action === 'active') actionName = '{% trans "批量发布"|escapejs %}';
+        else if (action === 'inactive') actionName = '{% trans "批量待审"|escapejs %}';
 
         showConfirmModal(
             actionName,
-            `确定要对选中的 ${checkedBoxes.length} 项执行此操作吗？`,
+            `{% trans "确定要对选中的"|escapejs %} ${checkedBoxes.length} {% trans "项执行此操作吗？"|escapejs %}`,
             () => {
                 const form = document.getElementById('bulk-form');
                 const actionInput = document.createElement('input');
@@ -151,22 +151,22 @@
     {% captureas actions_block %}
         <div class="dropdown dropdown-end">
             <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal hover:bg-base-200">
-                更多
+                {% trans "更多" %}
                 <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
             </div>
             <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-xl bg-base-100 rounded-2xl w-52 border border-base-content/5 mt-2">
-                <li><a href="{% url 'administration:export_all' 'Comment' %}" target="_blank" class="rounded-xl"><span class="material-symbols-outlined">download</span> 导出 JSON</a></li>
-                <li><button onclick="import_modal.showModal()" class="rounded-xl"><span class="material-symbols-outlined">upload</span> 导入 JSON</button></li>
+                <li><a href="{% url 'administration:export_all' 'Comment' %}" target="_blank" class="rounded-xl"><span class="material-symbols-outlined">download</span> {% trans "导出 JSON" %}</a></li>
+                <li><button onclick="import_modal.showModal()" class="rounded-xl"><span class="material-symbols-outlined">upload</span> {% trans "导入 JSON" %}</button></li>
                 <div class="divider my-1"></div>
-                <li><button onclick="submitBulkAction('active')" class="rounded-xl"><span class="material-symbols-outlined text-success">check_circle</span> 批量通过</button></li>
-                <li><button onclick="submitBulkAction('inactive')" class="rounded-xl"><span class="material-symbols-outlined text-warning">pending</span> 批量待审</button></li>
-                <li><button onclick="submitBulkAction('delete')" class="text-error rounded-xl"><span class="material-symbols-outlined">delete</span> 批量删除</button></li>
+                <li><button onclick="submitBulkAction('active')" class="rounded-xl"><span class="material-symbols-outlined text-success">check_circle</span> {% trans "批量通过" %}</button></li>
+                <li><button onclick="submitBulkAction('inactive')" class="rounded-xl"><span class="material-symbols-outlined text-warning">pending</span> {% trans "批量待审" %}</button></li>
+                <li><button onclick="submitBulkAction('delete')" class="text-error rounded-xl"><span class="material-symbols-outlined">delete</span> {% trans "批量删除" %}</button></li>
             </ul>
         </div>
     {% endcaptureas %}
 
     <!-- Header -->
-    {% include "administration/components/header.html" with title="评论管理" subtitle="管理用户评论与互动" breadcrumbs=None actions=actions_block %}
+    {% include "administration/components/header.html" with title=_("评论管理") subtitle=_("管理用户评论与互动") breadcrumbs=None actions=actions_block %}
 
     <!-- Stats Overview -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -175,9 +175,9 @@
                 <div class="stat-figure text-primary bg-primary/10 p-2 rounded-xl">
                     <span class="material-symbols-outlined text-2xl">comment</span>
                 </div>
-                <div class="stat-title">总评论数</div>
+                <div class="stat-title">{% trans "总评论数" %}</div>
                 <div class="stat-value text-primary text-3xl">{{ total_count }}</div>
-                <div class="stat-desc">所有评论总和</div>
+                <div class="stat-desc">{% trans "所有评论总和" %}</div>
             </div>
         </div>
         
@@ -186,9 +186,9 @@
                 <div class="stat-figure text-success bg-success/10 p-2 rounded-xl">
                     <span class="material-symbols-outlined text-2xl">check_circle</span>
                 </div>
-                <div class="stat-title">已发布</div>
+                <div class="stat-title">{% trans "已发布" %}</div>
                 <div class="stat-value text-success text-3xl">{{ active_count }}</div>
-                <div class="stat-desc">前台可见的评论</div>
+                <div class="stat-desc">{% trans "前台可见的评论" %}</div>
             </div>
         </div>
         
@@ -197,35 +197,35 @@
                 <div class="stat-figure text-warning bg-warning/10 p-2 rounded-xl">
                     <span class="material-symbols-outlined text-2xl">pending</span>
                 </div>
-                <div class="stat-title">待审核</div>
+                <div class="stat-title">{% trans "待审核" %}</div>
                 <div class="stat-value text-warning text-3xl">{{ pending_count }}</div>
-                <div class="stat-desc">需要管理员处理</div>
+                <div class="stat-desc">{% trans "需要管理员处理" %}</div>
             </div>
         </div>
     </div>
 
     <!-- Filter Tabs -->
     {% captureas filter_tabs_block %}
-        <a href="{% url 'administration:comment_list' %}" class="tab tab-sm whitespace-nowrap shrink-0 {% if not request.GET.status %}tab-active bg-base-100 shadow-sm text-base-content font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">全部</a>
+        <a href="{% url 'administration:comment_list' %}" class="tab tab-sm whitespace-nowrap shrink-0 {% if not request.GET.status %}tab-active bg-base-100 shadow-sm text-base-content font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">{% trans "全部" %}</a>
         <a href="{% url 'administration:comment_list' %}?status=pending" class="tab tab-sm whitespace-nowrap shrink-0 {% if request.GET.status == 'pending' %}tab-active bg-warning text-warning-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">
-            待审核
+            {% trans "待审核" %}
             {% if pending_count > 0 %}
             <div class="badge badge-sm badge-warning ml-1 border-none text-warning-content">{{ pending_count }}</div>
             {% endif %}
         </a>
-        <a href="{% url 'administration:comment_list' %}?status=active" class="tab tab-sm whitespace-nowrap shrink-0 {% if request.GET.status == 'active' %}tab-active bg-success text-success-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">已发布</a>
+        <a href="{% url 'administration:comment_list' %}?status=active" class="tab tab-sm whitespace-nowrap shrink-0 {% if request.GET.status == 'active' %}tab-active bg-success text-success-content shadow-sm font-bold{% else %}hover:bg-base-200{% endif %} rounded-lg transition-all">{% trans "已发布" %}</a>
     {% endcaptureas %}
 
     <!-- Bulk Actions -->
     {% captureas bulk_actions_block %}
         <button type="button" onclick="submitBulkAction('active')" class="btn btn-sm btn-success text-white gap-2 rounded-lg">
-            <span class="material-symbols-outlined text-[18px]">check_circle</span> 发布
+            <span class="material-symbols-outlined text-[18px]">check_circle</span> {% trans "发布" %}
         </button>
         <button type="button" onclick="submitBulkAction('inactive')" class="btn btn-sm btn-warning text-white gap-2 rounded-lg">
-            <span class="material-symbols-outlined text-[18px]">pending</span> 待审
+            <span class="material-symbols-outlined text-[18px]">pending</span> {% trans "待审" %}
         </button>
         <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error-focus text-white border-none gap-2 rounded-lg">
-            <span class="material-symbols-outlined text-[18px]">delete</span> 删除
+            <span class="material-symbols-outlined text-[18px]">delete</span> {% trans "删除" %}
         </button>
     {% endcaptureas %}
 
@@ -243,10 +243,10 @@
                             </label>
                         </th>
                         <th class="w-16 font-mono hidden md:table-cell">ID</th>
-                        <th>用户 / 内容</th>
-                        <th class="w-48 text-right hidden lg:table-cell">文章 / 时间</th>
-                        <th class="w-32 text-center hidden sm:table-cell whitespace-nowrap">状态</th>
-                        <th class="w-24 text-center pr-6">操作</th>
+                        <th>{% trans "用户 / 内容" %}</th>
+                        <th class="w-48 text-right hidden lg:table-cell">{% trans "文章 / 时间" %}</th>
+                        <th class="w-32 text-center hidden sm:table-cell whitespace-nowrap">{% trans "状态" %}</th>
+                        <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
                     </tr>
                 </thead>
                 <!-- Body (HTMX Target) -->
@@ -258,5 +258,5 @@
     {% endcaptureas %}
 
     <!-- List Container -->
-    {% include "administration/components/list_container.html" with title="评论列表" icon="chat" search_url="." filter_tabs=filter_tabs_block bulk_actions=bulk_actions_block content=table_content %}
+    {% include "administration/components/list_container.html" with title=_("评论列表") icon="chat" search_url="." filter_tabs=filter_tabs_block bulk_actions=bulk_actions_block content=table_content %}
 {% endblock %}

@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% load markdown_extras capture_tags static core_extras %}
+{% load markdown_extras capture_tags static core_extras i18n %}
 
 {% block extra_css %}
 <!-- 代码高亮样式 (Code Highlighting Styles) -->
@@ -130,24 +130,24 @@
                         </span>
                         {% endif %}
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1" title="{% trans '发布时间' %}">
                         <span class="material-symbols-outlined text-[18px]">calendar_today</span>
-                        <time>{{ post.published_at|default:post.created_at|date:"Y年m月d日" }}</time>
+                        <time>{{ post.published_at|default:post.created_at|date:"Y-m-d" }}</time>
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1" title="{% trans '阅读时间' %}">
                         <span class="material-symbols-outlined text-[18px]">schedule</span>
-                        <span>{{ post.reading_time }} 分钟阅读</span>
+                        <span>{{ post.reading_time }} {% trans "分钟阅读" %}</span>
                     </div>
-                    <div class="flex items-center gap-1">
+                    <div class="flex items-center gap-1" title="{% trans '阅读量' %}">
                         <span class="material-symbols-outlined text-[18px]">visibility</span>
-                        <span>{{ post.views }} 阅读</span>
+                        <span>{{ post.views }} {% trans "阅读" %}</span>
                     </div>
                     
                     {% if user.is_staff or user == post.author %}
                     <!-- 编辑按钮 (Edit Button - Only for Staff/Author) -->
                     <a href="{% url 'administration:post_edit' post.pk %}" class="flex items-center gap-1 text-primary hover:text-primary-focus transition-colors">
                         <span class="material-symbols-outlined text-[18px]">edit</span>
-                        编辑
+                        {% trans "编辑" %}
                     </a>
                     {% endif %}
                 </div>
@@ -197,12 +197,12 @@
                 </div>
 
                 <div class="flex items-center gap-3">
-                    <span class="font-bold text-sm uppercase tracking-wider opacity-50">分享</span>
+                    <span class="font-bold text-sm uppercase tracking-wider opacity-50">{% trans "分享" %}</span>
                     <div class="join">
-                        <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title }}" target="_blank" class="btn btn-sm btn-circle btn-ghost hover:bg-black/10 hover:text-black" title="分享到 X">
+                        <a href="https://twitter.com/intent/tweet?url={{ request.build_absolute_uri }}&text={{ post.title }}" target="_blank" class="btn btn-sm btn-circle btn-ghost hover:bg-black/10 hover:text-black" title="{% trans '分享到 X' %}">
                             <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                         </a>
-                        <button class="btn btn-sm btn-circle btn-ghost hover:bg-primary/10 hover:text-primary" @click="$dispatch('show-toast', { message: '链接已复制！', type: 'success' }); navigator.clipboard.writeText(window.location.href)" title="复制链接">
+                        <button class="btn btn-sm btn-circle btn-ghost hover:bg-primary/10 hover:text-primary" @click="$dispatch('show-toast', { message: '{% trans "链接已复制！" %}', type: 'success' }); navigator.clipboard.writeText(window.location.href)" title="{% trans '复制链接' %}">
                             <span class="material-symbols-outlined text-[20px]">content_copy</span>
                         </button>
                     </div>
@@ -212,7 +212,7 @@
             <!-- 相关文章推荐 (Related Posts) -->
             {% if related_posts %}
             <div class="not-prose mt-16 border-t border-base-content/10 pt-12">
-                <h3 class="text-2xl font-bold font-heading mb-8">相关阅读</h3>
+                <h3 class="text-2xl font-bold font-heading mb-8">{% trans "相关阅读" %}</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {% for related_post in related_posts %}
                     <a href="{{ related_post.get_absolute_url }}" class="group block h-full">
@@ -239,7 +239,7 @@
                                 <h4 class="font-bold text-lg mb-2 line-clamp-2 group-hover:text-primary transition-colors">{{ related_post.title }}</h4>
                                 <div class="mt-auto flex items-center justify-between text-xs text-base-content/60">
                                     <time>{{ related_post.published_at|default:related_post.created_at|date:"Y-m-d" }}</time>
-                                    <span>{{ related_post.reading_time|default:"1" }} 分钟阅读</span>
+                                    <span>{{ related_post.reading_time|default:"1" }} {% trans "分钟阅读" %}</span>
                                 </div>
                             </div>
                         </div>
@@ -253,9 +253,7 @@
             {% if post.polls.exists %}
             <div class="not-prose my-12 space-y-8">
                 {% for poll in post.polls.all %}
-                    {% if poll.is_active %}
-                        {% include "voting/partials/poll_results.html" %}
-                    {% endif %}
+                    {% include "voting/partials/poll_results.html" %}
                 {% endfor %}
             </div>
             {% endif %}
@@ -266,7 +264,7 @@
                 <a href="{% url 'post_detail' previous_post.slug %}" class="group flex items-center gap-4 p-4 rounded-xl border border-base-content/10 hover:border-primary hover:bg-primary/5 transition-all duration-300">
                     <span class="material-symbols-outlined text-3xl text-base-content/30 group-hover:text-primary transition-colors">arrow_back</span>
                     <div class="overflow-hidden">
-                        <div class="text-xs text-base-content/60 mb-1 group-hover:text-primary transition-colors">上一篇</div>
+                        <div class="text-xs text-base-content/60 mb-1 group-hover:text-primary transition-colors">{% trans "上一篇" %}</div>
                         <div class="font-bold truncate group-hover:text-primary transition-colors">{{ previous_post.title }}</div>
                     </div>
                 </a>
@@ -277,7 +275,7 @@
                 {% if next_post %}
                 <a href="{% url 'post_detail' next_post.slug %}" class="group flex items-center justify-end gap-4 p-4 rounded-xl border border-base-content/10 hover:border-primary hover:bg-primary/5 transition-all duration-300 text-right">
                     <div class="overflow-hidden">
-                        <div class="text-xs text-base-content/60 mb-1 group-hover:text-primary transition-colors">下一篇</div>
+                        <div class="text-xs text-base-content/60 mb-1 group-hover:text-primary transition-colors">{% trans "下一篇" %}</div>
                         <div class="font-bold truncate group-hover:text-primary transition-colors">{{ next_post.title }}</div>
                     </div>
                     <span class="material-symbols-outlined text-3xl text-base-content/30 group-hover:text-primary transition-colors">arrow_forward</span>
@@ -288,14 +286,14 @@
             <!-- 评论区 (Comments Section) -->
             <div class="not-prose mt-16" id="comments">
                 <div class="flex items-center gap-4 mb-8">
-                    <h3 class="text-2xl font-bold font-heading">评论</h3>
+                    <h3 class="text-2xl font-bold font-heading">{% trans "评论" %}</h3>
                     <div class="badge badge-neutral">{{ comments.count }}</div>
                 </div>
                 
                 {% if config.ENABLE_COMMENTS %}
                 <!-- 评论表单 (Comment Form) -->
                 <div class="bg-base-100 p-6 md:p-8 rounded-2xl border border-base-content/10 shadow-sm mb-12" id="comment-form">
-                    <h3 class="font-bold text-lg mb-4">发表你的观点</h3>
+                    <h3 class="font-bold text-lg mb-4">{% trans "发表你的观点" %}</h3>
                     {% if user.is_authenticated %}
                     <form method="post" class="space-y-4">
                         {% csrf_token %}
@@ -309,10 +307,10 @@
                                         <span class="material-symbols-outlined text-[16px]">reply</span>
                                     </span>
                                     <span>
-                                        正在回复 <span class="font-bold text-primary" id="reply-to-user"></span>
+                                        {% trans "正在回复" %} <span class="font-bold text-primary" id="reply-to-user"></span>
                                     </span>
                                 </span>
-                                <button type="button" class="btn btn-ghost btn-sm btn-circle hover:bg-base-300" onclick="cancelReply()" title="取消回复">
+                                <button type="button" class="btn btn-ghost btn-sm btn-circle hover:bg-base-300" onclick="cancelReply()" title="{% trans '取消回复' %}">
                                     <span class="material-symbols-outlined text-[18px]">close</span>
                                 </button>
                             </div>
@@ -322,7 +320,7 @@
                             {{ comment_form.content }}
                         </div>
                         <div class="flex justify-end">
-                            {% captureas btn_content %}发布评论{% endcaptureas %}
+                            {% captureas btn_content %}{% trans "发布评论" %}{% endcaptureas %}
                             {% include 'components/inspira/rainbow_button.html' with slot_content=btn_content type='submit' extra_classes='px-8 h-10 min-h-0' %}
                         </div>
                     </form>
@@ -330,8 +328,8 @@
                     <div class="alert bg-base-200 border-none rounded-xl flex items-center gap-4">
                         <span class="material-symbols-outlined text-3xl text-primary">account_circle</span>
                         <div>
-                            <h3 class="font-bold">需要登录</h3>
-                            <div class="text-sm opacity-70">请 <a href="{% url 'users:login' %}?next={{ request.path }}" class="link link-primary font-bold">登录</a> 或 <a href="{% url 'users:register' %}" class="link link-primary">注册</a> 后参与讨论。</div>
+                            <h3 class="font-bold">{% trans "需要登录" %}</h3>
+                            <div class="text-sm opacity-70">{% blocktrans %}请 <a href="{{ login_url }}?next={{ request.path }}" class="link link-primary font-bold">登录</a> 或 <a href="{{ register_url }}" class="link link-primary">注册</a> 后参与讨论。{% endblocktrans %}</div>
                         </div>
                     </div>
                     {% endif %}
@@ -340,8 +338,8 @@
                 <div class="alert bg-base-200 border-none rounded-xl flex items-center gap-4 mb-12">
                     <span class="material-symbols-outlined text-3xl opacity-50">comments_disabled</span>
                     <div>
-                        <h3 class="font-bold">评论已关闭</h3>
-                        <div class="text-sm opacity-70">管理员已暂时关闭评论功能。</div>
+                        <h3 class="font-bold">{% trans "评论已关闭" %}</h3>
+                        <div class="text-sm opacity-70">{% trans "管理员已暂时关闭评论功能。" %}</div>
                     </div>
                 </div>
                 {% endif %}
@@ -355,7 +353,7 @@
                             <div class="flex flex-col items-center shrink-0">
                                 <div class="avatar">
                                     <div class="w-10 h-10 rounded-full ring-2 ring-base-100 shadow-sm">
-                                        <a href="{% url 'users:user_public_profile' comment.user.username %}" title="查看 {{ comment.user.nickname|default:comment.user.username }} 的主页">
+                                        <a href="{% url 'users:user_public_profile' comment.user.username %}" title="{% blocktrans with name=comment.user.nickname|default:comment.user.username %}查看 {{ name }} 的主页{% endblocktrans %}">
                                             <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}" class="rounded-full object-cover" loading="lazy" />
                                         </a>
                                     </div>
@@ -386,25 +384,25 @@
                                             {% elif comment.user.is_staff %}
                                             <span class="badge badge-warning badge-xs gap-0.5 px-1.5 h-5 font-medium border-none text-warning-content/80">
                                                 <span class="material-symbols-outlined text-[10px]">verified</span>
-                                                管理员
+                                                {% trans "管理员" %}
                                             </span>
                                             {% endif %}
-                                            <span class="text-xs text-base-content/40">• {{ comment.created_at|timesince }}前</span>
+                                            <span class="text-xs text-base-content/40">{% blocktrans with time=comment.created_at|timesince %}• {{ time }}前{% endblocktrans %}</span>
                                         </div>
                                         
                                         <div class="flex gap-1 opacity-0 group-hover/comment:opacity-100 transition-opacity">
                                             {% if user.is_authenticated %}
                                             <button onclick="replyTo('{{ comment.id }}', '{{ comment.user.nickname|default:comment.user.username }}')" class="btn btn-ghost btn-xs gap-1 h-7 min-h-0 px-2 font-normal text-base-content/60 hover:text-primary hover:bg-primary/10">
                                                 <span class="material-symbols-outlined text-[14px]">reply</span>
-                                                回复
+                                                {% trans "回复" %}
                                             </button>
                                             {% endif %}
                                             {% if user.is_authenticated and user == comment.user or user.is_staff %}
                                             <button type="button" 
-                                                    onclick="confirmAction('{% url 'delete_comment' comment.id %}', '确定要删除这条评论及其所有回复吗？', '删除评论')"
+                                                    onclick="confirmAction('{% url 'delete_comment' comment.id %}', '{% trans "确定要删除这条评论及其所有回复吗？" %}', '{% trans "删除评论" %}')"
                                                     class="btn btn-ghost btn-xs text-error/70 hover:text-error hover:bg-error/10 gap-1 h-7 min-h-0 px-2 font-normal">
                                                 <span class="material-symbols-outlined text-[14px]">delete</span>
-                                                删除
+                                                {% trans "删除" %}
                                             </button>
                                             {% endif %}
                                         </div>
@@ -438,7 +436,7 @@
                                                     {% if reply.parent and reply.parent.user %}
                                                     <span class="text-xs text-base-content/40 flex items-center gap-1">
                                                         <span class="material-symbols-outlined text-[10px]">reply</span>
-                                                        回复 @{{ reply.parent.user.nickname|default:reply.parent.user.username }}
+                                                        {% blocktrans with name=reply.parent.user.nickname|default:reply.parent.user.username %}回复 @{{ name }}{% endblocktrans %}
                                                     </span>
                                                     {% endif %}
                                                     {% if reply.user.title %}
@@ -453,15 +451,15 @@
                                                     {% elif reply.user.is_staff %}
                                                     <span class="badge badge-warning badge-xs gap-0.5 px-1.5 h-5 font-medium border-none text-warning-content/80">
                                                         <span class="material-symbols-outlined text-[10px]">verified</span>
-                                                        管理员
+                                                        {% trans "管理员" %}
                                                     </span>
                                                     {% endif %}
-                                                    <span class="text-xs text-base-content/40">• {{ reply.created_at|timesince }}前</span>
+                                                    <span class="text-xs text-base-content/40">{% blocktrans with time=reply.created_at|timesince %}• {{ time }}前{% endblocktrans %}</span>
                                                 </div>
                                                 <div class="flex gap-1 opacity-0 group-hover/reply:opacity-100 transition-opacity">
                                                     {% if user.is_authenticated and user == reply.user or user.is_staff %}
                                                     <button type="button" 
-                                                            onclick="confirmAction('{% url 'delete_comment' reply.id %}', '确定要删除这条回复吗？', '删除回复')"
+                                                            onclick="confirmAction('{% url 'delete_comment' reply.id %}', '{% trans "确定要删除这条回复吗？" %}', '{% trans "删除回复" %}')"
                                                             class="btn btn-ghost btn-xs text-error/70 hover:text-error hover:bg-error/10 h-6 min-h-0 px-1">
                                                         <span class="material-symbols-outlined text-[14px]">delete</span>
                                                     </button>
@@ -481,11 +479,11 @@
                     </div>
                     {% empty %}
                     <div class="text-center py-16 bg-base-100 rounded-3xl border border-dashed border-base-content/20">
-                        <div class="w-16 h-16 bg-base-200 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="material-symbols-outlined text-3xl opacity-50">chat_bubble_outline</span>
+                        <div class="w-24 h-24 bg-base-200 rounded-full flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-4xl text-base-content/20">chat_bubble_outline</span>
                         </div>
-                        <h3 class="font-bold text-lg">暂无评论</h3>
-                        <p class="text-base-content/60 mt-1">你的观点很有价值，快来抢沙发吧！</p>
+                        <h3 class="font-bold text-lg opacity-60 mb-1">{% trans "暂无评论" %}</h3>
+                        <p class="text-base-content/60 mt-1">{% trans "你的观点很有价值，快来抢沙发吧！" %}</p>
                     </div>
                     {% endfor %}
                 </div>
@@ -500,7 +498,7 @@
                 <div class="p-6">
                     <h3 class="card-title text-sm uppercase tracking-wider opacity-50 mb-4 flex items-center gap-2">
                         <span class="material-symbols-outlined text-[18px]">format_list_bulleted</span>
-                        目录
+                        {% trans "目录" %}
                     </h3>
                     <nav id="toc" class="space-y-1 text-sm max-h-[60vh] overflow-y-auto pr-2 scrollbar-thin scrollbar-thumb-base-content/10 scrollbar-track-transparent">
                         <!-- TOC generated by JS -->
@@ -535,21 +533,22 @@
                     </div>
                     {% endif %}
                     <p class="text-sm text-base-content/60 mt-2">
-                        {{ post.author.bio|default:"这个作者很懒，什么都没写~" }}
+                        {% trans "这个作者很懒，什么都没写~" as default_bio %}
+                        {{ post.author.bio|default:default_bio }}
                     </p>
                     <div class="mt-6 flex justify-center gap-4">
                         <div class="text-center">
                             <div class="font-bold text-lg">{{ post.author.posts.count }}</div>
-                            <div class="text-xs opacity-60">文章</div>
+                            <div class="text-xs opacity-60">{% trans "文章" %}</div>
                         </div>
                         <div class="w-px bg-base-content/10"></div>
                         <div class="text-center">
                             <div class="font-bold text-lg">{{ post.author.total_views }}</div>
-                            <div class="text-xs opacity-60">阅读</div>
+                            <div class="text-xs opacity-60">{% trans "阅读" %}</div>
                         </div>
                     </div>
                     <a href="{% url 'users:user_public_profile' post.author.username %}" class="btn btn-outline btn-primary btn-sm rounded-full mt-6 w-full">
-                        访问主页
+                        {% trans "访问主页" %}
                     </a>
                 </div>
                 {% endcaptureas %}
@@ -702,7 +701,7 @@
             securityLevel: 'loose',
             fontFamily: 'inherit',
             themeVariables: themeVariables,
-        });
+            });
 
         // 查找所有 mermaid 代码块
         // Python-Markdown 可能生成:

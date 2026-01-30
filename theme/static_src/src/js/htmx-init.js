@@ -1,437 +1,438 @@
+// Global constants
+window.ICONS_LIST = [
+    'folder', 'article', 'tag', 'star', 'person', 'home', 'settings', 'search', 'favorite', 'share',
+    'lock', 'visibility', 'edit', 'delete', 'add', 'check', 'close', 'menu', 'more_vert', 'arrow_forward',
+    'image', 'movie', 'music_note', 'book', 'bookmark', 'label', 'flag', 'notifications', 'chat', 'mail',
+    'code', 'terminal', 'bug_report', 'developer_mode', 'lightbulb', 'bolt', 'rocket', 'science', 'school',
+    'work', 'business', 'shopping_cart', 'credit_card', 'account_balance', 'schedule', 'today', 'event', 'history',
+    'dashboard', 'grid_view', 'list', 'sort', 'filter_list', 'tune', 'language', 'translate', 'public',
+    'description', 'folder_open', 'link', 'cloud', 'download', 'upload', 'error', 'warning', 'info', 'help',
+    'add_circle', 'remove_circle', 'check_circle', 'cancel', 'arrow_back', 'arrow_upward', 'arrow_downward',
+    'chevron_left', 'chevron_right', 'expand_more', 'expand_less', 'refresh', 'sync', 'loop', 'undo', 'redo',
+    'content_copy', 'content_paste', 'content_cut', 'save', 'print', 'send', 'archive', 'unarchive', 'reply',
+    'reply_all', 'forward', 'report', 'thumb_up', 'thumb_down', 'comment', 'forum', 'question_answer',
+    'group', 'groups', 'person_add', 'person_remove', 'manage_accounts', 'account_circle', 'face', 'mood',
+    'mood_bad', 'sentiment_satisfied', 'sentiment_dissatisfied', 'star_border', 'star_half', 'toggle_on',
+    'toggle_off', 'check_box', 'check_box_outline_blank', 'radio_button_checked', 'radio_button_unchecked'
+];
+
 // Global initializer for HTMX navigations and initial page load
-// Ensures page-specific modules initialize after content swaps
-(function () {
-  function run(fn) {
-    try {
-      fn();
-    } catch (e) {
-      console.error('[htmx-init] initialization error:', e);
-    }
-  }
+function initDashboardCharts() {
+    if (typeof ApexCharts === 'undefined') return;
 
-  var registry = [];
-  function register(fn) {
-    if (typeof fn === 'function') {
-      registry.push(fn);
-    }
-  }
-  function runRegistry(root) {
-    registry.forEach(function (fn) {
-      run(function () {
-        fn(root || document);
-      });
-    });
-  }
-  window.registerHtmxInit = register;
-  window.runHtmxInit = runRegistry;
-
-  function initEditor(root) {
-    var editorContainer = (root || document).querySelector('#editor');
-    var contentInput = (root || document).querySelector('#id_content');
-    if (!editorContainer || !contentInput) return;
-    if (editorContainer.dataset.initialized === '1') return;
-    if (typeof window.initByteMD !== 'function') return;
-    var initialValue = contentInput.value || '';
-    window.initByteMD('editor', 'id_content', initialValue);
-    editorContainer.dataset.initialized = '1';
-  }
-
-  function initDashboard(root) {
-    var scope = root || document;
-    var trendEl = scope.querySelector('#trendChart');
-    var donutEl = scope.querySelector('#commentDonut');
-    var categoryEl = scope.querySelector('#categoryChart');
-    var tagEl = scope.querySelector('#tagChart');
-
-    if (!trendEl && !donutEl && !categoryEl && !tagEl) return;
-    if (typeof window.ApexCharts !== 'function') return;
-
-    var parseJson = function (value, fallback) {
-      if (!value) return fallback;
-      try {
-        return JSON.parse(value);
-      } catch (e) {
-        return fallback;
-      }
-    };
-    var resolveColor = function (cssColor) {
-      var el = document.createElement('span');
-      el.style.color = cssColor;
-      el.style.display = 'none';
-      document.body.appendChild(el);
-      var resolved = getComputedStyle(el).color;
-      document.body.removeChild(el);
-      return resolved || cssColor;
-    };
-    var getCssVar = function (varName) {
-      return getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
-    };
-
-    var currentTheme = document.documentElement.getAttribute('data-theme');
-    var themeMode = currentTheme === 'light' ? 'light' : 'dark';
-    var textColor = resolveColor('oklch(var(--bc))');
-    var mutedTextColor = resolveColor('oklch(var(--bc) / 0.6)');
-    var gridColor = resolveColor('oklch(var(--bc) / 0.1)');
-
-    var applyChartTextColors = function (container) {
-      if (!container) return;
-      var textNodes = container.querySelectorAll('text.apexcharts-text');
-      textNodes.forEach(function (node) {
-        var isMuted = node.classList.contains('apexcharts-xaxis-label') || node.classList.contains('apexcharts-yaxis-label') || node.classList.contains('apexcharts-datalabel-label');
-        var color = isMuted ? mutedTextColor : textColor;
-        node.setAttribute('fill', color);
-        node.style.fill = color;
-      });
-    };
-
-    if (trendEl) {
-      if (trendEl._chart) {
+    // Trend Chart
+    const trendChartEl = document.getElementById('trendChart');
+    if (trendChartEl && !trendChartEl.chart) {
         try {
-          trendEl._chart.destroy();
-        } catch (e) {}
-      }
-      var trendCounts = parseJson(trendEl.dataset.trendCounts, []);
-      var userTrendCounts = parseJson(trendEl.dataset.userTrendCounts, []);
-      var trendDates = parseJson(trendEl.dataset.trendDates, []);
-      var optionsTrend = {
-        series: [
-          { name: '评论数', data: trendCounts },
-          { name: '新用户', data: userTrendCounts }
-        ],
-        chart: {
-          type: 'area',
-          height: 320,
-          toolbar: { show: false },
-          fontFamily: 'inherit',
-          background: 'transparent',
-          animations: { enabled: true },
-          foreColor: textColor
-        },
-        stroke: { curve: 'smooth', width: 3 },
-        fill: {
-          type: 'gradient',
-          gradient: {
-            shadeIntensity: 1,
-            opacityFrom: 0.45,
-            opacityTo: 0.05,
-            stops: [0, 100]
-          }
-        },
-        dataLabels: { enabled: false },
-        xaxis: {
-          categories: trendDates,
-          labels: {
-            show: true,
-            style: { colors: mutedTextColor, fontSize: '11px', fontFamily: 'inherit' }
-          },
-          axisBorder: { show: false },
-          axisTicks: { show: false },
-          tooltip: { enabled: false }
-        },
-        yaxis: {
-          show: true,
-          labels: {
-            style: { colors: mutedTextColor, fontSize: '11px', fontFamily: 'inherit' }
-          }
-        },
-        grid: {
-          show: true,
-          borderColor: gridColor,
-          strokeDashArray: 4,
-          padding: { top: 0, right: 0, bottom: 0, left: 10 }
-        },
-        theme: { mode: themeMode },
-        colors: [getCssVar('--p') || '#3ABFF8', getCssVar('--s') || '#D926A9'],
-        tooltip: {
-          theme: themeMode,
-          style: { fontSize: '12px', fontFamily: 'inherit' },
-          x: { show: false },
-          marker: { show: false },
-          cssClass: 'apexcharts-tooltip-theme-layer'
-        }
-      };
-      var chartTrend = new ApexCharts(trendEl, optionsTrend);
-      chartTrend.render();
-      trendEl._chart = chartTrend;
-      setTimeout(function () {
-        applyChartTextColors(trendEl);
-      }, 0);
-    }
+            const dates = JSON.parse(trendChartEl.dataset.trendDates);
+            const counts = JSON.parse(trendChartEl.dataset.trendCounts);
+            const userCounts = JSON.parse(trendChartEl.dataset.userTrendCounts);
 
-    if (donutEl) {
-      if (donutEl._chart) {
-        try {
-          donutEl._chart.destroy();
-        } catch (e) {}
-      }
-      var commentStatusData = parseJson(donutEl.dataset.commentStatus, []);
-      var optionsDonut = {
-        series: commentStatusData,
-        labels: ['已发布', '待审核'],
-        chart: {
-          type: 'donut',
-          height: 160,
-          fontFamily: 'inherit',
-          background: 'transparent',
-          foreColor: textColor
-        },
-        plotOptions: {
-          pie: {
-            donut: {
-              size: '75%',
-              labels: {
-                show: true,
-                name: { show: false },
-                value: {
-                  show: true,
-                  fontSize: '20px',
-                  fontWeight: 700,
-                  color: textColor,
-                  formatter: function (val) {
-                    return val;
-                  }
+            const options = {
+                series: [{
+                    name: '评论',
+                    data: counts
+                }, {
+                    name: '新用户',
+                    data: userCounts
+                }],
+                chart: {
+                    type: 'area',
+                    height: 320,
+                    toolbar: { show: false },
+                    fontFamily: 'inherit',
+                    background: 'transparent',
+                    animations: { enabled: true }
                 },
-                total: {
-                  show: true,
-                  showAlways: true,
-                  label: '总计',
-                  fontSize: '12px',
-                  color: mutedTextColor,
-                  formatter: function (w) {
-                    return w.globals.seriesTotals.reduce(function (a, b) {
-                      return a + b;
-                    }, 0);
-                  }
-                }
-              }
-            }
-          }
-        },
-        dataLabels: { enabled: false },
-        legend: { show: false },
-        stroke: { show: false },
-        theme: { mode: themeMode },
-        colors: [getCssVar('--su') || '#36D399', getCssVar('--wa') || '#FBBD23'],
-        tooltip: { enabled: false }
-      };
-      var chartDonut = new ApexCharts(donutEl, optionsDonut);
-      chartDonut.render();
-      donutEl._chart = chartDonut;
-      setTimeout(function () {
-        applyChartTextColors(donutEl);
-      }, 0);
+                colors: ['#4f46e5', '#9333ea'],
+                dataLabels: { enabled: false },
+                stroke: { curve: 'smooth', width: 2 },
+                fill: {
+                    type: 'gradient',
+                    gradient: {
+                        shadeIntensity: 1,
+                        opacityFrom: 0.4,
+                        opacityTo: 0.05,
+                        stops: [0, 90, 100]
+                    }
+                },
+                xaxis: {
+                    categories: dates,
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    labels: { style: { colors: 'var(--fallback-bc,oklch(var(--bc)/0.6))' } }
+                },
+                yaxis: { show: false },
+                grid: {
+                    borderColor: 'var(--fallback-bc,oklch(var(--bc)/0.05))',
+                    strokeDashArray: 4,
+                    yaxis: { lines: { show: true } }
+                },
+                theme: { mode: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light' }
+            };
+
+            const chart = new ApexCharts(trendChartEl, options);
+            chart.render();
+            trendChartEl.chart = chart;
+        } catch (e) {
+            console.error('Error initializing trend chart:', e);
+        }
     }
 
-    if (categoryEl) {
-      if (categoryEl._chart) {
+    // Comment Donut
+    const commentDonutEl = document.getElementById('commentDonut');
+    if (commentDonutEl && !commentDonutEl.chart) {
         try {
-          categoryEl._chart.destroy();
-        } catch (e) {}
-      }
-      var categoryLabels = parseJson(categoryEl.dataset.categoryLabels, []);
-      var categoryData = parseJson(categoryEl.dataset.categoryData, []);
+            const data = JSON.parse(commentDonutEl.dataset.commentStatus);
+            const options = {
+                series: data,
+                labels: ['已发布', '待审核'],
+                chart: {
+                    type: 'donut',
+                    height: 240,
+                    fontFamily: 'inherit',
+                    background: 'transparent'
+                },
+                colors: ['#22c55e', '#eab308'],
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '70%',
+                            labels: {
+                                show: true,
+                                total: {
+                                    show: true,
+                                    label: '总计',
+                                    color: 'var(--fallback-bc,oklch(var(--bc)/1))',
+                                    formatter: function (w) {
+                                        return w.globals.seriesTotals.reduce((a, b) => a + b, 0)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                dataLabels: { enabled: false },
+                legend: { show: false },
+                stroke: { show: false },
+                theme: { mode: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light' }
+            };
 
-      var optionsCategory = {
-        series: categoryData,
-        labels: categoryLabels,
-        chart: {
-          type: 'donut',
-          height: 300,
-          fontFamily: 'inherit',
-          background: 'transparent',
-          foreColor: textColor
-        },
-        plotOptions: {
-          pie: {
-            donut: {
-              size: '65%',
-              labels: {
-                show: true,
-                total: {
-                  show: true,
-                  label: '总计',
-                  color: mutedTextColor,
-                  formatter: function (w) {
-                    return w.globals.seriesTotals.reduce(function (a, b) {
-                      return a + b;
-                    }, 0);
-                  }
-                }
-              }
-            }
-          }
-        },
-        dataLabels: { enabled: false },
-        legend: {
-          position: 'bottom',
-          labels: { colors: textColor }
-        },
-        stroke: { show: false },
-        theme: { mode: themeMode },
-        colors: [
-          getCssVar('--p') || '#3ABFF8',
-          getCssVar('--s') || '#D926A9',
-          getCssVar('--a') || '#1FB2A6',
-          getCssVar('--n') || '#2A323C'
-        ],
-        tooltip: { theme: themeMode }
-      };
-
-      var chartCategory = new ApexCharts(categoryEl, optionsCategory);
-      chartCategory.render();
-      categoryEl._chart = chartCategory;
+            const chart = new ApexCharts(commentDonutEl, options);
+            chart.render();
+            commentDonutEl.chart = chart;
+        } catch (e) {
+            console.error('Error initializing comment donut:', e);
+        }
     }
-
-    if (tagEl) {
-      if (tagEl._chart) {
+    
+    // Category Chart
+    const categoryChartEl = document.getElementById('categoryChart');
+    if (categoryChartEl && !categoryChartEl.chart) {
         try {
-          tagEl._chart.destroy();
-        } catch (e) {}
-      }
-      var tagLabels = parseJson(tagEl.dataset.tagLabels, []);
-      var tagData = parseJson(tagEl.dataset.tagData, []);
-
-      var optionsTag = {
-        series: [{
-          name: '文章数',
-          data: tagData
-        }],
-        chart: {
-          type: 'bar',
-          height: 300,
-          toolbar: { show: false },
-          fontFamily: 'inherit',
-          background: 'transparent',
-          foreColor: textColor
-        },
-        plotOptions: {
-          bar: {
-            borderRadius: 4,
-            horizontal: true,
-            barHeight: '60%',
-            distributed: true
-          }
-        },
-        dataLabels: { enabled: false },
-        xaxis: {
-          categories: tagLabels,
-          labels: { style: { colors: mutedTextColor } },
-          axisBorder: { show: false },
-          axisTicks: { show: false }
-        },
-        yaxis: {
-          labels: { style: { colors: textColor } }
-        },
-        grid: {
-          borderColor: gridColor,
-          strokeDashArray: 4
-        },
-        theme: { mode: themeMode },
-        colors: [
-          getCssVar('--p') || '#3ABFF8',
-          getCssVar('--s') || '#D926A9',
-          getCssVar('--a') || '#1FB2A6',
-          getCssVar('--in') || '#3ABFF8',
-          getCssVar('--su') || '#36D399',
-          getCssVar('--wa') || '#FBBD23',
-          getCssVar('--er') || '#F87272'
-        ],
-        legend: { show: false },
-        tooltip: {
-          theme: themeMode,
-          x: { show: true }  // 确保 tooltip 显示标签名
+            const labels = JSON.parse(categoryChartEl.dataset.categoryLabels);
+            const data = JSON.parse(categoryChartEl.dataset.categoryData);
+            
+            const options = {
+                series: data,
+                labels: labels,
+                chart: {
+                    type: 'polarArea',
+                    height: 300,
+                    fontFamily: 'inherit',
+                    background: 'transparent',
+                    toolbar: { show: false }
+                },
+                stroke: { colors: ['var(--fallback-b1,oklch(var(--b1)/1))'] },
+                fill: { opacity: 0.8 },
+                legend: { 
+                    position: 'bottom',
+                    labels: { colors: 'var(--fallback-bc,oklch(var(--bc)/1))' }
+                },
+                theme: { 
+                    mode: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light',
+                    monochrome: {
+                        enabled: true,
+                        color: '#4f46e5',
+                        shadeTo: 'light',
+                        shadeIntensity: 0.65
+                    }
+                }
+            };
+            
+            const chart = new ApexCharts(categoryChartEl, options);
+            chart.render();
+            categoryChartEl.chart = chart;
+        } catch(e) {
+            console.error('Error initializing category chart:', e);
         }
-      };
-
-      var chartTag = new ApexCharts(tagEl, optionsTag);
-      chartTag.render();
-      tagEl._chart = chartTag;
     }
 
-    if (!document.documentElement.dataset.dashboardObserver) {
-      var observer = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
-          if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
-            setTimeout(function () {
-              initDashboard(document);
-            }, 100);
-          }
-        });
-      });
-      observer.observe(document.documentElement, { attributes: true });
-      document.documentElement.dataset.dashboardObserver = '1';
+    // Tag Chart
+    const tagChartEl = document.getElementById('tagChart');
+    if (tagChartEl && !tagChartEl.chart) {
+        try {
+            const labels = JSON.parse(tagChartEl.dataset.tagLabels);
+            const data = JSON.parse(tagChartEl.dataset.tagData);
+            
+            const options = {
+                series: [{
+                    name: '文章数',
+                    data: data
+                }],
+                chart: {
+                    type: 'bar',
+                    height: 300,
+                    toolbar: { show: false },
+                    fontFamily: 'inherit',
+                    background: 'transparent'
+                },
+                plotOptions: {
+                    bar: {
+                        borderRadius: 4,
+                        horizontal: true,
+                        distributed: true
+                    }
+                },
+                colors: ['#9333ea', '#7e22ce', '#6b21a8', '#581c87', '#3b0764'],
+                dataLabels: { enabled: false },
+                xaxis: {
+                    categories: labels,
+                    axisBorder: { show: false },
+                    axisTicks: { show: false },
+                    labels: { style: { colors: 'var(--fallback-bc,oklch(var(--bc)/0.6))' } }
+                },
+                yaxis: {
+                    labels: { style: { colors: 'var(--fallback-bc,oklch(var(--bc)/0.6))' } }
+                },
+                theme: { mode: document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light' },
+                legend: { show: false }
+            };
+            
+            const chart = new ApexCharts(tagChartEl, options);
+            chart.render();
+            tagChartEl.chart = chart;
+        } catch(e) {
+            console.error('Error initializing tag chart:', e);
+        }
+    }
+}
+
+// Initialize on load and HTMX swap
+document.addEventListener('DOMContentLoaded', initDashboardCharts);
+document.addEventListener('htmx:afterSwap', initDashboardCharts);
+document.addEventListener('htmx:historyRestore', initDashboardCharts);
+
+// Global component registry for HTMX-loaded content
+window.registerGlobalComponents = function() {
+    if (typeof Alpine === 'undefined') return;
+
+    // Register categoryModal if not exists
+    if (!Alpine.data('categoryModal')) {
+        Alpine.data('categoryModal', () => ({
+            isSubmitting: false,
+            isTranslating: false,
+            activeTab: 'zh-hans',
+            coverPreview: null,
+            form: {
+                name_zh_hans: '',
+                name_en: '',
+                name_ja: '',
+                name_zh_hant: '',
+                description_zh_hans: '',
+                description_en: '',
+                description_ja: '',
+                description_zh_hant: '',
+                icon: 'folder',
+                color: 'primary',
+            },
+            colors: [
+                { name: 'Primary', value: 'primary', class: 'bg-primary' },
+                { name: 'Secondary', value: 'secondary', class: 'bg-secondary' },
+                { name: 'Accent', value: 'accent', class: 'bg-accent' },
+                { name: 'Neutral', value: 'neutral', class: 'bg-neutral' },
+                { name: 'Info', value: 'info', class: 'bg-info' },
+                { name: 'Success', value: 'success', class: 'bg-success' },
+                { name: 'Warning', value: 'warning', class: 'bg-warning' },
+                { name: 'Error', value: 'error', class: 'bg-error' },
+                { name: 'Red', value: '#ef4444', class: 'bg-red-500' },
+                { name: 'Orange', value: '#f97316', class: 'bg-orange-500' },
+                { name: 'Amber', value: '#f59e0b', class: 'bg-amber-500' },
+                { name: 'Yellow', value: '#eab308', class: 'bg-yellow-500' },
+                { name: 'Lime', value: '#84cc16', class: 'bg-lime-500' },
+                { name: 'Green', value: '#22c55e', class: 'bg-green-500' },
+                { name: 'Emerald', value: '#10b981', class: 'bg-emerald-500' },
+                { name: 'Teal', value: '#14b8a6', class: 'bg-teal-500' },
+                { name: 'Cyan', value: '#06b6d4', class: 'bg-cyan-500' },
+                { name: 'Sky', value: '#0ea5e9', class: 'bg-sky-500' },
+                { name: 'Blue', value: '#3b82f6', class: 'bg-blue-500' },
+                { name: 'Indigo', value: '#6366f1', class: 'bg-indigo-500' },
+                { name: 'Violet', value: '#8b5cf6', class: 'bg-violet-500' },
+                { name: 'Purple', value: '#a855f7', class: 'bg-purple-500' },
+                { name: 'Fuchsia', value: '#d946ef', class: 'bg-fuchsia-500' },
+                { name: 'Pink', value: '#ec4899', class: 'bg-pink-500' },
+                { name: 'Rose', value: '#f43f5e', class: 'bg-rose-500' },
+            ],
+            
+            handleFile(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.coverPreview = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                }
+            },
+
+            async translateAll() {
+                if (!this.form.name_zh_hans) {
+                    if (window.showToast) window.showToast('请先输入中文名称', 'warning');
+                    return;
+                }
+                this.isTranslating = true;
+                try {
+                    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                    const response = await fetch('/api/translate/', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
+                        body: JSON.stringify({
+                            text: this.form.name_zh_hans,
+                            target_langs: ['en', 'ja', 'zh-hant']
+                        })
+                    });
+                    const data = await response.json();
+                    if (data.translations) {
+                        if (data.translations.en) this.form.name_en = data.translations.en;
+                        if (data.translations.ja) this.form.name_ja = data.translations.ja;
+                        if (data.translations['zh-hant']) this.form.name_zh_hant = data.translations['zh-hant'];
+                        if (window.showToast) window.showToast('翻译完成', 'success');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    if (window.showToast) window.showToast('翻译失败', 'error');
+                } finally {
+                    this.isTranslating = false;
+                }
+            },
+
+            async submitForm() {
+                this.isSubmitting = true;
+                try {
+                    const formData = new FormData(document.getElementById('category_quick_form'));
+                    // Ensure hidden fields are populated
+                    formData.set('name', this.form.name_zh_hans);
+                    formData.set('description', this.form.description_zh_hans);
+                    formData.set('name_en', this.form.name_en);
+                    formData.set('name_ja', this.form.name_ja);
+                    formData.set('name_zh_hant', this.form.name_zh_hant);
+                    formData.set('description_en', this.form.description_en);
+                    formData.set('description_ja', this.form.description_ja);
+                    formData.set('description_zh_hant', this.form.description_zh_hant);
+                    
+                    // Use relative URL to avoid hardcoded paths if possible, or ensure administration namespace
+                    const response = await fetch('/admin/categories/create/quick/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                        },
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    if (data.status === 'success') {
+                        // Add to select box
+                        const select = document.getElementById('id_category');
+                        if (select) {
+                            const option = new Option(data.name, data.id);
+                            select.add(option, undefined);
+                            select.value = data.id;
+                        }
+                        // Close modal and reset
+                        document.getElementById('category_modal').close();
+                        this.resetForm();
+                        if (window.showToast) window.showToast('分类创建成功', 'success');
+                    } else {
+                        if (window.showToast) window.showToast('创建失败: ' + JSON.stringify(data.errors), 'error');
+                    }
+                } catch (e) {
+                    console.error(e);
+                    if (window.showToast) window.showToast('系统错误', 'error');
+                } finally {
+                    this.isSubmitting = false;
+                }
+            },
+            
+            resetForm() {
+                this.form = {
+                    name_zh_hans: '',
+                    name_en: '',
+                    name_ja: '',
+                    name_zh_hant: '',
+                    description_zh_hans: '',
+                    description_en: '',
+                    description_ja: '',
+                    description_zh_hant: '',
+                    icon: 'folder',
+                    color: 'primary',
+                };
+                this.coverPreview = null;
+                this.activeTab = 'zh-hans';
+                const formEl = document.getElementById('category_quick_form');
+                if (formEl) formEl.reset();
+            }
+        }));
     }
 
-    if (!document.documentElement.dataset.dashboardCleanupBound) {
-      document.addEventListener('htmx:beforeSwap', function () {
-        var trendTarget = document.querySelector('#trendChart');
-        if (trendTarget && trendTarget._chart) {
-          try {
-            trendTarget._chart.destroy();
-          } catch (e) {}
-          delete trendTarget._chart;
-        }
-        var donutTarget = document.querySelector('#commentDonut');
-        if (donutTarget && donutTarget._chart) {
-          try {
-            donutTarget._chart.destroy();
-          } catch (e) {}
-          delete donutTarget._chart;
-        }
-        var categoryTarget = document.querySelector('#categoryChart');
-        if (categoryTarget && categoryTarget._chart) {
-          try {
-            categoryTarget._chart.destroy();
-          } catch (e) {}
-          delete categoryTarget._chart;
-        }
-        var tagTarget = document.querySelector('#tagChart');
-        if (tagTarget && tagTarget._chart) {
-          try {
-            tagTarget._chart.destroy();
-          } catch (e) {}
-          delete tagTarget._chart;
-        }
-      });
-      document.documentElement.dataset.dashboardCleanupBound = '1';
+    // Register iconPicker if not exists
+    if (!Alpine.data('iconPicker')) {
+        Alpine.data('iconPicker', () => ({
+            searchQuery: '',
+            icons: [],
+            
+            init() {
+                if (window.ICONS_LIST) {
+                    this.icons = window.ICONS_LIST;
+                } else {
+                    setTimeout(() => {
+                        if (window.ICONS_LIST) this.icons = window.ICONS_LIST;
+                    }, 100);
+                }
+            },
+
+            get filteredIcons() {
+                if (!this.searchQuery) return this.icons;
+                const query = this.searchQuery.toLowerCase();
+                return this.icons.filter(i => i.toLowerCase().includes(query));
+            },
+
+            isSelected(iconName) {
+                if (window.currentIconInput) {
+                    return window.currentIconInput.value === iconName;
+                }
+                const input = document.querySelector('[name=icon]');
+                return input && input.value === iconName;
+            },
+
+            selectIcon(iconName) {
+                if (window.currentIconInput) {
+                    window.currentIconInput.value = iconName;
+                    window.currentIconInput.dispatchEvent(new Event('input'));
+                } else {
+                    const input = document.querySelector('[name=icon]');
+                    if (input) {
+                        input.value = iconName;
+                        input.dispatchEvent(new Event('input'));
+                    }
+                }
+                document.getElementById('icon_picker_modal').close();
+            }
+        }));
     }
-  }
+};
 
-  function initThemeToggle(root) {
-    var toggle = (root || document).querySelector('#theme-toggle-admin');
-    if (!toggle) return;
-    var currentTheme = localStorage.getItem('theme') || document.documentElement.getAttribute('data-theme');
-    toggle.checked = currentTheme === 'dark';
-  }
-
-  // Expose PinyinMatch if available (will be bundled)
-  if (typeof require === 'function') {
-    try {
-      window.PinyinMatch = require('pinyin-match');
-    } catch (e) {
-      // Ignore if not in Node environment
-    }
-  }
-
-  // HTMX Event Listeners
-  document.addEventListener('htmx:afterSwap', function (event) {
-    runRegistry(event.detail.target);
-    initEditor(event.detail.target);
-    initDashboard(event.detail.target);
-    // Re-initialize Alpine.js components if new content is injected
-    // Alpine usually handles this automatically, but sometimes explicit init is safer for complex DOM changes
-    // Only necessary if hx-swap is used and Alpine components are inside the swapped content
-    if (typeof Alpine !== 'undefined' && event.detail.elt) {
-       // Check if the swapped content contains x-data but hasn't been initialized
-       // This is a heuristic; modern Alpine + HTMX often work out of the box.
-       // But if you see issues, you might need:
-       // Alpine.initTree(event.detail.target);
-    }
-  });
-
-  document.addEventListener('DOMContentLoaded', function () {
-    runRegistry(document);
-    initEditor(document);
-    initDashboard(document);
-  });
-})();
+// Initialize components immediately if Alpine is ready, otherwise wait
+document.addEventListener('alpine:init', window.registerGlobalComponents);
+if (typeof Alpine !== 'undefined') {
+    window.registerGlobalComponents();
+}

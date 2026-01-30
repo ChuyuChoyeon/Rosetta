@@ -1,6 +1,7 @@
 from django.views.generic import ListView, CreateView
 from django.urls import reverse_lazy
 from django.contrib import messages
+from django.utils.translation import gettext as _
 from django.core.paginator import Paginator
 from .models import GuestbookEntry
 from .forms import GuestbookForm
@@ -33,5 +34,5 @@ class GuestbookView(CreateView):
             form.instance.nickname = self.request.user.nickname or self.request.user.username
             form.instance.email = self.request.user.email
         
-        messages.success(self.request, "留言发布成功！")
+        messages.success(self.request, _("留言发布成功！"))
         return super().form_valid(form)

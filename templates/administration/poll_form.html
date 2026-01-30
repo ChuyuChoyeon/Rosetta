@@ -1,5 +1,5 @@
 {% extends "administration/base.html" %}
-{% load capture_tags widget_tweaks %}
+{% load capture_tags widget_tweaks i18n %}
 
 {% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
@@ -8,62 +8,220 @@
 {% captureas header_actions %}
 {% endcaptureas %}
 
-{% include "administration/components/header.html" with title=title|default:"编辑投票" icon="poll" breadcrumbs=breadcrumbs actions=header_actions %}
+{% trans "编辑投票" as default_title %}
+{% include "administration/components/header.html" with title=title|default:default_title icon="poll" breadcrumbs=breadcrumbs actions=header_actions %}
 
-<form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+<form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start" x-data="translationForm" novalidate>
     {% csrf_token %}
+    <div class="hidden">
+        {{ form.title }}
+        {{ form.description }}
+    </div>
     
     <!-- Left Column: Main Content -->
     <div class="lg:col-span-2 space-y-6">
         {% captureas main_content %}
             <div class="flex flex-col gap-5">
                 {% if form.non_field_errors %}
-                <div class="alert alert-error mb-2 shadow-sm rounded-xl">
-                    <span class="material-symbols-outlined">error</span>
-                    <div class="flex flex-col">
-                        <span class="font-bold">表单错误</span>
-                        {% for error in form.non_field_errors %}
-                        <span class="text-sm">{{ error }}</span>
-                        {% endfor %}
+                <div role="alert" class="alert border border-error/20 bg-error/5 text-error mb-2 shadow-sm rounded-xl">
+                    <div class="flex items-start gap-4">
+                        <span class="material-symbols-outlined pt-1">error</span>
+                        <div class="w-full">
+                            <span class="font-bold block mb-1">{% trans "表单错误" %}</span>
+                            <ul class="list-disc list-inside text-sm opacity-90">
+                                {% for error in form.non_field_errors %}
+                                    <li>{{ error }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
                     </div>
                 </div>
                 {% endif %}
 
-                <!-- Title Field -->
-                <div class="form-control w-full group">
-                    <label class="label px-0">
-                        <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">
-                            标题 <span class="text-error">*</span>
-                        </span>
-                    </label>
-                    {% render_field form.title class="input input-bordered input-lg w-full focus:input-primary transition-all font-medium" placeholder="输入投票标题" %}
-                    {% if form.title.errors %}
-                    <label class="label px-0">
-                        <span class="label-text-alt text-error flex items-center gap-1">
-                            <span class="material-symbols-outlined text-xs">error</span>
-                            {{ form.title.errors.0 }}
-                        </span>
-                    </label>
-                    {% endif %}
-                </div>
+                <!-- Multi-language Tabs -->
+                <div x-data="translationForm" class="bg-base-100 border border-base-300 rounded-box overflow-hidden">
+                    <!-- Tab Header -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 bg-base-50/50 px-4 pt-2">
+                        <div role="tablist" class="tabs tabs-bordered -mb-[1px]">
+                            <a role="tab" class="tab h-10 px-4 transition-all duration-200"
+                               :class="activeTab === 'zh-hans' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                               @click="activeTab = 'zh-hans'">
+                                <span class="mr-2 text-lg">🇨🇳</span>
+                                {% trans "中文" %}
+                            </a>
+                            <a role="tab" class="tab h-10 px-4 transition-all duration-200"
+                               :class="activeTab === 'en' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                               @click="activeTab = 'en'">
+                                <span class="mr-2 text-lg">🇺🇸</span>
+                                English
+                            </a>
+                            <a role="tab" class="tab h-10 px-4 transition-all duration-200"
+                               :class="activeTab === 'ja' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                               @click="activeTab = 'ja'">
+                                <span class="mr-2 text-lg">🇯🇵</span>
+                                日本語
+                            </a>
+                            <a role="tab" class="tab h-10 px-4 transition-all duration-200"
+                               :class="activeTab === 'zh-hant' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                               @click="activeTab = 'zh-hant'">
+                                <span class="mr-2 text-lg">🇭🇰</span>
+                                繁體中文
+                            </a>
+                        </div>
 
-                <!-- Description Field -->
-                <div class="form-control w-full group">
-                    <label class="label px-0">
-                        <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">描述</span>
-                    </label>
-                    {% render_field form.description class="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all text-base leading-relaxed" placeholder="输入投票描述，详细说明投票目的..." %}
-                    {% if form.description.errors %}
-                    <label class="label px-0">
-                        <span class="label-text-alt text-error">{{ form.description.errors.0 }}</span>
-                    </label>
-                    {% endif %}
+                        <!-- One-click Translate Button -->
+                        <div class="mb-1">
+                            <button type="button" 
+                                    class="btn btn-sm btn-ghost gap-1.5 text-primary hover:bg-primary/10 transition-colors"
+                                    @click="translate('id_title_zh_hans', {
+                                        'en': 'id_title_en',
+                                        'ja': 'id_title_ja',
+                                        'zh-hant': 'id_title_zh_hant'
+                                    });
+                                    translate('id_description_zh_hans', {
+                                        'en': 'id_description_en',
+                                        'ja': 'id_description_ja',
+                                        'zh-hant': 'id_description_zh_hant'
+                                    })"
+                                    :class="{'loading': isLoading}"
+                                    title="{% trans '自动翻译到其他语言' %}">
+                                <span class="material-symbols-outlined text-[18px]" x-show="!isLoading">translate</span>
+                                <span class="hidden sm:inline font-medium">{% trans "一键翻译" %}</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Tab Content -->
+                    <div class="p-6">
+                        <!-- Zh-Hans Tab -->
+                        <div x-show="activeTab === 'zh-hans'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
+                            <!-- Title Field -->
+                            <div class="form-control w-full group">
+                                <label class="label px-0">
+                                    <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">
+                                        {% trans "标题 (中文)" %} <span class="text-error">*</span>
+                                    </span>
+                                </label>
+                                {% trans "输入投票标题 (中文)" as ph_title_zh %}
+                                {% render_field form.title_zh_hans class="input input-bordered input-lg w-full focus:input-primary transition-all font-medium" placeholder=ph_title_zh %}
+                                {% if form.title_zh_hans.errors %}
+                                <label class="label px-0">
+                                    <span class="label-text-alt text-error flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-xs">error</span>
+                                        {{ form.title_zh_hans.errors.0 }}
+                                    </span>
+                                </label>
+                                {% endif %}
+                            </div>
+
+                            <!-- Description Field -->
+                            <div class="form-control w-full group mt-4">
+                                <label class="label px-0">
+                                    <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "描述 (中文)" %}</span>
+                                </label>
+                                {% trans "输入投票描述，详细说明投票目的 (中文)..." as ph_desc_zh %}
+                                {% render_field form.description_zh_hans class="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all text-base leading-relaxed" placeholder=ph_desc_zh %}
+                                {% if form.description_zh_hans.errors %}
+                                <label class="label px-0">
+                                    <span class="label-text-alt text-error">{{ form.description_zh_hans.errors.0 }}</span>
+                                </label>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- English Tab -->
+                        <div x-show="activeTab === 'en'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+                            <div class="form-control w-full group">
+                                <label class="label px-0">
+                                    <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "Title (English)" %}</span>
+                                </label>
+                                {% trans "Enter poll title (English)" as ph_title_en %}
+                                {% render_field form.title_en class="input input-bordered input-lg w-full focus:input-primary transition-all font-medium" placeholder=ph_title_en %}
+                                {% if form.title_en.errors %}
+                                <label class="label px-0">
+                                    <span class="label-text-alt text-error">{{ form.title_en.errors.0 }}</span>
+                                </label>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-control w-full group mt-4">
+                                <label class="label px-0">
+                                    <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "Description (English)" %}</span>
+                                </label>
+                                {% trans "Enter poll description (English)..." as ph_desc_en %}
+                                {% render_field form.description_en class="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all text-base leading-relaxed" placeholder=ph_desc_en %}
+                                {% if form.description_en.errors %}
+                                <label class="label px-0">
+                                    <span class="label-text-alt text-error">{{ form.description_en.errors.0 }}</span>
+                                </label>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Japanese Tab -->
+                        <div x-show="activeTab === 'ja'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+                            <div class="form-control w-full group">
+                                <label class="label px-0">
+                                    <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "タイトル (Japanese)" %}</span>
+                                </label>
+                                {% trans "タイトルを入力 (Japanese)" as ph_title_ja %}
+                                {% render_field form.title_ja class="input input-bordered input-lg w-full focus:input-primary transition-all font-medium" placeholder=ph_title_ja %}
+                                {% if form.title_ja.errors %}
+                                <label class="label px-0">
+                                    <span class="label-text-alt text-error">{{ form.title_ja.errors.0 }}</span>
+                                </label>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-control w-full group mt-4">
+                                <label class="label px-0">
+                                    <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "説明 (Japanese)" %}</span>
+                                </label>
+                                {% trans "説明を入力 (Japanese)..." as ph_desc_ja %}
+                                {% render_field form.description_ja class="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all text-base leading-relaxed" placeholder=ph_desc_ja %}
+                                {% if form.description_ja.errors %}
+                                <label class="label px-0">
+                                    <span class="label-text-alt text-error">{{ form.description_ja.errors.0 }}</span>
+                                </label>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <!-- Zh-Hant Tab -->
+                        <div x-show="activeTab === 'zh-hant'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+                            <div class="form-control w-full group">
+                                <label class="label px-0">
+                                    <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "標題 (Traditional Chinese)" %}</span>
+                                </label>
+                                {% trans "輸入投票標題 (繁體中文)" as ph_title_zh_hant %}
+                                {% render_field form.title_zh_hant class="input input-bordered input-lg w-full focus:input-primary transition-all font-medium" placeholder=ph_title_zh_hant %}
+                                {% if form.title_zh_hant.errors %}
+                                <label class="label px-0">
+                                    <span class="label-text-alt text-error">{{ form.title_zh_hant.errors.0 }}</span>
+                                </label>
+                                {% endif %}
+                            </div>
+
+                            <div class="form-control w-full group mt-4">
+                                <label class="label px-0">
+                                    <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "描述 (Traditional Chinese)" %}</span>
+                                </label>
+                                {% trans "輸入投票描述 (繁體中文)..." as ph_desc_zh_hant %}
+                                {% render_field form.description_zh_hant class="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all text-base leading-relaxed" placeholder=ph_desc_zh_hant %}
+                                {% if form.description_zh_hant.errors %}
+                                <label class="label px-0">
+                                    <span class="label-text-alt text-error">{{ form.description_zh_hant.errors.0 }}</span>
+                                </label>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Related Post Field -->
                 <div class="form-control w-full">
                     <label class="label px-0">
-                        <span class="label-text font-bold text-base">关联文章</span>
+                        <span class="label-text font-bold text-base">{% trans "关联文章" %}</span>
                     </label>
                     {% render_field form.related_post class="select select-bordered w-full focus:select-primary transition-all" %}
                     {% if form.related_post.errors %}
@@ -74,14 +232,15 @@
                     <label class="label px-0">
                         <span class="label-text-alt text-base-content/60 flex items-center gap-1">
                             <span class="material-symbols-outlined text-xs">link</span>
-                            可选：将投票关联到特定文章，投票将显示在该文章页面。
+                            {% trans "可选：将投票关联到特定文章，投票将显示在该文章页面。" %}
                         </span>
                     </label>
                 </div>
             </div>
         {% endcaptureas %}
-        {% include "administration/components/form_card.html" with title="基本信息" icon="edit_note" content=main_content %}
-
+        {% trans "基本信息" as basic_info_title %}
+        {% include "administration/components/form_card.html" with title=basic_info_title icon="edit_note" content=main_content %}
+        
         <!-- Choices Formset -->
         {% captureas choices_content %}
             {{ choice_formset.management_form }}
@@ -92,13 +251,13 @@
             {% endif %}
 
             <div class="overflow-x-auto rounded-xl border border-base-content/5 bg-base-100/50">
-                <table class="table table-zebra w-full">
+                <table id="choices-table" class="table table-zebra w-full">
                     <thead class="bg-base-200/50 text-base-content/70">
                         <tr>
                             <th class="w-12 text-center font-mono text-xs">#</th>
-                            <th>选项内容</th>
-                            <th class="w-32 text-center">当前票数</th>
-                            <th class="w-20 text-center">删除</th>
+                            <th>{% trans "选项内容" %}</th>
+                            <th class="w-32 text-center">{% trans "当前票数" %}</th>
+                            <th class="w-20 text-center">{% trans "删除" %}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -111,45 +270,111 @@
                                 {% endfor %}
                             </td>
                             <td>
-                                {% render_field choice_form.text class="input input-bordered input-sm w-full focus:input-primary transition-all" placeholder="输入选项内容..." %}
-                                {% if choice_form.text.errors %}
-                                <div class="text-error text-xs mt-1 flex items-center gap-1">
-                                    <span class="material-symbols-outlined text-[10px]">error</span>
-                                    {{ choice_form.text.errors.0 }}
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <span class="text-xs font-bold opacity-50">{% trans "多语言内容" %}</span>
+                                    <button type="button" 
+                                            class="btn btn-ghost btn-xs text-primary gap-1 hover:bg-primary/10"
+                                            @click="translate('id_{{ choice_form.prefix }}-text_zh_hans', {
+                                                'en': 'id_{{ choice_form.prefix }}-text_en',
+                                                'ja': 'id_{{ choice_form.prefix }}-text_ja',
+                                                'zh-hant': 'id_{{ choice_form.prefix }}-text_zh_hant'
+                                            })"
+                                            title="{% trans '一键翻译此选项' %}">
+                                        <span class="material-symbols-outlined text-[14px]">translate</span>
+                                        {% trans "翻译" %}
+                                    </button>
                                 </div>
-                                {% endif %}
+                                <div class="space-y-2">
+                                    {% trans "简中" as ph_zh %}
+                                    {% render_field choice_form.text_zh_hans class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_zh %}
+                                    {% trans "English" as ph_en %}
+                                    {% render_field choice_form.text_en class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_en %}
+                                    {% trans "日本語" as ph_ja %}
+                                    {% render_field choice_form.text_ja class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_ja %}
+                                    {% trans "繁中" as ph_tw %}
+                                    {% render_field choice_form.text_zh_hant class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_tw %}
+                                </div>
                             </td>
                             <td>
                                 {% render_field choice_form.votes_count class="input input-bordered input-sm w-full text-center font-mono" %}
                             </td>
                             <td class="text-center">
                                 {% if choice_form.instance.pk %}
-                                    <div class="tooltip tooltip-left" data-tip="删除此选项">
-                                        <input type="checkbox" name="{{ choice_form.prefix }}-DELETE" id="id_{{ choice_form.prefix }}-DELETE" class="checkbox checkbox-error checkbox-sm hidden peer">
-                                        <label for="id_{{ choice_form.prefix }}-DELETE" class="btn btn-ghost btn-square btn-sm text-base-content/40 hover:text-error hover:bg-error/10 transition-colors peer-checked:btn-error peer-checked:text-white">
+                                    <div class="tooltip tooltip-left" data-tip="{% trans '删除此选项' %}">
+                                        <input type="checkbox" name="{{ choice_form.prefix }}-DELETE" id="id_{{ choice_form.prefix }}-DELETE" class="checkbox checkbox-error checkbox-sm hidden">
+                                        <button type="button" class="btn btn-ghost btn-square btn-sm text-base-content/40 hover:text-error hover:bg-error/10 transition-colors delete-row-btn">
                                             <span class="material-symbols-outlined text-lg">delete</span>
-                                        </label>
+                                        </button>
                                     </div>
                                 {% endif %}
                             </td>
                         </tr>
                         {% endfor %}
                     </tbody>
+                    
+                    <!-- Empty Form Template -->
+                    <template id="empty-form-template">
+                        <tr class="hover group">
+                            <td class="text-center font-mono text-xs opacity-50">
+                                <span class="row-index">#</span>
+                                {% for hidden in choice_formset.empty_form.hidden_fields %}
+                                    {{ hidden }}
+                                {% endfor %}
+                            </td>
+                            <td>
+                                <div class="flex justify-between items-center mb-1.5">
+                                    <span class="text-xs font-bold opacity-50">{% trans "多语言内容" %}</span>
+                                    <button type="button" 
+                                            class="btn btn-ghost btn-xs text-primary gap-1 hover:bg-primary/10"
+                                            @click="translate('id_choices-__prefix__-text_zh_hans', {
+                                                'en': 'id_choices-__prefix__-text_en',
+                                                'ja': 'id_choices-__prefix__-text_ja',
+                                                'zh-hant': 'id_choices-__prefix__-text_zh_hant'
+                                            })"
+                                            title="{% trans '一键翻译此选项' %}">
+                                        <span class="material-symbols-outlined text-[14px]">translate</span>
+                                        {% trans "翻译" %}
+                                    </button>
+                                </div>
+                                <div class="space-y-2">
+                                    {% trans "简中" as ph_zh %}
+                                    {% render_field choice_formset.empty_form.text_zh_hans class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_zh %}
+                                    {% trans "English" as ph_en %}
+                                    {% render_field choice_formset.empty_form.text_en class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_en %}
+                                    {% trans "日本語" as ph_ja %}
+                                    {% render_field choice_formset.empty_form.text_ja class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_ja %}
+                                    {% trans "繁中" as ph_tw %}
+                                    {% render_field choice_formset.empty_form.text_zh_hant class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_tw %}
+                                </div>
+                            </td>
+                            <td>
+                                {% render_field choice_formset.empty_form.votes_count class="input input-bordered input-sm w-full text-center font-mono" %}
+                            </td>
+                            <td class="text-center">
+                                <div class="tooltip tooltip-left" data-tip="{% trans '删除此选项' %}">
+                                    <button type="button" class="btn btn-ghost btn-square btn-sm text-base-content/40 hover:text-error hover:bg-error/10 transition-colors delete-row-btn">
+                                        <span class="material-symbols-outlined text-lg">delete</span>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    </template>
                 </table>
             </div>
             
             <div class="flex items-center justify-between mt-3 px-1">
                 <div class="flex items-center gap-2 text-xs text-base-content/60">
                     <span class="material-symbols-outlined text-sm text-info">info</span>
-                    <span>保存时将自动应用更改。</span>
+                    <span>{% trans "保存时将自动应用更改。" %}</span>
                 </div>
                 <button type="button" id="add-choice" class="btn btn-sm btn-ghost gap-2 text-primary hover:bg-primary/10">
                     <span class="material-symbols-outlined text-sm">add</span>
-                    添加选项
+                    {% trans "添加选项" %}
                 </button>
             </div>
         {% endcaptureas %}
-        {% include "administration/components/form_card.html" with title="投票选项" icon="list" content=choices_content %}
+        {% trans "投票选项" as options_title %}
+        {% include "administration/components/form_card.html" with title=options_title icon="list" content=choices_content %}
     </div>
 
     <!-- Right Column: Settings -->
@@ -159,17 +384,17 @@
             <div class="flex flex-col gap-3">
                 <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-0.5 transition-all duration-300">
                     <span class="material-symbols-outlined">save</span>
-                    保存更改
+                    {% trans "保存更改" %}
                 </button>
                 
                 <div class="grid grid-cols-2 gap-2">
                     <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300 hover:bg-base-200 hover:border-base-content/20 transition-all">
                         <span class="material-symbols-outlined text-xs">add_circle</span>
-                        保存并新增
+                        {% trans "保存并新增" %}
                     </button>
                     <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300 hover:bg-base-200 hover:border-base-content/20 transition-all">
                         <span class="material-symbols-outlined text-xs">edit</span>
-                        保存并继续
+                        {% trans "保存并继续" %}
                     </button>
                 </div>
 
@@ -177,188 +402,251 @@
                 <div class="divider my-1"></div>
                 <div class="flex justify-between items-center">
                     <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 hover:text-base-content">
-                        取消
+                        {% trans "取消" %}
                     </a>
-                    <button type="button" onclick="confirmDelete('{% url 'administration:poll_delete' object.pk %}', '确定要删除投票《{{ object.title|escapejs }}》吗？')" class="btn btn-sm btn-ghost text-error hover:bg-error/10 hover:text-error-focus transition-colors">
+                    {% trans "确定要删除投票" as confirm_msg %}
+                    {% blocktrans asvar delete_msg %}确定要删除投票《{{ object.title|escapejs }}》吗？{% endblocktrans %}
+                    <button type="button" onclick="confirmDelete('{% url 'administration:poll_delete' object.pk %}', '{{ delete_msg|escapejs }}')" class="btn btn-sm btn-ghost text-error hover:bg-error/10 hover:text-error-focus transition-colors">
                         <span class="material-symbols-outlined text-sm">delete</span>
-                        删除投票
+                        {% trans "删除投票" %}
                     </button>
                 </div>
                 {% else %}
                 <div class="divider my-1"></div>
                 <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full hover:bg-base-200">
-                    取消
+                    {% trans "取消" %}
                 </a>
                 {% endif %}
             </div>
         {% endcaptureas %}
-        {% include "administration/components/form_card.html" with title="发布" icon="publish" content=publish_content %}
+        {% trans "发布" as pub_title %}
+        {% include "administration/components/form_card.html" with title=pub_title icon="publish" content=publish_content %}
 
         <!-- Settings Box -->
         {% captureas settings_content %}
-            <div class="flex flex-col gap-4">
-                <div class="form-control bg-base-100 rounded-lg border border-base-content/5 p-3 hover:border-primary/20 transition-colors">
-                    <label class="label cursor-pointer p-0">
-                        <div class="flex flex-col gap-0.5">
-                            <span class="label-text font-bold flex items-center gap-2">
-                                <span class="material-symbols-outlined text-success">check_circle</span>
-                                启用投票
-                            </span>
-                            <span class="text-xs text-base-content/50">在前台显示此投票</span>
-                        </div>
-                        {% render_field form.is_active class="toggle toggle-success toggle-sm" %}
-                    </label>
-                </div>
-                
-                <div class="form-control bg-base-100 rounded-lg border border-base-content/5 p-3 hover:border-primary/20 transition-colors">
-                    <label class="label cursor-pointer p-0">
-                        <div class="flex flex-col gap-0.5">
-                            <span class="label-text font-bold flex items-center gap-2">
-                                <span class="material-symbols-outlined text-info">check_box</span>
-                                允许复选
-                            </span>
-                            <span class="text-xs text-base-content/50">允许用户选择多个选项</span>
-                        </div>
-                        {% render_field form.allow_multiple_choices class="toggle toggle-info toggle-sm" %}
-                    </label>
-                </div>
-
-                <div class="divider my-0"></div>
-
-                <div class="form-control w-full group">
-                    <label class="label px-0">
-                        <span class="label-text font-bold flex items-center gap-2 group-focus-within:text-primary transition-colors">
-                            <span class="material-symbols-outlined text-warning">event_busy</span>
-                            截止日期
-                        </span>
-                    </label>
-                    {% render_field form.end_date class="input input-bordered w-full focus:input-primary transition-all font-mono text-sm" type="datetime-local" %}
-                    <label class="label px-0">
-                        <span class="label-text-alt text-base-content/60">留空表示永久有效。</span>
-                    </label>
-                </div>
+            <div class="form-control">
+                <label class="label cursor-pointer justify-between">
+                    <span class="label-text font-medium">{% trans "启用状态" %}</span>
+                    {% render_field form.is_active class="toggle toggle-success" %}
+                </label>
+            </div>
+            
+            <div class="form-control mt-2">
+                <label class="label cursor-pointer justify-between">
+                    <span class="label-text font-medium">{% trans "允许多选" %}</span>
+                    {% render_field form.allow_multiple_choices class="checkbox checkbox-primary" %}
+                </label>
             </div>
         {% endcaptureas %}
-        {% include "administration/components/form_card.html" with title="设置" icon="settings" content=settings_content %}
+        {% trans "设置" as settings_title %}
+        {% include "administration/components/form_card.html" with title=settings_title icon="settings" content=settings_content %}
     </div>
 </form>
+{% endblock %}
 
-<div id="empty-form" class="hidden">
-    <table>
-        <tbody>
-            <tr class="hover group">
-                <td class="text-center font-mono text-xs opacity-50">
-                    <span class="choice-counter"></span>
-                </td>
-                <td>
-                    <input type="text" name="choices-__prefix__-text" class="input input-bordered input-sm w-full focus:input-primary transition-all" placeholder="输入选项内容..." id="id_choices-__prefix__-text">
-                </td>
-                <td>
-                    <input type="number" name="choices-__prefix__-votes_count" value="0" class="input input-bordered input-sm w-full text-center font-mono" id="id_choices-__prefix__-votes_count">
-                </td>
-                <td class="text-center">
-                    <input type="checkbox" name="choices-__prefix__-DELETE" id="id_choices-__prefix__-DELETE" class="checkbox checkbox-error checkbox-sm hidden peer">
-                    <label for="id_choices-__prefix__-DELETE" class="btn btn-ghost btn-square btn-sm text-base-content/40 hover:text-error hover:bg-error/10 transition-colors btn-delete-row peer-checked:btn-error peer-checked:text-white" title="删除此选项">
-                        <span class="material-symbols-outlined text-lg">delete</span>
-                    </label>
-                </td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+{% block extra_js %}
+    <script>
+        (function() {
+            function initForm() {
+                const form = document.querySelector('form');
+                if (form && !form.dataset.pollInitialized) {
+                    form.dataset.pollInitialized = 'true';
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const formsetContainer = document.querySelector('table tbody');
-        const addButton = document.getElementById('add-choice');
-        const totalForms = document.getElementById('id_choices-TOTAL_FORMS');
-        const emptyFormTemplate = document.getElementById('empty-form').querySelector('tr');
-        
-        // Update row numbers and attach auto-add listeners
-        function updateRowNumbersAndListeners() {
-            formsetContainer.querySelectorAll('tr').forEach((row, index) => {
-                const counter = row.querySelector('.choice-counter');
-                if (counter) counter.textContent = index + 1;
-                // Update forloop counter in existing rows if they are just text
-                if (!counter && row.cells[0]) {
-                    // Try to find text node
-                    const cell = row.cells[0];
-                    // Keep hidden inputs
-                    const inputs = Array.from(cell.querySelectorAll('input'));
-                    cell.innerHTML = `${index + 1}`;
-                    inputs.forEach(input => cell.appendChild(input));
-                }
+                    function setupSync(baseId, fieldName) {
+                        const languages = ['zh_hans', 'en', 'ja', 'zh_hant'];
+                        const baseInput = document.getElementById(baseId);
+                        if (!baseInput) return;
 
-                // Attach listener to the last text input
-                if (index === formsetContainer.querySelectorAll('tr').length - 1) {
-                    const textInput = row.querySelector('input[type="text"]');
-                    if (textInput && !textInput.dataset.autoAddBound) {
-                        textInput.dataset.autoAddBound = 'true';
-                        textInput.addEventListener('input', function() {
-                            // Only add if this is the last visible row
-                            const allRows = formsetContainer.querySelectorAll('tr:not(.hidden)');
-                            const lastRow = allRows[allRows.length - 1];
-                            if (row === lastRow && this.value.trim() !== '') {
-                                addNewRow();
+                        languages.forEach(lang => {
+                            const inputId = `id_${fieldName}_${lang}`;
+                            const input = document.getElementById(inputId);
+                            if (input) {
+                                input.addEventListener('input', function() {
+                                    if (this.value) {
+                                        baseInput.value = this.value;
+                                    } else {
+                                        let foundValue = '';
+                                        for (const otherLang of languages) {
+                                            const otherInput = document.getElementById(`id_${fieldName}_${otherLang}`);
+                                            if (otherInput && otherInput.value) {
+                                                foundValue = otherInput.value;
+                                                break;
+                                            }
+                                        }
+                                        baseInput.value = foundValue;
+                                    }
+                                });
+                                if (input.value && !baseInput.value) {
+                                    baseInput.value = input.value;
+                                }
                             }
                         });
                     }
+
+                    setupSync('id_title', 'title');
+                    setupSync('id_description', 'description');
+
+                    form.addEventListener('submit', function(e) {
+                        function ensureValue(baseId, fieldName) {
+                            const baseInput = document.getElementById(baseId);
+                            if (baseInput && !baseInput.value) {
+                                const alpineData = document.querySelector('[x-data="translationForm"]');
+                                if (alpineData && alpineData._x_dataStack) {
+                                    const activeTab = alpineData._x_dataStack[0].activeTab;
+                                    const activeInput = document.getElementById(`id_${fieldName}_${activeTab}`);
+                                    if (activeInput && activeInput.value) {
+                                        baseInput.value = activeInput.value;
+                                        return;
+                                    }
+                                }
+                                const languages = ['zh_hans', 'en', 'ja', 'zh_hant'];
+                                for (const lang of languages) {
+                                    const input = document.getElementById(`id_${fieldName}_${lang}`);
+                                    if (input && input.value) {
+                                        baseInput.value = input.value;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        ensureValue('id_title', 'title');
+                        ensureValue('id_description', 'description');
+
+                        // Sync choice fields
+                        const totalForms = document.getElementById('id_choices-TOTAL_FORMS');
+                        if (totalForms) {
+                            const count = parseInt(totalForms.value);
+                            const languages = ['zh_hans', 'en', 'ja', 'zh_hant'];
+                            for (let i = 0; i < count; i++) {
+                                const baseTextInput = document.getElementById(`id_choices-${i}-text`);
+                                if (baseTextInput) {
+                                    // Check if base has value, if not try to fill from translations
+                                    if (!baseTextInput.value) {
+                                        for (const lang of languages) {
+                                            const textInput = document.getElementById(`id_choices-${i}-text_${lang}`);
+                                            if (textInput && textInput.value) {
+                                                baseTextInput.value = textInput.value;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+
+                    // Choice adding logic
+                    const addBtn = document.getElementById('add-choice');
+                    const totalForms = document.getElementById('id_choices-TOTAL_FORMS');
+                    const tbody = document.querySelector('#choices-table tbody');
+                    const emptyFormTemplate = document.getElementById('empty-form-template');
+                    
+                    if (addBtn && totalForms && tbody && emptyFormTemplate) {
+                        addBtn.addEventListener('click', function() {
+                            const count = parseInt(totalForms.value);
+                            const templateContent = emptyFormTemplate.content.cloneNode(true);
+                            
+                            // Use table/tbody container to ensure tr elements are valid during innerHTML manipulation
+                            const tempTable = document.createElement('table');
+                            const tempTbody = document.createElement('tbody');
+                            tempTable.appendChild(tempTbody);
+                            tempTbody.appendChild(templateContent);
+                            
+                            // Replace __prefix__ with current count
+                            tempTbody.innerHTML = tempTbody.innerHTML.replace(/__prefix__/g, count);
+                            
+                            const newRow = tempTbody.firstElementChild;
+                            
+                            // Update index display
+                            const indexSpan = newRow.querySelector('.row-index');
+                            if (indexSpan) indexSpan.innerText = count + 1;
+
+                            // Add delete handler for new row
+                            const deleteBtn = newRow.querySelector('.delete-row-btn');
+                            if (deleteBtn) {
+                                deleteBtn.addEventListener('click', function() {
+                                    newRow.remove();
+                                    updateFormIndices();
+                                });
+                            }
+                            
+                            tbody.appendChild(newRow);
+                            totalForms.value = count + 1;
+                        });
+                    } else {
+                        console.error('Poll form initialization failed: missing elements', {
+                            addBtn: !!addBtn,
+                            totalForms: !!totalForms,
+                            tbody: !!tbody,
+                            emptyFormTemplate: !!emptyFormTemplate
+                        });
+                    }
+
+                    // Bind delete handlers to existing rows
+                    document.querySelectorAll('.delete-row-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const row = this.closest('tr');
+                            const checkbox = row.querySelector('input[type="checkbox"][name$="-DELETE"]');
+                            
+                            if (checkbox) {
+                                // For existing rows: toggle checkbox and visual state
+                                checkbox.checked = !checkbox.checked;
+                                if (checkbox.checked) {
+                                    row.classList.add('opacity-30', 'bg-base-200');
+                                    this.classList.add('btn-error', 'text-white');
+                                    this.classList.remove('text-base-content/40', 'hover:text-error');
+                                } else {
+                                    row.classList.remove('opacity-30', 'bg-base-200');
+                                    this.classList.remove('btn-error', 'text-white');
+                                    this.classList.add('text-base-content/40', 'hover:text-error');
+                                }
+                            } else {
+                                // For new rows (should rely on the click handler added during creation, 
+                                // but if we are here it means it's an existing row without DELETE checkbox? 
+                                // Unlikely for model formsets unless cannot delete.)
+                            }
+                        });
+                    });
+
+                    function updateFormIndices() {
+                        const rows = tbody.querySelectorAll('tr');
+                        let newCount = 0;
+                        
+                        rows.forEach((row, index) => {
+                            // Update row index display
+                            const indexSpan = row.querySelector('.row-index');
+                            if (indexSpan) indexSpan.innerText = index + 1; // 1-based index for display
+
+                            // Check if it's a new row (not having an ID field usually means new in this context, 
+                            // but better to just re-index everything to be safe for POST data)
+                            // Note: Re-indexing existing rows with IDs is dangerous if not careful, 
+                            // but for Django formsets, as long as the ID field matches the object, it's fine.
+                            // However, we only really need to re-index to ensure continuity for TOTAL_FORMS.
+                            
+                            // Update all inputs in this row
+                            row.querySelectorAll('input, select, textarea, label').forEach(el => {
+                                if (el.name) el.name = el.name.replace(/choices-\d+-/, `choices-${index}-`);
+                                if (el.id) el.id = el.id.replace(/choices-\d+-/, `choices-${index}-`);
+                                if (el.htmlFor) el.htmlFor = el.htmlFor.replace(/choices-\d+-/, `choices-${index}-`);
+                            });
+
+                            newCount++;
+                        });
+                        
+                        totalForms.value = newCount;
+                    }
                 }
-            });
-        }
-
-        function addNewRow() {
-            const formCount = parseInt(totalForms.value);
-            const newRow = emptyFormTemplate.cloneNode(true);
-            
-            // Replace __prefix__ with form count
-            newRow.innerHTML = newRow.innerHTML.replace(/__prefix__/g, formCount);
-            
-            // Add to container
-            formsetContainer.appendChild(newRow);
-            
-            // Update total forms
-            totalForms.value = formCount + 1;
-            
-            updateRowNumbersAndListeners();
-            
-            // Setup delete button for new row
-            const deleteBtn = newRow.querySelector('.btn-delete-row');
-            if (deleteBtn) {
-                deleteBtn.addEventListener('click', function(e) {
-                    newRow.remove();
-                });
             }
-        }
 
-        // Add new row button click
-        addButton.addEventListener('click', addNewRow);
-        
-        // Initial setup
-        updateRowNumbersAndListeners();
-        
-        // Handle delete for existing rows
-        formsetContainer.addEventListener('change', function(e) {
-            if (e.target.name && e.target.name.includes('DELETE')) {
-                const row = e.target.closest('tr');
-                if (e.target.checked) {
-                    row.classList.add('opacity-30', 'bg-base-200');
-                    row.querySelectorAll('input:not([type="checkbox"])').forEach(input => input.readOnly = true);
-                } else {
-                    row.classList.remove('opacity-30', 'bg-base-200');
-                    row.querySelectorAll('input:not([type="checkbox"])').forEach(input => input.readOnly = false);
-                }
+            // Initialize on page load
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', initForm);
+            } else {
+                initForm();
             }
-        });
 
-        // Ensure at least 3 rows for new forms or empty forms
-        const currentRows = formsetContainer.querySelectorAll('tr').length;
-        if (currentRows === 0) {
-            for (let i = 0; i < 3; i++) {
-                addNewRow();
-            }
-        }
-    });
-</script>
-
+            // Initialize after HTMX swap (for SPA-like navigation)
+            document.addEventListener('htmx:afterSwap', initForm);
+        })();
+    </script>
 {% endblock %}

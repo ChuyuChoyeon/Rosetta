@@ -1,8 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {% load widget_tweaks %}
+{% load i18n %}
 
-{% block title %}留言板 - {{ block.super }}{% endblock %}
+{% block title %}{% trans "留言板" %}{% endblock %}
 
 {% block content %}
 <div class="min-h-screen bg-base-100">
@@ -15,15 +16,15 @@
         
         <div class="container mx-auto px-4 relative z-10 text-center">
             <h1 class="text-6xl md:text-8xl font-bold font-heading mb-6 tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary animate-in fade-in slide-in-from-bottom-4 duration-700">
-                留言板
+                {% trans "留言板" %}
             </h1>
             <p class="text-xl md:text-2xl text-base-content/60 max-w-3xl mx-auto mb-10 font-light leading-relaxed animate-in fade-in slide-in-from-bottom-4 duration-700 delay-150">
-                无论是建议、反馈，还是仅仅想打个招呼，<br>这里都是属于您的空间。
+                {% trans "无论是建议、反馈，还是仅仅想打个招呼，<br>这里都是属于您的空间。" %}
             </p>
             <div class="flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-700 delay-300">
                 <a href="#guestbook-form" class="btn btn-primary btn-lg rounded-full px-8 shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all">
                     <span class="material-symbols-outlined">edit</span>
-                    写留言
+                    {% trans "写留言" %}
                 </a>
             </div>
         </div>
@@ -73,7 +74,7 @@
                                         {% elif entry.user.is_staff %}
                                         <span class="badge badge-primary badge-xs gap-1 px-2 py-2.5 shadow-sm">
                                             <span class="material-symbols-outlined text-[12px]">verified</span>
-                                            管理员
+                                            {% trans "管理员" %}
                                         </span>
                                         {% endif %}
                                     </div>
@@ -98,7 +99,7 @@
                                 <div class="avatar w-6 h-6 rounded-full ring-2 ring-primary/20">
                                     <img src="{% static 'core/img/logo.png' %}" alt="Admin">
                                 </div>
-                                <span class="text-xs font-bold text-primary badge badge-primary badge-outline badge-xs">站长回复</span>
+                                <span class="text-xs font-bold text-primary badge badge-primary badge-outline badge-xs">{% trans "站长回复" %}</span>
                                 <span class="text-[10px] text-base-content/30 ml-auto">{{ entry.reply_at|date:"m/d" }}</span>
                             </div>
                             <p class="text-xs text-base-content/70 leading-relaxed pl-8 border-l-2 border-primary/20">{{ entry.reply_content }}</p>
@@ -112,8 +113,8 @@
                 <div class="w-24 h-24 bg-base-200 rounded-full flex items-center justify-center mx-auto mb-6 animate-bounce">
                     <span class="material-symbols-outlined text-5xl text-base-content/20">forum</span>
                 </div>
-                <h3 class="text-2xl font-bold text-base-content/40">暂无留言</h3>
-                <p class="text-base-content/30 mt-2">快来抢占沙发，成为第一个留言的人！</p>
+                <h3 class="text-2xl font-bold text-base-content/40">{% trans "暂无留言" %}</h3>
+                <p class="text-base-content/30 mt-2">{% trans "快来抢占沙发，成为第一个留言的人！" %}</p>
             </div>
             {% endfor %}
         </div>
@@ -122,15 +123,15 @@
         {% if is_paginated %}
         <div class="join grid grid-cols-2 w-full max-w-xs mx-auto mb-20 shadow-sm">
             {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-outline border-base-content/10 hover:bg-primary hover:border-primary hover:text-primary-content">上一页</a>
+            <a href="?page={{ page_obj.previous_page_number }}" class="join-item btn btn-outline border-base-content/10 hover:bg-primary hover:border-primary hover:text-primary-content">{% trans "上一页" %}</a>
             {% else %}
-            <button class="join-item btn btn-outline border-base-content/10 btn-disabled opacity-50">上一页</button>
+            <button class="join-item btn btn-outline border-base-content/10 btn-disabled opacity-50">{% trans "上一页" %}</button>
             {% endif %}
             
             {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-outline border-base-content/10 hover:bg-primary hover:border-primary hover:text-primary-content">下一页</a>
+            <a href="?page={{ page_obj.next_page_number }}" class="join-item btn btn-outline border-base-content/10 hover:bg-primary hover:border-primary hover:text-primary-content">{% trans "下一页" %}</a>
             {% else %}
-            <button class="join-item btn btn-outline border-base-content/10 btn-disabled opacity-50">下一页</button>
+            <button class="join-item btn btn-outline border-base-content/10 btn-disabled opacity-50">{% trans "下一页" %}</button>
             {% endif %}
         </div>
         {% endif %}
@@ -141,8 +142,8 @@
                 <div class="h-2 bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_100%] animate-gradient"></div>
                 <div class="card-body p-8 md:p-12">
                     <div class="text-center mb-8">
-                        <h2 class="text-3xl font-bold font-heading mb-2">写留言</h2>
-                        <p class="text-base-content/60">期待听到您的声音</p>
+                        <h2 class="text-3xl font-bold font-heading mb-2">{% trans "写留言" %}</h2>
+                        <p class="text-base-content/60">{% trans "期待听到您的声音" %}</p>
                     </div>
                     
                     <form method="post" class="space-y-6">
@@ -152,7 +153,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div class="form-control w-full group">
                                 <label class="label">
-                                    <span class="label-text font-medium group-focus-within:text-primary transition-colors">昵称 <span class="text-error">*</span></span>
+                                    <span class="label-text font-medium group-focus-within:text-primary transition-colors">{% trans "昵称" %} <span class="text-error">*</span></span>
                                 </label>
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 group-focus-within:text-primary transition-colors">
@@ -167,7 +168,7 @@
 
                             <div class="form-control w-full group">
                         <label class="label">
-                            <span class="label-text font-medium group-focus-within:text-primary transition-colors">邮箱 <span class="text-xs opacity-50 font-normal">(保密)</span> <span class="text-error">*</span></span>
+                            <span class="label-text font-medium group-focus-within:text-primary transition-colors">{% trans "邮箱" %} <span class="text-xs opacity-50 font-normal">{% trans "(保密)" %}</span> <span class="text-error">*</span></span>
                         </label>
                         <div class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 group-focus-within:text-primary transition-colors">
@@ -178,7 +179,7 @@
                         <div class="form-control mt-2">
                             <label class="label cursor-pointer justify-start gap-3">
                                 {{ form.show_email }}
-                                <span class="label-text text-xs opacity-70">在留言中公开显示邮箱</span>
+                                <span class="label-text text-xs opacity-70">{% trans "在留言中公开显示邮箱" %}</span>
                             </label>
                         </div>
                         {% if form.email.errors %}
@@ -189,7 +190,7 @@
                         
                         <div class="form-control w-full group">
                             <label class="label">
-                                <span class="label-text font-medium group-focus-within:text-primary transition-colors">网站 <span class="text-xs opacity-50 font-normal">(可选)</span></span>
+                                <span class="label-text font-medium group-focus-within:text-primary transition-colors">{% trans "网站" %} <span class="text-xs opacity-50 font-normal">{% trans "(可选)" %}</span></span>
                             </label>
                             <div class="relative">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 group-focus-within:text-primary transition-colors">
@@ -209,7 +210,7 @@
                                 <div class="font-bold text-lg">{{ user.nickname|default:user.username }}</div>
                                 <div class="text-xs opacity-60 flex items-center gap-1">
                                     <span class="w-2 h-2 bg-success rounded-full animate-pulse"></span>
-                                    以登录身份留言
+                                    {% trans "以登录身份留言" %}
                                 </div>
                             </div>
                         </div>
@@ -217,7 +218,7 @@
 
                         <div class="form-control w-full group">
                             <label class="label">
-                                <span class="label-text font-medium group-focus-within:text-primary transition-colors">内容 <span class="text-error">*</span></span>
+                                <span class="label-text font-medium group-focus-within:text-primary transition-colors">{% trans "内容" %} <span class="text-error">*</span></span>
                             </label>
                             {{ form.content|add_class:"textarea textarea-bordered h-40 w-full focus:textarea-primary text-base bg-base-200/30 focus:bg-base-100 transition-all p-4" }}
                             {% if form.content.errors %}
@@ -227,14 +228,14 @@
 
                         <div class="form-control w-full group">
                             <label class="label">
-                                <span class="label-text font-medium group-focus-within:text-primary transition-colors">验证码 <span class="text-error">*</span></span>
+                                <span class="label-text font-medium group-focus-within:text-primary transition-colors">{% trans "验证码" %} <span class="text-error">*</span></span>
                             </label>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                                 <div class="relative">
                                     <span class="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/30 group-focus-within:text-primary transition-colors">
                                         <span class="material-symbols-outlined text-[20px]">security</span>
                                     </span>
-                                    <input type="text" name="captcha_1" class="input input-bordered w-full pl-10 focus:input-primary bg-base-200/30 focus:bg-base-100 transition-all" placeholder="请输入右侧字符" required id="id_captcha_1">
+                                    <input type="text" name="captcha_1" class="input input-bordered w-full pl-10 focus:input-primary bg-base-200/30 focus:bg-base-100 transition-all" placeholder="{% trans '请输入右侧字符' %}" required id="id_captcha_1">
                                 </div>
                                 <div class="captcha-wrapper relative group h-[48px] flex items-center w-fit">
                                     {{ form.captcha }}
@@ -247,7 +248,7 @@
 
                         <div class="pt-4">
                             <button type="submit" class="btn btn-primary btn-lg w-full shadow-xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all rounded-xl">
-                                发布留言
+                                {% trans "发布留言" %}
                                 <span class="material-symbols-outlined ml-1">send</span>
                             </button>
                         </div>
@@ -264,7 +265,7 @@
         const captchaImages = document.querySelectorAll('.captcha');
         captchaImages.forEach(function(img) {
             img.classList.add('rounded-lg', 'border', 'border-base-300', 'cursor-pointer', 'hover:opacity-80', 'transition-opacity', 'h-full', 'w-auto', 'object-contain');
-            img.title = "点击刷新验证码";
+            img.title = "{% trans '点击刷新验证码' %}";
             
             // Ensure proper sizing wrapper
             if (!img.parentElement.classList.contains('captcha-wrapper')) {

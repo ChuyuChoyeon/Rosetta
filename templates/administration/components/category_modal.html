@@ -1,0 +1,167 @@
+{% load i18n %}
+<dialog id="category_modal" class="modal" x-data="categoryModal">
+    <div class="modal-box w-11/12 max-w-5xl h-[90vh] bg-base-100 p-0 overflow-hidden flex flex-col">
+        <!-- Header -->
+        <div class="flex items-center justify-between p-4 border-b border-base-200 bg-base-50 flex-none">
+            <h3 class="font-bold text-lg flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">category</span>
+                {% trans "新增分类" %}
+            </h3>
+            <button type="button" class="btn btn-sm btn-circle btn-ghost" onclick="document.getElementById('category_modal').close()">✕</button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 overflow-y-auto flex-1">
+            <form id="category_quick_form" @submit.prevent="submitForm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left Column: Basic Info & i18n -->
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <h4 class="font-bold text-sm text-base-content/70">{% trans "基本信息 (多语言)" %}</h4>
+                            <div class="flex gap-2">
+                                <div role="tablist" class="tabs tabs-bordered tabs-xs">
+                                    <a role="tab" class="tab" :class="activeTab === 'zh-hans' ? 'tab-active font-bold' : ''" @click="activeTab = 'zh-hans'">🇨🇳</a>
+                                    <a role="tab" class="tab" :class="activeTab === 'en' ? 'tab-active font-bold' : ''" @click="activeTab = 'en'">🇺🇸</a>
+                                    <a role="tab" class="tab" :class="activeTab === 'ja' ? 'tab-active font-bold' : ''" @click="activeTab = 'ja'">🇯🇵</a>
+                                    <a role="tab" class="tab" :class="activeTab === 'zh-hant' ? 'tab-active font-bold' : ''" @click="activeTab = 'zh-hant'">🇭🇰</a>
+                                </div>
+                                <button type="button" @click="translateAll" class="btn btn-xs btn-ghost text-primary" :class="{'loading': isTranslating}" title="{% trans '一键翻译' %}">
+                                    <span class="material-symbols-outlined text-[14px]" x-show="!isTranslating">translate</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Zh-Hans Fields -->
+                        <div x-show="activeTab === 'zh-hans'" class="space-y-4">
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text font-bold">{% trans "名称 (中文)" %} *</span></label>
+                                <input type="text" name="name_zh_hans" x-model="form.name_zh_hans" class="input input-bordered w-full" required>
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text">{% trans "描述 (中文)" %}</span></label>
+                                <textarea name="description_zh_hans" x-model="form.description_zh_hans" class="textarea textarea-bordered h-24"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- English Fields -->
+                        <div x-show="activeTab === 'en'" class="space-y-4" style="display: none;">
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text">{% trans "Name (English)" %}</span></label>
+                                <input type="text" name="name_en" x-model="form.name_en" class="input input-bordered w-full">
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text">{% trans "Description (English)" %}</span></label>
+                                <textarea name="description_en" x-model="form.description_en" class="textarea textarea-bordered h-24"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Japanese Fields -->
+                        <div x-show="activeTab === 'ja'" class="space-y-4" style="display: none;">
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text">{% trans "名前 (Japanese)" %}</span></label>
+                                <input type="text" name="name_ja" x-model="form.name_ja" class="input input-bordered w-full">
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text">{% trans "説明 (Japanese)" %}</span></label>
+                                <textarea name="description_ja" x-model="form.description_ja" class="textarea textarea-bordered h-24"></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Zh-Hant Fields -->
+                        <div x-show="activeTab === 'zh-hant'" class="space-y-4" style="display: none;">
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text">{% trans "名稱 (Traditional Chinese)" %}</span></label>
+                                <input type="text" name="name_zh_hant" x-model="form.name_zh_hant" class="input input-bordered w-full">
+                            </div>
+                            <div class="form-control w-full">
+                                <label class="label"><span class="label-text">{% trans "描述 (Traditional Chinese)" %}</span></label>
+                                <textarea name="description_zh_hant" x-model="form.description_zh_hant" class="textarea textarea-bordered h-24"></textarea>
+                            </div>
+                        </div>
+                        
+                        <!-- Base Fields (Hidden, sync with zh-hans) -->
+                        <input type="hidden" name="name" :value="form.name_zh_hans">
+                        <input type="hidden" name="description" :value="form.description_zh_hans">
+                    </div>
+
+                    <!-- Right Column: Visuals -->
+                    <div class="space-y-6">
+                        <h4 class="font-bold text-sm text-base-content/70">{% trans "视觉样式" %}</h4>
+
+                        <!-- Icon Picker (New Style) -->
+                        <div class="form-control w-full">
+                            <label class="label"><span class="label-text">{% trans "图标" %}</span></label>
+                            <div class="join w-full">
+                                <div class="join-item flex items-center justify-center bg-base-200 border border-base-300 w-12 px-2">
+                                    <span class="material-symbols-outlined text-2xl" x-text="form.icon || 'help'"></span>
+                                </div>
+                                <input type="text" name="icon" x-model="form.icon" class="input input-bordered join-item flex-1 font-mono" placeholder="folder">
+                                <button type="button" class="btn btn-neutral join-item" onclick="window.currentIconInput = document.querySelector('#category_quick_form [name=icon]'); document.getElementById('icon_picker_modal').showModal()">
+                                    <span class="material-symbols-outlined">grid_view</span>
+                                    {% trans "选择" %}
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Cover Image (Updated Style) -->
+                        <div class="form-control w-full">
+                            <label class="label"><span class="label-text">{% trans "封面图" %}</span></label>
+                            <div class="relative w-full aspect-video bg-base-100 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-base-300 group hover:border-primary transition-all cursor-pointer shadow-sm hover:shadow-md"
+                                 @click="$refs.coverInput.click()">
+                                <img :src="coverPreview" class="w-full h-full object-cover" x-show="coverPreview">
+                                
+                                <div class="flex flex-col items-center text-base-content/40 group-hover:text-primary transition-colors duration-300" x-show="!coverPreview">
+                                    <div class="p-4 rounded-full bg-base-200 group-hover:bg-primary/10 transition-colors mb-2">
+                                        <span class="material-symbols-outlined text-3xl">add_photo_alternate</span>
+                                    </div>
+                                    <span class="text-sm font-medium">{% trans "点击上传封面图" %}</span>
+                                    <span class="text-xs opacity-60 mt-1">{% trans "支持 JPG, PNG, WEBP" %}</span>
+                                </div>
+                                
+                                <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white backdrop-blur-[1px]" x-show="coverPreview">
+                                    <div class="btn btn-circle btn-ghost text-white">
+                                        <span class="material-symbols-outlined text-2xl">edit</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="file" name="cover_image" x-ref="coverInput" class="hidden" @change="handleFile">
+                        </div>
+
+                        <!-- Color Picker (Moved Below Cover) -->
+                        <div class="form-control w-full">
+                            <label class="label"><span class="label-text">{% trans "颜色标识" %}</span></label>
+                            <div class="grid grid-cols-6 gap-2 p-3 border border-base-300 rounded-xl bg-base-50/50">
+                                <template x-for="color in colors" :key="color">
+                                    <div class="w-8 h-8 rounded-full cursor-pointer flex items-center justify-center transition-all duration-200 hover:scale-110 hover:shadow-md"
+                                         :class="[
+                                            color.class, 
+                                            form.color === color.value ? 'ring-2 ring-offset-2 ring-offset-base-100 ring-primary scale-110 shadow-sm' : ''
+                                         ]"
+                                         @click="form.color = color.value"
+                                         :title="color.name">
+                                        <span class="material-symbols-outlined text-white text-[16px] drop-shadow-sm" x-show="form.color === color.value">check</span>
+                                    </div>
+                                </template>
+                            </div>
+                            <input type="hidden" name="color" x-model="form.color">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="modal-action border-t border-base-200 mt-6 pt-4 flex-none">
+                    <button type="button" class="btn btn-ghost" onclick="document.getElementById('category_modal').close()" hx-disable>{% trans "取消" %}</button>
+                    <button type="submit" class="btn btn-primary gap-2" :class="{'loading': isSubmitting}">
+                        <span class="material-symbols-outlined" x-show="!isSubmitting">save</span>
+                        {% trans "保存分类" %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</dialog>
+
+<!-- Icon Picker Modal (With Search) -->
+<!-- Removed duplicate definition -->
+
+<!-- Scripts removed: moved to htmx-init.js global registry -->

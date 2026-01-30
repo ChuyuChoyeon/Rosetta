@@ -44,6 +44,11 @@ dependencies = [
     "celery>=5.5.3",
     "xpinyin>=0.7.7",
     "beautifulsoup4>=4.14.3",
+    "django-rosetta>=0.10.3",
+    "django-modeltranslation>=0.19.19",
+    "deep-translator>=1.11.4",
+    "polib>=1.2.0",
+    "googletrans==4.0.0rc1",
 ]
 
 [tool.coverage.run]

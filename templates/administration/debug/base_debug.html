@@ -1,6 +1,7 @@
 {% extends "administration/base.html" %}
+{% load i18n %}
 
-{% block title %}调试工具{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}{% trans "调试工具" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
 {% block content %}
 <div class="flex flex-col gap-6">
@@ -10,8 +11,8 @@
             <span class="material-symbols-outlined text-3xl">bug_report</span>
         </div>
         <div>
-            <h1 class="text-2xl font-bold">调试工具箱</h1>
-            <p class="text-base-content/60 text-sm">系统诊断与开发辅助工具</p>
+            <h1 class="text-2xl font-bold">{% trans "调试工具箱" %}</h1>
+            <p class="text-base-content/60 text-sm">{% trans "系统诊断与开发辅助工具" %}</p>
         </div>
     </div>
 
@@ -19,27 +20,27 @@
     <div role="tablist" class="tabs tabs-lifted tabs-lg">
         <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug' %}">
             <span class="material-symbols-outlined text-lg mr-2">dashboard</span>
-            概览
+            {% trans "概览" %}
         </a>
         <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug_ui_test' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug_ui_test' %}">
             <span class="material-symbols-outlined text-lg mr-2">palette</span>
-            UI 测试
+            {% trans "UI 测试" %}
         </a>
         <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug_permission' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug_permission' %}">
             <span class="material-symbols-outlined text-lg mr-2">verified_user</span>
-            权限检查
+            {% trans "权限检查" %}
         </a>
         <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug_mock' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug_mock' %}">
             <span class="material-symbols-outlined text-lg mr-2">science</span>
-            Mock 数据
+            {% trans "Mock 数据" %}
         </a>
         <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug_cache' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug_cache' %}">
             <span class="material-symbols-outlined text-lg mr-2">cleaning_services</span>
-            缓存管理
+            {% trans "缓存管理" %}
         </a>
         <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug_email' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug_email' %}">
             <span class="material-symbols-outlined text-lg mr-2">mail</span>
-            邮件测试
+            {% trans "邮件测试" %}
         </a>
         <a role="tab" class="tab flex-1 cursor-default"></a>
     </div>

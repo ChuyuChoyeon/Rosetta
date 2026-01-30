@@ -1,3 +1,4 @@
+{% load i18n %}
 {% for category in categories %}
 <tr class="hover">
     <th class="pl-6">
@@ -39,10 +40,10 @@
     </td>
     <td class="text-right pr-6">
         <div class="join">
-            <a href="{% url 'post_by_category' category.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="查看">
+            <a href="{% url 'post_by_category' category.slug %}" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '查看' %}">
                 <span class="material-symbols-outlined text-base">visibility</span>
             </a>
-            <a href="{% url 'administration:category_edit' category.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
+            <a href="{% url 'administration:category_edit' category.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '编辑' %}">
                 <span class="material-symbols-outlined text-base">edit</span>
             </a>
             <button type="button" 
@@ -50,9 +51,9 @@
                     hx-trigger="confirmed"
                     hx-target="closest tr"
                     hx-swap="outerHTML swap:0.5s"
-                    onclick="confirmHtmx(this, '确定要删除分类《{{ category.name|escapejs }}》吗？')"
+                    onclick="confirmHtmx(this, '{% blocktrans with name=category.name|escapejs %}确定要删除分类《{{ name }}》吗？{% endblocktrans %}')"
                     class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" 
-                    data-tip="删除">
+                    data-tip="{% trans '删除' %}">
                 <span class="material-symbols-outlined text-base">delete</span>
             </button>
         </div>
@@ -63,8 +64,9 @@
     <td colspan="6" class="text-center py-10 text-base-content/50">
         <div class="flex flex-col items-center gap-2">
             <span class="material-symbols-outlined text-4xl opacity-20">category</span>
-            <span>暂无分类</span>
+            <span>{% trans "暂无分类" %}</span>
         </div>
     </td>
 </tr>
 {% endfor %}
+

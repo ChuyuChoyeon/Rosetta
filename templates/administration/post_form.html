@@ -1,7 +1,10 @@
 {% extends "administration/base.html" %}
-{% load capture_tags static %}
+{% load capture_tags static i18n %}
 
-{% block title %}{{ title|default:"编辑文章" }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
+{% block title %}
+    {% trans "编辑文章" as default_title %}
+    {{ title|default:default_title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}
+{% endblock %}
 
 {% block extra_head %}
 <!-- ByteMD 样式由 js/editor.js 动态注入和管理 -->
@@ -9,263 +12,662 @@
 
 {% block content %}
     <!-- Header -->
-    {% include "administration/components/header.html" with title=title|default:"编辑文章" subtitle="编辑文章内容和设置" breadcrumbs=None %}
+    {% trans "编辑文章" as default_title %}
+    {% trans "编辑文章内容和设置" as default_subtitle %}
+    {% include "administration/components/header.html" with title=title|default:default_title subtitle=default_subtitle breadcrumbs=None %}
 
-    <form method="post" enctype="multipart/form-data" class="w-full">
+    <form method="post" enctype="multipart/form-data" class="w-full" x-data="translationForm" novalidate>
         {% csrf_token %}
+        
+        {% if form.errors %}
+        <div role="alert" class="alert border border-error/20 bg-error/5 text-error mb-6">
+            <div class="flex items-start gap-4">
+                <span class="material-symbols-outlined pt-1">error</span>
+                <div class="w-full">
+                    <h3 class="font-bold">{% trans "请修正以下错误" %}</h3>
+                    <ul class="mt-2 list-disc list-inside text-sm opacity-90">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
             <!-- Main Content (Left Column - 75%) -->
             <div class="lg:col-span-3 space-y-6">
                 
                 <!-- Main Info Card -->
                 {% captureas main_card_content %}
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text font-bold text-lg">文章标题</span>
-                        </label>
-                        {{ form.title }}
-                        {% if form.title.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.title.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
-                    
-                    <div class="form-control w-full mt-4">
-                        <label class="label flex justify-between items-center">
-                            <span class="label-text font-bold">内容 (Markdown)</span>
-                        </label>
-                        
-                        <div id="editor" class="bg-base-100 rounded-lg border border-base-300"></div>
+                        <!-- Multi-language Tabs -->
+                        <div class="bg-base-100 border border-base-300 rounded-box overflow-hidden mb-6">
+                            <!-- Tab Header -->
+                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 bg-base-50/50 px-4 pt-2">
+                                <div role="tablist" class="tabs tabs-bordered -mb-[1px]">
+                                    <a role="tab" class="tab h-10 px-4 transition-all duration-200"
+                                       :class="activeTab === 'zh-hans' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                                       @click="activeTab = 'zh-hans'">
+                                        <span class="mr-2 text-lg">🇨🇳</span>
+                                        {% trans "中文" %}
+                                    </a>
+                                    <a role="tab" class="tab h-10 px-4 transition-all duration-200"
+                                       :class="activeTab === 'en' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                                       @click="activeTab = 'en'">
+                                        <span class="mr-2 text-lg">🇺🇸</span>
+                                        English
+                                    </a>
+                                    <a role="tab" class="tab h-10 px-4 transition-all duration-200"
+                                       :class="activeTab === 'ja' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                                       @click="activeTab = 'ja'">
+                                        <span class="mr-2 text-lg">🇯🇵</span>
+                                        日本語
+                                    </a>
+                                    <a role="tab" class="tab h-10 px-4 transition-all duration-200"
+                                       :class="activeTab === 'zh-hant' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                                       @click="activeTab = 'zh-hant'">
+                                        <span class="mr-2 text-lg">🇭🇰</span>
+                                        繁體中文
+                                    </a>
+                                </div>
 
-                        <div class="hidden">
-                            {{ form.content }}
+                                <!-- One-click Translate Button -->
+                                <div class="mb-1">
+                                    <button type="button" 
+                                            class="btn btn-sm btn-ghost gap-1.5 text-primary hover:bg-primary/10 transition-colors"
+                                            @click="translate('id_title_zh_hans', {
+                                                'en': 'id_title_en',
+                                                'ja': 'id_title_ja',
+                                                'zh-hant': 'id_title_zh_hant'
+                                            });
+                                            translate('id_subtitle_zh_hans', {
+                                                'en': 'id_subtitle_en',
+                                                'ja': 'id_subtitle_ja',
+                                                'zh-hant': 'id_subtitle_zh_hant'
+                                            });
+                                            translate('id_excerpt_zh_hans', {
+                                                'en': 'id_excerpt_en',
+                                                'ja': 'id_excerpt_ja',
+                                                'zh-hant': 'id_excerpt_zh_hant'
+                                            });
+                                            translate('id_content_zh_hans', {
+                                                'en': 'id_content_en',
+                                                'ja': 'id_content_ja',
+                                                'zh-hant': 'id_content_zh_hant'
+                                            })"
+                                            :class="{'loading': isLoading}"
+                                            title="{% trans '自动翻译到其他语言' %}">
+                                        <span class="material-symbols-outlined text-[18px]" x-show="!isLoading">translate</span>
+                                        <span class="hidden sm:inline font-medium">{% trans "一键翻译" %}</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Tab Content -->
+                            <div class="p-6">
+                                <!-- Zh-Hans Tab -->
+                                <div x-show="activeTab === 'zh-hans'">
+                                    <div class="form-control w-full">
+                                        <label class="label">
+                                            <span class="label-text font-bold text-lg">{% trans "文章标题 (中文)" %}</span>
+                                        </label>
+                                        {{ form.title_zh_hans }}
+                                        {% if form.title_zh_hans.errors %}
+                                        <label class="label">
+                                            <span class="label-text-alt text-error">{{ form.title_zh_hans.errors.0 }}</span>
+                                        </label>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "副标题 (中文)" %}</span>
+                                        </label>
+                                        {{ form.subtitle_zh_hans }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text font-bold">{% trans "摘要 (中文)" %}</span>
+                                        </label>
+                                        {{ form.excerpt_zh_hans }}
+                                    </div>
+                                </div>
+
+                                <!-- English Tab -->
+                                <div x-show="activeTab === 'en'" style="display: none;">
+                                    <div class="form-control w-full">
+                                        <label class="label">
+                                            <span class="label-text font-bold text-lg">{% trans "Title (English)" %}</span>
+                                        </label>
+                                        {{ form.title_en }}
+                                        {% if form.title_en.errors %}
+                                        <label class="label">
+                                            <span class="label-text-alt text-error">{{ form.title_en.errors.0 }}</span>
+                                        </label>
+                                        {% endif %}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Subtitle (English)" %}</span>
+                                        </label>
+                                        {{ form.subtitle_en }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text font-bold">{% trans "Excerpt (English)" %}</span>
+                                        </label>
+                                        {{ form.excerpt_en }}
+                                    </div>
+                                </div>
+
+                                <!-- Japanese Tab -->
+                                <div x-show="activeTab === 'ja'" style="display: none;">
+                                    <div class="form-control w-full">
+                                        <label class="label">
+                                            <span class="label-text font-bold text-lg">{% trans "タイトル (Japanese)" %}</span>
+                                        </label>
+                                        {{ form.title_ja }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "サブタイトル (Japanese)" %}</span>
+                                        </label>
+                                        {{ form.subtitle_ja }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text font-bold">{% trans "要約 (Japanese)" %}</span>
+                                        </label>
+                                        {{ form.excerpt_ja }}
+                                    </div>
+                                </div>
+
+                                <!-- Zh-Hant Tab -->
+                                <div x-show="activeTab === 'zh-hant'" style="display: none;">
+                                    <div class="form-control w-full">
+                                        <label class="label">
+                                            <span class="label-text font-bold text-lg">{% trans "文章標題 (Traditional Chinese)" %}</span>
+                                        </label>
+                                        {{ form.title_zh_hant }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "副標題 (Traditional Chinese)" %}</span>
+                                        </label>
+                                        {{ form.subtitle_zh_hant }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text font-bold">{% trans "摘要 (Traditional Chinese)" %}</span>
+                                        </label>
+                                        {{ form.excerpt_zh_hant }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
 
-                        {% if form.content.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-control w-full mt-4">
-                        <label class="label">
-                            <span class="label-text font-bold">摘要</span>
-                        </label>
-                        {{ form.excerpt }}
-                        <label class="label">
-                            <span class="label-text-alt opacity-60">可选，用于列表页展示</span>
-                        </label>
-                    </div>
-                {% endcaptureas %}
-                {% include "administration/components/form_card.html" with content=main_card_content %}
-                
-                <!-- SEO / Slug Settings -->
-                {% captureas seo_card_content %}
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">Slug (URL别名)</span>
-                        </label>
-                        {{ form.slug }}
-                        <label class="label">
-                            <span class="label-text-alt opacity-60">留空将自动根据标题生成</span>
-                        </label>
-                    </div>
-
-                    <div class="divider"></div>
-
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">Meta 标题 (Title)</span>
-                        </label>
-                        {{ form.meta_title }}
-                        <label class="label">
-                            <span class="label-text-alt opacity-60">可选，覆盖默认标题</span>
-                        </label>
-                    </div>
-
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">Meta 描述 (Description)</span>
-                        </label>
-                        {{ form.meta_description }}
-                        <label class="label">
-                            <span class="label-text-alt opacity-60">可选，覆盖自动生成的摘要</span>
-                        </label>
-                    </div>
-
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">Meta 关键词 (Keywords)</span>
-                        </label>
-                        {{ form.meta_keywords }}
-                        <label class="label">
-                            <span class="label-text-alt opacity-60">可选，逗号分隔</span>
-                        </label>
-                    </div>
-                {% endcaptureas %}
-                {% include "administration/components/form_card.html" with title="SEO 设置" content=seo_card_content %}
-            </div>
-
-            <!-- Sidebar (Right Column - 25% - Sticky) -->
-            <div class="lg:col-span-1 space-y-6 sticky top-24 z-30">
-                <!-- Publish Actions -->
-                {% captureas publish_content %}
-                    <div class="space-y-4">
-                        <div class="form-control w-full">
-                            <label class="label cursor-pointer justify-between">
-                                <span class="label-text">状态</span> 
-                                {{ form.status }}
+                        <!-- Editor (Content) -->
+                        <div class="form-control w-full mt-6"
+                             x-init="$watch('activeTab', (value, oldValue) => {
+                                 // Load new content
+                                 if (window.bytemdEditor && value) {
+                                     const newInputId = 'id_content_' + value.replace('-', '_');
+                                     const newInput = document.getElementById(newInputId);
+                                     if (newInput) {
+                                         // Update the target input for real-time syncing FIRST
+                                         if (window.bytemdEditor.setTargetInput) {
+                                             window.bytemdEditor.setTargetInput(newInputId);
+                                         }
+                                         // Update editor content
+                                         window.bytemdEditor.$set({ value: newInput.value });
+                                     }
+                                 }
+                             })">
+                            <label class="label flex justify-between items-center">
+                                <span class="label-text font-bold text-lg">
+                                    <span x-text="{'zh-hans': '{% trans "内容 (中文)" %}', 'en': '{% trans "Content (English)" %}', 'ja': '{% trans "内容 (Japanese)" %}', 'zh-hant': '{% trans "內容 (Traditional Chinese)" %}'}[activeTab]"></span>
+                                </span>
                             </label>
+                            
+                            <div id="editor" class="bg-base-100 border border-base-200 rounded-lg overflow-hidden min-h-[500px]"></div>
+                            
+                            <!-- Initialize Editor -->
+                            <script>
+                                (function() {
+                                    const initEditor = () => {
+                                        // If editor.js is loaded and ByteMD is available
+                                        if (window.initByteMD) {
+                                            const container = document.getElementById('editor');
+                                            // Ensure container exists and hasn't been initialized (empty)
+                                            if (container && container.childElementCount === 0) {
+                                                const initialInputId = 'id_content_zh_hans';
+                                                window.bytemdEditor = window.initByteMD('editor', initialInputId);
+                                            }
+                                        } else {
+                                            // Retry if script is still loading (e.g. on fresh page load)
+                                            setTimeout(initEditor, 50);
+                                        }
+                                    };
+
+                                    // Try to initialize immediately (handles HTMX swaps where DOMContentLoaded already fired)
+                                    initEditor();
+
+                                    // Fallback: also try on DOMContentLoaded for fresh page loads if script execution order varies
+                                    if (document.readyState === 'loading') {
+                                        document.addEventListener('DOMContentLoaded', initEditor);
+                                    }
+                                })();
+                            </script>
+                            
+                            <!-- Hidden inputs for content and base title -->
+                            <div class="hidden">
+                                {{ form.title }} <!-- Base title, usually mapped to current language or zh-hans -->
+                                {{ form.content }} <!-- Base content, usually mapped to current language or zh-hans -->
+                                {{ form.content_zh_hans }}
+                                {{ form.content_en }}
+                                {{ form.content_ja }}
+                                {{ form.content_zh_hant }}
+                            </div>
                         </div>
 
-                        <div class="form-control w-full">
+                        <!-- Slug Field -->
+                        <div class="form-control w-full mt-6">
                             <label class="label">
-                                <span class="label-text">发布时间</span>
+                                <span class="label-text font-bold text-lg">{% trans "URL 别名 (Slug)" %}</span>
                             </label>
-                            {{ form.published_at }}
-                            {% if form.published_at.errors %}
+                            {{ form.slug }}
+                            {% if form.slug.errors %}
                             <label class="label">
-                                <span class="label-text-alt text-error">{{ form.published_at.errors.0 }}</span>
-                            </label>
-                            {% else %}
-                            <label class="label">
-                                <span class="label-text-alt opacity-60">留空将使用当前时间</span>
+                                <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
                             </label>
                             {% endif %}
-                        </div>
-
-                        <div class="form-control w-full">
-                            <label class="label cursor-pointer justify-between">
-                                <span class="label-text">是否置顶</span>
-                                {{ form.is_pinned }}
+                            <label class="label">
+                                <span class="label-text-alt text-base-content/60">{% trans "“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。" %}</span>
                             </label>
                         </div>
 
-                        <div class="form-control w-full">
-                            <label class="label cursor-pointer justify-between">
-                                <span class="label-text">允许评论</span>
-                                {{ form.allow_comments }}
-                            </label>
+                        <!-- SEO Settings -->
+                        <div class="bg-base-100 border border-base-300 rounded-box overflow-hidden mt-6">
+                            <div class="p-4 bg-base-50/50 border-b border-base-200 font-bold flex items-center gap-2">
+                                <span class="material-symbols-outlined text-secondary">search</span>
+                                {% trans "SEO 设置" %}
+                            </div>
+                            <div class="p-6">
+                                <!-- Zh-Hans SEO -->
+                                <div x-show="activeTab === 'zh-hans'">
+                                    <div class="form-control w-full">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta 标题 (Title)" %}</span>
+                                        </label>
+                                        {{ form.meta_title_zh_hans }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta 描述 (Description)" %}</span>
+                                        </label>
+                                        {{ form.meta_description_zh_hans }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta 关键词 (Keywords)" %}</span>
+                                        </label>
+                                        {{ form.meta_keywords_zh_hans }}
+                                    </div>
+                                </div>
+
+                                <!-- English SEO -->
+                                <div x-show="activeTab === 'en'" style="display: none;">
+                                    <div class="form-control w-full">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta Title" %}</span>
+                                        </label>
+                                        {{ form.meta_title_en }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta Description" %}</span>
+                                        </label>
+                                        {{ form.meta_description_en }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta Keywords" %}</span>
+                                        </label>
+                                        {{ form.meta_keywords_en }}
+                                    </div>
+                                </div>
+
+                                <!-- Japanese SEO -->
+                                <div x-show="activeTab === 'ja'" style="display: none;">
+                                    <div class="form-control w-full">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta タイトル" %}</span>
+                                        </label>
+                                        {{ form.meta_title_ja }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta 説明文" %}</span>
+                                        </label>
+                                        {{ form.meta_description_ja }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta キーワード" %}</span>
+                                        </label>
+                                        {{ form.meta_keywords_ja }}
+                                    </div>
+                                </div>
+
+                                <!-- Zh-Hant SEO -->
+                                <div x-show="activeTab === 'zh-hant'" style="display: none;">
+                                    <div class="form-control w-full">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta 標題 (Title)" %}</span>
+                                        </label>
+                                        {{ form.meta_title_zh_hant }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta 描述 (Description)" %}</span>
+                                        </label>
+                                        {{ form.meta_description_zh_hant }}
+                                    </div>
+                                    <div class="form-control w-full mt-4">
+                                        <label class="label">
+                                            <span class="label-text">{% trans "Meta 關鍵詞 (Keywords)" %}</span>
+                                        </label>
+                                        {{ form.meta_keywords_zh_hant }}
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+                {% endcaptureas %}
+                {% include "administration/components/form_card.html" with content=main_card_content %}
+            </div>
+
+            <!-- Sidebar (Right Column - 25%) -->
+            <div class="lg:col-span-1 space-y-6">
+                <!-- Publish Box -->
+                {% captureas publish_content %}
+                    <div class="flex flex-col gap-3">
+                        <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                            <span class="material-symbols-outlined">save</span>
+                            {% trans "保存文章" %}
+                        </button>
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">{% trans "保存并新增" %}</button>
+                            <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">{% trans "保存并继续" %}</button>
+                        </div>
+
+                        {% if object %}
+                        <div class="divider my-1"></div>
+                        <div class="flex justify-between items-center">
+                            <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">{% trans "取消" %}</a>
+                            <button type="button" onclick="confirmDelete('{% url 'administration:post_delete' object.pk %}', '{% blocktrans with title=object.title|escapejs %}确定要删除文章《{{ title }}》吗？{% endblocktrans %}')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
+                                {% trans "删除文章" %}
+                            </button>
+                        </div>
+                        {% else %}
+                        <div class="divider my-1"></div>
+                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">{% trans "取消" %}</a>
+                        {% endif %}
                     </div>
                 {% endcaptureas %}
+                {% trans "发布" as pub_title %}
+                {% include "administration/components/form_card.html" with title=pub_title icon="publish" content=publish_content %}
 
-                {% captureas publish_actions %}
-                    {% if object.slug %}
-                    <a href="{% url 'post_detail' object.slug %}" target="_blank" class="btn btn-outline btn-sm w-full gap-2">
-                        <span class="material-symbols-outlined text-sm">open_in_new</span>
-                        预览/查看
-                    </a>
-                    {% endif %}
-                    {% with slot_content='<span class="material-symbols-outlined">save</span> 保存更改' extra_classes='w-full gap-2 font-bold' type='submit' %}
-                        {% include 'components/inspira/shimmer_button.html' %}
-                    {% endwith %}
-                    <div class="flex gap-2">
-                        <button type="submit" name="_continue" class="btn btn-ghost btn-xs flex-1">保存并继续</button>
-                        <button type="submit" name="_addanother" class="btn btn-ghost btn-xs flex-1">保存并新增</button>
-                    </div>
-                {% endcaptureas %}
-
-                {% include "administration/components/form_card.html" with title="发布" icon="publish" content=publish_content actions=publish_actions %}
-
-                <!-- Password Protection -->
-                {% captureas password_content %}
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text">访问密码</span>
-                        </label>
-                        {{ form.password }}
-                        <label class="label">
-                            <span class="label-text-alt opacity-60">设置此密码后，访问文章需要输入密码。留空则公开访问。</span>
-                        </label>
-                    </div>
-                {% endcaptureas %}
-                {% include "administration/components/form_card.html" with title="访问控制" icon="lock" icon_class="text-warning" content=password_content %}
-
-                <!-- Categories & Tags -->
+                <!-- Taxonomy Box -->
                 {% captureas taxonomy_content %}
                     <div class="form-control w-full">
                         <label class="label">
-                            <span class="label-text">分类</span>
+                            <span class="label-text font-medium">{% trans "分类" %}</span>
+                            <button type="button" onclick="document.getElementById('category_modal').showModal()" class="label-text-alt link link-primary">{% trans "新增" %}</button>
                         </label>
                         {{ form.category }}
                     </div>
-
-                    <div class="form-control w-full mt-4" 
-                         x-data="{ 
-                            tags: [], 
-                            newTag: '',
-                            init() {
-                                const initialValue = document.getElementById('id_tags_str').value;
-                                if (initialValue) {
-                                    this.tags = initialValue.split(',').filter(t => t.trim() !== '').map(t => t.trim());
+                    
+                    <div class="form-control w-full mt-4" x-data="{
+                        tags: [],
+                        newTag: '',
+                        init() {
+                            // Delay init slightly to ensure DOM is ready and value is populated
+                            this.$nextTick(() => {
+                                const initial = document.getElementById('{{ form.tags_str.id_for_label }}').value;
+                                if (initial) {
+                                    this.tags = initial.split(',').map(t => t.trim()).filter(t => t);
                                 }
-                            },
-                            addTag() {
-                                const tag = this.newTag.trim();
-                                if (tag && !this.tags.includes(tag)) {
-                                    this.tags.push(tag);
-                                }
+                            });
+                        },
+                        addTag() {
+                            const tag = this.newTag.trim();
+                            if (tag && !this.tags.includes(tag)) {
+                                this.tags.push(tag);
                                 this.newTag = '';
                                 this.updateHiddenInput();
-                            },
-                            removeTag(index) {
-                                this.tags.splice(index, 1);
-                                this.updateHiddenInput();
-                            },
-                            updateHiddenInput() {
-                                document.getElementById('id_tags_str').value = this.tags.join(',');
+                            } else if (this.tags.includes(tag)) {
+                                this.newTag = ''; // Clear duplicate
+                                if (window.showToast) window.showToast('{% trans "标签已存在" %}', 'warning');
                             }
-                         }">
+                        },
+                        removeTag(index) {
+                            this.tags.splice(index, 1);
+                            this.updateHiddenInput();
+                        },
+                        removeLastTag() {
+                            if (this.newTag === '' && this.tags.length > 0) {
+                                this.tags.pop();
+                                this.updateHiddenInput();
+                            }
+                        },
+                        updateHiddenInput() {
+                            document.getElementById('{{ form.tags_str.id_for_label }}').value = this.tags.join(',');
+                        }
+                    }">
                         <label class="label">
-                            <span class="label-text">标签</span>
+                            <span class="label-text font-medium">{% trans "标签" %}</span>
                         </label>
                         
-                        <!-- Hidden Input for Form Submission -->
-                        {{ form.tags_str }}
-                        
-                        <!-- Visual Tag Input -->
-                        <div class="flex flex-wrap gap-2 mb-2">
+                        <div class="flex flex-wrap items-center gap-2 p-2 border rounded-lg bg-base-100 border-base-300 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all min-h-[3rem]">
+                            <!-- Tags -->
                             <template x-for="(tag, index) in tags" :key="index">
-                                <div class="badge badge-primary gap-1 p-3">
+                                <div class="badge badge-primary gap-1 pr-1 py-3 animate-in fade-in zoom-in duration-200">
                                     <span x-text="tag"></span>
-                                    <button type="button" @click="removeTag(index)" class="btn btn-ghost btn-xs btn-circle text-primary-content/70 hover:text-white min-h-0 h-4 w-4">
-                                        <span class="material-symbols-outlined text-[10px] font-bold">close</span>
+                                    <button type="button" @click="removeTag(index)" class="btn btn-ghost btn-xs btn-circle text-primary-content/70 hover:bg-primary-focus hover:text-white h-4 w-4 min-h-0">
+                                        <span class="material-symbols-outlined text-[14px] font-bold">close</span>
                                     </button>
                                 </div>
                             </template>
-                        </div>
-                        
-                        <div class="join w-full">
+                            
+                            <!-- Input -->
                             <input type="text" 
                                    x-model="newTag" 
                                    @keydown.enter.prevent="addTag()" 
-                                   @keydown.comma.prevent="addTag()"
+                                   @keydown.backspace="removeLastTag()"
                                    @blur="addTag()"
-                                   class="input input-bordered join-item w-full" 
-                                   placeholder="输入标签..." />
-                            <button type="button" @click="addTag()" class="btn btn-square join-item">
-                                <span class="material-symbols-outlined">add</span>
-                            </button>
+                                   class="input input-ghost input-sm flex-1 min-w-[60px] focus:outline-none focus:bg-transparent h-8 px-1 placeholder:text-base-content/30"
+                                   placeholder="{% trans '输入标签并回车...' %}">
                         </div>
-
+                        
                         <label class="label">
-                            <span class="label-text-alt opacity-60">输入标签后按回车或逗号添加</span>
+                            <span class="label-text-alt text-base-content/60">{% trans "输入新标签后按回车添加" %}</span>
+                        </label>
+
+                        <!-- Hidden Real Input -->
+                        <div class="hidden">
+                            {{ form.tags_str }}
+                        </div>
+                    </div>
+                {% endcaptureas %}
+                {% trans "分类与标签" as tax_title %}
+                {% include "administration/components/form_card.html" with title=tax_title icon="category" content=taxonomy_content %}
+
+                <!-- Settings Box -->
+                {% captureas settings_content %}
+                    <div class="form-control">
+                        <label class="label cursor-pointer justify-between">
+                            <span class="label-text font-medium">{% trans "文章状态" %}</span>
+                            {{ form.status }}
+                        </label>
+                    </div>
+                    
+                    <div class="form-control mt-2">
+                        <label class="label cursor-pointer justify-between">
+                            <span class="label-text font-medium">{% trans "置顶文章" %}</span>
+                            {{ form.is_pinned }}
+                        </label>
+                    </div>
+
+                    <div class="form-control mt-2">
+                        <label class="label cursor-pointer justify-between">
+                            <span class="label-text font-medium">{% trans "允许评论" %}</span>
+                            {{ form.allow_comments }}
+                        </label>
+                    </div>
+
+                    <div class="form-control w-full mt-4">
+                        <label class="label">
+                            <span class="label-text font-medium">{% trans "访问密码" %}</span>
+                        </label>
+                        {{ form.password }}
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/60">{% trans "留空则公开访问" %}</span>
                         </label>
                     </div>
                 {% endcaptureas %}
-                {% include "administration/components/form_card.html" with title="分类与标签" icon="category" icon_class="text-secondary" content=taxonomy_content %}
-                
+                {% trans "设置" as settings_title %}
+                {% include "administration/components/form_card.html" with title=settings_title icon="settings" content=settings_content %}
+
                 <!-- Cover Image -->
                 {% captureas cover_content %}
-                    <div class="form-control w-full">
-                        {{ form.cover_image }}
+                    <div class="form-control w-full" x-data="{ 
+                        previewUrl: '{% if object.cover_image %}{{ object.cover_image.url|escapejs }}{% endif %}',
+                        handleFile(event) {
+                            const file = event.target.files[0];
+                            if (file) {
+                                const reader = new FileReader();
+                                reader.onload = (e) => {
+                                    this.previewUrl = e.target.result;
+                                };
+                                reader.readAsDataURL(file);
+                            }
+                        }
+                    }">
+                        <div class="flex flex-col gap-2">
+                            <!-- Preview area -->
+                            <div class="relative w-full aspect-video bg-base-200 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-base-300 group hover:border-primary transition-colors cursor-pointer" 
+                                 @click="document.getElementById('{{ form.cover_image.id_for_label }}').click()">
+                                
+                                <img :src="previewUrl" class="w-full h-full object-cover" x-show="previewUrl">
+                                
+                                <div class="flex flex-col items-center text-base-content/40 group-hover:text-primary transition-colors" x-show="!previewUrl">
+                                    <span class="material-symbols-outlined text-4xl">image</span>
+                                    <span class="text-sm mt-1">{% trans "点击上传封面" %}</span>
+                                </div>
+                                
+                                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white" x-show="previewUrl">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </div>
+                            </div>
+                            
+                            <div @change="handleFile">
+                                {{ form.cover_image }}
+                            </div>
+                        </div>
                     </div>
                 {% endcaptureas %}
-                {% include "administration/components/form_card.html" with title="封面图片" icon="image" icon_class="text-accent" content=cover_content %}
+                {% trans "封面图" as cover_title %}
+                {% include "administration/components/form_card.html" with title=cover_title icon="image" content=cover_content %}
             </div>
         </div>
     </form>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const languages = ['zh_hans', 'en', 'ja', 'zh_hant'];
+
+            // Helper to sync multiple language fields to a base field
+            function setupSync(baseId, fieldName) {
+                const baseInput = document.getElementById(baseId);
+                if (!baseInput) return;
+
+                languages.forEach(lang => {
+                    const inputId = `id_${fieldName}_${lang}`;
+                    const input = document.getElementById(inputId);
+                    if (input) {
+                        // Sync on input
+                        input.addEventListener('input', function() {
+                            if (this.value) {
+                                baseInput.value = this.value;
+                            } else {
+                                let foundValue = '';
+                                for (const otherLang of languages) {
+                                    const otherInput = document.getElementById(`id_${fieldName}_${otherLang}`);
+                                    if (otherInput && otherInput.value) {
+                                        foundValue = otherInput.value;
+                                        break;
+                                    }
+                                }
+                                baseInput.value = foundValue;
+                            }
+                        });
+                        
+                        // Initial sync
+                        if (input.value && !baseInput.value) {
+                            baseInput.value = input.value;
+                        }
+                    }
+                });
+            }
+
+            setupSync('id_title', 'title');
+            setupSync('id_subtitle', 'subtitle');
+            setupSync('id_excerpt', 'excerpt');
+
+            form.addEventListener('submit', function(e) {
+                if (window.bytemdEditor) {
+                    const value = window.bytemdEditor.getValue();
+                    // Get the currently active tab's language code from Alpine data
+                    const alpineEl = document.querySelector('form[x-data="translationForm"]');
+                    if (alpineEl && alpineEl._x_dataStack) {
+                        const activeTab = alpineEl._x_dataStack[0].activeTab;
+                        
+                        // Construct the input ID based on the active tab
+                        const inputId = 'id_content_' + activeTab.replace('-', '_');
+                        const input = document.getElementById(inputId);
+                        if (input) {
+                            input.value = value;
+                        }
+                    }
+                }
+
+                // Final check for base fields
+                function ensureValue(baseId, fieldName) {
+                    const baseInput = document.getElementById(baseId);
+                    if (baseInput && !baseInput.value) {
+                        for (const lang of languages) {
+                            const input = document.getElementById(`id_${fieldName}_${lang}`);
+                            if (input && input.value) {
+                                baseInput.value = input.value;
+                                break;
+                            }
+                        }
+                    }
+                }
+                ensureValue('id_title', 'title');
+                ensureValue('id_content', 'content');
+                ensureValue('id_subtitle', 'subtitle');
+                ensureValue('id_excerpt', 'excerpt');
+            });
+        });
+    </script>
+
+    {% include "administration/components/category_modal.html" %}
 {% endblock %}

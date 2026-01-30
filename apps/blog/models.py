@@ -10,8 +10,9 @@ from django.dispatch import receiver
 from core.utils import generate_unique_slug, schedule_post_image_processing
 from core.validators import validate_image_file
 from imagekit.models import ImageSpecField
-from imagekit.processors import ResizeToFill
+from imagekit.processors import ResizeToFill, ResizeToFit
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 import re
 import math
 
@@ -22,28 +23,20 @@ class Category(models.Model):
     用于组织和归档文章，支持 slug 作为 URL 友好的标识符。
     """
 
-    name = models.CharField("名称", max_length=100)
-    slug = models.SlugField("别名", unique=True, blank=True)
-    description = models.TextField("描述", blank=True)
+    name = models.CharField(_("名称"), max_length=100)
+    slug = models.SlugField(_("别名"), unique=True, blank=True)
+    description = models.TextField(_("描述"), blank=True)
     icon = models.CharField(
-        "图标", max_length=50, blank=True, default="", help_text="Material Symbols 图标代码"
+        _("图标"), max_length=50, blank=True, default="", help_text=_("Material Symbols 图标代码")
     )
     color = models.CharField(
-        "颜色",
+        _("颜色"),
         max_length=20,
         default="primary",
-        help_text="Tailwind 颜色类名 (如 primary, secondary)",
-    )
-    parent = models.ForeignKey(
-        "self",
-        on_delete=models.CASCADE,
-        null=True,
-        blank=True,
-        related_name="children",
-        verbose_name="父分类",
+        help_text=_("Tailwind 颜色类名 (如 primary, secondary)"),
     )
     cover_image = models.ImageField(
-        "封面图",
+        _("封面图"),
         upload_to="categories/",
         blank=True,
         null=True,
@@ -51,7 +44,7 @@ class Category(models.Model):
     )
 
     class Meta:
-        verbose_name = "分类"
+        verbose_name = _("分类")
         verbose_name_plural = verbose_name
 
     def save(self, *args, **kwargs):
@@ -71,16 +64,16 @@ class Tag(models.Model):
     包含颜色配置，用于前端展示。
     """
 
-    name = models.CharField("名称", max_length=100)
-    slug = models.SlugField("别名", unique=True, blank=True)
-    color = models.CharField("颜色", max_length=20, default="#64748B")
-    is_active = models.BooleanField("是否可见", default=True)
+    name = models.CharField(_("名称"), max_length=100)
+    slug = models.SlugField(_("别名"), unique=True, blank=True)
+    color = models.CharField(_("颜色"), max_length=20, default="#64748B")
+    is_active = models.BooleanField(_("是否可见"), default=True)
     icon = models.CharField(
-        "图标", max_length=50, blank=True, default="", help_text="Material Symbols 图标代码"
+        _("图标"), max_length=50, blank=True, default="", help_text=_("Material Symbols 图标代码")
     )
 
     class Meta:
-        verbose_name = "标签"
+        verbose_name = _("标签")
         verbose_name_plural = verbose_name
 
     def save(self, *args, **kwargs):
@@ -104,30 +97,30 @@ class Post(models.Model):
     """
 
     STATUS_CHOICES = (
-        ("draft", "草稿"),
-        ("published", "已发布"),
+        ("draft", _("草稿")),
+        ("published", _("已发布")),
     )
 
-    title = models.CharField("标题", max_length=200)
-    subtitle = models.CharField("副标题", max_length=200, blank=True)
-    source = models.CharField("来源", max_length=50, blank=True, default="原创")
-    source_url = models.URLField("来源链接", blank=True)
-    audio = models.FileField("音频", upload_to="posts/audio/", blank=True, null=True)
-    video = models.FileField("视频", upload_to="posts/video/", blank=True, null=True)
+    title = models.CharField(_("标题"), max_length=200)
+    subtitle = models.CharField(_("副标题"), max_length=200, blank=True)
+    source = models.CharField(_("来源"), max_length=50, blank=True, default="原创")
+    source_url = models.URLField(_("来源链接"), blank=True)
+    audio = models.FileField(_("音频"), upload_to="posts/audio/", blank=True, null=True)
+    video = models.FileField(_("视频"), upload_to="posts/video/", blank=True, null=True)
     video_url = models.URLField(
-        "视频链接", blank=True, help_text="外部视频链接 (YouTube, Bilibili)"
+        _("视频链接"), blank=True, help_text=_("外部视频链接 (YouTube, Bilibili)")
     )
-    slug = models.SlugField("别名", unique=True, blank=True)
+    slug = models.SlugField(_("别名"), unique=True, blank=True)
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="posts",
-        verbose_name="作者",
+        verbose_name=_("作者"),
     )
-    content = models.TextField("内容")
-    excerpt = models.TextField("摘要", blank=True, max_length=500)
+    content = models.TextField(_("内容"))
+    excerpt = models.TextField(_("摘要"), blank=True, max_length=500)
     cover_image = models.ImageField(
-        "封面图",
+        _("封面图"),
         upload_to="posts/",
         blank=True,
         null=True,
@@ -154,42 +147,42 @@ class Post(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name="posts",
-        verbose_name="分类",
+        verbose_name=_("分类"),
     )
     tags = models.ManyToManyField(
-        Tag, blank=True, related_name="posts", verbose_name="标签"
+        Tag, blank=True, related_name="posts", verbose_name=_("标签")
     )
     likes = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         related_name="liked_posts",
         blank=True,
-        verbose_name="点赞",
+        verbose_name=_("点赞"),
     )
     status = models.CharField(
-        "状态", max_length=10, choices=STATUS_CHOICES, default="draft", db_index=True
+        _("状态"), max_length=10, choices=STATUS_CHOICES, default="draft", db_index=True
     )
     password = models.CharField(
-        "访问密码",
+        _("访问密码"),
         max_length=128,  # 增加长度以容纳哈希
         blank=True,
-        help_text="设置此密码后，访问文章需要输入密码",
+        help_text=_("设置此密码后，访问文章需要输入密码"),
     )
-    views = models.PositiveIntegerField("阅读量", default=0)
-    created_at = models.DateTimeField("创建时间", auto_now_add=True, db_index=True)
-    published_at = models.DateTimeField("发布时间", null=True, blank=True, db_index=True)
-    updated_at = models.DateTimeField("更新时间", auto_now=True)
-    is_pinned = models.BooleanField("置顶", default=False)
-    allow_comments = models.BooleanField("允许评论", default=True)
+    views = models.PositiveIntegerField(_("阅读量"), default=0)
+    created_at = models.DateTimeField(_("创建时间"), auto_now_add=True, db_index=True)
+    published_at = models.DateTimeField(_("发布时间"), null=True, blank=True, db_index=True)
+    updated_at = models.DateTimeField(_("更新时间"), auto_now=True)
+    is_pinned = models.BooleanField(_("置顶"), default=False)
+    allow_comments = models.BooleanField(_("允许评论"), default=True)
 
     # SEO Fields
     meta_title = models.CharField(
-        "Meta 标题", max_length=200, blank=True, help_text="覆盖默认的标题，用于搜索引擎显示"
+        _("Meta 标题"), max_length=200, blank=True, help_text=_("覆盖默认的标题，用于搜索引擎显示")
     )
     meta_description = models.CharField(
-        "Meta 描述", max_length=200, blank=True, help_text="覆盖默认的描述，建议 160 字以内"
+        _("Meta 描述"), max_length=200, blank=True, help_text=_("覆盖默认的描述，建议 160 字以内")
     )
     meta_keywords = models.CharField(
-        "Meta 关键词", max_length=200, blank=True, help_text="逗号分隔的关键词"
+        _("Meta 关键词"), max_length=200, blank=True, help_text=_("逗号分隔的关键词")
     )
 
     @property
@@ -257,10 +250,10 @@ class Comment(models.Model):
     """
 
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="comments", verbose_name="文章"
+        Post, on_delete=models.CASCADE, related_name="comments", verbose_name=_("文章")
     )
     user = models.ForeignKey(
-        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name="用户"
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("用户")
     )
     parent = models.ForeignKey(
         "self",
@@ -268,15 +261,15 @@ class Comment(models.Model):
         null=True,
         blank=True,
         related_name="replies",
-        verbose_name="父评论",
+        verbose_name=_("父评论"),
     )
-    content = models.TextField("内容")
-    created_at = models.DateTimeField("创建时间", auto_now_add=True, db_index=True)
-    active = models.BooleanField("是否可见", default=True, db_index=True)
+    content = models.TextField(_("内容"))
+    created_at = models.DateTimeField(_("创建时间"), auto_now_add=True, db_index=True)
+    active = models.BooleanField(_("是否可见"), default=True, db_index=True)
 
     class Meta:
         ordering = ["created_at"]
-        verbose_name = "评论"
+        verbose_name = _("评论")
         verbose_name_plural = verbose_name
 
     def __str__(self):
@@ -300,16 +293,16 @@ class PostViewHistory(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="view_history",
-        verbose_name="用户",
+        verbose_name=_("用户"),
     )
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="view_history", verbose_name="文章"
+        Post, on_delete=models.CASCADE, related_name="view_history", verbose_name=_("文章")
     )
-    viewed_at = models.DateTimeField("浏览时间", auto_now=True)
+    viewed_at = models.DateTimeField(_("浏览时间"), auto_now=True)
 
     class Meta:
         ordering = ["-viewed_at"]
-        verbose_name = "浏览历史"
+        verbose_name = _("浏览历史")
         verbose_name_plural = verbose_name
         unique_together = ("user", "post")
 
@@ -377,5 +370,9 @@ def _invalidate_post_tags_cache(sender, instance, action, **kwargs):
         cache.delete(f"post:{instance.id}:related")
         cache.delete(f"post:{instance.id}:meta_desc")
         cache.delete("sidebar:tags")
-        cache.delete(make_template_fragment_key("sidebar_tags"))
+        
+        languages = [l[0] for l in settings.LANGUAGES]
+        for lang in languages:
+            cache.delete(make_template_fragment_key("sidebar_tags", [lang]))
+            
         _delete_pattern("post:*:related")

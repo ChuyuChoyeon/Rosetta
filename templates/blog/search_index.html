@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static tailwind_tags %}
+{% load static tailwind_tags i18n %}
 
-{% block title %}搜索 - {{ block.super }}{% endblock %}
+{% block title %}{% trans "搜索" %}{% endblock %}
 
 {% block content %}
 <div class="min-h-[70vh] flex flex-col items-center justify-center relative overflow-hidden">
@@ -11,11 +11,11 @@
 
     <div class="w-full max-w-2xl px-4 z-10" x-data="searchComponent()">
         <h1 class="text-4xl md:text-5xl font-bold text-center mb-12 text-primary animate-fade-in-up">
-            探索 {{ config.SITE_NAME|default:"Rosetta" }}
+            {% blocktrans with site_name=config.SITE_NAME|default:"Rosetta" %}探索 {{ site_name }}{% endblocktrans %}
         </h1>
         
         <p class="text-center text-base-content/60 mb-8 animate-fade-in-up delay-100">
-            搜索文章、标签、分类或用户...
+            {% trans "搜索文章、标签、分类或用户..." %}
         </p>
 
         <!-- Search Input Container -->
@@ -31,7 +31,7 @@
                 @focus="showSuggestions = true"
                 @keydown.enter="search"
                 class="input input-lg w-full pl-12 pr-4 rounded-2xl shadow-lg border-2 border-base-200 focus:border-primary focus:outline-none transition-all duration-300 bg-base-100/80 backdrop-blur-md"
-                placeholder="输入关键词..."
+                placeholder="{% trans '输入关键词...' %}"
                 autofocus
             >
             
@@ -69,7 +69,7 @@
 
         <!-- Popular Tags -->
         <div class="mt-12 text-center animate-fade-in-up delay-300">
-            <p class="text-sm font-medium text-base-content/50 mb-4">热门标签</p>
+            <p class="text-sm font-medium text-base-content/50 mb-4">{% trans "热门标签" %}</p>
             <div class="flex flex-wrap justify-center gap-2">
                 {% for tag in sidebar_tags|slice:":8" %}
                 <a href="{% url 'search' %}?q={{ tag.name }}&type=tag" class="btn btn-sm btn-outline rounded-full hover:btn-primary transition-all duration-300 transform hover:scale-105">

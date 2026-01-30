@@ -1,3 +1,4 @@
+{% load i18n %}
 {% for user in users %}
 <tr class="hover">
     <th class="pl-6">
@@ -44,27 +45,27 @@
         {% if user.is_superuser %}
             <div class="badge badge-primary badge-sm badge-outline bg-primary/5 gap-1 border-primary/30">
                 <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                超级管理员
+                {% trans "超级管理员" %}
             </div>
         {% elif user.is_staff %}
             <div class="badge badge-secondary badge-sm badge-outline bg-secondary/5 gap-1 border-secondary/30">
                 <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
-                管理员
+                {% trans "管理员" %}
             </div>
         {% else %}
-            <div class="badge badge-ghost badge-sm badge-outline text-base-content/60 border-base-content/20">普通用户</div>
+            <div class="badge badge-ghost badge-sm badge-outline text-base-content/60 border-base-content/20">{% trans "普通用户" %}</div>
         {% endif %}
     </td>
     <td class="w-32">
         {% if user.is_active %}
             <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/5 border-success/30 whitespace-nowrap">
                 <span class="w-1.5 h-1.5 rounded-full bg-success animate-pulse"></span>
-                正常
+                {% trans "正常" %}
             </div>
         {% else %}
             <div class="badge badge-error badge-sm gap-1 badge-outline bg-error/5 border-error/30 whitespace-nowrap">
                 <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
-                禁用
+                {% trans "禁用" %}
             </div>
         {% endif %}
     </td>
@@ -76,7 +77,7 @@
     </td>
     <td class="text-right pr-4">
         <div class="join">
-            <a href="{% url 'administration:user_edit' user.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="编辑">
+            <a href="{% url 'administration:user_edit' user.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '编辑' %}">
                 <span class="material-symbols-outlined text-base">edit</span>
             </a>
             <button type="button" 
@@ -84,9 +85,9 @@
                     hx-trigger="confirmed"
                     hx-target="closest tr"
                     hx-swap="outerHTML swap:0.5s"
-                    onclick="confirmHtmx(this, '确定要删除用户 {{ user.username }} 吗？')"
+                    onclick="confirmHtmx(this, '{% blocktrans with username=user.username|escapejs %}确定要删除用户 {{ username }} 吗？{% endblocktrans %}')"
                     class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" 
-                    data-tip="删除">
+                    data-tip="{% trans '删除' %}">
                 <span class="material-symbols-outlined text-base">delete</span>
             </button>
         </div>
@@ -97,8 +98,9 @@
     <td colspan="9" class="text-center py-10 text-base-content/50">
         <div class="flex flex-col items-center gap-2">
             <span class="material-symbols-outlined text-4xl opacity-20">person_off</span>
-            <span>暂无用户</span>
+            <span>{% trans "暂无用户" %}</span>
         </div>
     </td>
 </tr>
 {% endfor %}
+

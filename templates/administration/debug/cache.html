@@ -1,22 +1,23 @@
 {% extends "administration/debug/base_debug.html" %}
 {% load capture_tags %}
+{% load i18n %}
 
-{% block debug_title %}缓存管理{% endblock %}
+{% block debug_title %}{% trans "缓存管理" %}{% endblock %}
 
 {% block debug_content %}
 {% captureas card_content %}
 <div class="p-6">
     <h2 class="card-title mb-6 flex items-center gap-2">
         <span class="material-symbols-outlined text-warning">cleaning_services</span>
-        缓存管理
+        {% trans "缓存管理" %}
     </h2>
     
     <div class="alert alert-info mb-6">
         <span class="material-symbols-outlined">info</span>
         <div>
-            <h3 class="font-bold">缓存说明</h3>
+            <h3 class="font-bold">{% trans "缓存说明" %}</h3>
             <div class="text-xs">
-                系统使用 Django 默认缓存后端。清理缓存可能会导致短暂的性能下降，因为系统需要重新生成缓存数据。
+                {% trans "系统使用 Django 默认缓存后端。清理缓存可能会导致短暂的性能下降，因为系统需要重新生成缓存数据。" %}
             </div>
         </div>
     </div>
@@ -26,13 +27,13 @@
         <div class="border border-base-200 rounded-lg p-6 flex flex-col items-center text-center gap-4 hover:bg-base-200/50 transition-colors">
             <span class="material-symbols-outlined text-4xl text-error">delete_forever</span>
             <div>
-                <h3 class="font-bold">清理所有缓存</h3>
-                <p class="text-sm opacity-70 mt-1">清除系统中的所有缓存数据，包括页面缓存、数据库查询缓存等。</p>
+                <h3 class="font-bold">{% trans "清理所有缓存" %}</h3>
+                <p class="text-sm opacity-70 mt-1">{% trans "清除系统中的所有缓存数据，包括页面缓存、数据库查询缓存等。" %}</p>
             </div>
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="clear_all">
-                <button type="button" class="btn btn-error btn-sm" onclick="showConfirmModal('清理缓存', '确定要清理所有缓存吗？', () => this.form.submit())">立即清理</button>
+                <button type="button" class="btn btn-error btn-sm" onclick="showConfirmModal('{% trans "清理缓存"|escapejs %}', '{% trans "确定要清理所有缓存吗？"|escapejs %}', () => this.form.submit())">{% trans "立即清理" %}</button>
             </form>
         </div>
 
@@ -40,13 +41,13 @@
         <div class="border border-base-200 rounded-lg p-6 flex flex-col items-center text-center gap-4 hover:bg-base-200/50 transition-colors">
             <span class="material-symbols-outlined text-4xl text-warning">layers_clear</span>
             <div>
-                <h3 class="font-bold">清理模板缓存</h3>
-                <p class="text-sm opacity-70 mt-1">仅清除编译后的模板缓存。如果在修改模板后未生效，请尝试此操作。</p>
+                <h3 class="font-bold">{% trans "清理模板缓存" %}</h3>
+                <p class="text-sm opacity-70 mt-1">{% trans "仅清除编译后的模板缓存。如果在修改模板后未生效，请尝试此操作。" %}</p>
             </div>
             <form method="post">
                 {% csrf_token %}
                 <input type="hidden" name="action" value="clear_templates">
-                <button type="submit" class="btn btn-warning btn-sm">清理模板</button>
+                <button type="submit" class="btn btn-warning btn-sm">{% trans "清理模板" %}</button>
             </form>
         </div>
     </div>

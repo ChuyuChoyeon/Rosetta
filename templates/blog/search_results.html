@@ -1,24 +1,25 @@
 {% extends 'base.html' %}
+{% load i18n %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-12 max-w-7xl">
     <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-        <h1 class="text-3xl font-bold">"{{ query }}" 的搜索结果</h1>
+        <h1 class="text-3xl font-bold">{% blocktrans %}"{{ query }}" 的搜索结果{% endblocktrans %}</h1>
         
         <!-- Search Filters and Bar -->
         <div class="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
             <div role="tablist" class="tabs tabs-boxed">
-                <a href="?q={{ query }}" class="tab {% if not search_type or search_type == 'all' %}tab-active{% endif %}">全部</a>
-                <a href="?q={{ query }}&type=post" class="tab {% if search_type == 'post' %}tab-active{% endif %}">文章</a>
-                <a href="?q={{ query }}&type=user" class="tab {% if search_type == 'user' %}tab-active{% endif %}">用户</a>
-                <a href="?q={{ query }}&type=tag" class="tab {% if search_type == 'tag' %}tab-active{% endif %}">标签</a>
-                <a href="?q={{ query }}&type=category" class="tab {% if search_type == 'category' %}tab-active{% endif %}">分类</a>
-                <a href="?q={{ query }}&type=poll" class="tab {% if search_type == 'poll' %}tab-active{% endif %}">投票</a>
+                <a href="?q={{ query }}" class="tab {% if not search_type or search_type == 'all' %}tab-active{% endif %}">{% trans "全部" %}</a>
+                <a href="?q={{ query }}&type=post" class="tab {% if search_type == 'post' %}tab-active{% endif %}">{% trans "文章" %}</a>
+                <a href="?q={{ query }}&type=user" class="tab {% if search_type == 'user' %}tab-active{% endif %}">{% trans "用户" %}</a>
+                <a href="?q={{ query }}&type=tag" class="tab {% if search_type == 'tag' %}tab-active{% endif %}">{% trans "标签" %}</a>
+                <a href="?q={{ query }}&type=category" class="tab {% if search_type == 'category' %}tab-active{% endif %}">{% trans "分类" %}</a>
+                <a href="?q={{ query }}&type=poll" class="tab {% if search_type == 'poll' %}tab-active{% endif %}">{% trans "投票" %}</a>
             </div>
 
             <form action="{% url 'search' %}" method="get" class="join w-full md:w-auto">
                 <input type="hidden" name="type" value="{{ search_type }}">
-                <input type="text" name="q" value="{{ query }}" class="input input-bordered join-item w-full md:w-64" placeholder="搜索..." required>
+                <input type="text" name="q" value="{{ query }}" class="input input-bordered join-item w-full md:w-64" placeholder="{% trans '搜索...' %}" required>
                 <button type="submit" class="btn btn-primary join-item">
                     <span class="material-symbols-outlined">search</span>
                 </button>
@@ -43,7 +44,7 @@
                             <h2 class="card-title">{{ item.nickname|default:item.username }}</h2>
                             <p class="text-sm text-base-content/60">@{{ item.username }}</p>
                             <div class="card-actions mt-4">
-                                <a href="{% url 'users:user_public_profile' item.username %}" class="btn btn-primary btn-sm">查看主页</a>
+                                <a href="{% url 'users:user_public_profile' item.username %}" class="btn btn-primary btn-sm">{% trans "查看主页" %}</a>
                             </div>
                         </div>
                     </div>
@@ -61,11 +62,11 @@
                                     </h2>
                                     <p class="text-sm text-base-content/60 mt-2 line-clamp-2">{{ item.description }}</p>
                                 </div>
-                                <div class="badge badge-primary badge-outline">投票</div>
+                                <div class="badge badge-primary badge-outline">{% trans "投票" %}</div>
                             </div>
                             <div class="card-actions justify-between items-center mt-6">
-                                <span class="text-xs text-base-content/50">{{ item.total_votes }} 人参与</span>
-                                <a href="{% url 'voting:detail' item.pk %}" class="btn btn-primary btn-sm">参与投票</a>
+                                <span class="text-xs text-base-content/50">{% blocktrans with count=item.total_votes %}{{ count }} 人参与{% endblocktrans %}</span>
+                                <a href="{% url 'voting:detail' item.pk %}" class="btn btn-primary btn-sm">{% trans "参与投票" %}</a>
                             </div>
                         </div>
                     </div>
@@ -80,9 +81,10 @@
                                 </span>
                             </div>
                             <h2 class="card-title">{{ item.name }}</h2>
-                            <p class="text-sm text-base-content/60">{{ item.description|default:"暂无描述" }}</p>
+                            {% trans "暂无描述" as default_desc %}
+                            <p class="text-sm text-base-content/60">{{ item.description|default:default_desc }}</p>
                             <div class="card-actions mt-4">
-                                <a href="{% if item.parent %}{% url 'post_by_category' item.slug %}{% else %}{% url 'post_by_tag' item.slug %}{% endif %}" class="btn btn-ghost btn-sm">查看文章</a>
+                                <a href="{% if item.parent %}{% url 'post_by_category' item.slug %}{% else %}{% url 'post_by_tag' item.slug %}{% endif %}" class="btn btn-ghost btn-sm">{% trans "查看文章" %}</a>
                             </div>
                         </div>
                     </div>
@@ -123,8 +125,8 @@
     {% else %}
         <div class="flex flex-col items-center justify-center py-20 text-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-24 w-24 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-            <h3 class="text-2xl font-bold text-base-content/50">没有找到相关结果</h3>
-            <p class="text-base-content/40 mt-2">请尝试其他关键词或切换搜索类型。</p>
+            <h3 class="text-2xl font-bold text-base-content/50">{% trans "没有找到相关结果" %}</h3>
+            <p class="text-base-content/40 mt-2">{% trans "请尝试其他关键词或切换搜索类型。" %}</p>
         </div>
     {% endif %}
 </div>

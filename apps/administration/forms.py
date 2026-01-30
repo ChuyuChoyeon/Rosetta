@@ -1,5 +1,7 @@
 from django import forms
+from django.conf import settings
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 from blog.models import Post, Category, Tag, Comment
 from core.models import Page, Navigation, FriendLink, SearchPlaceholder
 from users.models import UserTitle
@@ -16,9 +18,26 @@ class UserTitleForm(forms.ModelForm):
 
     class Meta:
         model = UserTitle
-        fields = ["name", "color", "icon", "description"]
+        fields = [
+            "name",
+            "name_zh_hans",
+            "name_en",
+            "name_ja",
+            "name_zh_hant",
+            "color",
+            "icon",
+            "description",
+            "description_zh_hans",
+            "description_en",
+            "description_ja",
+            "description_zh_hant",
+        ]
         widgets = {
             "name": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "name_zh_hans": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "name_en": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "name_ja": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "name_zh_hant": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
             "color": forms.TextInput(
                 attrs={
                     "class": "input input-bordered w-full h-10 p-1 cursor-pointer",
@@ -34,7 +53,25 @@ class UserTitleForm(forms.ModelForm):
             "description": forms.TextInput(
                 attrs={"class": "input input-bordered w-full"}
             ),
+            "description_zh_hans": forms.TextInput(
+                attrs={"class": "input input-bordered w-full"}
+            ),
+            "description_en": forms.TextInput(
+                attrs={"class": "input input-bordered w-full"}
+            ),
+            "description_ja": forms.TextInput(
+                attrs={"class": "input input-bordered w-full"}
+            ),
+            "description_zh_hant": forms.TextInput(
+                attrs={"class": "input input-bordered w-full"}
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 允许基础字段为空，由 ModelTranslation 自动处理
+        self.fields["name"].required = False
+        self.fields["description"].required = False
 
 
 class PostForm(forms.ModelForm):
@@ -52,22 +89,39 @@ class PostForm(forms.ModelForm):
     - Textarea 默认行数为 20。
     """
 
-    tags_str = forms.CharField(required=False, widget=forms.HiddenInput, label="标签")
+    tags_str = forms.CharField(required=False, widget=forms.HiddenInput, label=_("标签"))
     published_at = forms.DateTimeField(
         required=False,
         widget=forms.DateTimeInput(attrs={"type": "datetime-local"}),
         input_formats=["%Y-%m-%dT%H:%M"],
-        label="发布时间",
+        label=_("发布时间"),
     )
 
     class Meta:
         model = Post
         fields = [
             "title",
+            "title_zh_hans",
+            "title_en",
+            "title_ja",
+            "title_zh_hant",
+            "subtitle",
+            "subtitle_zh_hans",
+            "subtitle_en",
+            "subtitle_ja",
+            "subtitle_zh_hant",
             "slug",
             "cover_image",
             "content",
+            "content_zh_hans",
+            "content_en",
+            "content_ja",
+            "content_zh_hant",
             "excerpt",
+            "excerpt_zh_hans",
+            "excerpt_en",
+            "excerpt_ja",
+            "excerpt_zh_hant",
             "status",
             "published_at",
             "category",
@@ -75,13 +129,39 @@ class PostForm(forms.ModelForm):
             "is_pinned",
             "allow_comments",
             "meta_title",
+            "meta_title_zh_hans",
+            "meta_title_en",
+            "meta_title_ja",
+            "meta_title_zh_hant",
             "meta_description",
+            "meta_description_zh_hans",
+            "meta_description_en",
+            "meta_description_ja",
+            "meta_description_zh_hant",
             "meta_keywords",
+            "meta_keywords_zh_hans",
+            "meta_keywords_en",
+            "meta_keywords_ja",
+            "meta_keywords_zh_hant",
         ]
         widgets = {
+            "title": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "subtitle": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
             "content": forms.Textarea(attrs={"rows": 20}),
+            "content_zh_hans": forms.Textarea(attrs={"rows": 20}),
+            "content_en": forms.Textarea(attrs={"rows": 20}),
+            "content_ja": forms.Textarea(attrs={"rows": 20}),
+            "content_zh_hant": forms.Textarea(attrs={"rows": 20}),
             "excerpt": forms.Textarea(attrs={"rows": 3}),
+            "excerpt_zh_hans": forms.Textarea(attrs={"rows": 3}),
+            "excerpt_en": forms.Textarea(attrs={"rows": 3}),
+            "excerpt_ja": forms.Textarea(attrs={"rows": 3}),
+            "excerpt_zh_hant": forms.Textarea(attrs={"rows": 3}),
             "meta_description": forms.Textarea(attrs={"rows": 2}),
+            "meta_description_zh_hans": forms.Textarea(attrs={"rows": 2}),
+            "meta_description_en": forms.Textarea(attrs={"rows": 2}),
+            "meta_description_ja": forms.Textarea(attrs={"rows": 2}),
+            "meta_description_zh_hant": forms.Textarea(attrs={"rows": 2}),
             "cover_image": forms.FileInput(
                 attrs={"class": "file-input file-input-bordered w-full"}
             ),
@@ -89,6 +169,10 @@ class PostForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # 允许基础字段为空，由 ModelTranslation 自动处理
+        self.fields["title"].required = False
+        self.fields["content"].required = False
+
         if self.instance.pk:
             self.fields["tags_str"].initial = ",".join(
                 [t.name for t in self.instance.tags.all()]
@@ -203,12 +287,41 @@ class CategoryForm(forms.ModelForm):
 
     class Meta:
         model = Category
-        fields = ["name", "slug", "description", "icon", "color"]
+        fields = [
+            "name",
+            "name_zh_hans",
+            "name_en",
+            "name_ja",
+            "name_zh_hant",
+            "slug",
+            "description",
+            "description_zh_hans",
+            "description_en",
+            "description_ja",
+            "description_zh_hant",
+            "icon",
+            "color",
+            "cover_image",
+        ]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "description": forms.Textarea(attrs={"class": "textarea textarea-bordered w-full"}),
+            "cover_image": forms.FileInput(attrs={"class": "file-input file-input-bordered w-full"}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # 允许基础字段为空，由 ModelTranslation 自动处理
+        self.fields["name"].required = False
+
         for name, field in self.fields.items():
-            field.widget.attrs.update({"class": "input input-bordered w-full"})
+            # Apply default styles if not already set in widgets
+            if name in ["name", "description"]:
+                 # Already handled in widgets
+                 pass
+            else:
+                field.widget.attrs.update({"class": "input input-bordered w-full"})
+            
             if isinstance(field.widget, forms.Textarea):
                 field.widget.attrs.update(
                     {"class": "textarea textarea-bordered w-full"}
@@ -225,10 +338,27 @@ class TagForm(forms.ModelForm):
 
     class Meta:
         model = Tag
-        fields = ["name", "slug", "color", "is_active"]
+        fields = [
+            "name",
+            "name_zh_hans",
+            "name_en",
+            "name_ja",
+            "name_zh_hant",
+            "slug",
+            "color",
+            "icon",
+            "is_active",
+        ]
+        widgets = {
+            "name": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "icon": forms.TextInput(attrs={"class": "input input-bordered w-full font-mono"}),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # 允许基础字段为空，由 ModelTranslation 自动处理
+        self.fields["name"].required = False
+
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.update({"class": "toggle toggle-success"})
@@ -248,111 +378,75 @@ class PageForm(forms.ModelForm):
 
     class Meta:
         model = Page
-        fields = ["title", "slug", "content", "status"]
+        fields = [
+            "title",
+            "title_zh_hans",
+            "title_en",
+            "title_ja",
+            "title_zh_hant",
+            "slug",
+            "content",
+            "content_zh_hans",
+            "content_en",
+            "content_ja",
+            "content_zh_hant",
+            "status",
+        ]
         widgets = {
+            "title": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
             "content": forms.Textarea(attrs={"rows": 20}),
+            "content_zh_hans": forms.Textarea(attrs={"rows": 20}),
+            "content_en": forms.Textarea(attrs={"rows": 20}),
+            "content_ja": forms.Textarea(attrs={"rows": 20}),
+            "content_zh_hant": forms.Textarea(attrs={"rows": 20}),
         }
 
-    def clean_content(self):
-        content = self.cleaned_data.get("content")
-        if content:
-            import bleach
-
-            allowed_tags = list(bleach.sanitizer.ALLOWED_TAGS) + [
-                "h1",
-                "h2",
-                "h3",
-                "h4",
-                "h5",
-                "h6",
-                "p",
-                "div",
-                "span",
-                "br",
-                "hr",
-                "ul",
-                "ol",
-                "li",
-                "dl",
-                "dt",
-                "dd",
-                "img",
-                "pre",
-                "code",
-                "blockquote",
-                "table",
-                "thead",
-                "tbody",
-                "tr",
-                "th",
-                "td",
-                "strong",
-                "em",
-                "b",
-                "i",
-                "u",
-                "s",
-                "strike",
-                "iframe",
-                "figure",
-                "figcaption",
-                "video",
-                "audio",
-                "source",
-            ]
-            allowed_attrs = {
-                "*": ["class", "id", "style", "title", "data-theme"],
-                "a": ["href", "target", "rel"],
-                "img": ["src", "alt", "width", "height"],
-                "iframe": [
-                    "src",
-                    "width",
-                    "height",
-                    "frameborder",
-                    "allow",
-                    "allowfullscreen",
-                ],
-                "video": [
-                    "src",
-                    "controls",
-                    "width",
-                    "height",
-                    "poster",
-                    "autoplay",
-                    "loop",
-                    "muted",
-                    "playsinline",
-                ],
-                "audio": ["src", "controls", "autoplay", "loop", "muted"],
-                "source": ["src", "type"],
-            }
-            allowed_styles = [
-                "color",
-                "background-color",
-                "text-align",
-                "font-size",
-                "font-weight",
-                "text-decoration",
-                "width",
-                "height",
-                "display",
-                "margin",
-                "padding",
-                "border",
-                "border-radius",
-            ]
-
-            content = bleach.clean(
-                content,
-                tags=allowed_tags,
-                attributes=allowed_attrs,
-                styles=allowed_styles,
-                strip=True,
-            )
-        return content
+    def clean(self):
+        cleaned_data = super().clean()
+        for lang in ['zh_hans', 'en', 'ja', 'zh_hant']:
+            field_name = f'content_{lang}'
+            content = cleaned_data.get(field_name)
+            if content:
+                import bleach
+                # ... (rest of bleach logic) ...
+                # Reusing the list from original code
+                allowed_tags = list(bleach.sanitizer.ALLOWED_TAGS) + [
+                    "h1", "h2", "h3", "h4", "h5", "h6", "p", "div", "span", "br", "hr",
+                    "ul", "ol", "li", "dl", "dt", "dd", "img", "pre", "code", "blockquote",
+                    "table", "thead", "tbody", "tr", "th", "td", "strong", "em", "b", "i",
+                    "u", "s", "strike", "iframe", "figure", "figcaption", "video", "audio", "source",
+                ]
+                allowed_attrs = {
+                    "*": ["class", "id", "style", "title", "data-theme"],
+                    "a": ["href", "target", "rel"],
+                    "img": ["src", "alt", "width", "height"],
+                    "iframe": ["src", "width", "height", "frameborder", "allow", "allowfullscreen"],
+                    "video": ["src", "controls", "width", "height", "poster", "autoplay", "loop", "muted", "playsinline"],
+                    "audio": ["src", "controls", "autoplay", "loop", "muted"],
+                    "source": ["src", "type"],
+                }
+                allowed_styles = [
+                    "color", "background-color", "text-align", "font-size", "font-weight",
+                    "text-decoration", "width", "height", "display", "margin", "padding",
+                    "border", "border-radius",
+                ]
+                content = bleach.clean(
+                    content,
+                    tags=allowed_tags,
+                    attributes=allowed_attrs,
+                    styles=allowed_styles,
+                    strip=True,
+                )
+                cleaned_data[field_name] = content
+        
+        return cleaned_data
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # 允许基础字段为空，由 ModelTranslation 自动处理
+        self.fields["title"].required = False
+        self.fields["content"].required = False
+
         for name, field in self.fields.items():
             field.widget.attrs.update({"class": "input input-bordered w-full"})
             if isinstance(field.widget, forms.Textarea):
@@ -372,10 +466,27 @@ class NavigationForm(forms.ModelForm):
 
     class Meta:
         model = Navigation
-        fields = ["title", "url", "location", "order", "is_active"]
+        fields = [
+            "title",
+            "title_zh_hans",
+            "title_en",
+            "title_ja",
+            "title_zh_hant",
+            "url",
+            "location",
+            "order",
+            "is_active",
+            "target_blank",
+        ]
+        widgets = {
+            "title": forms.HiddenInput(),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # 允许基础字段为空，由 ModelTranslation 自动处理
+        self.fields["title"].required = False
+
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.update({"class": "toggle toggle-success"})
@@ -392,10 +503,24 @@ class SearchPlaceholderForm(forms.ModelForm):
 
     class Meta:
         model = SearchPlaceholder
-        fields = ["text", "order", "is_active"]
+        fields = [
+            "text",
+            "text_zh_hans",
+            "text_en",
+            "text_ja",
+            "text_zh_hant",
+            "order",
+            "is_active",
+        ]
+        widgets = {
+            "text": forms.HiddenInput(),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # 允许基础字段为空，由 ModelTranslation 自动处理
+        self.fields["text"].required = False
+
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.update({"class": "toggle toggle-success"})
@@ -412,10 +537,33 @@ class FriendLinkForm(forms.ModelForm):
 
     class Meta:
         model = FriendLink
-        fields = ["name", "url", "description", "logo", "order", "is_active"]
+        fields = [
+            "name",
+            "name_zh_hans",
+            "name_en",
+            "name_ja",
+            "name_zh_hant",
+            "url",
+            "description",
+            "description_zh_hans",
+            "description_en",
+            "description_ja",
+            "description_zh_hant",
+            "logo",
+            "order",
+            "is_active",
+        ]
+        widgets = {
+            "name": forms.HiddenInput(),
+            "description": forms.HiddenInput(),
+        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # 允许基础字段为空，由 ModelTranslation 自动处理
+        self.fields["name"].required = False
+        self.fields["description"].required = False
+
         for name, field in self.fields.items():
             if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs.update({"class": "toggle toggle-success"})
@@ -464,9 +612,9 @@ class UserForm(forms.ModelForm):
 
     new_password = forms.CharField(
         required=False,
-        widget=forms.PasswordInput(attrs={"class": "input input-bordered w-full"}),
-        label="新密码",
-        help_text="如需修改密码请在此输入，否则留空",
+        widget=forms.PasswordInput(attrs={"class": "input input-bordered w-full", "autocomplete": "new-password"}),
+        label=_("新密码"),
+        help_text=_("如需修改密码请在此输入，否则留空"),
     )
 
     class Meta:
@@ -554,15 +702,50 @@ class PollForm(forms.ModelForm):
 
     class Meta:
         model = Poll
-        fields = ["title", "description", "is_active", "allow_multiple_choices", "end_date", "related_post"]
+        fields = [
+            "title",
+            "title_zh_hans",
+            "title_en",
+            "title_ja",
+            "title_zh_hant",
+            "description",
+            "description_zh_hans",
+            "description_en",
+            "description_ja",
+            "description_zh_hant",
+            "is_active",
+            "allow_multiple_choices",
+            "end_date",
+            "related_post",
+        ]
         widgets = {
-            "title": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
-            "description": forms.Textarea(attrs={"class": "textarea textarea-bordered w-full", "rows": 3}),
+            "title": forms.HiddenInput(),
+            "description": forms.HiddenInput(),
+            "title_zh_hans": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "title_en": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "title_ja": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "title_zh_hant": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
+            "description_zh_hans": forms.Textarea(
+                attrs={"class": "textarea textarea-bordered w-full", "rows": 3}
+            ),
+            "description_en": forms.Textarea(
+                attrs={"class": "textarea textarea-bordered w-full", "rows": 3}
+            ),
+            "description_ja": forms.Textarea(
+                attrs={"class": "textarea textarea-bordered w-full", "rows": 3}
+            ),
+            "description_zh_hant": forms.Textarea(
+                attrs={"class": "textarea textarea-bordered w-full", "rows": 3}
+            ),
             "related_post": forms.Select(attrs={"class": "select select-bordered w-full"}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        # 允许基础字段为空，由 ModelTranslation 自动处理
+        self.fields["title"].required = False
+        self.fields["description"].required = False
+
         if self.instance.pk and self.instance.end_date:
             self.fields["end_date"].initial = timezone.localtime(
                 self.instance.end_date
@@ -570,14 +753,39 @@ class PollForm(forms.ModelForm):
 
 from django.forms import inlineformset_factory
 
+class ChoiceForm(forms.ModelForm):
+    """
+    投票选项表单
+    """
+    class Meta:
+        model = Choice
+        fields = [
+            "text",
+            "text_zh_hans",
+            "text_en",
+            "text_ja",
+            "text_zh_hant",
+            "votes_count",
+        ]
+        widgets = {
+            "text": forms.HiddenInput(),
+            "text_zh_hans": forms.TextInput(attrs={"class": "input input-bordered w-full", "placeholder": _("选项文本 (简中)")}),
+            "text_en": forms.TextInput(attrs={"class": "input input-bordered w-full", "placeholder": _("选项文本 (英文)")}),
+            "text_ja": forms.TextInput(attrs={"class": "input input-bordered w-full", "placeholder": _("选项文本 (日文)")}),
+            "text_zh_hant": forms.TextInput(attrs={"class": "input input-bordered w-full", "placeholder": _("选项文本 (繁中)")}),
+            "votes_count": forms.NumberInput(attrs={"class": "input input-bordered w-full"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 允许基础字段为空，由 ModelTranslation 自动处理
+        self.fields["text"].required = False
+
+
 ChoiceFormSet = inlineformset_factory(
     Poll,
     Choice,
-    fields=["text", "votes_count"],
-    extra=0,
+    form=ChoiceForm,
+    extra=1,
     can_delete=True,
-    widgets={
-        "text": forms.TextInput(attrs={"class": "input input-bordered w-full"}),
-        "votes_count": forms.NumberInput(attrs={"class": "input input-bordered w-full"}),
-    },
 )

@@ -1,4 +1,5 @@
 <!-- Inspira UI: Placeholders And Vanish Input -->
+{% load i18n %}
 <script>
     if (typeof initVanishInput !== 'function') {
         function initVanishInput(action, placeholders) {
@@ -27,8 +28,12 @@
     }
 </script>
 
+{% trans "搜索文章..." as p1 %}
+{% trans "搜索标签..." as p2 %}
+{% trans "输入关键词..." as p3 %}
+
 <form action="{{ action|default:'/search/' }}" method="get" class="relative w-full {{ extra_classes }}"
-      x-data="initVanishInput('{{ action|default:"/search/" }}', {{ placeholders|safe|default:"['搜索文章...', '搜索标签...', '输入关键词...']" }})"
+      x-data="initVanishInput('{{ action|default:"/search/" }}', {% if placeholders %}{{ placeholders|safe }}{% else %}['{{ p1|escapejs }}', '{{ p2|escapejs }}', '{{ p3|escapejs }}']{% endif %})"
       @submit.prevent="submit">
     
     <div class="relative flex items-center overflow-hidden rounded-full bg-base-100 border border-base-content/10 shadow-sm transition-all duration-700 ease-in-out focus-within:shadow-md focus-within:border-primary/50 h-10"
