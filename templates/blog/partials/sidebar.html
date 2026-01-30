@@ -10,7 +10,7 @@
             {% trans "搜索" %}
         </h3>
         {% url 'search' as search_url %}
-        {% include 'components/inspira/placeholders_and_vanish_input.html' with action=search_url placeholders=search_placeholders|default:"['搜索文章...', 'Python', 'Django', 'Tailwind']" %}
+        {% include 'components/inspira/placeholders_and_vanish_input.html' with action=search_url placeholders=search_placeholders %}
     </div>
 
     <!-- Navigation Menu -->

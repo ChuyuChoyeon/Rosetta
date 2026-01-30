@@ -8,6 +8,41 @@ module.exports = {
     '../../**/admin.py',
     '../../**/*.js',
   ],
+  safelist: [
+    'alert-info',
+    'alert-success',
+    'alert-warning',
+    'alert-error',
+    'btn-primary',
+    'btn-ghost',
+    'btn-link',
+    'loading',
+    'loading-spinner',
+    'modal',
+    'modal-box',
+    'modal-action',
+    'input',
+    'input-bordered',
+    'textarea',
+    'textarea-bordered',
+    'checkbox',
+    'checkbox-primary',
+    'radio',
+    'radio-primary',
+    'select',
+    'select-bordered',
+    'badge',
+    'badge-primary',
+    'badge-secondary',
+    'card',
+    'card-body',
+    'card-title',
+    'card-actions',
+    'shadow-bloom', // Custom class if we define it, otherwise relying on utilities
+    'hover:-translate-y-1',
+    'transition-all',
+    'duration-200',
+  ],
   plugins: [
     require('@tailwindcss/typography'),
     require('@tailwindcss/forms'),
@@ -33,8 +68,8 @@ module.exports = {
         text: "#1E293B",
       },
       fontFamily: {
-        sans: ['"PingFang SC"', '"Inter"', '"Hiragino Sans GB"', '"Microsoft YaHei"', '"Noto Sans SC"', 'sans-serif'],
-        heading: ['"PingFang SC"', '"Poppins"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif'],
+        sans: ['"Inter"', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', '"Noto Sans SC"', 'sans-serif'],
+        heading: ['"Poppins"', '"PingFang SC"', '"Hiragino Sans GB"', '"Microsoft YaHei"', 'sans-serif'],
         mono: ['"Fira Code"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
       },
       borderRadius: {
@@ -60,6 +95,36 @@ module.exports = {
   },
   daisyui: {
     themes: [
+      {
+        nexus: {
+          "color-scheme": "light",
+          "primary": "#4F46E5", // Indigo 600
+          "primary-content": "#ffffff",
+          "secondary": "#06B6D4", // Cyan 500
+          "secondary-content": "#ffffff",
+          "accent": "#EC4899", // Pink 500
+          "accent-content": "#ffffff",
+          "neutral": "#1e293b", // Slate 800
+          "neutral-content": "#ffffff",
+          "base-100": "#ffffff",
+          "base-200": "#f8fafc", // Slate 50
+          "base-300": "#e2e8f0", // Slate 200
+          "base-content": "#0f172a", // Slate 900
+          "info": "#3b82f6", // Blue 500
+          "success": "#22c55e", // Green 500
+          "warning": "#f59e0b", // Amber 500
+          "error": "#ef4444", // Red 500
+          "--rounded-box": "1rem",
+          "--rounded-btn": "0.5rem",
+          "--rounded-badge": "1.9rem",
+          "--animation-btn": "0.25s",
+          "--animation-input": "0.2s",
+          "--btn-focus-scale": "0.95",
+          "--border-btn": "1px",
+          "--tab-border": "1px",
+          "--tab-radius": "0.5rem",
+        },
+      },
       {
         light: {
           "color-scheme": "light",

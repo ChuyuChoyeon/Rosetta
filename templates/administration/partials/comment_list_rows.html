@@ -71,7 +71,7 @@
     </td>
     <td class="text-right pr-4">
         <div class="join">
-            <button type="button" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '回复' %}" onclick="openReplyModal('{{ comment.pk }}', '{{ comment.content|escapejs }}')">
+            <button type="button" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '回复' %}" onclick="openReplyModal('{% url 'administration:comment_reply' comment.pk %}', '{{ comment.content|escapejs }}')">
                 <span class="material-symbols-outlined text-base">reply</span>
             </button>
             <a href="{% url 'administration:comment_edit' comment.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '编辑' %}">

@@ -1,5 +1,5 @@
 {% extends "administration/base.html" %}
-{% load capture_tags widget_tweaks i18n %}
+{% load capture_tags i18n %}
 
 {% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
 
@@ -39,7 +39,7 @@
                 {% endif %}
 
                 <!-- Multi-language Tabs -->
-                <div x-data="translationForm" class="bg-base-100 border border-base-300 rounded-box overflow-hidden">
+                <div class="bg-base-100 border border-base-300 rounded-box overflow-hidden">
                     <!-- Tab Header -->
                     <div class="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 bg-base-50/50 px-4 pt-2">
                         <div role="tablist" class="tabs tabs-bordered -mb-[1px]">
@@ -102,8 +102,7 @@
                                         {% trans "标题 (中文)" %} <span class="text-error">*</span>
                                     </span>
                                 </label>
-                                {% trans "输入投票标题 (中文)" as ph_title_zh %}
-                                {% render_field form.title_zh_hans class="input input-bordered input-lg w-full focus:input-primary transition-all font-medium" placeholder=ph_title_zh %}
+                                {{ form.title_zh_hans }}
                                 {% if form.title_zh_hans.errors %}
                                 <label class="label px-0">
                                     <span class="label-text-alt text-error flex items-center gap-1">
@@ -119,8 +118,7 @@
                                 <label class="label px-0">
                                     <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "描述 (中文)" %}</span>
                                 </label>
-                                {% trans "输入投票描述，详细说明投票目的 (中文)..." as ph_desc_zh %}
-                                {% render_field form.description_zh_hans class="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all text-base leading-relaxed" placeholder=ph_desc_zh %}
+                                {{ form.description_zh_hans }}
                                 {% if form.description_zh_hans.errors %}
                                 <label class="label px-0">
                                     <span class="label-text-alt text-error">{{ form.description_zh_hans.errors.0 }}</span>
@@ -135,8 +133,7 @@
                                 <label class="label px-0">
                                     <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "Title (English)" %}</span>
                                 </label>
-                                {% trans "Enter poll title (English)" as ph_title_en %}
-                                {% render_field form.title_en class="input input-bordered input-lg w-full focus:input-primary transition-all font-medium" placeholder=ph_title_en %}
+                                {{ form.title_en }}
                                 {% if form.title_en.errors %}
                                 <label class="label px-0">
                                     <span class="label-text-alt text-error">{{ form.title_en.errors.0 }}</span>
@@ -148,8 +145,7 @@
                                 <label class="label px-0">
                                     <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "Description (English)" %}</span>
                                 </label>
-                                {% trans "Enter poll description (English)..." as ph_desc_en %}
-                                {% render_field form.description_en class="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all text-base leading-relaxed" placeholder=ph_desc_en %}
+                                {{ form.description_en }}
                                 {% if form.description_en.errors %}
                                 <label class="label px-0">
                                     <span class="label-text-alt text-error">{{ form.description_en.errors.0 }}</span>
@@ -164,8 +160,7 @@
                                 <label class="label px-0">
                                     <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "タイトル (Japanese)" %}</span>
                                 </label>
-                                {% trans "タイトルを入力 (Japanese)" as ph_title_ja %}
-                                {% render_field form.title_ja class="input input-bordered input-lg w-full focus:input-primary transition-all font-medium" placeholder=ph_title_ja %}
+                                {{ form.title_ja }}
                                 {% if form.title_ja.errors %}
                                 <label class="label px-0">
                                     <span class="label-text-alt text-error">{{ form.title_ja.errors.0 }}</span>
@@ -177,8 +172,7 @@
                                 <label class="label px-0">
                                     <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "説明 (Japanese)" %}</span>
                                 </label>
-                                {% trans "説明を入力 (Japanese)..." as ph_desc_ja %}
-                                {% render_field form.description_ja class="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all text-base leading-relaxed" placeholder=ph_desc_ja %}
+                                {{ form.description_ja }}
                                 {% if form.description_ja.errors %}
                                 <label class="label px-0">
                                     <span class="label-text-alt text-error">{{ form.description_ja.errors.0 }}</span>
@@ -193,8 +187,7 @@
                                 <label class="label px-0">
                                     <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "標題 (Traditional Chinese)" %}</span>
                                 </label>
-                                {% trans "輸入投票標題 (繁體中文)" as ph_title_zh_hant %}
-                                {% render_field form.title_zh_hant class="input input-bordered input-lg w-full focus:input-primary transition-all font-medium" placeholder=ph_title_zh_hant %}
+                                {{ form.title_zh_hant }}
                                 {% if form.title_zh_hant.errors %}
                                 <label class="label px-0">
                                     <span class="label-text-alt text-error">{{ form.title_zh_hant.errors.0 }}</span>
@@ -206,8 +199,7 @@
                                 <label class="label px-0">
                                     <span class="label-text font-bold text-base group-focus-within:text-primary transition-colors">{% trans "描述 (Traditional Chinese)" %}</span>
                                 </label>
-                                {% trans "輸入投票描述 (繁體中文)..." as ph_desc_zh_hant %}
-                                {% render_field form.description_zh_hant class="textarea textarea-bordered h-32 w-full focus:textarea-primary transition-all text-base leading-relaxed" placeholder=ph_desc_zh_hant %}
+                                {{ form.description_zh_hant }}
                                 {% if form.description_zh_hant.errors %}
                                 <label class="label px-0">
                                     <span class="label-text-alt text-error">{{ form.description_zh_hant.errors.0 }}</span>
@@ -223,7 +215,7 @@
                     <label class="label px-0">
                         <span class="label-text font-bold text-base">{% trans "关联文章" %}</span>
                     </label>
-                    {% render_field form.related_post class="select select-bordered w-full focus:select-primary transition-all" %}
+                    {{ form.related_post }}
                     {% if form.related_post.errors %}
                     <label class="label px-0">
                         <span class="label-text-alt text-error">{{ form.related_post.errors.0 }}</span>
@@ -285,18 +277,14 @@
                                     </button>
                                 </div>
                                 <div class="space-y-2">
-                                    {% trans "简中" as ph_zh %}
-                                    {% render_field choice_form.text_zh_hans class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_zh %}
-                                    {% trans "English" as ph_en %}
-                                    {% render_field choice_form.text_en class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_en %}
-                                    {% trans "日本語" as ph_ja %}
-                                    {% render_field choice_form.text_ja class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_ja %}
-                                    {% trans "繁中" as ph_tw %}
-                                    {% render_field choice_form.text_zh_hant class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_tw %}
+                                    {{ choice_form.text_zh_hans }}
+                                    {{ choice_form.text_en }}
+                                    {{ choice_form.text_ja }}
+                                    {{ choice_form.text_zh_hant }}
                                 </div>
                             </td>
                             <td>
-                                {% render_field choice_form.votes_count class="input input-bordered input-sm w-full text-center font-mono" %}
+                                {{ choice_form.votes_count }}
                             </td>
                             <td class="text-center">
                                 {% if choice_form.instance.pk %}
@@ -311,56 +299,52 @@
                         </tr>
                         {% endfor %}
                     </tbody>
-                    
-                    <!-- Empty Form Template -->
-                    <template id="empty-form-template">
-                        <tr class="hover group">
-                            <td class="text-center font-mono text-xs opacity-50">
-                                <span class="row-index">#</span>
-                                {% for hidden in choice_formset.empty_form.hidden_fields %}
-                                    {{ hidden }}
-                                {% endfor %}
-                            </td>
-                            <td>
-                                <div class="flex justify-between items-center mb-1.5">
-                                    <span class="text-xs font-bold opacity-50">{% trans "多语言内容" %}</span>
-                                    <button type="button" 
-                                            class="btn btn-ghost btn-xs text-primary gap-1 hover:bg-primary/10"
-                                            @click="translate('id_choices-__prefix__-text_zh_hans', {
-                                                'en': 'id_choices-__prefix__-text_en',
-                                                'ja': 'id_choices-__prefix__-text_ja',
-                                                'zh-hant': 'id_choices-__prefix__-text_zh_hant'
-                                            })"
-                                            title="{% trans '一键翻译此选项' %}">
-                                        <span class="material-symbols-outlined text-[14px]">translate</span>
-                                        {% trans "翻译" %}
-                                    </button>
-                                </div>
-                                <div class="space-y-2">
-                                    {% trans "简中" as ph_zh %}
-                                    {% render_field choice_formset.empty_form.text_zh_hans class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_zh %}
-                                    {% trans "English" as ph_en %}
-                                    {% render_field choice_formset.empty_form.text_en class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_en %}
-                                    {% trans "日本語" as ph_ja %}
-                                    {% render_field choice_formset.empty_form.text_ja class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_ja %}
-                                    {% trans "繁中" as ph_tw %}
-                                    {% render_field choice_formset.empty_form.text_zh_hant class="input input-bordered input-sm w-full focus:input-primary" placeholder=ph_tw %}
-                                </div>
-                            </td>
-                            <td>
-                                {% render_field choice_formset.empty_form.votes_count class="input input-bordered input-sm w-full text-center font-mono" %}
-                            </td>
-                            <td class="text-center">
-                                <div class="tooltip tooltip-left" data-tip="{% trans '删除此选项' %}">
-                                    <button type="button" class="btn btn-ghost btn-square btn-sm text-base-content/40 hover:text-error hover:bg-error/10 transition-colors delete-row-btn">
-                                        <span class="material-symbols-outlined text-lg">delete</span>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </template>
                 </table>
             </div>
+
+            <!-- Empty Form Template - Moved outside table for validity -->
+            <template id="empty-form-template">
+                <tr class="hover group">
+                    <td class="text-center font-mono text-xs opacity-50">
+                        <span class="row-index">#</span>
+                        {% for hidden in choice_formset.empty_form.hidden_fields %}
+                            {{ hidden }}
+                        {% endfor %}
+                    </td>
+                    <td>
+                        <div class="flex justify-between items-center mb-1.5">
+                            <span class="text-xs font-bold opacity-50">{% trans "多语言内容" %}</span>
+                            <button type="button" 
+                                    class="btn btn-ghost btn-xs text-primary gap-1 hover:bg-primary/10"
+                                    @click="translate('id_choices-__prefix__-text_zh_hans', {
+                                        'en': 'id_choices-__prefix__-text_en',
+                                        'ja': 'id_choices-__prefix__-text_ja',
+                                        'zh-hant': 'id_choices-__prefix__-text_zh_hant'
+                                    })"
+                                    title="{% trans '一键翻译此选项' %}">
+                                <span class="material-symbols-outlined text-[14px]">translate</span>
+                                {% trans "翻译" %}
+                            </button>
+                        </div>
+                        <div class="space-y-2">
+                            {{ choice_formset.empty_form.text_zh_hans }}
+                            {{ choice_formset.empty_form.text_en }}
+                            {{ choice_formset.empty_form.text_ja }}
+                            {{ choice_formset.empty_form.text_zh_hant }}
+                        </div>
+                    </td>
+                    <td>
+                        {{ choice_formset.empty_form.votes_count }}
+                    </td>
+                    <td class="text-center">
+                        <div class="tooltip tooltip-left" data-tip="{% trans '删除此选项' %}">
+                            <button type="button" class="btn btn-ghost btn-square btn-sm text-base-content/40 hover:text-error hover:bg-error/10 transition-colors delete-row-btn">
+                                <span class="material-symbols-outlined text-lg">delete</span>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            </template>
             
             <div class="flex items-center justify-between mt-3 px-1">
                 <div class="flex items-center gap-2 text-xs text-base-content/60">
@@ -427,15 +411,22 @@
             <div class="form-control">
                 <label class="label cursor-pointer justify-between">
                     <span class="label-text font-medium">{% trans "启用状态" %}</span>
-                    {% render_field form.is_active class="toggle toggle-success" %}
+                    {{ form.is_active }}
                 </label>
             </div>
             
             <div class="form-control mt-2">
                 <label class="label cursor-pointer justify-between">
                     <span class="label-text font-medium">{% trans "允许多选" %}</span>
-                    {% render_field form.allow_multiple_choices class="checkbox checkbox-primary" %}
+                    {{ form.allow_multiple_choices }}
                 </label>
+            </div>
+
+            <div class="form-control mt-2">
+                 <label class="label">
+                    <span class="label-text font-medium">{% trans "结束时间" %}</span>
+                </label>
+                {{ form.end_date }}
             </div>
         {% endcaptureas %}
         {% trans "设置" as settings_title %}
@@ -574,12 +565,8 @@
                             totalForms.value = count + 1;
                         });
                     } else {
-                        console.error('Poll form initialization failed: missing elements', {
-                            addBtn: !!addBtn,
-                            totalForms: !!totalForms,
-                            tbody: !!tbody,
-                            emptyFormTemplate: !!emptyFormTemplate
-                        });
+                        // Retry init if elements are missing (rare race condition)
+                        setTimeout(initForm, 100);
                     }
 
                     // Bind delete handlers to existing rows
@@ -600,10 +587,6 @@
                                     this.classList.remove('btn-error', 'text-white');
                                     this.classList.add('text-base-content/40', 'hover:text-error');
                                 }
-                            } else {
-                                // For new rows (should rely on the click handler added during creation, 
-                                // but if we are here it means it's an existing row without DELETE checkbox? 
-                                // Unlikely for model formsets unless cannot delete.)
                             }
                         });
                     });
@@ -617,12 +600,6 @@
                             const indexSpan = row.querySelector('.row-index');
                             if (indexSpan) indexSpan.innerText = index + 1; // 1-based index for display
 
-                            // Check if it's a new row (not having an ID field usually means new in this context, 
-                            // but better to just re-index everything to be safe for POST data)
-                            // Note: Re-indexing existing rows with IDs is dangerous if not careful, 
-                            // but for Django formsets, as long as the ID field matches the object, it's fine.
-                            // However, we only really need to re-index to ensure continuity for TOTAL_FORMS.
-                            
                             // Update all inputs in this row
                             row.querySelectorAll('input, select, textarea, label').forEach(el => {
                                 if (el.name) el.name = el.name.replace(/choices-\d+-/, `choices-${index}-`);

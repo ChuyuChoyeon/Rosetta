@@ -302,7 +302,7 @@ class UnifiedProfileView(View):
                 
                 # 构建基本上下文
                 profile_user = request.user
-                preference, _ = UserPreference.objects.get_or_create(user=profile_user)
+                preference, created = UserPreference.objects.get_or_create(user=profile_user)
                 profile_user.preference = preference
                 
                 context = {

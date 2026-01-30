@@ -28,6 +28,8 @@ urlpatterns = [
     # 静态页面
     path("about/", PageView.as_view(), {"slug": "about"}, name="about"),
     path("contact/", PageView.as_view(), {"slug": "contact"}, name="contact"),
+    # Design System Styleguide
+    path("styleguide/", TemplateView.as_view(template_name="styleguide.html"), name="styleguide"),
     # 通用单页面路由 (放在最后)
     path("p/<slug:slug>/", PageView.as_view(), name="page_detail"),
 ]

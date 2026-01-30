@@ -632,22 +632,6 @@
             setupSync('id_excerpt', 'excerpt');
 
             form.addEventListener('submit', function(e) {
-                if (window.bytemdEditor) {
-                    const value = window.bytemdEditor.getValue();
-                    // Get the currently active tab's language code from Alpine data
-                    const alpineEl = document.querySelector('form[x-data="translationForm"]');
-                    if (alpineEl && alpineEl._x_dataStack) {
-                        const activeTab = alpineEl._x_dataStack[0].activeTab;
-                        
-                        // Construct the input ID based on the active tab
-                        const inputId = 'id_content_' + activeTab.replace('-', '_');
-                        const input = document.getElementById(inputId);
-                        if (input) {
-                            input.value = value;
-                        }
-                    }
-                }
-
                 // Final check for base fields
                 function ensureValue(baseId, fieldName) {
                     const baseInput = document.getElementById(baseId);

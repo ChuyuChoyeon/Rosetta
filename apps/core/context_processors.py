@@ -3,6 +3,7 @@ from django.core.cache import cache
 from .models import FriendLink, Navigation, SearchPlaceholder
 from users.models import UserPreference
 from constance import config
+from django.utils.translation import gettext_lazy as _
 
 
 def site_settings(request):
@@ -25,14 +26,13 @@ def site_settings(request):
 
     placeholders = load_cached(
         "site:search_placeholders",
-        lambda: list(
-            SearchPlaceholder.objects.filter(is_active=True).values_list(
-                "text", flat=True
-            )
-        ),
+        lambda: list(SearchPlaceholder.objects.filter(is_active=True)),
     )
     if not placeholders:
-        placeholders = ["搜索文章...", "搜索标签..."]
+        placeholders = [_("搜索文章..."), _("搜索标签...")]
+    else:
+        # Extract text property to trigger modeltranslation fallback/current language logic
+        placeholders = [p.text for p in placeholders]
 
     def build_navigations():
         navs = Navigation.objects.filter(is_active=True).order_by("order")

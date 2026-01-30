@@ -408,6 +408,8 @@ class PageForm(forms.ModelForm):
             content = cleaned_data.get(field_name)
             if content:
                 import bleach
+                from bleach.css_sanitizer import CSSSanitizer
+
                 # ... (rest of bleach logic) ...
                 # Reusing the list from original code
                 allowed_tags = list(bleach.sanitizer.ALLOWED_TAGS) + [
@@ -430,11 +432,14 @@ class PageForm(forms.ModelForm):
                     "text-decoration", "width", "height", "display", "margin", "padding",
                     "border", "border-radius",
                 ]
+                
+                css_sanitizer = CSSSanitizer(allowed_css_properties=allowed_styles)
+
                 content = bleach.clean(
                     content,
                     tags=allowed_tags,
                     attributes=allowed_attrs,
-                    styles=allowed_styles,
+                    css_sanitizer=css_sanitizer,
                     strip=True,
                 )
                 cleaned_data[field_name] = content

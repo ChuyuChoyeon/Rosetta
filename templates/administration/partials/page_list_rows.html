@@ -52,7 +52,7 @@
                     hx-trigger="confirmed"
                     hx-target="closest tr"
                     hx-swap="outerHTML swap:0.5s"
-                    onclick="confirmHtmx(this, '{% blocktrans with title=page.title|escapejs %}确定要删除页面《{{ title }}》吗？{% endblocktrans %}')"
+                    onclick="confirmHtmx(this, '{% blocktrans with title=page.title|escapejs %}确定要删除页面“{{ title }}”吗？{% endblocktrans %}')"
                     class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" 
                     data-tip="{% trans '删除' %}">
                 <span class="material-symbols-outlined text-base">delete</span>

@@ -48,7 +48,7 @@
         <div class="bg-base-200/50 p-4 rounded-xl mb-4 text-sm opacity-70 italic border-l-4 border-primary" id="reply_parent_content">
             <!-- Parent Content -->
         </div>
-        <form method="post" id="comment_reply_form">
+        <form method="post" id="comment_reply_form" hx-boost="false">
             {% csrf_token %}
             <div class="form-control w-full mb-4">
                 <label class="label">
@@ -106,12 +106,12 @@
         modal.showModal();
     }
 
-    function openReplyModal(pk, parentContent) {
+    function openReplyModal(url, parentContent) {
         const modal = document.getElementById('comment_reply_modal');
         const form = document.getElementById('comment_reply_form');
         const parentContentDiv = document.getElementById('reply_parent_content');
         
-        form.action = `/administration/comments/${pk}/reply/`;
+        form.action = url;
         parentContentDiv.textContent = parentContent.length > 100 ? parentContent.substring(0, 100) + '...' : parentContent;
         
         modal.showModal();

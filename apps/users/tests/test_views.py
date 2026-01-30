@@ -2,6 +2,7 @@ from django.test import TestCase, Client, override_settings
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from django.contrib import messages
+from django.utils import translation
 from users.models import UserPreference
 from captcha.models import CaptchaStore
 from django.contrib.contenttypes.models import ContentType
@@ -13,6 +14,7 @@ User = get_user_model()
 @override_settings(CAPTCHA_TEST_MODE=True)
 class UserTests(TestCase):
     def setUp(self):
+        translation.activate('zh-hans')
         self.client = Client()
         self.register_url = reverse("users:register")
         self.login_url = reverse("users:login")
@@ -105,6 +107,7 @@ class UserTests(TestCase):
 @override_settings(CAPTCHA_TEST_MODE=True)
 class AdditionalUserViewTests(TestCase):
     def setUp(self):
+        translation.activate('zh-hans')
         self.client = Client()
         self.existing_user = User.objects.create_user(
             username="testuser",
