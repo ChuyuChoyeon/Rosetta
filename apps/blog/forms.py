@@ -5,7 +5,9 @@ from .models import Comment
 class CommentForm(forms.ModelForm):
     """
     评论表单
-    用于用户提交评论内容。
+    
+    用于前台用户提交评论。
+    包含前端样式类 (Tailwind CSS) 和基本的长度验证。
     """
 
     class Meta:
@@ -23,6 +25,9 @@ class CommentForm(forms.ModelForm):
         }
 
     def clean_content(self):
+        """
+        验证评论内容长度
+        """
         content = self.cleaned_data.get("content")
         if len(content) > 2000:
             raise forms.ValidationError("评论内容过长，请控制在 2000 字以内。")

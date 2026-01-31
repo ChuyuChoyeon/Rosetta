@@ -74,15 +74,17 @@ class UpdateThemeView(LoginRequiredMixin, View):
     更新主题视图 (AJAX)
 
     处理前端通过 Fetch API 发送的主题切换请求。
+    允许用户在 "light" 和 "dark" 模式（或更多 DaisyUI 主题）之间切换。
 
     请求方式: POST
     数据格式: JSON {"theme": "theme_name"}
 
     功能:
     1. 解析请求体中的 JSON 数据。
-    2. 获取或创建当前用户的 UserPreference 对象。
-    3. 更新 theme 字段并保存。
-    4. 返回 JSON 响应表示成功或失败。
+    2. 验证 theme 名称的安全性 (字母数字和连字符)。
+    3. 获取或创建当前用户的 UserPreference 对象。
+    4. 更新 theme 字段并保存。
+    5. 返回 JSON 响应表示成功或失败。
     """
 
     def post(self, request):
@@ -117,20 +119,22 @@ class UpdateThemeView(LoginRequiredMixin, View):
 class UnifiedProfileView(View):
     """
     统一用户个人资料视图
-
-    这是一个功能丰富的复合视图，用于处理用户个人主页的所有交互。
-    支持查看他人资料和管理自己的资料。
+    
+    这是一个聚合视图，集成了用户个人主页的所有功能。
+    它根据当前用户和目标用户的关系（本人/他人），动态展示不同的内容和操作。
 
     功能模块:
-    1. **资料展示**: 显示用户头像、封面、简介、统计数据等。
+    1. **资料展示**: 头像、封面、简介、统计数据 (阅读量、评论数)。
     2. **Tab 切换**:
-       - `posts`: 展示用户发布的文章和评论（公开）。
-       - `history`: 展示用户的浏览历史（仅限本人）。
-       - `notifications`: 展示用户的通知消息（仅限本人）。
-       - `settings`: 展示偏好设置表单（仅限本人）。
-       - `info`: 展示基本资料编辑表单（仅限本人）。
+       - `posts`: 发布的文章 (公开)。
+       - `comments`: 发表的评论 (公开)。
+       - `history`: 浏览历史 (私有，仅本人可见)。
+       - `notifications`: 通知消息 (私有，仅本人可见)。
+       - `settings`: 偏好设置 (私有，仅本人可见)。
+       - `info`: 资料编辑 (私有，仅本人可见)。
+       - `security`: 密码修改 (私有，仅本人可见)。
     3. **数据更新**: 处理资料修改、密码修改、偏好设置保存等 POST 请求。
-    4. **HTMX 支持**: 针对 HTMX 请求仅返回部分 HTML 片段，实现无刷新切换 Tab。
+    4. **HTMX 支持**: 针对 HTMX 请求仅返回部分 HTML 片段 (`users/includes/profile_content.html`)，实现 Tab 无刷新切换。
     """
 
     template_name = "users/public_profile.html"

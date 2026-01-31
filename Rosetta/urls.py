@@ -50,6 +50,8 @@ if settings.DEBUG:
     from django.shortcuts import render
 
     urlpatterns += [
+        # Debug Toolbar
+        path("__debug__/", include("debug_toolbar.urls")),
         # 浏览器自动刷新工具 (django-browser-reload)
         path("__reload__/", include("django_browser_reload.urls")),
         # --- 错误页面预览 ---

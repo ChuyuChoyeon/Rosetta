@@ -130,6 +130,13 @@ class SuperuserRequiredMixin(UserPassesTestMixin):
 
 
 class DebugToolRequiredMixin:
+    """
+    调试工具权限混入类
+
+    仅在 settings.DEBUG_TOOL_ENABLED 为 True 时允许访问。
+    用于保护调试相关的视图，防止在生产环境中意外暴露。
+    """
+
     def dispatch(self, request, *args, **kwargs):
         if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
             raise Http404("Not found")
@@ -734,6 +741,8 @@ class CategoryListView(BaseListView):
 class CategoryCreateView(BaseCreateView):
     """
     分类创建视图
+
+    提供创建新文章分类的界面。
     """
 
     model = Category
@@ -747,6 +756,9 @@ from django.views import View
 class CategoryQuickCreateView(View):
     """
     分类快速创建视图 (AJAX)
+
+    用于在文章编辑页面快速添加分类，无需跳转。
+    返回新创建分类的 ID 和名称。
     """
 
     def post(self, request, *args, **kwargs):
@@ -770,6 +782,8 @@ class CategoryQuickCreateView(View):
 class CategoryUpdateView(BaseUpdateView):
     """
     分类更新视图
+
+    编辑现有分类的名称、图标、颜色等属性。
     """
 
     model = Category
@@ -780,6 +794,8 @@ class CategoryUpdateView(BaseUpdateView):
 class CategoryDeleteView(BaseDeleteView):
     """
     分类删除视图
+
+    删除指定的分类。注意：删除分类不会删除其下的文章。
     """
 
     model = Category
@@ -789,6 +805,8 @@ class CategoryDeleteView(BaseDeleteView):
 class CategoryExportView(BaseExportView):
     """
     分类导出视图
+
+    将所有分类数据导出为 JSON 文件。
     """
 
     model = Category
@@ -797,6 +815,8 @@ class CategoryExportView(BaseExportView):
 class CategoryImportView(BaseImportView):
     """
     分类导入视图
+
+    从 JSON 文件导入分类数据。
     """
 
     model = Category
@@ -835,6 +855,8 @@ class TagListView(BaseListView):
 class TagCreateView(BaseCreateView):
     """
     标签创建视图
+
+    创建新的文章标签。
     """
 
     model = Tag
@@ -845,6 +867,8 @@ class TagCreateView(BaseCreateView):
 class TagUpdateView(BaseUpdateView):
     """
     标签更新视图
+
+    编辑现有标签的名称和状态。
     """
 
     model = Tag
@@ -855,6 +879,8 @@ class TagUpdateView(BaseUpdateView):
 class TagDeleteView(BaseDeleteView):
     """
     标签删除视图
+
+    删除指定的标签。
     """
 
     model = Tag
@@ -866,6 +892,7 @@ class TagAutocompleteView(LoginRequiredMixin, StaffRequiredMixin, View):
     标签自动补全视图
 
     返回 JSON 格式的标签建议列表，用于前端输入联想。
+    支持按名称模糊搜索 (icontains)。
     """
 
     def get(self, request):
@@ -882,6 +909,8 @@ class TagAutocompleteView(LoginRequiredMixin, StaffRequiredMixin, View):
 class TagExportView(BaseExportView):
     """
     标签导出视图
+
+    将所有标签数据导出为 JSON 文件。
     """
 
     model = Tag
@@ -890,6 +919,8 @@ class TagExportView(BaseExportView):
 class TagImportView(BaseImportView):
     """
     标签导入视图
+
+    从 JSON 文件导入标签数据。
     """
 
     model = Tag
@@ -1027,6 +1058,9 @@ class PageListView(BaseListView):
 class PageCreateView(BaseCreateView):
     """
     单页面创建视图
+
+    创建新的独立页面（如关于我们、隐私政策）。
+    支持富文本编辑和自定义 URL Slug。
     """
 
     model = Page
@@ -1037,6 +1071,8 @@ class PageCreateView(BaseCreateView):
 class PageUpdateView(BaseUpdateView):
     """
     单页面更新视图
+
+    编辑现有页面的内容和属性。
     """
 
     model = Page
@@ -1047,6 +1083,8 @@ class PageUpdateView(BaseUpdateView):
 class PageDeleteView(BaseDeleteView):
     """
     单页面删除视图
+
+    删除指定的独立页面。
     """
 
     model = Page
@@ -1106,6 +1144,9 @@ class NavigationListView(BaseListView):
 class NavigationCreateView(BaseCreateView):
     """
     导航菜单创建视图
+
+    添加新的前台导航链接。
+    支持设置链接地址、打开方式（新窗口）和排序。
     """
 
     model = Navigation
@@ -1116,6 +1157,8 @@ class NavigationCreateView(BaseCreateView):
 class NavigationUpdateView(BaseUpdateView):
     """
     导航菜单更新视图
+
+    编辑现有导航菜单的属性。
     """
 
     model = Navigation
@@ -1126,6 +1169,8 @@ class NavigationUpdateView(BaseUpdateView):
 class NavigationDeleteView(BaseDeleteView):
     """
     导航删除视图
+
+    删除指定的导航菜单项。
     """
 
     model = Navigation
@@ -1198,6 +1243,9 @@ class FriendLinkListView(BaseListView):
 class FriendLinkCreateView(BaseCreateView):
     """
     友情链接创建视图
+
+    添加新的友情链接。
+    支持上传 Logo 和设置网站描述。
     """
 
     model = FriendLink
@@ -1208,6 +1256,8 @@ class FriendLinkCreateView(BaseCreateView):
 class FriendLinkUpdateView(BaseUpdateView):
     """
     友情链接更新视图
+
+    编辑现有友情链接的信息和状态。
     """
 
     model = FriendLink
@@ -1218,6 +1268,8 @@ class FriendLinkUpdateView(BaseUpdateView):
 class FriendLinkDeleteView(BaseDeleteView):
     """
     友情链接删除视图
+
+    删除指定的友情链接。
     """
 
     model = FriendLink
@@ -1227,6 +1279,8 @@ class FriendLinkDeleteView(BaseDeleteView):
 class FriendLinkExportView(BaseExportView):
     """
     友情链接导出视图
+
+    将所有友情链接数据导出为 JSON 文件。
     """
 
     model = FriendLink
@@ -1235,6 +1289,8 @@ class FriendLinkExportView(BaseExportView):
 class FriendLinkImportView(BaseImportView):
     """
     友情链接导入视图
+
+    从 JSON 文件导入友情链接数据。
     """
 
     model = FriendLink
@@ -1273,6 +1329,8 @@ class SearchPlaceholderListView(BaseListView):
 class SearchPlaceholderCreateView(BaseCreateView):
     """
     搜索占位符创建视图
+
+    添加新的搜索框提示文字。
     """
 
     model = SearchPlaceholder
@@ -1283,6 +1341,8 @@ class SearchPlaceholderCreateView(BaseCreateView):
 class SearchPlaceholderUpdateView(BaseUpdateView):
     """
     搜索占位符更新视图
+
+    编辑现有的搜索提示文字。
     """
 
     model = SearchPlaceholder
@@ -1293,6 +1353,8 @@ class SearchPlaceholderUpdateView(BaseUpdateView):
 class SearchPlaceholderDeleteView(BaseDeleteView):
     """
     搜索占位符删除视图
+
+    删除指定的搜索提示文字。
     """
 
     model = SearchPlaceholder
@@ -1302,6 +1364,8 @@ class SearchPlaceholderDeleteView(BaseDeleteView):
 class SearchPlaceholderExportView(BaseExportView):
     """
     搜索占位符导出视图
+
+    将所有搜索占位符数据导出为 JSON 文件。
     """
 
     model = SearchPlaceholder
@@ -1310,6 +1374,8 @@ class SearchPlaceholderExportView(BaseExportView):
 class SearchPlaceholderImportView(BaseImportView):
     """
     搜索占位符导入视图
+
+    从 JSON 文件导入搜索占位符数据。
     """
 
     model = SearchPlaceholder
@@ -1383,6 +1449,9 @@ class UserUpdateView(BaseUpdateView):
 class UserDeleteView(BaseDeleteView):
     """
     用户删除视图
+
+    删除指定的用户。
+    注意：这通常是逻辑删除或物理删除，具体取决于模型配置。
     """
 
     model = User
@@ -1392,6 +1461,8 @@ class UserDeleteView(BaseDeleteView):
 class UserExportView(BaseExportView):
     """
     用户导出视图
+
+    导出用户基本信息（不包含敏感数据如密码）。
     """
 
     model = User
@@ -1407,6 +1478,8 @@ class UserExportView(BaseExportView):
 class UserImportView(BaseImportView):
     """
     用户导入视图
+
+    从 JSON 文件批量导入用户。
     """
 
     model = User
@@ -1425,6 +1498,8 @@ class UserImportView(BaseImportView):
 class UserTitleListView(BaseListView):
     """
     用户称号列表视图
+
+    展示所有用户称号。
     """
 
     model = UserTitle
@@ -1434,6 +1509,8 @@ class UserTitleListView(BaseListView):
 class UserTitleCreateView(BaseCreateView):
     """
     用户称号创建视图
+
+    创建新的用户称号。
     """
 
     model = UserTitle
@@ -1444,6 +1521,8 @@ class UserTitleCreateView(BaseCreateView):
 class UserTitleUpdateView(BaseUpdateView):
     """
     用户称号更新视图
+
+    编辑现有的用户称号。
     """
 
     model = UserTitle
@@ -1454,6 +1533,8 @@ class UserTitleUpdateView(BaseUpdateView):
 class UserTitleDeleteView(BaseDeleteView):
     """
     用户称号删除视图
+
+    删除指定的用户称号。
     """
 
     model = UserTitle
@@ -1463,6 +1544,8 @@ class UserTitleDeleteView(BaseDeleteView):
 class UserTitleExportView(BaseExportView):
     """
     用户称号导出视图
+
+    将所有用户称号数据导出为 JSON 文件。
     """
 
     model = UserTitle
@@ -1471,6 +1554,8 @@ class UserTitleExportView(BaseExportView):
 class UserTitleImportView(BaseImportView):
     """
     用户称号导入视图
+
+    从 JSON 文件导入用户称号数据。
     """
 
     model = UserTitle
@@ -1481,6 +1566,8 @@ class UserTitleImportView(BaseImportView):
 class GroupListView(BaseListView):
     """
     用户组列表视图
+
+    展示所有用户组。
     """
 
     model = Group
@@ -1491,6 +1578,8 @@ class GroupListView(BaseListView):
 class GroupCreateView(BaseCreateView):
     """
     用户组创建视图
+
+    创建新的用户组，并可分配权限。
     """
 
     model = Group
@@ -1501,6 +1590,8 @@ class GroupCreateView(BaseCreateView):
 class GroupUpdateView(BaseUpdateView):
     """
     用户组更新视图
+
+    编辑现有用户组的名称和权限。
     """
 
     model = Group
@@ -1511,6 +1602,8 @@ class GroupUpdateView(BaseUpdateView):
 class GroupDeleteView(BaseDeleteView):
     """
     用户组删除视图
+
+    删除指定的用户组。
     """
 
     model = Group
@@ -1520,6 +1613,8 @@ class GroupDeleteView(BaseDeleteView):
 class GroupExportView(BaseExportView):
     """
     用户组导出视图
+
+    将所有用户组数据导出为 JSON 文件。
     """
 
     model = Group
@@ -1528,6 +1623,8 @@ class GroupExportView(BaseExportView):
 class GroupImportView(BaseImportView):
     """
     用户组导入视图
+
+    从 JSON 文件导入用户组数据。
     """
 
     model = Group
@@ -1571,6 +1668,8 @@ class LogEntryListView(BaseListView):
 class LogEntryDeleteView(BaseDeleteView):
     """
     操作日志删除视图
+
+    删除指定的审计日志记录。
     """
 
     model = LogEntry
@@ -1580,6 +1679,8 @@ class LogEntryDeleteView(BaseDeleteView):
 class LogEntryExportView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     操作日志导出视图
+
+    将审计日志导出为 CSV 文件。
     """
 
     def get(self, request):
@@ -1688,6 +1789,8 @@ from datetime import datetime
 class LogFileView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     查看系统日志文件内容
+
+    读取并展示指定日志文件的最后 N 行（默认 2000 行）。
     """
 
     def get(self, request, filename):
@@ -1726,6 +1829,8 @@ class LogFileView(LoginRequiredMixin, StaffRequiredMixin, View):
 class LogFileDownloadView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     下载系统日志文件
+
+    以附件形式下载指定的日志文件。
     """
 
     def get(self, request, filename):
@@ -1748,6 +1853,8 @@ class LogFileDownloadView(LoginRequiredMixin, StaffRequiredMixin, View):
 class LogFileDeleteView(LoginRequiredMixin, StaffRequiredMixin, View):
     """
     删除或清空系统日志文件
+
+    支持 "clear" (清空内容) 和默认的删除文件操作。
     """
 
     def post(self, request, filename):
@@ -2943,6 +3050,11 @@ class DebugPermissionView(
         return context
 
 class PollListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
+    """
+    投票列表视图
+
+    展示所有投票活动。
+    """
     model = Poll
     template_name = "administration/poll_list.html"
     context_object_name = "polls"
@@ -2961,6 +3073,11 @@ class PollListView(LoginRequiredMixin, UserPassesTestMixin, ListView):
 
 
 class PollCreateView(LoginRequiredMixin, UserPassesTestMixin, AuditLogMixin, CreateView):
+    """
+    投票创建视图
+
+    创建新的投票，同时处理选项 (Choices) 的 FormSet。
+    """
     model = Poll
     form_class = PollForm
     template_name = "administration/poll_form.html"
@@ -2998,6 +3115,11 @@ class PollCreateView(LoginRequiredMixin, UserPassesTestMixin, AuditLogMixin, Cre
 
 
 class PollUpdateView(LoginRequiredMixin, UserPassesTestMixin, AuditLogMixin, UpdateView):
+    """
+    投票更新视图
+
+    编辑投票及其选项。
+    """
     model = Poll
     form_class = PollForm
     template_name = "administration/poll_form.html"
@@ -3035,6 +3157,11 @@ class PollUpdateView(LoginRequiredMixin, UserPassesTestMixin, AuditLogMixin, Upd
 
 
 class PollDeleteView(LoginRequiredMixin, UserPassesTestMixin, AuditLogMixin, DeleteView):
+    """
+    投票删除视图
+
+    删除指定的投票及其选项。
+    """
     model = Poll
     template_name = "administration/generic_confirm_delete.html"
     success_url = reverse_lazy("administration:poll_list")

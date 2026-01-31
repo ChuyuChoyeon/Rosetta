@@ -9,42 +9,63 @@ import uuid
 import os
 
 
+"""
+核心工具模块 (Core Utils)
+
+本模块包含项目通用的辅助函数和异步任务，主要功能包括：
+- Slug 生成：支持中文拼音回退
+- 缓存连接：适配 django-constance
+- 异步任务状态管理：统一的 Redis 状态跟踪
+- 搜索索引重建 (Watson)
+- 图片异步处理 (缩略图生成)
+- 孤儿文件清理 (Orphaned Media Cleaner)
+- 数据库备份与恢复
+"""
+
+
 def generate_unique_slug(
     model_class, source_text, slug_field="slug", allow_unicode=False
 ):
     """
-    Generate a unique slug for a model instance.
+    为模型实例生成唯一的 Slug。
+    
+    策略：
+    1. 尝试使用 Django 的 slugify (默认仅支持 ASCII)。
+    2. 如果结果为空（例如纯中文且 allow_unicode=False），则尝试转为拼音。
+    3. 如果还为空，则使用 UUID 前8位作为兜底。
+    4. 如果生成的 Slug 已存在，则在后缀追加 "-1", "-2" 等数字直到唯一。
 
     Args:
-        model_class: The Django model class.
-        source_text: The text to slugify.
-        slug_field: The field name to check for uniqueness (default: "slug").
-        allow_unicode: Whether to allow unicode characters in slug (default: False).
+        model_class: Django 模型类
+        source_text: 来源文本（通常是标题）
+        slug_field: 模型中存储 slug 的字段名 (默认: "slug")
+        allow_unicode: 是否允许 Unicode 字符 (默认: False)
     """
     origin_slug = slugify(source_text, allow_unicode=allow_unicode)
 
-    # Fallback for empty slug (e.g. purely non-ASCII text without allow_unicode)
+    # 兜底方案：处理 slugify 结果为空的情况 (如纯中文环境)
     if not origin_slug:
-        # Try pinyin first
+        # 尝试使用 xpinyin 将中文转换为拼音
         try:
             from xpinyin import Pinyin
             p = Pinyin()
+            # source_text 可能包含特殊字符，先转拼音再 slugify
             origin_slug = slugify(p.get_pinyin(source_text, ""))
         except ImportError:
             pass
             
-        # If still empty, use UUID
+        # 如果依然为空（极其罕见），使用随机 UUID
         if not origin_slug:
             origin_slug = str(uuid.uuid4())[:8]
     
-    # Ensure lowercase
+    # 统一转换为小写
     origin_slug = origin_slug.lower()
 
     unique_slug = origin_slug
     n = 1
-    # Check if slug exists, excluding the current instance if it were passed (not handling instance exclusion here for simplicity in creation)
-    # Ideally this is used for creation. For updates, one might want to keep existing slug.
-    # But this simple version is for auto-generating NEW slugs.
+    # 检查 Slug 是否冲突
+    # 注意：这里主要用于新对象的自动生成，未排除自身 ID (如果是更新操作)
+    # 对于简单的自动生成场景通常够用
     while model_class.objects.filter(**{slug_field: unique_slug}).exists():
         unique_slug = f"{origin_slug}-{n}"
         n += 1
@@ -54,20 +75,21 @@ def generate_unique_slug(
 
 class ConstanceRedisConnection:
     """
-    Helper class to provide a Redis connection for django-constance
-    reusing the django-redis connection pool.
-
-    django-constance expects a class that can be instantiated with no arguments
-    and returns a redis client.
+    Constance Redis 连接辅助类。
+    
+    django-constance 需要一个能返回 Redis 客户端的类。
+    这里复用 django-redis 的连接池，避免创建额外的连接。
     """
 
     def __new__(cls):
         from django_redis import get_redis_connection
-
         return get_redis_connection("default")
 
 
 def _set_task_status(task_key, status, detail=None, ttl=86400):
+    """
+    更新单个异步任务的状态到 Redis。
+    """
     payload = {"status": status, "updated_at": timezone.now().isoformat()}
     if detail:
         payload["detail"] = detail
@@ -76,6 +98,9 @@ def _set_task_status(task_key, status, detail=None, ttl=86400):
 
 
 def _set_queue_status(task_key, status, ttl=86400, **extra):
+    """
+    更新批量队列任务的状态到 Redis (包含进度信息)。
+    """
     payload = {"status": status, "updated_at": timezone.now().isoformat()}
     payload.update(extra)
     cache.set(task_key, payload, ttl)
@@ -83,15 +108,19 @@ def _set_queue_status(task_key, status, ttl=86400, **extra):
 
 
 def _process_post_cover_image(post_id):
+    """
+    处理单篇文章的封面图：生成缩略图和 WebP 优化版。
+    """
     from blog.models import Post
 
     post = Post.objects.filter(id=post_id).first()
     if not post or not post.cover_image:
         return "skipped"
     
-    # Process both thumbnail and optimized
+    # 依次处理缩略图 (thumbnail) 和优化图 (optimized)
     specs = [post.cover_thumbnail, post.cover_optimized]
     for spec in specs:
+        # imagekit 的 ImageSpecField 是懒加载的，访问其 url 或 generate() 会触发生成
         if hasattr(spec, "generate"):
             spec.generate()
         else:
@@ -101,6 +130,10 @@ def _process_post_cover_image(post_id):
 
 @shared_task
 def _run_watson_rebuild(task_key, lock_key, status_ttl):
+    """
+    Celery 任务：重建 Watson 搜索索引。
+    这是耗时操作，必须异步执行。
+    """
     _set_task_status(task_key, "running", ttl=status_ttl)
     try:
         call_command("buildwatson")
@@ -110,28 +143,40 @@ def _run_watson_rebuild(task_key, lock_key, status_ttl):
         traceback.print_exc()
         _set_task_status(task_key, "error", str(exc), ttl=status_ttl)
     finally:
+        # 任务结束，释放锁
         cache.delete(lock_key)
 
 
 def trigger_watson_rebuild_async():
+    """
+    触发重建搜索索引的异步任务。
+    包含去重锁机制，防止短时间内重复触发。
+    """
     task_id = uuid.uuid4().hex
     task_key = f"watson:rebuild:{task_id}"
     lock_key = "watson:rebuild:lock"
     status_ttl = int(getattr(settings, "WATSON_REBUILD_STATUS_TTL", 86400))
     lock_ttl = int(getattr(settings, "WATSON_REBUILD_LOCK_TTL", 3600))
 
+    # 尝试获取锁，如果锁已存在，说明有任务正在运行
     if not cache.add(lock_key, task_id, lock_ttl):
         latest_key = cache.get("watson:rebuild:latest")
         return {"accepted": False, "task_key": latest_key}
 
     _set_task_status(task_key, "queued", ttl=status_ttl)
     cache.set("watson:rebuild:latest", task_key, status_ttl)
+    
+    # 发送 Celery 任务
     _run_watson_rebuild.delay(task_key, lock_key, status_ttl)
     return {"accepted": True, "task_key": task_key}
 
 
 @shared_task
 def _run_image_queue(task_key, delay, limit, status_ttl, lock_key):
+    """
+    Celery 任务：批量处理图片队列。
+    扫描最近更新且有封面的文章，生成缺失的缩略图。
+    """
     queued = 0
     processed = 0
     failed = 0
@@ -139,6 +184,7 @@ def _run_image_queue(task_key, delay, limit, status_ttl, lock_key):
     try:
         from blog.models import Post
 
+        # 选取最近更新的 N 篇文章
         posts = list(
             Post.objects.filter(cover_image__isnull=False)
             .exclude(cover_image="")
@@ -146,6 +192,7 @@ def _run_image_queue(task_key, delay, limit, status_ttl, lock_key):
         )
         post_ids = []
         for post in posts:
+            # 简单的去重：如果该文章正在处理中，则跳过
             queue_key = f"image:post:{post.id}"
             if cache.add(queue_key, "queued", status_ttl):
                 post_ids.append(post.id)
@@ -179,6 +226,7 @@ def _run_image_queue(task_key, delay, limit, status_ttl, lock_key):
                 failed += 1
                 cache.set(f"image:post:{post_id}", f"error:{exc}", status_ttl)
 
+            # 实时更新进度
             _set_queue_status(
                 task_key,
                 "running",
@@ -222,6 +270,9 @@ def _run_image_queue(task_key, delay, limit, status_ttl, lock_key):
 
 @shared_task
 def _process_post_image(post_id, queue_key=None, status_ttl=None):
+    """
+    Celery 任务：处理单篇文章图片（用于保存文章时触发）。
+    """
     if status_ttl is None:
         status_ttl = int(getattr(settings, "IMAGE_QUEUE_STATUS_TTL", 86400))
     if queue_key is None:
@@ -236,6 +287,9 @@ def _process_post_image(post_id, queue_key=None, status_ttl=None):
 
 
 def queue_post_images_async(limit=20, delay_seconds=None):
+    """
+    触发批量处理图片的异步任务。
+    """
     delay = delay_seconds
     if delay is None:
         delay = int(getattr(settings, "IMAGE_PROCESSING_DELAY", 120))
@@ -261,15 +315,22 @@ def queue_post_images_async(limit=20, delay_seconds=None):
         delay=delay,
         limit=limit,
     )
+    # 延迟执行，避免频繁 I/O
     _run_image_queue.apply_async(
         args=[task_key, delay, limit, status_ttl, lock_key], countdown=delay
     )
     return {"accepted": True, "task_key": task_key}
 
 
-# --- Orphaned Media Cleaner ---
+# --- Orphaned Media Cleaner (孤儿文件清理) ---
 @shared_task
 def _run_media_scan(task_key, lock_key, status_ttl):
+    """
+    Celery 任务：扫描孤儿文件（存在于磁盘但未被数据库引用的文件）。
+    分为两步：
+    1. 收集数据库中所有 FileField/ImageField 的引用路径。
+    2. 遍历 media 目录，找出不在引用列表中的文件。
+    """
     _set_task_status(task_key, "running", ttl=status_ttl)
     try:
         from django.apps import apps
@@ -281,12 +342,13 @@ def _run_media_scan(task_key, lock_key, status_ttl):
         # 1. 扫描数据库引用 (优先构建白名单，减少内存占用)
         db_files = set()
         for model in apps.get_models():
+            # 找出所有文件字段
             file_fields = [f for f in model._meta.get_fields() if isinstance(f, (models.FileField, models.ImageField))]
             if not file_fields:
                 continue
             
             for field in file_fields:
-                # 优化：使用 iterator() 减少内存占用
+                # 优化：使用 iterator() 减少大表查询的内存占用
                 paths = model.objects.exclude(
                     **{f"{field.name}__isnull": True}
                 ).exclude(
@@ -295,7 +357,7 @@ def _run_media_scan(task_key, lock_key, status_ttl):
                 
                 for path in paths:
                     if path:
-                        # 归一化路径
+                        # 归一化路径分隔符
                         name = str(path).replace("\\", "/")
                         db_files.add(name)
 
@@ -315,7 +377,7 @@ def _run_media_scan(task_key, lock_key, status_ttl):
                     continue
                 if rel_path.startswith("backups/"):
                     continue
-                if rel_path.startswith("CACHE/"): # ImageKit Cache
+                if rel_path.startswith("CACHE/"): # ImageKit 缓存目录
                     continue
                     
                 size = os.path.getsize(full_path)
@@ -338,11 +400,12 @@ def _run_media_scan(task_key, lock_key, status_ttl):
             "scan_size": scan_size,
             "orphaned_count": len(orphaned),
             "orphaned_size": orphaned_size,
-            "orphaned_files": orphaned[:100],  # 只存前100个详情
+            "orphaned_files": orphaned[:100],  # 预览前100个文件
             "orphaned_files_all_key": f"{task_key}:files"
         }
         cache.set(task_key, result, status_ttl)
         
+        # 将完整列表单独存一个 key，防止主 key 值过大
         if orphaned:
              cache.set(f"{task_key}:files", orphaned, status_ttl)
 
@@ -355,6 +418,9 @@ def _run_media_scan(task_key, lock_key, status_ttl):
 
 
 def trigger_media_scan_async():
+    """
+    触发媒体文件扫描任务。
+    """
     task_id = uuid.uuid4().hex
     task_key = f"media:scan:{task_id}"
     lock_key = "media:scan:lock"
@@ -372,6 +438,10 @@ def trigger_media_scan_async():
 
 @shared_task
 def _run_media_clean(task_key, scan_task_key, lock_key, status_ttl):
+    """
+    Celery 任务：执行清理操作。
+    必须基于先前的扫描结果，删除确认无用的文件。
+    """
     _set_task_status(task_key, "running", ttl=status_ttl)
     try:
         orphaned_files = cache.get(f"{scan_task_key}:files")
@@ -401,13 +471,12 @@ def _run_media_clean(task_key, scan_task_key, lock_key, status_ttl):
                         cleaned_count += 1
                         cleaned_size += f["size"]
                     
-                    # 尝试删除空目录
+                    # 尝试删除空目录 (清理垃圾后留下的空文件夹)
                     directory = os.path.dirname(full_path)
                     if os.path.exists(directory) and not os.listdir(directory):
                         os.rmdir(directory)
             except OSError as e:
                 # 记录错误但不中断循环，除非是致命错误
-                # 这里简单跳过
                 pass
 
         cache.set(task_key, {
@@ -430,6 +499,9 @@ def _run_media_clean(task_key, scan_task_key, lock_key, status_ttl):
 
 
 def trigger_media_clean_async():
+    """
+    触发清理任务。必须先执行扫描任务。
+    """
     # 必须基于最近一次成功的扫描
     scan_key = cache.get("media:scan:latest")
     if not scan_key:
@@ -454,8 +526,11 @@ def trigger_media_clean_async():
     return {"accepted": True, "task_key": task_key}
 
 
-# --- Database Backup ---
+# --- Database Backup (数据库备份) ---
 def list_backups():
+    """
+    列出所有现有的数据库备份文件。
+    """
     backup_dir = settings.BASE_DIR / "backups"
     if not backup_dir.exists():
         return []
@@ -474,6 +549,10 @@ def list_backups():
     return backups
 
 def create_backup(filename=None):
+    """
+    创建新的数据库备份。
+    使用 Django 的 dumpdata 命令。
+    """
     backup_dir = settings.BASE_DIR / "backups"
     backup_dir.mkdir(exist_ok=True)
     
@@ -484,6 +563,7 @@ def create_backup(filename=None):
     file_path = backup_dir / filename
     
     with open(file_path, "w", encoding="utf-8") as f:
+        # 排除 contenttypes 和 auth.permission 等元数据表，以及 session 日志
         call_command(
             "dumpdata", 
             exclude=["contenttypes", "auth.permission", "admin.logentry", "sessions.session"],
@@ -493,10 +573,13 @@ def create_backup(filename=None):
     return filename
 
 def delete_backup(filename):
+    """
+    删除指定的备份文件。
+    """
     backup_dir = settings.BASE_DIR / "backups"
     file_path = backup_dir / filename
     
-    # 安全检查
+    # 安全检查：防止路径遍历攻击
     if not file_path.resolve().is_relative_to(backup_dir.resolve()):
         raise ValueError("Invalid path")
         
@@ -506,6 +589,10 @@ def delete_backup(filename):
     return False
 
 def restore_backup(filename):
+    """
+    从备份文件恢复数据库。
+    使用 Django 的 loaddata 命令。
+    """
     backup_dir = settings.BASE_DIR / "backups"
     file_path = backup_dir / filename
     
@@ -520,13 +607,20 @@ def restore_backup(filename):
 
 
 def schedule_post_image_processing(post_id, delay_seconds=None):
+    """
+    调度单篇文章的图片处理任务（例如保存文章后）。
+    使用 Redis 锁防止重复调度。
+    """
     delay = delay_seconds
     if delay is None:
         delay = int(getattr(settings, "IMAGE_PROCESSING_DELAY", 120))
     status_ttl = int(getattr(settings, "IMAGE_QUEUE_STATUS_TTL", 86400))
     queue_key = f"image:post:{post_id}"
+    
+    # 如果已经在队列中，则不重复添加
     if not cache.add(queue_key, "queued", delay + status_ttl):
         return False
+    
     _process_post_image.apply_async(
         args=[post_id, queue_key, status_ttl], countdown=delay
     )

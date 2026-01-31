@@ -10,23 +10,44 @@ from django.utils.translation import gettext_lazy as _
 from core.utils import generate_unique_slug
 
 
+"""
+核心数据模型 (Core Models)
+
+本模块定义了网站运行所需的基础数据模型，包括：
+- Page: 单页面（关于、联系我们等）
+- Navigation: 导航菜单配置
+- FriendLink: 友情链接
+- SearchPlaceholder: 搜索框动态占位符
+- Notification: 用户站内通知
+"""
+
+
 class Page(models.Model):
     """
-    单页面模型
-    用于创建关于页、联系页等独立页面，不属于博客文章流。
+    单页面模型 (Page)
+    
+    用于创建那些不属于博客文章流的独立页面，例如“关于我”、“联系页面”、“隐私政策”等。
+    支持自定义 URL 别名 (slug) 和 Markdown 内容。
     """
 
     STATUS_CHOICES = (
         ("draft", _("草稿")),
         ("published", _("已发布")),
     )
+    
     title = models.CharField(_("标题"), max_length=200)
     slug = models.SlugField(
-        _("别名"), unique=True, help_text=_("URL 路径的一部分，例如 about 或 contact")
+        _("别名"), 
+        unique=True, 
+        help_text=_("URL 路径的一部分，例如 about 或 contact，留空将自动根据标题生成")
     )
-    content = models.TextField(_("内容"))
+    content = models.TextField(_("内容"), help_text=_("支持 Markdown 格式"))
     status = models.CharField(
-        _("状态"), max_length=10, choices=STATUS_CHOICES, default="published"
+        _("状态"), 
+        max_length=10, 
+        choices=STATUS_CHOICES, 
+        default="published",
+        help_text=_("控制页面是否对外可见")
     )
     created_at = models.DateTimeField(_("创建时间"), auto_now_add=True)
     updated_at = models.DateTimeField(_("更新时间"), auto_now=True)
@@ -36,6 +57,10 @@ class Page(models.Model):
         verbose_name_plural = verbose_name
 
     def save(self, *args, **kwargs):
+        """
+        重写 save 方法以自动处理 Slug。
+        如果用户未填写 Slug，则根据标题自动生成唯一的 Slug。
+        """
         if not self.slug:
             self.slug = generate_unique_slug(Page, self.title)
         super().save(*args, **kwargs)
@@ -46,15 +71,17 @@ class Page(models.Model):
 
 class SearchPlaceholder(models.Model):
     """
-    搜索框占位符模型
-    用于管理前台搜索框的动态占位符文字。
+    搜索框占位符模型 (Search Placeholder)
+    
+    用于在前端搜索框中展示动态的提示文字（如“搜索 Django 教程...”）。
+    可以在后台配置多条记录，系统会随机或按权重显示，引导用户搜索。
     """
 
     text = models.CharField(
         _("占位符文本"), max_length=100, help_text=_("例如：搜索 Django...")
     )
     is_active = models.BooleanField(_("是否启用"), default=True)
-    order = models.IntegerField(_("排序"), default=0)
+    order = models.IntegerField(_("排序"), default=0, help_text=_("数字越小越靠前"))
     created_at = models.DateTimeField(_("创建时间"), auto_now_add=True)
 
     class Meta:
@@ -68,17 +95,18 @@ class SearchPlaceholder(models.Model):
 
 class FriendLink(models.Model):
     """
-    友情链接模型
-    用于在页脚或侧边栏显示合作伙伴链接。
+    友情链接模型 (Friend Link)
+    
+    用于管理与其他网站的互换链接。通常显示在页脚或侧边栏。
     """
 
     name = models.CharField(_("网站名称"), max_length=100)
     url = models.URLField(_("网站链接"))
     description = models.CharField(_("描述"), max_length=200, blank=True)
     logo = models.ImageField(_("标志"), upload_to="friend_links/", blank=True, null=True)
-    order = models.IntegerField(_("排序"), default=0)
+    order = models.IntegerField(_("排序"), default=0, help_text=_("数字越小越靠前"))
     is_active = models.BooleanField(_("是否显示"), default=True)
-    target_blank = models.BooleanField(_("新窗口打开"), default=False)
+    target_blank = models.BooleanField(_("新窗口打开"), default=False, help_text=_("是否在新标签页中打开链接"))
 
     class Meta:
         verbose_name = _("友情链接")
@@ -91,8 +119,10 @@ class FriendLink(models.Model):
 
 class Navigation(models.Model):
     """
-    导航菜单模型
-    用于动态管理网站头部导航栏、底部链接等。
+    导航菜单模型 (Navigation)
+    
+    用于动态管理全站的菜单链接，无需修改代码即可调整菜单结构。
+    支持配置显示位置（顶部、底部、侧边栏）。
     """
 
     LOCATION_CHOICES = (
@@ -100,14 +130,15 @@ class Navigation(models.Model):
         ("footer", _("底部链接")),
         ("sidebar", _("侧边栏")),
     )
+    
     title = models.CharField(_("标题"), max_length=100)
-    url = models.CharField("URL", max_length=200)
+    url = models.CharField("URL", max_length=200, help_text=_("可以是绝对路径或相对路径"))
     location = models.CharField(
         _("位置"), max_length=20, choices=LOCATION_CHOICES, default="header"
     )
-    order = models.IntegerField(_("排序"), default=0)
+    order = models.IntegerField(_("排序"), default=0, help_text=_("数字越小越靠前"))
     is_active = models.BooleanField(_("是否显示"), default=True)
-    target_blank = models.BooleanField(_("新窗口打开"), default=False)
+    target_blank = models.BooleanField(_("新窗口打开"), default=False, help_text=_("是否在新标签页中打开链接"))
 
     class Meta:
         ordering = ["order"]
@@ -120,8 +151,9 @@ class Navigation(models.Model):
 
 class Notification(models.Model):
     """
-    系统通知模型
-    用于向用户发送站内消息（评论回复、提及、系统通知等）。
+    系统通知模型 (Notification)
+    
+    用于向用户发送各类消息提醒，如评论回复、系统公告等。
     """
 
     LEVEL_CHOICES = (
@@ -130,11 +162,13 @@ class Notification(models.Model):
         ("warning", _("警告")),
         ("error", _("错误")),
     )
+    
     user = models.ForeignKey(
         "users.User",
         on_delete=models.CASCADE,
         verbose_name=_("用户"),
         related_name="notifications",
+        help_text=_("接收通知的用户")
     )
     title = models.CharField(_("标题"), max_length=255)
     message = models.TextField(_("内容"))
@@ -148,7 +182,7 @@ class Notification(models.Model):
         max_length=255,
         blank=True,
         null=True,
-        help_text=_("可选，点击通知跳转的 URL"),
+        help_text=_("可选，点击通知跳转的 URL，例如评论所在的文章地址"),
     )
 
     class Meta:
@@ -161,10 +195,18 @@ class Notification(models.Model):
 
 
 def _clear_site_cache():
+    """
+    辅助函数：清除全站相关的缓存。
+    
+    当导航、友链等基础数据发生变更时调用，确保前台显示最新数据。
+    """
+    # 清除字典型缓存
     cache.delete("site:friend_links")
     cache.delete("site:navigations")
     cache.delete("site:search_placeholders")
     
+    # 清除模板片段缓存 (Template Fragment Cache)
+    # 因为侧边栏等位置可能使用了 {% cache %} 标签，需要手动清除
     languages = [l[0] for l in settings.LANGUAGES]
     for lang in languages:
         cache.delete(make_template_fragment_key("sidebar_friend_links", [lang]))
@@ -173,14 +215,23 @@ def _clear_site_cache():
 
 @receiver([post_save, post_delete], sender=FriendLink)
 def _invalidate_friendlink_cache(sender, instance, **kwargs):
+    """
+    信号接收器：FriendLink 变动时清除缓存。
+    """
     _clear_site_cache()
 
 
 @receiver([post_save, post_delete], sender=Navigation)
 def _invalidate_navigation_cache(sender, instance, **kwargs):
+    """
+    信号接收器：Navigation 变动时清除缓存。
+    """
     _clear_site_cache()
 
 
 @receiver([post_save, post_delete], sender=SearchPlaceholder)
 def _invalidate_searchplaceholder_cache(sender, instance, **kwargs):
+    """
+    信号接收器：SearchPlaceholder 变动时清除缓存。
+    """
     _clear_site_cache()

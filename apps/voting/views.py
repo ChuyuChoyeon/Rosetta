@@ -7,6 +7,11 @@ from django.db.models import F
 from .models import Poll, Choice, Vote
 
 class PollListView(ListView):
+    """
+    投票列表视图
+
+    展示所有开启的投票活动。
+    """
     model = Poll
     template_name = "voting/poll_list.html"
     context_object_name = "polls"
@@ -16,6 +21,12 @@ class PollListView(ListView):
         return Poll.objects.filter(is_active=True).order_by('-created_at')
 
 class PollDetailView(DetailView):
+    """
+    投票详情视图
+
+    展示投票的详细信息和选项。
+    如果用户已登录，会检查用户是否已经投票。
+    """
     model = Poll
     template_name = "voting/poll_detail.html"
     context_object_name = "poll"
@@ -30,10 +41,22 @@ class PollDetailView(DetailView):
         return context
 
 class PollVoteView(LoginRequiredMixin, View):
+    """
+    投票动作视图 (AJAX)
+
+    处理用户的投票请求。
+    
+    逻辑：
+    1. 检查是否重复投票。
+    2. 验证选项有效性。
+    3. 创建 Vote 记录。
+    4. 原子更新 Choice 的票数。
+    5. 返回更新后的投票结果 (HTMX 片段)。
+    """
     def post(self, request, pk):
         poll = get_object_or_404(Poll, pk=pk)
         
-        # Check if already voted
+        # 检查是否已投票 (Check if already voted)
         if Vote.objects.filter(poll=poll, user=request.user).exists():
             # If already voted, return the results directly
             context = {
@@ -48,13 +71,13 @@ class PollVoteView(LoginRequiredMixin, View):
 
         choice = get_object_or_404(Choice, pk=choice_id, poll=poll)
 
-        # Create Vote
+        # 创建投票记录 (Create Vote)
         Vote.objects.create(poll=poll, user=request.user, choice=choice)
         
-        # Increment Count (Atomic)
+        # 增加票数 (Increment Count - Atomic)
         Choice.objects.filter(pk=choice_id).update(votes_count=F("votes_count") + 1)
 
-        # Return updated poll results (HTMX)
+        # 返回更新后的结果 (Return updated poll results - HTMX)
         context = {
             "poll": poll,
             "has_voted": True

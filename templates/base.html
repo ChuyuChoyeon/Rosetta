@@ -1,4 +1,15 @@
 {% load static tailwind_tags meta i18n %}
+<!--
+    全站基础模板 (Base Template)
+    
+    这是所有页面的父模板，定义了 HTML 骨架、全局样式、脚本以及公共组件（导航栏、页脚、Toast等）。
+    
+    可覆盖的 Block (Blocks available for override):
+    - title: 页面标题
+    - extra_css: 页面特定的 CSS 样式
+    - extra_head: 插入到 <head> 尾部的其他内容
+    - content: 页面主体内容
+-->
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE }}">
 <head>
@@ -6,17 +17,17 @@
     <link rel="shortcut icon" href="{{ config.SITE_FAVICON|default:'/static/core/img/favicon.ico' }}">
     <link rel="alternate" type="application/rss+xml" title="{% trans 'RSS Feed' %}" href="{% url 'post_feed' %}">
     
-    <!-- Google 字体：Poppins & Open Sans (本地化) -->
+    <!-- Google 字体：Poppins & Open Sans (本地化托管) -->
     <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">
     
-    <!-- Meta 标签 -->
+    <!-- Meta 标签 (SEO 与社交分享) -->
     {% include 'meta/meta.html' %}
     
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     
-    <!-- Material Symbols 图标字体 -->
+    <!-- Material Symbols 图标字体配置 -->
     <style>
         @font-face {
             font-family: 'Material Symbols Outlined';
@@ -42,24 +53,30 @@
         }
     </style>
     
+    <!-- 引入 Tailwind CSS (由 django-tailwind 编译) -->
     {% tailwind_css %}
+    
+    <!-- 第三方库样式 -->
     <link href="{% static 'theme/css/cropper.min.css' %}" rel="stylesheet">
     <link href="{% static 'theme/css/style.css' %}" rel="stylesheet">
 
+    <!-- 预留给子模板的样式块 -->
     {% block extra_css %}{% endblock %}
     {% block extra_head %}{% endblock %}
 
+    <!-- 注入后台配置的自定义 Head 代码 (如统计脚本) -->
     {% if config.EXTRA_HEAD_CODE %}
     {{ config.EXTRA_HEAD_CODE|safe }}
     {% endif %}
 
-    <!-- NProgress 加载进度条 (必须在 Tailwind 之后以获取变量) -->
+    <!-- NProgress 加载进度条 (必须在 Tailwind 之后以获取 CSS 变量) -->
     <script src="{% static 'theme/js/nprogress.js' %}"></script>
     <link rel="stylesheet" href="{% static 'theme/css/nprogress.css' %}" />
     
+    <!-- 全局脚本库 -->
     <script src="{% static 'js/page-loader.js' %}"></script>
-    <script src="{% static 'theme/js/htmx.min.js' %}"></script>
-    <script defer src="{% static 'theme/js/alpine.min.js' %}"></script>
+    <script src="{% static 'theme/js/htmx.min.js' %}"></script> <!-- HTMX 用于局部刷新 -->
+    <script defer src="{% static 'theme/js/alpine.min.js' %}"></script> <!-- Alpine.js 用于轻量级交互 -->
     <script src="{% static 'theme/js/cropper.min.js' %}"></script>
     <script src="{% static 'theme/js/geopattern.min.js' %}"></script>
     <script src="{% static 'theme/js/theme.js' %}"></script>
@@ -69,18 +86,20 @@
 
     <script>
         // --- 全局配置 ---
+        // 如果用户已登录，设置主题更新 URL，供 theme.js 调用
         {% if user.is_authenticated %}
         window.USER_PREFERENCE_URL = "{% url 'users:update_theme' %}";
         {% endif %}
     </script>
     
+    <!-- 主题初始化 (防闪烁) -->
     {% include 'partials/theme_init.html' %}
     
     <style>
-        /* Smooth Scrolling */
+        /* 平滑滚动 */
         html { scroll-behavior: smooth; }
 
-        /* Custom Scrollbar */
+        /* 自定义滚动条样式 */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -96,13 +115,13 @@
             background: oklch(var(--bc) / 0.4);
         }
         
-        /* Selection Color */
+        /* 文本选中颜色 */
         ::selection {
             background-color: oklch(var(--p) / 0.3);
             color: inherit;
         }
 
-        /* Reading Progress Bar */
+        /* 顶部阅读进度条容器 */
         .progress-container {
             position: fixed;
             top: 0;
@@ -112,6 +131,7 @@
             background: transparent;
         }
         
+        /* 进度条本体 */
         .progress-bar {
             height: 4px;
             background: oklch(var(--p));
@@ -119,7 +139,7 @@
             transition: width 0.1s ease;
         }
 
-        /* Glassmorphism Utilities */
+        /* 玻璃拟态 (Glassmorphism) 工具类 */
         .glass-panel {
             background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(10px);
@@ -127,6 +147,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
         
+        /* 暗色模式下的玻璃拟态 */
         html[data-theme='dark'] .glass-panel {
             background: rgba(0, 0, 0, 0.6);
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -134,40 +155,49 @@
     </style>
 </head>
 
+<!-- 
+    Body 标签说明:
+    1. x-data: Alpine.js 状态，用于控制“回到顶部”按钮的显示
+    2. @scroll.window: 监听滚动事件
+    3. hx-headers: 为所有 HTMX 请求注入 CSRF Token
+-->
 <body class="min-h-screen flex flex-col font-sans text-base-content selection:bg-primary selection:text-primary-content scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-base-100 {% if debug %}debug-screens{% endif %}" 
       x-data="{ showScrollTop: false }" 
       @scroll.window="showScrollTop = (window.pageYOffset > 300)"
       hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'>
 
-    <!-- Inspira UI: 神经元背景动画 -->
+    <!-- Inspira UI: 神经元背景动画特效 -->
     {% include 'components/inspira/neural_background.html' %}
 
-    <!-- 阅读进度条 -->
+    <!-- 顶部阅读进度条 -->
     <div class="progress-container">
         <div class="progress-bar" id="readingProgress"></div>
     </div>
 
-    <!-- 内容包裹层 -->
+    <!-- 主内容包裹层 (Sticky Footer 布局) -->
     <div id="main-wrapper" class="flex flex-col min-h-screen">
+        <!-- 顶部导航栏 -->
         {% include 'partials/navbar.html' %}
 
         <main class="flex-grow container mx-auto px-4 py-8">
-            <!-- Toast 通知 -->
+            <!-- Toast 全局通知容器 -->
             {% include 'components/toast.html' %}
             
+            <!-- 页面具体内容块 -->
             {% block content %}{% endblock %}
         </main>
         
-        <!-- 全局确认弹窗 -->
+        <!-- 全局确认弹窗 (用于删除操作等) -->
     {% include 'components/confirm_modal.html' %}
     
-    <!-- 文章详情页骨架屏 (Article Skeleton) -->
+    <!-- 文章详情页骨架屏 (加载占位) -->
     {% include 'components/skeletons/article_skeleton.html' %}
 
+    <!-- 页脚 -->
     {% include 'partials/footer.html' %}
     </div>
 
-    <!-- 回到顶部按钮 -->
+    <!-- 回到顶部按钮 (Floating Action Button) -->
     <button 
         x-show="showScrollTop" 
         x-transition:enter="transition ease-out duration-300"
@@ -188,6 +218,7 @@
     <script>
         // --- 阅读进度条逻辑 (Reading Progress Bar) ---
         // 监听滚动事件，动态计算并更新顶部进度条宽度
+        // 显示用户当前阅读位置在整个页面中的百分比
         window.onscroll = function() {
             let winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             let height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -196,6 +227,7 @@
         };
     </script>
 
+    <!-- 注入后台配置的自定义 Footer 代码 (如客服脚本) -->
     {% if config.EXTRA_FOOTER_CODE %}
     {{ config.EXTRA_FOOTER_CODE|safe }}
     {% endif %}

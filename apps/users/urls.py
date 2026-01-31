@@ -17,15 +17,19 @@ from .views import (
 app_name = "users"
 
 urlpatterns = [
-    # --- 认证相关 ---
+    # --- 认证相关 (Authentication) ---
+    # 用户注册
     path("register/", RegisterView.as_view(), name="register"),
+    # 用户登录
     path("login/", CustomLoginView.as_view(), name="login"),
+    # 用户登出
     path(
         "logout/",
         LogoutView.as_view(next_page="users:login"),
         name="logout",
     ),
-    # --- 个人资料相关 ---
+    
+    # --- 个人资料相关 (Profile) ---
     # 当前登录用户的个人资料页 (重定向到带 username 的 URL 或显示当前用户)
     path("profile/", UnifiedProfileView.as_view(), name="profile"),
     # 指定用户的公开个人资料页
@@ -34,6 +38,7 @@ urlpatterns = [
         UnifiedProfileView.as_view(),
         name="user_public_profile",
     ),
+    
     # --- 功能性接口 (AJAX/HTMX) ---
     # 更新主题偏好 (AJAX)
     path("update-theme/", UpdateThemeView.as_view(), name="update_theme"),
@@ -49,19 +54,23 @@ urlpatterns = [
         DeleteNotificationView.as_view(),
         name="delete_notification",
     ),
-    # --- 账户安全 ---
+    
+    # --- 账户安全 (Security) ---
     # 修改密码
     path(
         "password-change/",
         CustomPasswordChangeView.as_view(),
         name="password_change",
     ),
-    # --- API 接口 (JWT) ---
+    
+    # --- API 接口 (JWT Authentication) ---
+    # 获取 Token
     path(
         "api/token/",
         TokenObtainPairView.as_view(),
         name="token_obtain_pair",
     ),
+    # 刷新 Token
     path(
         "api/token/refresh/",
         TokenRefreshView.as_view(),

@@ -164,6 +164,7 @@ INSTALLED_APPS = [
     "constance",  # 动态配置
     "constance.backends.database",  # 注册 Database Backend App (即使在 Redis 模式下保留也不影响，除非 strict)
     "widget_tweaks",  # 表单渲染增强
+    "django_extensions",  # 开发增强工具
     # --- 核心业务模块 ---
     "blog.apps.BlogConfig",
     "users.apps.UsersConfig",
@@ -177,6 +178,7 @@ INSTALLED_APPS = [
 # ------------------------------------------------------------------------------
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "core.middleware.RateLimitMiddleware",
     "core.logging.RequestIDMiddleware",  # 请求 ID
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -195,7 +197,12 @@ MIDDLEWARE = [
 if DEBUG:
     MIDDLEWARE += [
         "django_browser_reload.middleware.BrowserReloadMiddleware",
+        "debug_toolbar.middleware.DebugToolbarMiddleware",
     ]
+
+    # Debug Toolbar
+    INSTALLED_APPS += ["debug_toolbar"]
+    INTERNAL_IPS = ["127.0.0.1", "localhost"]
 
 # ------------------------------------------------------------------------------
 # 模板与入口 (Templates & WSGI)
@@ -298,11 +305,8 @@ STATICFILES_FINDERS = (
     "django.contrib.staticfiles.finders.FileSystemFinder",
     "django.contrib.staticfiles.finders.AppDirectoriesFinder",
 )
-
-# 生产环境使用 WhiteNoise (可选，如果不想完全依赖 Nginx 处理静态文件)
-# 但通常 1Panel + Nginx 组合直接由 Nginx 处理效率更高。
-# 这里保持默认 Storage，假设 Nginx 接管。
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+# 生产环境使用 WhiteNoise
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 
 # ------------------------------------------------------------------------------
@@ -568,3 +572,23 @@ else:
 
 # 邮件后端
 EMAIL_BACKEND = "core.backends.ConstanceEmailBackend"
+
+# Sentry
+if not DEBUG:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    from sentry_sdk.integrations.redis import RedisIntegration
+    from sentry_sdk.integrations.celery import CeleryIntegration
+
+    SENTRY_DSN = env("SENTRY_DSN", default=None)
+    if SENTRY_DSN:
+        sentry_sdk.init(
+            dsn=SENTRY_DSN,
+            integrations=[
+                DjangoIntegration(),
+                RedisIntegration(),
+                CeleryIntegration(),
+            ],
+            traces_sample_rate=env.float("SENTRY_TRACES_SAMPLE_RATE", default=0.1),
+            send_default_pii=True,
+        )

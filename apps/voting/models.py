@@ -5,6 +5,8 @@ from django.utils.translation import gettext_lazy as _
 class Poll(models.Model):
     """
     投票/问卷模型
+
+    定义投票活动的基本信息，如标题、描述、是否允许多选、截止时间等。
     """
     title = models.CharField(_("标题"), max_length=200)
     description = models.TextField(_("描述"), blank=True)
@@ -33,11 +35,14 @@ class Poll(models.Model):
 
     @property
     def total_votes(self):
+        """计算总票数"""
         return self.choices.aggregate(total=models.Sum('votes_count'))['total'] or 0
 
 class Choice(models.Model):
     """
-    投票选项
+    投票选项模型
+
+    定义投票的可选答案。
     """
     poll = models.ForeignKey(Poll, related_name='choices', on_delete=models.CASCADE, verbose_name=_("所属投票"))
     text = models.CharField(_("选项文本"), max_length=200)
@@ -53,7 +58,9 @@ class Choice(models.Model):
 
 class Vote(models.Model):
     """
-    用户投票记录
+    用户投票记录模型
+
+    记录用户对某个选项的投票，用于防止重复投票。
     """
     poll = models.ForeignKey(Poll, on_delete=models.CASCADE, verbose_name=_("投票"))
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, verbose_name=_("用户"))

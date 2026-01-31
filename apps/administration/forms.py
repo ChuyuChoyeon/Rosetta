@@ -282,7 +282,8 @@ class CategoryForm(forms.ModelForm):
     """
     分类表单
 
-    用于管理文章分类。
+    用于创建和编辑文章分类。
+    支持多语言字段 (ModelTranslation) 和封面图上传。
     """
 
     class Meta:
@@ -333,7 +334,7 @@ class TagForm(forms.ModelForm):
     标签表单
 
     用于管理文章标签。
-    包含颜色选择和激活状态控制。
+    支持设置标签颜色（用于前端显示）和关联图标。
     """
 
     class Meta:
@@ -373,7 +374,8 @@ class PageForm(forms.ModelForm):
     """
     单页面表单
 
-    用于管理独立页面（如关于、联系）。
+    用于创建和编辑独立页面。
+    包含富文本内容清洗逻辑 (Bleach)，确保 HTML 安全。
     """
 
     class Meta:
@@ -504,6 +506,8 @@ class NavigationForm(forms.ModelForm):
 class SearchPlaceholderForm(forms.ModelForm):
     """
     搜索占位符表单
+
+    用于设置前台搜索框的动态提示文字。
     """
 
     class Meta:
@@ -537,7 +541,8 @@ class FriendLinkForm(forms.ModelForm):
     """
     友情链接表单
 
-    用于管理友情链接展示。
+    用于添加和编辑友情链接。
+    支持上传站点 Logo 和多语言描述。
     """
 
     class Meta:
@@ -586,6 +591,8 @@ from django.contrib.auth.models import Group
 class GroupForm(forms.ModelForm):
     """
     用户组表单
+
+    用于创建和编辑用户组及其权限。
     """
 
     class Meta:
@@ -697,6 +704,9 @@ class UserForm(forms.ModelForm):
 class PollForm(forms.ModelForm):
     """
     投票表单
+
+    用于创建和编辑投票活动。
+    支持设置结束时间、关联文章和多选选项。
     """
     end_date = forms.DateTimeField(
         required=False,
@@ -761,6 +771,9 @@ from django.forms import inlineformset_factory
 class ChoiceForm(forms.ModelForm):
     """
     投票选项表单
+
+    用于编辑投票的单个选项文本。
+    通常作为 FormSet 的一部分使用。
     """
     class Meta:
         model = Choice

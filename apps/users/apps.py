@@ -2,6 +2,11 @@ from django.apps import AppConfig
 
 
 class UsersConfig(AppConfig):
+    """
+    用户应用配置
+
+    Users 应用负责处理用户认证、注册、登录、个人资料管理以及通知系统。
+    """
     default_auto_field = "django.db.models.BigAutoField"
     name = "users"
     verbose_name = "用户管理"
@@ -9,7 +14,8 @@ class UsersConfig(AppConfig):
     def ready(self):
         """
         App 初始化
-        1. 确保必要的媒体目录存在，防止 FileNotFoundError
+        1. 确保必要的媒体目录存在，防止 FileNotFoundError。
+        2. 注册信号接收器 (已通过 import models 自动完成，如果 models.py 中有 @receiver)。
         """
         import os
         from django.conf import settings

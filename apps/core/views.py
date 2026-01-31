@@ -31,16 +31,36 @@ from constance import config
 from meta.views import Meta
 
 
+"""
+核心视图模块 (Core Views)
+
+本模块包含网站的基础视图和通用 API 接口，包括：
+- 健康检查、robots.txt
+- 图片上传 API
+- 文本翻译 API
+- 单页面展示 (PageView)
+- 超级管理员专用的调试 API (Debug APIs)
+"""
+
+
 @require_GET
 def health_check(request):
     """
-    健康检查 API
+    健康检查 API。
+    
+    用于负载均衡器或监控系统检查应用是否存活。
+    返回当前的服务器时间戳。
     """
     return JsonResponse({"status": "ok", "timestamp": timezone.now().isoformat()})
 
 
 @require_GET
 def robots_txt(request):
+    """
+    动态生成 robots.txt 文件。
+    
+    指导搜索引擎爬虫的行为，禁止访问后台和用户中心，并指定 Sitemap 地址。
+    """
     lines = [
         "User-agent: *",
         "Disallow: /admin/",
@@ -53,6 +73,18 @@ def robots_txt(request):
 
 @require_POST
 def upload_image(request):
+    """
+    通用图片上传 API。
+    
+    接收一个名为 'image' 的文件，将其保存到默认存储后端，并返回访问 URL。
+    通常用于 Markdown 编辑器或富文本编辑器的图片上传功能。
+    
+    权限：
+        仅限已登录用户。
+    
+    返回:
+        JSON: {"url": "..."} 或错误信息
+    """
     if not request.user.is_authenticated:
         return JsonResponse({"error": "Unauthorized"}, status=403)
     if "image" not in request.FILES:
@@ -60,8 +92,11 @@ def upload_image(request):
 
     image = request.FILES["image"]
     content_type = image.content_type or ""
+    # 简单的文件类型校验，防止上传非图片文件
     if not content_type.startswith("image/"):
         return JsonResponse({"error": "Invalid image type"}, status=400)
+    
+    # 生成唯一文件名，防止重名覆盖
     ext = os.path.splitext(image.name)[1]
     filename = f"uploads/{uuid.uuid4().hex}{ext}"
 
@@ -74,6 +109,19 @@ def upload_image(request):
 @require_POST
 @user_passes_test(lambda u: u.is_staff, login_url="users:login")
 def translate_text(request):
+    """
+    文本翻译 API。
+    
+    使用 deep_translator 调用 Google 翻译接口，将文本翻译为指定语言。
+    主要用于后台自动填充多语言字段。
+    
+    权限：
+        仅限管理员 (Staff) 用户。
+        
+    参数 (JSON):
+        text: 待翻译的文本
+        target_langs: 目标语言代码列表 (例如 ['en', 'zh-hant'])
+    """
     try:
         data = json.loads(request.body)
         text = data.get("text", "")
@@ -86,14 +134,14 @@ def translate_text(request):
         
         for lang in target_langs:
             try:
-                # Map Django language codes to Google Translate codes if necessary
+                # 映射 Django 语言代码到 Google 翻译支持的代码
                 dest_lang = lang
                 if lang == 'zh-hant':
                     dest_lang = 'zh-TW'
                 elif lang == 'zh-hans':
                     dest_lang = 'zh-CN'
                 
-                # Using src='zh-CN' as per user requirement (input is Chinese)
+                # 强制源语言为中文 (zh-CN)，因为目前需求主要是从中文翻译到其他语言
                 translated_text = GoogleTranslator(source='zh-CN', target=dest_lang).translate(text)
                 translations[lang] = translated_text
             except Exception as e:
@@ -106,9 +154,10 @@ def translate_text(request):
 
 class PageView(DetailView):
     """
-    单页面视图
+    单页面展示视图 (Page View)
 
-    用于展示关于页、联系页等静态内容页面。
+    用于渲染数据库中存储的静态页面内容（如关于、联系我们）。
+    支持在内容中使用简单的模板语法（如 {{ config.SITE_NAME }}）。
     """
 
     model = Page
@@ -116,10 +165,13 @@ class PageView(DetailView):
     context_object_name = "page"
 
     def get_queryset(self):
+        # 仅展示已发布且按创建时间倒序排列的页面
         return Page.objects.filter(status="published").order_by("-created_at")
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        
+        # 获取全站 SEO 配置信息
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = getattr(config, "SITE_KEYWORDS", "")
@@ -128,25 +180,18 @@ class PageView(DetailView):
         ]
         page = self.object
         
-        # Render page content as a template to support {{ config.SITE_NAME }} etc.
+        # 尝试将页面内容作为模板进行渲染
+        # 这样管理员在后台编辑页面内容时，可以插入 {{ config.SITE_NAME }} 等变量
         if page and page.content:
             from django.template import Template, Context
             try:
-                # Use current context to render the content
-                # We need to ensure 'config' is available. 
-                # Since we are in get_context_data, context processors haven't run yet for *this* dictionary,
-                # but they will run when the final response is rendered.
-                # However, to render the string *now*, we need the values.
-                
-                # A safer/simpler way for just config is to pass it explicitly if needed,
-                # or use RequestContext if we were in a view function.
-                # Here we just want to support 'config' and basic tags.
+                # 创建一个包含 config 的简单上下文
+                # 注意：这里不会包含 request 等其他上下文变量，仅用于简单的变量替换
                 t = Template(page.content)
-                # Create a minimal context with config
                 c = Context({'config': config})
                 context['rendered_content'] = t.render(c)
             except Exception:
-                # Fallback to raw content if rendering fails
+                # 如果渲染出错（例如语法错误），则回退到原始内容
                 context['rendered_content'] = page.content
         else:
              context['rendered_content'] = ""
@@ -165,7 +210,9 @@ class PageView(DetailView):
 @user_passes_test(lambda u: u.is_superuser, login_url="users:login")
 def debug_api_migrations(request):
     """
-    调试 API：返回待应用的迁移
+    调试 API：查看待应用的数据库迁移。
+    
+    仅超级用户可用。用于在前端面板快速查看数据库状态。
     """
     if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
         return JsonResponse({"error": "Not found"}, status=404)
@@ -179,7 +226,7 @@ def debug_api_migrations(request):
         executor = MigrationExecutor(connection)
         targets = executor.loader.graph.leaf_nodes()
         
-        # Plan migrations
+        # 计算迁移计划
         plan = executor.migration_plan(targets)
         
         pending = [
@@ -195,9 +242,9 @@ def debug_api_migrations(request):
 @user_passes_test(lambda u: u.is_superuser, login_url="users:login")
 def debug_api_stats(request):
     """
-    调试 API：返回系统统计数据
-
-    包括用户、分类、文章、评论数量和数据库连接状态。
+    调试 API：获取系统核心统计数据。
+    
+    仅超级用户可用。返回用户、分类、文章、评论的总数，以及数据库连接状态。
     """
     if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
         return JsonResponse({"error": "Not found"}, status=404)
@@ -225,14 +272,16 @@ def debug_api_stats(request):
 @user_passes_test(lambda u: u.is_superuser, login_url="users:login")
 def debug_api_system(request):
     """
-    调试 API：返回系统环境信息
-
-    包括 Python/Django 版本、已安装应用、中间件以及资源使用情况（CPU、内存、磁盘）。
+    调试 API：获取服务器系统环境信息。
+    
+    仅超级用户可用。返回 Python/Django 版本、已安装的第三方应用列表、
+    以及服务器的 CPU、内存、磁盘使用情况（依赖 psutil 库）。
     """
     if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
         return JsonResponse({"error": "Not found"}, status=404)
 
     installed_apps = list(getattr(settings, "INSTALLED_APPS", []))
+    # 筛选出第三方应用（排除 Django 内置应用和本项目应用）
     third_party = [
         app
         for app in installed_apps
@@ -244,7 +293,7 @@ def debug_api_system(request):
         and app not in {"blog", "users", "core"}
     ]
 
-    # 获取系统资源信息 (依赖 psutil)
+    # 获取系统资源使用情况
     try:
         cpu_percent = psutil.cpu_percent(interval=None)
         memory = psutil.virtual_memory()
@@ -285,8 +334,9 @@ def debug_api_system(request):
 def debug_execute_command(request):
     """
     调试 API：执行受限的 Django 管理命令。
-
-    出于安全考虑，仅支持白名单内的命令。
+    
+    仅超级用户可用。出于安全考虑，仅支持白名单内的无害或只读命令。
+    用于在前端面板快速执行一些维护操作（如检查配置、清除 Session）。
     """
     if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
         return JsonResponse({"error": "Not found"}, status=404)
@@ -296,11 +346,11 @@ def debug_execute_command(request):
 
     command = request.POST.get("command")
 
-    # 安全白名单：仅允许执行以下无害或只读命令
+    # 安全白名单：仅允许执行以下命令
     ALLOWED_COMMANDS = {
         "check": ["--deploy", "--fail-level", "WARNING"],
         "showmigrations": ["--list"],
-        # "diffsettings": ["--all"],  # 已移除以防止敏感信息泄露
+        # "diffsettings": ["--all"],  # 出于安全原因已禁用
         "clearsessions": [],
         "help": [],
     }
@@ -308,8 +358,8 @@ def debug_execute_command(request):
     if command not in ALLOWED_COMMANDS:
         return JsonResponse({"error": "Command not allowed"}, status=403)
 
-    # 目前忽略用户传递的参数，强制使用白名单中的安全参数
-    # 避免命令注入风险
+    # 强制使用白名单中预定义的参数，忽略用户传递的任何参数
+    # 这是防止命令注入的关键措施
     safe_args = ALLOWED_COMMANDS[command]
 
     out = StringIO()

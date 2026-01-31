@@ -1,12 +1,14 @@
 {% extends 'base.html' %}
 {% load markdown_extras i18n %}
 
+{# 单页面详情模板：用于展示“关于”、“联系我们”等静态页面内容 #}
+
 {% block title %}{{ page.title }}{% endblock %}
 
 {% block content %}
 <div class="container mx-auto px-4 py-12 max-w-5xl">
     <div class="bg-base-100 rounded-3xl shadow-sm border border-base-content/5 p-8 md:p-12 relative overflow-hidden">
-        <!-- Background Decoration -->
+        <!-- 背景装饰效果 (Background Decoration) -->
         <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32"></div>
         <div class="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-3xl pointer-events-none -ml-32 -mb-32"></div>
 
@@ -15,6 +17,7 @@
             <div class="h-1 w-24 bg-gradient-to-r from-primary to-secondary rounded-full mx-auto"></div>
         </header>
 
+        <!-- 文章内容区：应用 Markdown 渲染和排版样式 -->
         <article class="prose prose-lg md:prose-xl mx-auto dark:prose-invert relative z-10">
             {{ rendered_content|default:page.content|markdown }}
         </article>

@@ -593,9 +593,19 @@ from django.http import HttpResponse, JsonResponse
 class SearchView(SidebarContextMixin, ListView):
     """
     全站搜索视图
-    - 支持多模型搜索 (Post, Category, Tag, User, Poll)
-    - 支持按类型筛选
-    - 使用 django-watson 进行全文检索
+
+    提供统一的搜索接口，整合了多种数据来源：
+    1. Django Watson (全文搜索引擎，优先使用)。
+    2. 数据库模糊查询 (icontains，作为降级方案)。
+    3. 拼音搜索 (支持首字母和全拼，针对 ASCII 查询)。
+    
+    支持按内容类型 (Type) 过滤：
+    - all: 全部
+    - post: 文章
+    - category: 分类
+    - tag: 标签
+    - user: 用户
+    - poll: 投票
     """
 
     template_name = "blog/search_results.html"
@@ -603,14 +613,14 @@ class SearchView(SidebarContextMixin, ListView):
     paginate_by = 12
 
     def get(self, request, *args, **kwargs):
-        # Handle JSON suggestions
+        # 处理搜索建议请求 (AJAX)
         if request.GET.get('type') == 'suggest':
             return self.get_suggestions(request)
 
-        # Handle empty query -> Search Home
+        # 处理空查询 -> 返回搜索首页
         if not request.GET.get('q'):
             self.template_name = "blog/search_index.html"
-            # Manually trigger get_context_data with empty object_list
+            # 手动触发 get_context_data 并传入空列表
             self.object_list = []
             context = self.get_context_data()
             return render(request, self.template_name, context)
@@ -618,6 +628,13 @@ class SearchView(SidebarContextMixin, ListView):
         return super().get(request, *args, **kwargs)
 
     def get_suggestions(self, request):
+        """
+        获取搜索建议
+        
+        用于前端搜索框的自动补全功能。
+        返回包含文本、URL 和类型的 JSON 列表。
+        优先匹配拼音，然后是数据库模糊匹配。
+        """
         query = request.GET.get('q', '').strip()
         if not query:
             return JsonResponse({'results': []})
@@ -625,13 +642,13 @@ class SearchView(SidebarContextMixin, ListView):
         results = []
         seen = set()
         
-        # Helper to add unique results
+        # 辅助函数：添加唯一结果
         def add_result(text, url, type_code, type_label):
             if text not in seen:
                 seen.add(text)
                 results.append({'text': text, 'url': url, 'type': type_code, 'type_label': type_label})
 
-        # 1. Pinyin Search (if query is ASCII)
+        # 1. 拼音搜索 (仅当查询词为 ASCII 时启用)
         if all(ord(c) < 128 for c in query):
             try:
                 from xpinyin import Pinyin
@@ -640,9 +657,9 @@ class SearchView(SidebarContextMixin, ListView):
                 def match_pinyin(text, q):
                     if not text: return False
                     try:
-                        # Convert to pinyin without separator: "测试" -> "ceshi"
+                        # 转换为无分隔符的拼音: "测试" -> "ceshi"
                         py_full = p.get_pinyin(text, "")
-                        # Convert to initials: "测试" -> "cs"
+                        # 转换为首字母: "测试" -> "cs"
                         py_initials = p.get_initials(text, "")
                         
                         q_lower = q.lower()
@@ -650,13 +667,13 @@ class SearchView(SidebarContextMixin, ListView):
                     except Exception:
                         return False
 
-                # Search Tags
+                # 搜索标签
                 for tag in Tag.objects.all():
                     if match_pinyin(tag.name, query):
                         add_result(tag.name, f"{request.path}?q={tag.name}&type=tag", "tag", _("标签"))
                         if len(results) >= 5: break
                 
-                # Search Posts
+                # 搜索文章
                 for post in Post.objects.filter(status='published'):
                     if match_pinyin(post.title, query):
                         add_result(post.title, post.get_absolute_url(), "post", _("文章"))
@@ -665,7 +682,7 @@ class SearchView(SidebarContextMixin, ListView):
             except ImportError:
                 pass
         
-        # 2. Standard DB Search
+        # 2. 标准数据库搜索 (降级/补充)
         if len(results) < 10:
             # Tags
             for tag in Tag.objects.filter(name__icontains=query)[:5]:

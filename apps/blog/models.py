@@ -189,7 +189,12 @@ class Post(models.Model):
     def reading_time(self):
         """
         计算阅读时长 (分钟)
-        假设阅读速度: 中文 300 字/分钟, 英文 150 词/分钟
+        
+        算法逻辑：
+        1. 移除 HTML 标签（如果内容包含）。
+        2. 统计中文字符数，按 300 字/分钟计算。
+        3. 统计英文单词数，按 150 词/分钟计算。
+        4. 两者相加向上取整，最少为 1 分钟。
         """
         # 移除 HTML 标签 (如果 content 已经是 Markdown 还没渲染 HTML，则直接计算)
         # 这里假设 content 是 Markdown 源码
