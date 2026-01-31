@@ -24,15 +24,38 @@ def site_settings(request):
             cache.set(key, data, ttl)
         return data
 
-    placeholders = load_cached(
-        "site:search_placeholders",
-        lambda: list(SearchPlaceholder.objects.filter(is_active=True)),
-    )
+    def get_search_placeholders():
+        # 1. 优先使用 SearchPlaceholder
+        phs = list(SearchPlaceholder.objects.filter(is_active=True))
+        if phs:
+            return phs
+
+        # 2. 回退到热门/随机标签 (Tags)
+        try:
+            from blog.models import Tag
+            # 随机获取 5 个标签作为占位符
+            tags = list(Tag.objects.filter(is_active=True).order_by('?')[:5])
+            if tags:
+                return tags
+        except ImportError:
+            pass
+        return []
+
+    cached_data = load_cached("site:search_placeholders_v2", get_search_placeholders)
+
+    placeholders = []
+    if cached_data:
+        # 判断数据类型并提取文本
+        first_item = cached_data[0]
+        if hasattr(first_item, "text"):  # SearchPlaceholder
+            placeholders = [p.text for p in cached_data]
+        elif hasattr(first_item, "name"):  # Tag
+            # 格式化: "搜索 <标签名>..."
+            prefix = _("搜索 {}...")
+            placeholders = [str(prefix).format(tag.name) for tag in cached_data]
+
     if not placeholders:
         placeholders = [_("搜索文章..."), _("搜索标签...")]
-    else:
-        # Extract text property to trigger modeltranslation fallback/current language logic
-        placeholders = [p.text for p in placeholders]
 
     def build_navigations():
         navs = Navigation.objects.filter(is_active=True).order_by("order")
