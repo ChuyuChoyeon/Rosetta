@@ -99,6 +99,7 @@ uv.lock
 core/migrations/*
 */migrations/*
 theme/static_src/package-lock.json
+<<<<<<< HEAD
 INDEX.md
 # --- Django 补充项 ---
 # 本地设置（多人协作时避免冲突）
@@ -235,3 +236,6 @@ silk/
 # --- 本地缓存与锁 ---
 *.lock
 *.pid.lock
+=======
+apps/*/migrations/*
+>>>>>>> c6c7f6a (chore: 忽略所有apps子目录下的迁移文件)
