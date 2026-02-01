@@ -57,8 +57,12 @@
     <link rel="stylesheet" href="{% static 'js/editor.css' %}?v=4.1">
     <script defer src="{% static 'js/editor.js' %}?v=4.1"></script>
 
-    {% block extra_head %}{% endblock %}
+    <!-- Cropper.js -->
+    <link rel="stylesheet" href="{% static 'css/cropper.css' %}">
+    <script src="{% static 'js/image-cropper.js' %}"></script>
     
+    {% block extra_head %}{% endblock %}
+</head>    
     <!-- FontAwesome (Required by Toast UI) -->
     <link rel="stylesheet" href="{% static 'theme/css/all.min.css' %}">
     

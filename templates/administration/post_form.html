@@ -546,19 +546,10 @@
 
                 <!-- Cover Image -->
                 {% captureas cover_content %}
-                    <div class="form-control w-full" x-data="{ 
+                    <div class="form-control w-full" x-data="imageCropper({ 
                         previewUrl: '{% if object.cover_image %}{{ object.cover_image.url|escapejs }}{% endif %}',
-                        handleFile(event) {
-                            const file = event.target.files[0];
-                            if (file) {
-                                const reader = new FileReader();
-                                reader.onload = (e) => {
-                                    this.previewUrl = e.target.result;
-                                };
-                                reader.readAsDataURL(file);
-                            }
-                        }
-                    }">
+                        aspectRatio: 1200/630
+                    })">
                         <div class="flex flex-col gap-2">
                             <!-- Preview area -->
                             <div class="relative w-full aspect-video bg-base-200 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-base-300 group hover:border-primary transition-colors cursor-pointer" 
@@ -569,6 +560,7 @@
                                 <div class="flex flex-col items-center text-base-content/40 group-hover:text-primary transition-colors" x-show="!previewUrl">
                                     <span class="material-symbols-outlined text-4xl">image</span>
                                     <span class="text-sm mt-1">{% trans "点击上传封面" %}</span>
+                                    <span class="text-xs opacity-60 mt-0.5">{% trans "推荐 1200x630" %}</span>
                                 </div>
                                 
                                 <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white" x-show="previewUrl">
@@ -576,8 +568,12 @@
                                 </div>
                             </div>
                             
-                            <div @change="handleFile">
-                                {{ form.cover_image }}
+                            <div class="hidden">
+                                <input type="file" 
+                                       name="{{ form.cover_image.name }}" 
+                                       id="{{ form.cover_image.id_for_label }}"
+                                       accept="image/*"
+                                       @change="handleFile">
                             </div>
                         </div>
                     </div>

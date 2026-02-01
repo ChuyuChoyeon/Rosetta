@@ -6,6 +6,8 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from django.templatetags.static import static
 from core.validators import validate_image_file
+from imagekit.models import ImageSpecField
+from imagekit.processors import ResizeToFill
 
 
 class UserTitle(models.Model):
@@ -53,6 +55,21 @@ class User(AbstractUser):
         null=True,
         validators=[validate_image_file],
     )
+    # 头像缩略图 (列表显示)
+    avatar_thumbnail = ImageSpecField(
+        source="avatar",
+        processors=[ResizeToFill(100, 100)],
+        format="WEBP",
+        options={"quality": 80},
+    )
+    # 头像中图 (个人资料显示)
+    avatar_medium = ImageSpecField(
+        source="avatar",
+        processors=[ResizeToFill(300, 300)],
+        format="WEBP",
+        options={"quality": 85},
+    )
+
     cover_image = models.ImageField(
         "封面图",
         upload_to="covers/",
@@ -61,6 +78,21 @@ class User(AbstractUser):
         help_text="建议尺寸 800x200 像素",
         validators=[validate_image_file],
     )
+    # 封面图缩略图 (列表显示)
+    cover_thumbnail = ImageSpecField(
+        source="cover_image",
+        processors=[ResizeToFill(200, 50)],
+        format="WEBP",
+        options={"quality": 80},
+    )
+    # 封面图优化版 (个人主页显示)
+    cover_optimized = ImageSpecField(
+        source="cover_image",
+        processors=[ResizeToFill(800, 200)],
+        format="WEBP",
+        options={"quality": 85},
+    )
+
     nickname = models.CharField("昵称", max_length=50, blank=True)
     bio = models.TextField("个人简介", blank=True, max_length=500)
     website = models.URLField("个人网站", blank=True)
@@ -98,6 +130,21 @@ class User(AbstractUser):
         if self.avatar and hasattr(self.avatar, "url"):
             return self.avatar.url
         return static("core/img/avatar-default.svg")
+
+    @property
+    def get_avatar_thumbnail_url(self):
+        """获取用户头像缩略图URL"""
+        if self.avatar and hasattr(self.avatar, "url"):
+            return self.avatar_thumbnail.url
+        return static("core/img/avatar-default.svg")
+
+    @property
+    def get_avatar_medium_url(self):
+        """获取用户头像中图URL"""
+        if self.avatar and hasattr(self.avatar, "url"):
+            return self.avatar_medium.url
+        return static("core/img/avatar-default.svg")
+
 
     @property
     def unread_notification_count(self):

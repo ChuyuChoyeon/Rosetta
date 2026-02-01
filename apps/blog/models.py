@@ -43,6 +43,22 @@ class Category(models.Model):
         validators=[validate_image_file],
     )
 
+    # ImageKit Thumbnails
+    cover_thumbnail = ImageSpecField(
+        source="cover_image",
+        processors=[ResizeToFill(200, 50)],
+        format="WEBP",
+        options={"quality": 80},
+    )
+
+    cover_optimized = ImageSpecField(
+        source="cover_image",
+        processors=[ResizeToFill(800, 200)],
+        format="WEBP",
+        options={"quality": 85},
+    )
+
+
     class Meta:
         verbose_name = _("分类")
         verbose_name_plural = verbose_name

@@ -106,34 +106,70 @@
         <!-- Profile Info -->
         {% captureas profile_content %}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="form-control w-full">
+                <!-- Avatar -->
+                <div class="form-control w-full" x-data="imageCropper({ 
+                    previewUrl: '{% if object.avatar %}{{ object.avatar.url|escapejs }}{% endif %}',
+                    aspectRatio: 1
+                })">
                     <label class="label">
                         <span class="label-text font-medium">{% trans "头像" %}</span>
                     </label>
-                    {% if object.avatar %}
-                    <div class="mb-2">
-                        <div class="avatar">
-                            <div class="w-16 rounded-full ring ring-base-200 ring-offset-2">
-                                <img src="{{ object.avatar.url }}" />
+                    <div class="flex items-center gap-4">
+                        <div class="avatar relative group cursor-pointer" @click="document.getElementById('{{ form.avatar.id_for_label }}').click()">
+                            <div class="w-24 h-24 rounded-full ring ring-base-200 ring-offset-2 overflow-hidden bg-base-100">
+                                <img :src="previewUrl || '{% static 'core/img/avatar-default.svg' %}'" class="object-cover w-full h-full" />
+                                <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white rounded-full">
+                                    <span class="material-symbols-outlined">edit</span>
+                                </div>
                             </div>
                         </div>
+                        <div class="flex-1">
+                            <input type="file" 
+                                   name="{{ form.avatar.name }}" 
+                                   id="{{ form.avatar.id_for_label }}"
+                                   class="file-input file-input-bordered w-full file-input-sm"
+                                   accept="image/*"
+                                   @change="handleFile">
+                            <label class="label">
+                                <span class="label-text-alt opacity-60">{% trans "建议尺寸: 300x300 (1:1)" %}</span>
+                            </label>
+                        </div>
                     </div>
-                    {% endif %}
-                    {% render_field form.avatar class="file-input file-input-bordered w-full" %}
                 </div>
 
-                <div class="form-control w-full">
+                <!-- Cover Image -->
+                <div class="form-control w-full" x-data="imageCropper({ 
+                    previewUrl: '{% if object.cover_image %}{{ object.cover_image.url|escapejs }}{% endif %}',
+                    aspectRatio: 4
+                })">
                     <label class="label">
                         <span class="label-text font-medium">{% trans "封面图" %}</span>
                     </label>
-                    {% if object.cover_image %}
-                    <div class="mb-2">
-                        <div class="h-16 w-32 rounded-lg overflow-hidden ring-1 ring-base-200">
-                            <img src="{{ object.cover_image.url }}" class="w-full h-full object-cover" />
+                    <div class="relative w-full aspect-[4/1] bg-base-200 rounded-lg overflow-hidden flex items-center justify-center border-2 border-dashed border-base-300 group hover:border-primary transition-colors cursor-pointer" 
+                         @click="document.getElementById('{{ form.cover_image.id_for_label }}').click()">
+                        
+                        <img :src="previewUrl" class="w-full h-full object-cover" x-show="previewUrl">
+                        
+                        <div class="flex flex-col items-center text-base-content/40 group-hover:text-primary transition-colors" x-show="!previewUrl">
+                            <span class="material-symbols-outlined text-3xl">image</span>
+                            <span class="text-xs mt-1">{% trans "点击上传封面" %}</span>
+                        </div>
+                        
+                        <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white" x-show="previewUrl">
+                            <span class="material-symbols-outlined">edit</span>
                         </div>
                     </div>
-                    {% endif %}
-                    {% render_field form.cover_image class="file-input file-input-bordered w-full" %}
+                    
+                    <div class="hidden">
+                         <input type="file" 
+                                name="{{ form.cover_image.name }}" 
+                                id="{{ form.cover_image.id_for_label }}"
+                                accept="image/*"
+                                @change="handleFile">
+                    </div>
+                    <label class="label">
+                        <span class="label-text-alt opacity-60">{% trans "建议尺寸: 1200x300 (4:1)" %}</span>
+                    </label>
                 </div>
             </div>
 

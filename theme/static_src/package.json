@@ -8,7 +8,7 @@
     "build": "npm run build:clean && npm run build:tailwind && npm run build:js",
     "build:clean": "rimraf ../static/css/dist",
     "build:tailwind": "cross-env NODE_ENV=production postcss ./src/styles.css -o ../static/css/dist/styles.css --minify",
-    "build:js": "esbuild src/js/editor.js --bundle --outfile=../static/js/editor.js --loader:.woff2=file --loader:.woff=file --loader:.ttf=file --minify && esbuild src/js/viewer.js --bundle --outfile=../static/js/viewer.js --loader:.woff2=file --loader:.woff=file --loader:.ttf=file --minify && esbuild src/js/htmx-init.js --bundle --outfile=../static/js/htmx-init.js --minify && esbuild src/js/admin-translation.js --bundle --outfile=../static/js/admin-translation.js --minify",
+    "build:js": "esbuild src/js/editor.js --bundle --outfile=../static/js/editor.js --loader:.woff2=file --loader:.woff=file --loader:.ttf=file --minify && esbuild src/js/viewer.js --bundle --outfile=../static/js/viewer.js --loader:.woff2=file --loader:.woff=file --loader:.ttf=file --minify && esbuild src/js/htmx-init.js --bundle --outfile=../static/js/htmx-init.js --minify && esbuild src/js/admin-translation.js --bundle --outfile=../static/js/admin-translation.js --minify && esbuild src/js/image-cropper.js --bundle --outfile=../static/js/image-cropper.js --loader:.css=file --minify",
     "dev": "cross-env NODE_ENV=development postcss ./src/styles.css -o ../static/css/dist/styles.css --watch"
   },
   "keywords": [],
@@ -46,6 +46,7 @@
     "@bytemd/plugin-medium-zoom": "^1.22.0",
     "@bytemd/plugin-mermaid": "^1.22.0",
     "@tailwindcss/container-queries": "^0.1.1",
+    "cropperjs": "^1.6.2",
     "tailwind-scrollbar": "^4.0.2",
     "tailwindcss-animate": "^1.0.7"
   }

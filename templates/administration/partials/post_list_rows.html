@@ -42,7 +42,7 @@
         <div class="flex items-center space-x-2">
             <div class="avatar">
                 <div class="w-6 h-6 rounded-full ring ring-base-200 ring-offset-1">
-                    <img src="{{ post.author.get_avatar_url }}" alt="{{ post.author.username }}" />
+                    <img src="{{ post.author.get_avatar_thumbnail_url }}" alt="{{ post.author.username }}" />
                 </div>
             </div>
             <a href="{% url 'administration:user_edit' post.author.pk %}" class="text-sm hover:text-primary transition-colors truncate max-w-[100px]">{{ post.author.username }}</a>

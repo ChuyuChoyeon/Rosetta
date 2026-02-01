@@ -145,7 +145,7 @@ class DashboardService:
             
             uptime_str = f"{uptime.days}{_('天')} " if uptime.days > 0 else ""
             hours, remainder = divmod(uptime.seconds, 3600)
-            minutes, _ = divmod(remainder, 60)
+            minutes, seconds = divmod(remainder, 60)
             uptime_str += f"{hours}{_('小时')} {minutes}{_('分钟')}"
 
             context["system_info"] = {

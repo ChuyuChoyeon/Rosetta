@@ -9,16 +9,22 @@
     <th class="font-mono text-xs opacity-50 hidden md:table-cell">{{ category.id }}</th>
     <td>
         <div class="flex items-center gap-3">
-            {% if category.icon %}
+            {% if category.cover_image %}
+                <div class="avatar">
+                    <div class="w-12 h-8 rounded-lg ring-1 ring-base-content/10 shadow-sm overflow-hidden">
+                        <img src="{{ category.cover_thumbnail.url }}" alt="Cover" class="object-cover w-full h-full" />
+                    </div>
+                </div>
+            {% elif category.icon %}
                 {% if category.color|first == '#' %}
-                <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center shrink-0" style="color: {{ category.color }}">
+                <div class="w-12 h-8 rounded-lg bg-base-200 flex items-center justify-center shrink-0" style="color: {{ category.color }}">
                 {% else %}
-                <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center text-{{ category.color|default:'base-content' }} shrink-0">
+                <div class="w-12 h-8 rounded-lg bg-base-200 flex items-center justify-center text-{{ category.color|default:'base-content' }} shrink-0">
                 {% endif %}
                     <span class="material-symbols-outlined text-lg">{{ category.icon }}</span>
                 </div>
             {% else %}
-                <div class="w-8 h-8 rounded-lg bg-base-200 flex items-center justify-center text-base-content/20 shrink-0">
+                <div class="w-12 h-8 rounded-lg bg-base-200 flex items-center justify-center text-base-content/20 shrink-0">
                     <span class="material-symbols-outlined text-lg">category</span>
                 </div>
             {% endif %}
