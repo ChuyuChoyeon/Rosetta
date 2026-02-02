@@ -41,8 +41,7 @@ COPY . .
 # --- 构建阶段 ---
 
 # 1. 安装 Tailwind 依赖
-# --no-input 防止交互式提示阻塞构建
-RUN uv run python manage.py tailwind install --no-input
+RUN uv run python manage.py tailwind install
 
 # 2. 构建 Tailwind CSS
 RUN uv run python manage.py tailwind build
