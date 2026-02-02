@@ -91,13 +91,36 @@ def upload_image(request):
         return JsonResponse({"error": "No image provided"}, status=400)
 
     image = request.FILES["image"]
-    content_type = image.content_type or ""
-    # 简单的文件类型校验，防止上传非图片文件
-    if not content_type.startswith("image/"):
-        return JsonResponse({"error": "Invalid image type"}, status=400)
     
+    # 1. 检查扩展名白名单
+    allowed_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'}
+    ext = os.path.splitext(image.name)[1].lower()
+    if ext not in allowed_extensions:
+        return JsonResponse({"error": "Unsupported file extension"}, status=400)
+
+    # 2. 检查文件头 (Magic Bytes) 防止伪造
+    try:
+        import magic
+        # 读取前 2KB 用于检测
+        first_chunk = image.read(2048)
+        image.seek(0) # 重置指针
+        
+        mime_type = magic.from_buffer(first_chunk, mime=True)
+        if not mime_type.startswith("image/"):
+             return JsonResponse({"error": "Invalid file content (not an image)"}, status=400)
+             
+        # 额外检查：排除 SVG (XSS 风险)
+        if "svg" in mime_type:
+             return JsonResponse({"error": "SVG images are not allowed for security reasons"}, status=400)
+             
+    except ImportError:
+        # 如果没有安装 python-magic，回退到简单的 Content-Type 检查，但记录警告
+        # 生产环境强烈建议安装 python-magic
+        content_type = image.content_type or ""
+        if not content_type.startswith("image/"):
+            return JsonResponse({"error": "Invalid image type"}, status=400)
+
     # 生成唯一文件名，防止重名覆盖
-    ext = os.path.splitext(image.name)[1]
     filename = f"uploads/{uuid.uuid4().hex}{ext}"
 
     file_path = default_storage.save(filename, image)

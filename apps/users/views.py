@@ -354,11 +354,11 @@ class MarkNotificationReadView(LoginRequiredMixin, View):
     """
     标记通知为已读
 
-    支持 POST 和 GET 请求（为了方便某些场景下的直接链接访问，但建议使用 POST）。
+    仅支持 POST 请求。
     HTMX 支持：如果请求来自 HTMX，则返回空响应以支持前端移除元素或更新状态。
     """
 
-    def action(self, request, pk):
+    def post(self, request, pk):
         notification = get_object_or_404(
             Notification,
             pk=pk,
@@ -375,12 +375,6 @@ class MarkNotificationReadView(LoginRequiredMixin, View):
         if next_url:
             return redirect(next_url)
         return redirect("users:profile")
-
-    def get(self, request, pk):
-        return self.action(request, pk)
-
-    def post(self, request, pk):
-        return self.action(request, pk)
 
 
 class DeleteNotificationView(LoginRequiredMixin, View):

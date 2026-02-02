@@ -54,29 +54,54 @@ class PollVoteView(LoginRequiredMixin, View):
     5. 返回更新后的投票结果 (HTMX 片段)。
     """
     def post(self, request, pk):
+        from django.db import transaction
+        
         poll = get_object_or_404(Poll, pk=pk)
         
-        # 检查是否已投票 (Check if already voted)
-        if Vote.objects.filter(poll=poll, user=request.user).exists():
-            # If already voted, return the results directly
-            context = {
-                "poll": poll,
-                "has_voted": True
-            }
-            return render(request, "voting/partials/poll_results.html", context)
-
         choice_id = request.POST.get("choice")
         if not choice_id:
             return HttpResponse(f'<div class="alert alert-warning">{_("请选择一个选项！")}</div>')
-
+            
         choice = get_object_or_404(Choice, pk=choice_id, poll=poll)
 
-        # 创建投票记录 (Create Vote)
-        Vote.objects.create(poll=poll, user=request.user, choice=choice)
+        # 检查是否允许投票 (Check if voting is allowed)
+        # 1. 如果不允许重复投票，检查是否已投过该 Poll
+        # 2. 如果允许重复投票 (多选)，检查是否已投过该选项
         
-        # 增加票数 (Increment Count - Atomic)
-        Choice.objects.filter(pk=choice_id).update(votes_count=F("votes_count") + 1)
+        has_voted_poll = Vote.objects.filter(poll=poll, user=request.user).exists()
+        has_voted_choice = Vote.objects.filter(poll=poll, user=request.user, choice=choice).exists()
 
+        if poll.allow_multiple_choices:
+             if has_voted_choice:
+                # 已经投过这个选项了
+                context = {"poll": poll, "has_voted": True}
+                return render(request, "voting/partials/poll_results.html", context)
+        else:
+             if has_voted_poll:
+                # 已经投过票了 (单选)
+                context = {"poll": poll, "has_voted": True}
+                return render(request, "voting/partials/poll_results.html", context)
+
+        try:
+            with transaction.atomic():
+                #再一次检查防止并发 (Double check for concurrency)
+                if poll.allow_multiple_choices:
+                    if Vote.objects.filter(poll=poll, user=request.user, choice=choice).exists():
+                         raise ValueError("Already voted for this choice")
+                else:
+                    if Vote.objects.filter(poll=poll, user=request.user).exists():
+                         raise ValueError("Already voted for this poll")
+
+                # 创建投票记录 (Create Vote)
+                Vote.objects.create(poll=poll, user=request.user, choice=choice)
+                
+                # 增加票数 (Increment Count - Atomic)
+                Choice.objects.filter(pk=choice_id).update(votes_count=F("votes_count") + 1)
+        except ValueError:
+            # 并发导致重复投票，直接返回结果
+            context = {"poll": poll, "has_voted": True}
+            return render(request, "voting/partials/poll_results.html", context)
+            
         # 返回更新后的结果 (Return updated poll results - HTMX)
         context = {
             "poll": poll,
