@@ -24,6 +24,9 @@
                 } else {
                     document.documentElement.classList.remove('dark');
                 }
+                // CRITICAL FIX: Always persist to localStorage even in fallback mode
+                // This ensures ThemeManager picks up the correct state when it finally initializes
+                localStorage.setItem('theme', theme);
             }
         } catch (e) {
             console.error('Theme initialization error:', e);
