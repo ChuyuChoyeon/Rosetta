@@ -18,7 +18,7 @@
         <div class="flex justify-between items-center w-full lg:hidden pb-2 border-b border-base-content/5 lg:border-0">
             <!-- 移动端菜单开关 -->
             <div class="dropdown">
-                <div tabindex="0" role="button" class="btn btn-ghost btn-circle">
+                <div tabindex="0" role="button" class="btn btn-ghost btn-circle" aria-label="{% trans '菜单' %}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" /></svg>
                 </div>
                 <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
@@ -39,7 +39,7 @@
             <!-- 移动端右侧操作 (搜索 & 主题) -->
             <div class="flex items-center gap-1">
                 <!-- 搜索 -->
-                <button class="btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors" onclick="search_modal.showModal()">
+                <button class="btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors" onclick="search_modal.showModal()" aria-label="{% trans '搜索' %}">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </button>
                 <!-- 语言切换 (移动端) -->
@@ -154,7 +154,7 @@
     
     <div class="navbar-end gap-2 hidden lg:flex lg:w-auto">
       <!-- 搜索 -->
-      <button class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors" onclick="search_modal.showModal()">
+      <button class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors" onclick="search_modal.showModal()" aria-label="{% trans '搜索' %}">
         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
       </button>
 
@@ -176,61 +176,83 @@
           </ul>
       </div>
       
-      <!-- 主题切换 -->
-                <label class="swap swap-rotate btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors grid place-items-center">
-                    <!-- 隐藏的复选框用于控制状态 -->
-                    <input type="checkbox" 
-                           class="theme-controller hidden" 
-                           value="dark"
-                           onchange="updateTheme(this.checked ? 'dark' : 'light')"
-                           id="theme-toggle-nav" />
-                    
-                    <!-- 太阳图标 -->
-                    <span class="material-symbols-outlined swap-off text-[24px] leading-none col-start-1 row-start-1">light_mode</span>
-                    
-                    <!-- 月亮图标 -->
-                    <span class="material-symbols-outlined swap-on text-[24px] leading-none col-start-1 row-start-1">dark_mode</span>
-                </label>
-                <!-- 强制同步脚本：在元素渲染后立即执行，防止 FOUC 和状态不一致 -->
-                <script>
-                    (function() {
-                        try {
-                            var toggle = document.getElementById('theme-toggle-nav');
-                            if (toggle) {
-                                // 优先读取 DOM 上的 data-theme，这是最准确的当前状态（由 theme_init.html 设置）
-                                var currentTheme = document.documentElement.getAttribute('data-theme');
-                                // 如果 DOM 没设置，回退到 localStorage
-                                if (!currentTheme) currentTheme = localStorage.getItem('theme');
-                                // 如果是暗色，强制选中
-                                if (currentTheme === 'dark' || document.documentElement.classList.contains('dark')) {
-                                    toggle.checked = true;
-                                } else {
-                                    toggle.checked = false;
-                                }
-                            }
-                        } catch(e) { console.error('Theme toggle sync error:', e); }
-                    })();
-                </script>
+      <!-- 主题切换 (Dropdown) -->
+      <div class="dropdown dropdown-end">
+          <div tabindex="0" role="button" class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors">
+              <span class="material-symbols-outlined text-[24px]" x-show="!$store.theme || $store.theme === 'system'">brightness_auto</span>
+              <span class="material-symbols-outlined text-[24px]" x-show="$store.theme === 'light'" style="display: none;">light_mode</span>
+              <span class="material-symbols-outlined text-[24px]" x-show="$store.theme === 'dark'" style="display: none;">dark_mode</span>
+          </div>
+          <ul tabindex="0" class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+              <li>
+                  <button class="flex justify-between" @click="updateTheme('light')" :class="{ 'active': $store.theme === 'light' }">
+                      <span class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[20px]">light_mode</span>
+                          {% trans "浅色" %}
+                      </span>
+                      <span class="material-symbols-outlined text-[16px]" x-show="$store.theme === 'light'">check</span>
+                  </button>
+              </li>
+              <li>
+                  <button class="flex justify-between" @click="updateTheme('dark')" :class="{ 'active': $store.theme === 'dark' }">
+                      <span class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[20px]">dark_mode</span>
+                          {% trans "深色" %}
+                      </span>
+                      <span class="material-symbols-outlined text-[16px]" x-show="$store.theme === 'dark'">check</span>
+                  </button>
+              </li>
+              <li>
+                  <button class="flex justify-between" @click="updateTheme('system')" :class="{ 'active': $store.theme === 'system' }">
+                      <span class="flex items-center gap-2">
+                          <span class="material-symbols-outlined text-[20px]">brightness_auto</span>
+                          {% trans "跟随系统" %}
+                      </span>
+                      <span class="material-symbols-outlined text-[16px]" x-show="!$store.theme || $store.theme === 'system'">check</span>
+                  </button>
+              </li>
+          </ul>
+      </div>
 
+      <!-- Alpine Store for Theme -->
       <script>
+          document.addEventListener('alpine:init', () => {
+              Alpine.store('theme', localStorage.getItem('theme') || 'system');
+          });
+
           function updateTheme(theme) {
-              // 使用 ThemeManager 应用主题 (它会处理 DOM、localStorage 和 Tailwind dark 类)
+              // Update Alpine store
+              if (window.Alpine) {
+                  Alpine.store('theme', theme);
+              }
+
+              // Use ThemeManager to apply theme
               if (window.ThemeManager) {
                   window.ThemeManager.updateTheme(theme);
               } else {
-                  // 降级处理 (虽然应该总是有 ThemeManager)
-                  document.documentElement.setAttribute('data-theme', theme);
-                  if (theme === 'dark') {
-                      document.documentElement.classList.add('dark');
+                  // Fallback
+                  if (theme === 'system') {
+                      localStorage.removeItem('theme');
+                      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                          document.documentElement.setAttribute('data-theme', 'dark');
+                          document.documentElement.classList.add('dark');
+                      } else {
+                          document.documentElement.setAttribute('data-theme', 'light');
+                          document.documentElement.classList.remove('dark');
+                      }
                   } else {
-                      document.documentElement.classList.remove('dark');
+                      document.documentElement.setAttribute('data-theme', theme);
+                      localStorage.setItem('theme', theme);
+                      if (theme === 'dark') {
+                          document.documentElement.classList.add('dark');
+                      } else {
+                          document.documentElement.classList.remove('dark');
+                      }
                   }
-                  localStorage.setItem('theme', theme);
               }
               
               // Sync with backend if user is logged in
               {% if request.user.is_authenticated %}
-              // 使用防抖，避免频繁请求
               if (window.themeUpdateTimeout) clearTimeout(window.themeUpdateTimeout);
               window.themeUpdateTimeout = setTimeout(() => {
                   fetch("{% url 'users:update_theme' %}", {
@@ -383,13 +405,13 @@
             x-transition:leave="transition ease-in duration-150"
             x-transition:leave-start="opacity-100 translate-y-0"
             x-transition:leave-end="opacity-0 translate-y-2"
-            class="absolute w-full mt-4 bg-base-100/95 backdrop-blur rounded-xl shadow-xl border border-base-200 overflow-hidden z-50"
+            class="absolute w-full mt-4 bg-base-100/95 backdrop-blur-xl rounded-xl shadow-2xl border border-base-content/10 overflow-hidden z-50"
             style="display: none;"
         >
             <ul class="max-h-[60vh] overflow-y-auto">
                 <template x-for="(item, index) in suggestions" :key="index">
                     <li>
-                        <a :href="item.url" class="flex items-center justify-between px-4 py-3 hover:bg-primary/10 hover:text-primary transition-colors group border-b border-base-content/5 last:border-0">
+                        <a :href="item.url" class="flex items-center justify-between px-4 py-3 hover:bg-primary/10 hover:text-primary transition-colors group border-b border-base-content/5 last:border-0 bg-base-100/50">
                             <div class="flex items-center gap-3">
                                 <span class="material-symbols-outlined text-base-content/50 group-hover:text-primary transition-colors text-xl" x-text="getIcon(item.type)"></span>
                                 <div class="flex flex-col">

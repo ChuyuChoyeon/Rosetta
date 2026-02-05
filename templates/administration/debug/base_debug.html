@@ -30,10 +30,6 @@
             <span class="material-symbols-outlined text-lg mr-2">verified_user</span>
             {% trans "权限检查" %}
         </a>
-        <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug_mock' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug_mock' %}">
-            <span class="material-symbols-outlined text-lg mr-2">science</span>
-            {% trans "Mock 数据" %}
-        </a>
         <a role="tab" class="tab {% if request.resolver_match.url_name == 'debug_cache' %}tab-active [--tab-bg:theme(colors.base-100)] font-bold{% endif %}" href="{% url 'administration:debug_cache' %}">
             <span class="material-symbols-outlined text-lg mr-2">cleaning_services</span>
             {% trans "缓存管理" %}

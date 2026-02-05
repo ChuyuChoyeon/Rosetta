@@ -212,14 +212,14 @@ class UnifiedProfileView(View):
                         author=profile_user,
                         status="published",
                     )
-                    .select_related("category")
-                    .prefetch_related("tags")
+                    .select_related("category", "author")
+                    .prefetch_related("tags", "likes", "comments")
                     .order_by("-published_at", "-created_at")[:20]
                 )
             elif active_tab == "comments":
                 context["comments"] = (
                     Comment.objects.filter(user=profile_user, active=True)
-                    .select_related("post")
+                    .select_related("post", "post__author", "user")
                     .order_by("-created_at")[:20]
                 )
 

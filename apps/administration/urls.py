@@ -252,10 +252,18 @@ urlpatterns = [
         name="logfile_delete",
     ),
 
-    # --- System Tools (系统工具) ---
+    # --- Maintenance & Tools (维护与工具) ---
+    # 定时任务
+    path("tasks/", views.PeriodicTaskListView.as_view(), name="periodic_task_list"),
+    path("tasks/create/", views.PeriodicTaskCreateView.as_view(), name="periodic_task_create"),
+    path("tasks/<int:pk>/edit/", views.PeriodicTaskUpdateView.as_view(), name="periodic_task_edit"),
+    path("tasks/<int:pk>/delete/", views.PeriodicTaskDeleteView.as_view(), name="periodic_task_delete"),
+    path("tasks/<int:pk>/run/", views.PeriodicTaskRunView.as_view(), name="periodic_task_run"),
+    path("tasks/<int:pk>/toggle/", views.PeriodicTaskToggleView.as_view(), name="periodic_task_toggle"),
+
     # 系统设置与工具
     path("settings/", views.SettingsView.as_view(), name="settings"),
-    path("system/", views.SystemToolsView.as_view(), name="system_tools"),
+    path("system/tools/", views.SystemToolsView.as_view(), name="system_tools"),
     path("system/monitor/", views.SystemMonitorView.as_view(), name="system_monitor"),
     path("system/backup/download/<str:filename>/", views.BackupDownloadView.as_view(), name="backup_download"),
 
@@ -267,7 +275,6 @@ urlpatterns = [
         views.DebugPermissionView.as_view(),
         name="debug_permission",
     ),
-    path("debug/mock/", views.DebugMockView.as_view(), name="debug_mock"),
     path("debug/cache/", views.DebugCacheView.as_view(), name="debug_cache"),
     path("debug/email/", views.DebugEmailView.as_view(), name="debug_email"),
 

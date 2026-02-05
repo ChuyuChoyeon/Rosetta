@@ -79,7 +79,16 @@
             </div>
             
             {% if current_file %}
-            <div class="flex gap-2 w-full sm:w-auto justify-end">
+            <div class="flex gap-2 w-full sm:w-auto justify-end items-center">
+                <!-- Track Log Toggle -->
+                <div class="form-control" title="{% trans '实时追踪最新日志' %}">
+                    <label class="label cursor-pointer gap-2">
+                        <span class="label-text text-xs font-medium opacity-70">{% trans "追踪" %}</span>
+                        <input type="checkbox" id="track-log-toggle" class="toggle toggle-xs toggle-success" checked />
+                    </label>
+                </div>
+                <div class="divider divider-horizontal mx-0 my-1 hidden sm:flex"></div>
+
                 <a href="." class="btn btn-sm btn-ghost gap-2" title="{% trans '刷新' %}">
                     <span class="material-symbols-outlined text-sm">refresh</span>
                     <span class="hidden sm:inline">{% trans "刷新" %}</span>
@@ -98,11 +107,23 @@
         </div>
 
         <!-- Content -->
-        <div class="flex-1 overflow-auto bg-base-100 relative group">
+        <div class="flex-1 overflow-auto bg-base-100 relative group" id="log-scroll-container">
             {% if log_content %}
-                <div class="p-4 log-content text-base-content/80 select-text">{{ log_content }}</div>
+                <div class="p-4 text-base-content/80 select-text">
+                     <div id="log-content-area" class="log-content whitespace-pre-wrap break-all">{{ log_content }}</div>
+                     <div id="log-append-target"></div>
+                </div>
+                
+                <!-- Polling Trigger -->
+                <div hx-get="?file={{ current_file }}&partial=content" 
+                     hx-trigger="every 2s condition:window.shouldPollLog()" 
+                     hx-vals="js:{last_pos: window.currentLogPos || 0}"
+                     hx-swap="beforeend"
+                     hx-target="#log-content-area"
+                     hx-select="#log-content-area"
+                     class="hidden"></div>
             {% else %}
-                <div class="flex flex-col items-center justify-center h-full text-base-content/30 gap-3">
+                <div id="log-content-area" class="flex flex-col items-center justify-center h-full text-base-content/30 gap-3">
                     {% if current_file %}
                         <span class="material-symbols-outlined text-5xl opacity-50">draft</span>
                         <p>{% trans "文件为空" %}</p>
@@ -120,6 +141,50 @@
 <div class="p-0 overflow-hidden rounded-2xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5 w-full">
     {{ card_content }}
 </div>
+
+<script>
+    (function() {
+        const logContainer = document.getElementById('log-scroll-container');
+        // Initialize from server context
+        window.currentLogPos = {{ initial_log_pos|default:0 }}; 
+
+        // Function to scroll to bottom
+        const scrollToBottom = () => {
+            if (logContainer) {
+                logContainer.scrollTop = logContainer.scrollHeight;
+            }
+        };
+
+        // Scroll on initial load
+        if (logContainer) {
+            scrollToBottom();
+        }
+
+        // Listen for HTMX updates
+        document.body.addEventListener('htmx:afterOnLoad', function(evt) {
+            // Update position from header
+            const xhr = evt.detail.xhr;
+            const newPos = xhr.getResponseHeader('X-Log-Pos');
+            if (newPos) {
+                window.currentLogPos = parseInt(newPos);
+            }
+            
+            // Auto scroll if tracking
+            if (evt.detail.target.id === 'log-content-area') {
+                const trackToggle = document.getElementById('track-log-toggle');
+                if (trackToggle && trackToggle.checked) {
+                    scrollToBottom();
+                }
+            }
+        });
+    })();
+    
+    // Global function for hx-trigger condition
+    window.shouldPollLog = function() {
+        const toggle = document.getElementById('track-log-toggle');
+        return toggle && toggle.checked;
+    };
+</script>
 
 <!-- Clear Log Confirmation Modal -->
 {% if current_file %}

@@ -165,6 +165,7 @@ INSTALLED_APPS = [
     "constance.backends.database",  # 注册 Database Backend App (即使在 Redis 模式下保留也不影响，除非 strict)
     "widget_tweaks",  # 表单渲染增强
     "django_extensions",  # 开发增强工具
+    "django_celery_beat",  # 定时任务
     # --- 核心业务模块 ---
     "blog.apps.BlogConfig",
     "users.apps.UsersConfig",

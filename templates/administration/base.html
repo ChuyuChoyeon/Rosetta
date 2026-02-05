@@ -46,6 +46,19 @@
     <script src="{% static 'theme/js/htmx.min.js' %}"></script>
     <script src="{% static 'js/htmx-init.js' %}?v=4.2"></script>
     
+    <!-- HTMX & Alpine Integration -->
+    <script>
+        // Ensure Alpine.js re-initializes components after HTMX swaps
+        document.addEventListener('htmx:afterSwap', function(evt) {
+            // Re-scan the swapped content for x-data attributes
+            // Alpine.js usually handles this automatically if loaded correctly,
+            // but explicit re-init helps in complex cases.
+            if (window.Alpine) {
+                // Alpine.initTree(evt.detail.elt); // Can cause double init if not careful
+            }
+        });
+    </script>
+    
     <!-- Global UI Helpers -->
     <script src="{% static 'js/ui-helpers.js' %}"></script>
     <script src="{% static 'js/admin-translation.js' %}"></script>
@@ -384,6 +397,12 @@
 
                 <li class="menu-title text-xs font-bold uppercase tracking-wider opacity-50 mt-4 mb-2 px-2">{% trans "维护与工具" %}</li>
                 <li>
+                    <a href="{% url 'administration:periodic_task_list' %}" class="{% if 'periodic_task' in request.resolver_match.url_name %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
+                        <span class="material-symbols-outlined {% if 'periodic_task' in request.resolver_match.url_name %}text-primary{% else %}text-info{% endif %}">schedule</span>
+                        {% trans "定时任务" %}
+                    </a>
+                </li>
+                <li>
                     <a href="{% url 'administration:system_tools' %}" class="{% if request.resolver_match.url_name == 'system_tools' %}active bg-primary/10 text-primary border-l-4 border-primary font-bold{% else %}hover:bg-base-200{% endif %} transition-all duration-200 rounded-r-xl rounded-l-none -ml-4 pl-8 py-2.5">
                         <span class="material-symbols-outlined {% if request.resolver_match.url_name == 'system_tools' %}text-primary{% else %}text-info{% endif %}">build_circle</span>
                         {% trans "系统工具" %}
@@ -569,7 +588,6 @@
             { id: 'debug', title: '{% trans "调试面板"|escapejs %}', icon: 'bug_report', url: '{% url 'administration:debug' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 面板"|escapejs %}' },
             { id: 'debug_ui', title: '{% trans "调试 UI 测试"|escapejs %}', icon: 'design_services', url: '{% url 'administration:debug_ui_test' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 UI 组件"|escapejs %}' },
             { id: 'debug_permission', title: '{% trans "调试 权限检查"|escapejs %}', icon: 'security', url: '{% url 'administration:debug_permission' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 权限"|escapejs %}' },
-            { id: 'debug_mock', title: '{% trans "调试 模拟数据"|escapejs %}', icon: 'science', url: '{% url 'administration:debug_mock' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 模拟"|escapejs %}' },
             { id: 'debug_cache', title: '{% trans "调试 缓存状态"|escapejs %}', icon: 'memory', url: '{% url 'administration:debug_cache' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 缓存"|escapejs %}' },
             { id: 'debug_email', title: '{% trans "调试 邮件发送"|escapejs %}', icon: 'mail', url: '{% url 'administration:debug_email' %}', group: '{% trans "调试"|escapejs %}', keywords: '{% trans "调试 邮件"|escapejs %}' },
             { id: 'profile', title: '{% trans "个人资料"|escapejs %}', icon: 'person', url: '{% url 'users:profile' %}', group: '{% trans "账户"|escapejs %}', keywords: '{% trans "资料 账户"|escapejs %}' },

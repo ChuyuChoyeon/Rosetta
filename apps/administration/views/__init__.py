@@ -1,4 +1,8 @@
 from .dashboard import IndexView
+from .tasks import (
+    PeriodicTaskListView, PeriodicTaskCreateView, PeriodicTaskUpdateView, PeriodicTaskDeleteView,
+    PeriodicTaskRunView, PeriodicTaskToggleView
+)
 from .posts import (
     PostListView, PostCreateView, PostUpdateView, PostDeleteView, PostDuplicateView
 )
@@ -35,6 +39,6 @@ from .logs import (
 )
 from .system import (
     SettingsView, SystemToolsView, SystemMonitorView, BackupDownloadView,
-    DebugDashboardView, DebugUITestView, DebugPermissionView, DebugMockView, DebugCacheView, DebugEmailView
+    DebugDashboardView, DebugUITestView, DebugPermissionView, DebugCacheView, DebugEmailView
 )
 from .utils import BulkActionView, ExportAllView, ImportJsonView

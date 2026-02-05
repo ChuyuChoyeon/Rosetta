@@ -282,7 +282,7 @@ class AdditionalUserViewTests(TestCase):
         )
 
         self.client.force_login(self.existing_user)
-        response = self.client.get(
+        response = self.client.post(
             reverse(
                 "users:mark_notification_read",
                 kwargs={"pk": notification.pk},
@@ -308,7 +308,7 @@ class AdditionalUserViewTests(TestCase):
         )
 
         self.client.force_login(self.existing_user)
-        response = self.client.get(
+        response = self.client.post(
             reverse(
                 "users:mark_notification_read",
                 kwargs={"pk": notification.pk},
@@ -334,7 +334,7 @@ class AdditionalUserViewTests(TestCase):
         )
 
         self.client.force_login(self.existing_user)
-        response = self.client.get(
+        response = self.client.post(
             reverse(
                 "users:mark_notification_read",
                 kwargs={"pk": notification.pk},

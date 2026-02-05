@@ -1,6 +1,7 @@
 from django.contrib import sitemaps
 from django.urls import reverse
 from blog.models import Post, Category, Tag
+from core.models import Page
 
 
 class PostSitemap(sitemaps.Sitemap):
@@ -39,6 +40,18 @@ class TagSitemap(sitemaps.Sitemap):
         return reverse("post_by_tag", kwargs={"slug": obj.slug})
 
 
+class PageSitemap(sitemaps.Sitemap):
+    changefreq = "monthly"
+    priority = 0.5
+    i18n = True
+
+    def items(self):
+        return Page.objects.filter(status="published")
+
+    def location(self, obj):
+        return reverse("page_detail", kwargs={"slug": obj.slug})
+
+
 class StaticViewSitemap(sitemaps.Sitemap):
     priority = 0.5
     changefreq = "daily"
@@ -54,6 +67,7 @@ class StaticViewSitemap(sitemaps.Sitemap):
             "category_list",
             "tag_list",
             "archive",
+            "guestbook:index",
         ]
 
     def location(self, item):
@@ -69,6 +83,7 @@ sitemaps = {
     "categories": CategorySitemap,
     "tags": TagSitemap,
     "static": StaticViewSitemap,
+    "pages": PageSitemap,
 }
 
 urlpatterns = [

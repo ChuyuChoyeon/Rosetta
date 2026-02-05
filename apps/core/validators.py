@@ -97,7 +97,7 @@ class FileValidator:
                         except Exception:
                             mime = None
                     if not mime:
-                        mime, _ = mimetypes.guess_type(value.name)
+                        mime, _encoding = mimetypes.guess_type(value.name)
                 finally:
                     value.seek(initial_pos)
 

@@ -551,13 +551,36 @@ def list_backups():
 def create_backup(filename=None):
     """
     创建新的数据库备份。
-    使用 Django 的 dumpdata 命令。
+    自动检测数据库类型：
+    - SQLite: 执行文件级二进制备份 (更完整，恢复更快)
+    - 其他: 执行 dumpdata (JSON 格式)
     """
+    import shutil
+    from pathlib import Path
+
     backup_dir = settings.BASE_DIR / "backups"
     backup_dir.mkdir(exist_ok=True)
     
+    db_conf = settings.DATABASES['default']
+    engine = db_conf['ENGINE']
+    timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
+
+    # SQLite 二进制备份
+    if 'sqlite3' in engine:
+        if not filename:
+            filename = f"db_backup_{timestamp}.sqlite3"
+        
+        db_path = Path(db_conf['NAME'])
+        
+        # 确保源文件存在
+        if not db_path.exists():
+             raise FileNotFoundError(f"Database file not found at {db_path}")
+            
+        shutil.copy(db_path, backup_dir / filename)
+        return filename
+
+    # 其他数据库使用 dumpdata
     if not filename:
-        timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
         filename = f"backup_{timestamp}.json"
     
     file_path = backup_dir / filename
@@ -591,8 +614,13 @@ def delete_backup(filename):
 def restore_backup(filename):
     """
     从备份文件恢复数据库。
-    使用 Django 的 loaddata 命令。
+    自动检测备份类型：
+    - .sqlite3: 替换当前 SQLite 数据库文件 (如果是 SQLite)
+    - .json/.json.gz: 使用 loaddata
     """
+    import shutil
+    from pathlib import Path
+
     backup_dir = settings.BASE_DIR / "backups"
     file_path = backup_dir / filename
     
@@ -601,9 +629,29 @@ def restore_backup(filename):
          
     if not file_path.exists():
         raise FileNotFoundError("Backup file not found")
+
+    # SQLite 二进制恢复
+    if filename.endswith(".sqlite3"):
+        db_conf = settings.DATABASES['default']
+        if 'sqlite3' not in db_conf['ENGINE']:
+             raise ValueError("Cannot restore SQLite backup to non-SQLite database")
         
-    call_command("loaddata", str(file_path))
-    return True
+        db_path = Path(db_conf['NAME'])
+        
+        # Create a temp backup of current state just in case
+        if db_path.exists():
+            shutil.copy(db_path, f"{db_path}.pre_restore")
+            
+        # Restore
+        shutil.copy(file_path, db_path)
+        return True
+
+    # JSON 恢复 (Universal)
+    if filename.endswith(".json") or filename.endswith(".json.gz"):
+        call_command("loaddata", str(file_path))
+        return True
+        
+    raise ValueError(f"Unsupported backup format: {filename}")
 
 
 def schedule_post_image_processing(post_id, delay_seconds=None):

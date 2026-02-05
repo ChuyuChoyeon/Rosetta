@@ -72,6 +72,10 @@ class BaseCreateView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Crea
     template_name_suffix = "_form"
 
     def get_template_names(self) -> List[str]:
+        # 优先使用显式定义的 template_name
+        if self.template_name:
+            return [self.template_name]
+
         return [
             f"administration/{self.model._meta.model_name}_form.html",
             "administration/generic_form.html",

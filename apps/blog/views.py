@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 from django.views.generic import ListView, DetailView
+from django.db import models
 from django.db.models import Q, Count
 from django.db.models.functions import Coalesce
 from django.contrib import messages
@@ -116,16 +117,118 @@ class HomeView(SidebarContextMixin, ListView):
         获取文章列表
         - 仅显示已发布文章
         - 预加载关联数据以优化查询
+        - 支持按 'recommended' 筛选 (混合权重算法)
         """
-        return (
+        queryset = (
             Post.objects.filter(status="published")
             .select_related("author", "category")
-            .prefetch_related("tags", "polls", "polls__choices")  # 预加载 Polls 及其 Choices
-            .order_by("-is_pinned", "-published_at", "-created_at")
+            .prefetch_related("tags", "likes", "comments")
         )
+
+        filter_type = self.request.GET.get("filter", "latest")
+        
+        if filter_type == "recommended":
+            if self.request.user.is_authenticated:
+                # 混合推荐算法 (Hybrid Recommendation) - Inspired by X (Twitter) Algorithm
+                # 核心四大要素：
+                # 1. 关联性 (Relevance): 标签匹配、分类匹配
+                # 2. 互动性 (Engagement): 阅读量、点赞数、评论数
+                # 3. 社交性 (Social): 作者互动亲密度 (TODO: 暂以分类/标签模拟)
+                # 4. 时效性 (Recency): 时间衰减因子
+                
+                from django.db.models import Case, When, Value, FloatField, IntegerField, F, ExpressionWrapper, Q, Count
+                from django.db.models.functions import ExtractYear, Extract, Ln, Coalesce
+                
+                # 1. 获取用户画像 (User Profile Construction)
+                # 基于最近浏览记录提取偏好
+                viewed_posts = PostViewHistory.objects.filter(user=self.request.user).select_related('post').order_by("-viewed_at")[:50]
+                viewed_post_ids = [vp.post_id for vp in viewed_posts]
+                
+                # 提取偏好标签和分类
+                viewed_tag_ids = Tag.objects.filter(posts__id__in=viewed_post_ids).values_list("id", flat=True)
+                viewed_category_ids = Post.objects.filter(id__in=viewed_post_ids).values_list("category_id", flat=True).distinct()
+                
+                if viewed_tag_ids or viewed_category_ids:
+                    now = timezone.now()
+                    week_ago = now - timezone.timedelta(days=7)
+                    month_ago = now - timezone.timedelta(days=30)
+                    
+                    # 2. 多维度打分 (Multi-factor Scoring)
+                    queryset = queryset.annotate(
+                        # A. 关联性 (Relevance)
+                        tag_match_count=Count("tags", filter=Q(tags__id__in=viewed_tag_ids), distinct=True),
+                        category_match=Case(
+                            When(category_id__in=viewed_category_ids, then=Value(1)),
+                            default=Value(0),
+                            output_field=IntegerField()
+                        ),
+                        
+                        # B. 互动性 (Engagement)
+                        # 使用 distinct=True 避免多对多查询的数量膨胀
+                        likes_count=Count("likes", distinct=True),
+                        comments_count=Count("comments", distinct=True),
+                        
+                        # C. 时效性 (Recency) - Step Function Approximation
+                        # SQLite friendly freshness bonus
+                        freshness_score=Case(
+                            When(published_at__gte=week_ago, then=Value(50.0)),
+                            When(published_at__gte=month_ago, then=Value(20.0)),
+                            default=Value(0.0),
+                            output_field=FloatField()
+                        ),
+                    ).annotate(
+                        # 计算各维度子分数
+                        relevance_score=ExpressionWrapper(
+                            (F('tag_match_count') * 50.0) + (F('category_match') * 100.0),
+                            output_field=FloatField()
+                        ),
+                        engagement_score=ExpressionWrapper(
+                            (Ln(F('views') + 1) * 4.0) +        # Log(views) * 4 (approx Log10 * 10)
+                            (F('likes_count') * 5.0) +          # 点赞权重
+                            (F('comments_count') * 10.0),       # 评论权重 (高互动)
+                            output_field=FloatField()
+                        ),
+                    ).annotate(
+                        # 3. 最终加权得分 (Final Weighted Score)
+                        # Score = Relevance + Engagement + Recency
+                        final_score=ExpressionWrapper(
+                            F('relevance_score') + F('engagement_score') + F('freshness_score'),
+                            output_field=FloatField()
+                        )
+                    ).order_by("-final_score", "-published_at")
+                else:
+                    # 冷启动：基于热度和时效的全局推荐
+                    month_ago = timezone.now() - timezone.timedelta(days=30)
+                    queryset = queryset.annotate(
+                        likes_count=Count("likes", distinct=True),
+                        comments_count=Count("comments", distinct=True),
+                        freshness_score=Case(
+                            When(published_at__gte=month_ago, then=Value(20.0)),
+                            default=Value(0.0),
+                            output_field=FloatField()
+                        ),
+                    ).annotate(
+                         engagement_score=ExpressionWrapper(
+                            (Ln(F('views') + 1) * 4.0) + 
+                            (F('likes_count') * 5.0) + 
+                            (F('comments_count') * 10.0) +
+                            F('freshness_score'),
+                            output_field=FloatField()
+                        )
+                    ).order_by("-engagement_score", "-published_at")
+
+            else:
+                # 未登录用户：热门 + 置顶
+                queryset = queryset.order_by("-is_pinned", "-views", "-published_at")
+        else:
+            # 默认：最新发布 (保留置顶在最前)
+            queryset = queryset.order_by("-is_pinned", "-published_at", "-created_at")
+            
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["current_filter"] = self.request.GET.get("filter", "latest")
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
@@ -163,14 +266,16 @@ class ArchiveView(SidebarContextMixin, ListView):
     model = Post
     template_name = "blog/archive.html"
     context_object_name = "posts"
-    queryset = (
-        Post.objects.filter(status="published")
-        .select_related("author", "category")
-        .prefetch_related("tags")
-        .annotate(published_at_fallback=Coalesce("published_at", "created_at"))
-        .order_by("-published_at_fallback")
-    )
     paginate_by = 100  # 归档页显示更多文章，便于快速浏览
+
+    def get_queryset(self):
+        return (
+            Post.objects.filter(status="published")
+            .select_related("author", "category")
+            .prefetch_related("tags")
+            .annotate(published_at_fallback=Coalesce("published_at", "created_at"))
+            .order_by("-published_at_fallback")
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -633,7 +738,7 @@ class SearchView(SidebarContextMixin, ListView):
         
         用于前端搜索框的自动补全功能。
         返回包含文本、URL 和类型的 JSON 列表。
-        优先匹配拼音，然后是数据库模糊匹配。
+        优先使用 Watson 全文搜索，其次拼音匹配，最后数据库模糊匹配。
         """
         query = request.GET.get('q', '').strip()
         if not query:
@@ -648,8 +753,37 @@ class SearchView(SidebarContextMixin, ListView):
                 seen.add(text)
                 results.append({'text': text, 'url': url, 'type': type_code, 'type_label': type_label})
 
+        # 0. Watson Search (First Priority)
+        try:
+            from watson import search as watson
+            from voting.models import Poll
+            
+            # Watson search for relevant models
+            # We search a bit more to filter out later if needed
+            watson_results = watson.filter([Post, Tag, Category, User], query)[:10]
+            
+            for res in watson_results:
+                obj = res.object
+                if isinstance(obj, Post) and obj.status == 'published':
+                    add_result(obj.title, obj.get_absolute_url(), "post", _("文章"))
+                elif isinstance(obj, Tag):
+                    add_result(obj.name, f"{request.path}?q={obj.name}&type=tag", "tag", _("标签"))
+                elif isinstance(obj, Category):
+                    add_result(obj.name, f"{request.path}?q={obj.name}&type=category", "category", _("分类"))
+                elif isinstance(obj, User):
+                     name = obj.nickname or obj.username
+                     add_result(name, f"{request.path}?q={name}&type=user", "user", _("用户"))
+                
+                if len(results) >= 8: # Keep some space for other methods if Watson returns few
+                    break
+        except ImportError:
+            pass
+        except Exception as e:
+            # Watson might fail if index is not built or DB error
+            print(f"Watson suggestion error: {e}")
+
         # 1. 拼音搜索 (仅当查询词为 ASCII 时启用)
-        if all(ord(c) < 128 for c in query):
+        if len(results) < 10 and all(ord(c) < 128 for c in query):
             try:
                 from xpinyin import Pinyin
                 p = Pinyin()

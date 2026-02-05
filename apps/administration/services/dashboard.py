@@ -151,7 +151,11 @@ class DashboardService:
             context["system_info"] = {
                 "cpu_percent": cpu_usage,
                 "memory_percent": memory.percent,
+                "memory_used": memory.used,
+                "memory_total": memory.total,
                 "disk_percent": disk.percent,
+                "disk_free": disk.free,
+                "disk_total": disk.total,
                 "python_version": platform.python_version(),
                 "django_version": django.get_version(),
                 "platform_system": platform.system(),

@@ -65,19 +65,20 @@ class ExportAllView(BaseExportView):
     """
     def get(self, request, *args, **kwargs):
         model_name = kwargs.get("model")
-        # Logic to resolve model similar to BulkActionView
-        # For simplicity, we can implement dynamic resolution or require specific views per model
-        # BaseExportView expects `self.model` to be set.
-        # Here we dynamically set it.
         
         try:
-            # Try finding model
-            for app_label in ["blog", "core", "users", "auth", "administration"]:
-                try:
-                    self.model = apps.get_model(app_label, model_name)
-                    break
-                except LookupError:
-                    continue
+            # Handle app.Model format
+            if "." in model_name:
+                app_label, model = model_name.split(".")
+                self.model = apps.get_model(app_label, model)
+            else:
+                # Try finding model in common apps
+                for app_label in ["blog", "core", "users", "auth", "administration"]:
+                    try:
+                        self.model = apps.get_model(app_label, model_name)
+                        break
+                    except LookupError:
+                        continue
             
             if not self.model:
                 raise Http404(f"Model {model_name} not found")
@@ -93,13 +94,18 @@ class ImportJsonView(BaseImportView):
     def post(self, request, *args, **kwargs):
         model_name = kwargs.get("model")
         try:
-            # Try finding model
-            for app_label in ["blog", "core", "users", "auth", "administration"]:
-                try:
-                    self.model = apps.get_model(app_label, model_name)
-                    break
-                except LookupError:
-                    continue
+            # Handle app.Model format
+            if "." in model_name:
+                app_label, model = model_name.split(".")
+                self.model = apps.get_model(app_label, model)
+            else:
+                # Try finding model in common apps
+                for app_label in ["blog", "core", "users", "auth", "administration"]:
+                    try:
+                        self.model = apps.get_model(app_label, model_name)
+                        break
+                    except LookupError:
+                        continue
             
             if not self.model:
                 raise Http404(f"Model {model_name} not found")

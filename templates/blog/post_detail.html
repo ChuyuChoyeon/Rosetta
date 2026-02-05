@@ -62,8 +62,12 @@
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ request.build_absolute_uri }}"
+  },
   "headline": "{{ post.meta_title|default:post.title|escapejs }}",
-  "description": "{{ meta.description|escapejs }}",
+  "description": "{{ meta.description|default:post.excerpt|default:post.content|striptags|truncatechars:160|escapejs }}",
   "keywords": "{{ meta.keywords|join:','|escapejs }}",
   {% if post.cover_image %}
   "image": [
@@ -76,11 +80,11 @@
   {% endif %}
   "datePublished": "{{ post.published_at|default:post.created_at|date:'c' }}",
   "dateModified": "{{ post.updated_at|date:'c' }}",
-  "author": [{
+  "author": {
       "@type": "Person",
       "name": "{{ post.author.nickname|default:post.author.username|escapejs }}",
       "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'users:user_public_profile' post.author.username %}"
-  }],
+  },
   "publisher": {
       "@type": "Organization",
       "name": "{{ config.SITE_NAME|default:'Rosetta Blog'|escapejs }}",
@@ -88,7 +92,46 @@
           "@type": "ImageObject",
           "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'core/img/logo.png' %}"
       }
+  },
+  "articleBody": "{{ post.content|striptags|truncatechars:5000|escapejs }}"
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "{% trans '首页' %}",
+    "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'home' %}"
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "name": "{% trans '文章' %}",
+    "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'post_list' %}"
   }
+  {% if post.category %}
+  ,{
+    "@type": "ListItem",
+    "position": 3,
+    "name": "{{ post.category.name|escapejs }}",
+    "item": "{{ request.scheme }}://{{ request.get_host }}{% url 'post_by_category' post.category.slug %}"
+  },{
+    "@type": "ListItem",
+    "position": 4,
+    "name": "{{ post.title|truncatechars:30|escapejs }}",
+    "item": "{{ request.build_absolute_uri }}"
+  }
+  {% else %}
+  ,{
+    "@type": "ListItem",
+    "position": 3,
+    "name": "{{ post.title|truncatechars:30|escapejs }}",
+    "item": "{{ request.build_absolute_uri }}"
+  }
+  {% endif %}
+  ]
 }
 </script>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">

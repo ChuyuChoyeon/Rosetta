@@ -113,7 +113,7 @@ def upload_image(request):
         if "svg" in mime_type:
              return JsonResponse({"error": "SVG images are not allowed for security reasons"}, status=400)
              
-    except ImportError:
+    except (ImportError, AttributeError):
         # 如果没有安装 python-magic，回退到简单的 Content-Type 检查，但记录警告
         # 生产环境强烈建议安装 python-magic
         content_type = image.content_type or ""

@@ -1,0 +1,516 @@
+{% extends "administration/base.html" %}
+{% load i18n widget_tweaks capture_tags %}
+
+{% block title %}{% if form.instance.pk %}{% trans "编辑任务" %}{% else %}{% trans "新建任务" %}{% endif %} - Rosetta Admin{% endblock %}
+
+{% block content %}
+<!-- Header -->
+{% captureas header_actions %}
+    <button type="submit" form="taskForm" class="btn btn-primary gap-2">
+        <span class="material-symbols-outlined">save</span>
+        {% trans "保存任务" %}
+    </button>
+{% endcaptureas %}
+
+{% if form.instance.pk %}
+    {% trans "编辑任务" as title %}
+{% else %}
+    {% trans "新建任务" as title %}
+{% endif %}
+
+{% include "administration/components/header.html" with title=title icon="schedule" breadcrumbs=breadcrumbs actions=header_actions %}
+
+<form id="taskForm" method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-6" novalidate>
+    {% csrf_token %}
+    
+    <!-- Left Column: Main Content -->
+    <div class="lg:col-span-2 space-y-6">
+        <!-- Error Alert -->
+        {% if form.errors %}
+        <div role="alert" class="alert border border-error/20 bg-error/5 text-error mb-4 shadow-sm">
+            <div class="flex items-start gap-4">
+                <span class="material-symbols-outlined pt-1">error</span>
+                <div class="w-full">
+                    <span class="font-bold block mb-1">{% trans "表单错误" %}</span>
+                    <ul class="list-disc list-inside text-sm opacity-90">
+                        {% for field in form %}
+                            {% for error in field.errors %}
+                                <li>{{ field.label }}: {{ error }}</li>
+                            {% endfor %}
+                        {% endfor %}
+                        {% for error in form.non_field_errors %}
+                            <li>{{ error }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Basic Info -->
+        <div class="bg-base-100 border border-base-300 rounded-box p-6">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">info</span>
+                {% trans "基本信息" %}
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-bold text-base">{% trans "任务名称" %} <span class="text-error">*</span></span>
+                    </label>
+                    {% render_field form.name class="input input-bordered w-full focus:input-primary transition-all" placeholder=form.name.label %}
+                    {% if form.name.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.name.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+
+                <!-- Task Info Data -->
+                <script>
+                    window.TASK_INFO_MAP = {{ task_info_map|safe|default:"{}" }};
+                    
+                    // Re-initialize global data after HTMX swaps
+                    document.addEventListener('htmx:afterSwap', function(evt) {
+                        if (!window.TASK_INFO_MAP) {
+                            window.TASK_INFO_MAP = {{ task_info_map|safe|default:"{}" }};
+                        }
+                    });
+                </script>
+
+                <div class="form-control w-full" x-data="{
+                    selectedTask: '{{ form.task.value|default:"" }}',
+                    get currentInfo() {
+                        return window.TASK_INFO_MAP[this.selectedTask] || null;
+                    }
+                }">
+                    <label class="label">
+                        <span class="label-text font-bold text-base">{% trans "Task (注册路径)" %} <span class="text-error">*</span></span>
+                    </label>
+                    {% render_field form.task class="select select-bordered w-full focus:select-primary transition-all" x-model="selectedTask" %}
+                    
+                    <!-- Task Documentation Card -->
+                    <div x-show="currentInfo" x-transition class="mt-4 bg-base-200/50 rounded-lg p-4 border border-base-300 text-sm">
+                        <div class="flex items-start gap-3">
+                            <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined">description</span>
+                            </div>
+                            <div class="space-y-2 flex-1 min-w-0">
+                                <div>
+                                    <h4 class="font-bold opacity-70 text-xs uppercase tracking-wider mb-1">{% trans "任务说明" %}</h4>
+                                    <p class="whitespace-pre-wrap text-base-content/80 leading-relaxed" x-text="currentInfo?.doc || '{% trans "暂无描述" %}'"></p>
+                                </div>
+                                <div x-show="currentInfo?.signature" class="pt-2 border-t border-base-content/5">
+                                    <h4 class="font-bold opacity-70 text-xs uppercase tracking-wider mb-1">Signature</h4>
+                                    <code class="font-mono text-xs bg-base-100 px-2 py-1 rounded text-secondary break-all block" x-text="currentInfo?.signature"></code>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if form.task.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error">{{ form.task.errors.0 }}</span>
+                    </label>
+                    {% endif %}
+                </div>
+                
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-bold text-base">{% trans "描述" %}</span>
+                    </label>
+                    {% render_field form.description class="textarea textarea-bordered h-24 focus:textarea-primary transition-all" placeholder=form.description.label %}
+                </div>
+
+                <div class="form-control w-full">
+                    <label class="label cursor-pointer justify-start gap-4">
+                        <span class="label-text font-bold text-base">{% trans "启用任务" %}</span> 
+                        {% render_field form.enabled class="toggle toggle-primary" %}
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Arguments -->
+        <div class="bg-base-100 border border-base-300 rounded-box p-6">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-secondary">data_object</span>
+                {% trans "参数配置" %}
+            </h2>
+            
+            <div role="alert" class="alert alert-info alert-soft mb-6">
+                <span class="material-symbols-outlined text-lg">help</span>
+                <div class="text-xs">
+                    <p class="font-bold mb-1">{% trans "参数必须是合法的 JSON 格式" %}</p>
+                    <p>Args: <code>[1, "foo"]</code></p>
+                    <p>Kwargs: <code>{"key": "value"}</code></p>
+                </div>
+            </div>
+
+            <div class="space-y-6">
+                <!-- Args Editor -->
+                <div class="form-control w-full" x-data="listEditor('args')">
+                    <label class="label">
+                        <span class="label-text font-bold text-base">{% trans "位置参数 (Args)" %}</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" @click="toggleMode()" class="btn btn-xs btn-ghost gap-1 opacity-70 hover:opacity-100">
+                                <span class="material-symbols-outlined text-xs" x-text="isRaw ? 'view_list' : 'code'"></span>
+                                <span x-text="isRaw ? '{% trans "可视化" %}' : '{% trans "源码" %}'"></span>
+                            </button>
+                        </div>
+                    </label>
+                    
+                    <!-- Visual List Editor -->
+                    <div x-show="!isRaw" class="space-y-2">
+                        <template x-for="(item, index) in items" :key="index">
+                            <div class="flex gap-2 items-center">
+                                <div class="bg-base-200 px-3 py-2 rounded-lg text-xs font-mono opacity-50 select-none" x-text="index"></div>
+                                <input type="text" x-model="item.value" @input="updateRaw()" class="input input-bordered w-full font-mono text-sm focus:input-primary transition-all" placeholder="Value (JSON or String)">
+                                <button type="button" @click="remove(index)" class="btn btn-square btn-ghost btn-sm text-error/70 hover:text-error hover:bg-error/10">
+                                    <span class="material-symbols-outlined text-lg">delete</span>
+                                </button>
+                            </div>
+                        </template>
+                        
+                        <div x-show="items.length === 0" class="text-center py-4 border-2 border-dashed border-base-200 rounded-lg text-base-content/40 text-sm">
+                            {% trans "暂无参数" %}
+                        </div>
+
+                        <button type="button" @click="add()" class="btn btn-sm btn-outline btn-primary w-full gap-2 border-dashed">
+                            <span class="material-symbols-outlined text-lg">add</span>
+                            {% trans "添加参数" %}
+                        </button>
+                    </div>
+
+                    <!-- Raw JSON Editor -->
+                    <div x-show="isRaw" class="relative">
+                        {% trans '[1, "text"]' as args_placeholder %}
+                        {% render_field form.args x-ref="input" x-model="rawContent" @input="syncFromRaw()" class="textarea textarea-bordered h-32 font-mono text-sm focus:textarea-primary transition-all w-full leading-relaxed" placeholder=args_placeholder %}
+                        <div x-show="error" class="absolute right-3 top-3 text-error text-xs font-bold bg-base-100/90 px-2 py-1 rounded backdrop-blur-sm border border-error/20 shadow-sm flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">error</span>
+                            <span x-text="error"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kwargs Editor -->
+                <div class="form-control w-full" x-data="dictEditor('kwargs')">
+                    <label class="label">
+                        <span class="label-text font-bold text-base">{% trans "关键字参数 (Kwargs)" %}</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" @click="toggleMode()" class="btn btn-xs btn-ghost gap-1 opacity-70 hover:opacity-100">
+                                <span class="material-symbols-outlined text-xs" x-text="isRaw ? 'view_list' : 'code'"></span>
+                                <span x-text="isRaw ? '{% trans "可视化" %}' : '{% trans "源码" %}'"></span>
+                            </button>
+                        </div>
+                    </label>
+
+                    <!-- Visual Dict Editor -->
+                    <div x-show="!isRaw" class="space-y-2">
+                        <template x-for="(item, index) in items" :key="index">
+                            <div class="flex gap-2 items-center">
+                                <input type="text" x-model="item.key" @input="updateRaw()" class="input input-bordered w-1/3 font-mono text-sm focus:input-primary transition-all text-right text-primary" placeholder="Key">
+                                <span class="text-base-content/40 font-bold">:</span>
+                                <input type="text" x-model="item.value" @input="updateRaw()" class="input input-bordered w-2/3 font-mono text-sm focus:input-primary transition-all" placeholder="Value">
+                                <button type="button" @click="remove(index)" class="btn btn-square btn-ghost btn-sm text-error/70 hover:text-error hover:bg-error/10">
+                                    <span class="material-symbols-outlined text-lg">delete</span>
+                                </button>
+                            </div>
+                        </template>
+
+                        <div x-show="items.length === 0" class="text-center py-4 border-2 border-dashed border-base-200 rounded-lg text-base-content/40 text-sm">
+                            {% trans "暂无参数" %}
+                        </div>
+
+                        <button type="button" @click="add()" class="btn btn-sm btn-outline btn-primary w-full gap-2 border-dashed">
+                            <span class="material-symbols-outlined text-lg">add</span>
+                            {% trans "添加键值对" %}
+                        </button>
+                    </div>
+
+                    <!-- Raw JSON Editor -->
+                    <div x-show="isRaw" class="relative">
+                        {% trans '{"key": "value"}' as kwargs_placeholder %}
+                        {% render_field form.kwargs x-ref="input" x-model="rawContent" @input="syncFromRaw()" class="textarea textarea-bordered h-32 font-mono text-sm focus:textarea-primary transition-all w-full leading-relaxed" placeholder=kwargs_placeholder %}
+                        <div x-show="error" class="absolute right-3 top-3 text-error text-xs font-bold bg-base-100/90 px-2 py-1 rounded backdrop-blur-sm border border-error/20 shadow-sm flex items-center gap-1">
+                            <span class="material-symbols-outlined text-sm">error</span>
+                            <span x-text="error"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor Components Logic -->
+            <script>
+                document.addEventListener('alpine:init', () => {
+                    // List Editor for Args
+                    Alpine.data('listEditor', (fieldName) => ({
+                        isRaw: false,
+                        rawContent: '',
+                        items: [],
+                        error: null,
+                        
+                        init() {
+                            this.rawContent = this.$refs.input.value || '[]';
+                            this.syncFromRaw(true);
+                        },
+                        
+                        toggleMode() {
+                            this.isRaw = !this.isRaw;
+                            if (!this.isRaw) {
+                                this.syncFromRaw(true); // Refresh visual from raw before switching
+                            }
+                        },
+
+                        add() {
+                            this.items.push({ value: '' });
+                            this.updateRaw();
+                        },
+
+                        remove(index) {
+                            this.items.splice(index, 1);
+                            this.updateRaw();
+                        },
+
+                        updateRaw() {
+                            // Convert items back to JSON list
+                            // Try to parse values as JSON if possible, else string
+                            const list = this.items.map(item => {
+                                try {
+                                    return JSON.parse(item.value);
+                                } catch {
+                                    return item.value;
+                                }
+                            });
+                            this.rawContent = JSON.stringify(list, null, 4);
+                            // Manually update the hidden/textarea input value for form submission
+                            this.$refs.input.value = this.rawContent; 
+                        },
+
+                        syncFromRaw(force = false) {
+                            try {
+                                const parsed = JSON.parse(this.rawContent || '[]');
+                                if (Array.isArray(parsed)) {
+                                    this.items = parsed.map(val => ({
+                                        value: typeof val === 'string' ? val : JSON.stringify(val)
+                                    }));
+                                    this.error = null;
+                                } else {
+                                    if(force) this.error = '{% trans "必须是列表格式" %}';
+                                }
+                            } catch (e) {
+                                if(force) this.error = '{% trans "无效的 JSON 格式" %}';
+                            }
+                        }
+                    }));
+
+                    // Dictionary Editor for Kwargs
+                    Alpine.data('dictEditor', (fieldName) => ({
+                        isRaw: false,
+                        rawContent: '',
+                        items: [],
+                        error: null,
+                        
+                        init() {
+                            this.rawContent = this.$refs.input.value || '{}';
+                            this.syncFromRaw(true);
+                        },
+                        
+                        toggleMode() {
+                            this.isRaw = !this.isRaw;
+                            if (!this.isRaw) {
+                                this.syncFromRaw(true);
+                            }
+                        },
+
+                        add() {
+                            this.items.push({ key: '', value: '' });
+                            this.updateRaw();
+                        },
+
+                        remove(index) {
+                            this.items.splice(index, 1);
+                            this.updateRaw();
+                        },
+
+                        updateRaw() {
+                            const obj = {};
+                            this.items.forEach(item => {
+                                if (item.key) {
+                                    try {
+                                        obj[item.key] = JSON.parse(item.value);
+                                    } catch {
+                                        obj[item.key] = item.value;
+                                    }
+                                }
+                            });
+                            this.rawContent = JSON.stringify(obj, null, 4);
+                            this.$refs.input.value = this.rawContent;
+                        },
+
+                        syncFromRaw(force = false) {
+                            try {
+                                const parsed = JSON.parse(this.rawContent || '{}');
+                                if (typeof parsed === 'object' && !Array.isArray(parsed)) {
+                                    this.items = Object.entries(parsed).map(([k, v]) => ({
+                                        key: k,
+                                        value: typeof v === 'string' ? v : JSON.stringify(v)
+                                    }));
+                                    this.error = null;
+                                } else {
+                                    if(force) this.error = '{% trans "必须是字典格式" %}';
+                                }
+                            } catch (e) {
+                                if(force) this.error = '{% trans "无效的 JSON 格式" %}';
+                            }
+                        }
+                    }));
+                });
+            </script>
+        </div>
+    </div>
+
+    <!-- Right Column: Sidebar Settings -->
+    <div class="space-y-6">
+        <!-- Schedule -->
+        <div class="bg-base-100 border border-base-300 rounded-box overflow-hidden" 
+             x-data="{ scheduleType: '{% if form.schedule_type.value == 'crontab' %}crontab{% else %}interval{% endif %}' }">
+            <!-- Header with Tabs -->
+            <div class="flex items-center border-b border-base-200 bg-base-50/50">
+                 <button type="button" 
+                         class="flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-2"
+                         :class="scheduleType === 'interval' ? 'border-primary text-primary bg-base-100' : 'border-transparent text-base-content/60 hover:text-base-content hover:bg-base-100/50'"
+                         @click="scheduleType = 'interval'">
+                    <span class="material-symbols-outlined text-lg">timer</span>
+                    {% trans "间隔调度" %}
+                 </button>
+                 <div class="w-px h-6 bg-base-300"></div>
+                 <button type="button" 
+                         class="flex-1 py-3 text-sm font-bold border-b-2 transition-colors flex items-center justify-center gap-2"
+                         :class="scheduleType === 'crontab' ? 'border-primary text-primary bg-base-100' : 'border-transparent text-base-content/60 hover:text-base-content hover:bg-base-100/50'"
+                         @click="scheduleType = 'crontab'">
+                    <span class="material-symbols-outlined text-lg">calendar_month</span>
+                    Crontab
+                 </button>
+            </div>
+            
+            <!-- Hidden inputs for form submission -->
+            <input type="hidden" name="schedule_type" :value="scheduleType">
+
+            <div class="p-6">
+                <!-- Interval Fields -->
+                <div x-show="scheduleType === 'interval'" 
+                     x-transition:enter="transition ease-out duration-200"
+                     x-transition:enter-start="opacity-0 translate-y-2"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="space-y-4">
+                        <div class="form-control">
+                            <label class="label">
+                                <span class="label-text font-bold">{% trans "执行频率" %}</span>
+                            </label>
+                            <div class="join w-full shadow-sm">
+                                <div class="join-item bg-base-200 flex items-center px-3 border border-base-300 border-r-0 text-sm font-medium text-base-content/70">
+                                    {% trans "每" %}
+                                </div>
+                                {% render_field form.interval_every class="join-item input input-bordered w-24 focus:input-primary transition-all text-center" placeholder="1" %}
+                                {% render_field form.interval_period class="join-item select select-bordered flex-1 focus:select-primary transition-all w-full" %}
+                            </div>
+                            {% if form.interval_every.errors %}
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ form.interval_every.errors.0 }}</span>
+                            </label>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="alert alert-info bg-info/10 text-info-content border-info/20 text-xs shadow-sm">
+                            <span class="material-symbols-outlined text-lg">info</span>
+                            <span>{% trans "例如：每 10 分钟执行一次，或每 2 小时执行一次。" %}</span>
+                        </div>
+                    </div>
+
+                    <!-- Crontab Fields -->
+                    <div x-show="scheduleType === 'crontab'" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 translate-y-2"
+                         x-transition:enter-end="opacity-100 translate-y-0"
+                         class="space-y-4" style="display: none;">
+                        
+                        <div class="grid grid-cols-5 gap-2">
+                            <!-- Minute -->
+                            <div class="form-control text-center">
+                                <label class="label py-1.5 justify-center"><span class="label-text text-xs font-bold uppercase tracking-wider opacity-70">{% trans "分" %}</span></label>
+                                {% render_field form.cron_minute class="input input-bordered input-sm w-full font-mono text-center focus:input-primary" placeholder="*" %}
+                                <div class="text-[10px] opacity-50 mt-1">Minute</div>
+                            </div>
+                            <!-- Hour -->
+                            <div class="form-control text-center">
+                                <label class="label py-1.5 justify-center"><span class="label-text text-xs font-bold uppercase tracking-wider opacity-70">{% trans "时" %}</span></label>
+                                {% render_field form.cron_hour class="input input-bordered input-sm w-full font-mono text-center focus:input-primary" placeholder="*" %}
+                                <div class="text-[10px] opacity-50 mt-1">Hour</div>
+                            </div>
+                            <!-- Day of Month -->
+                            <div class="form-control text-center">
+                                <label class="label py-1.5 justify-center"><span class="label-text text-xs font-bold uppercase tracking-wider opacity-70">{% trans "日" %}</span></label>
+                                {% render_field form.cron_day_of_month class="input input-bordered input-sm w-full font-mono text-center focus:input-primary" placeholder="*" %}
+                                <div class="text-[10px] opacity-50 mt-1">Day</div>
+                            </div>
+                            <!-- Month -->
+                            <div class="form-control text-center">
+                                <label class="label py-1.5 justify-center"><span class="label-text text-xs font-bold uppercase tracking-wider opacity-70">{% trans "月" %}</span></label>
+                                {% render_field form.cron_month_of_year class="input input-bordered input-sm w-full font-mono text-center focus:input-primary" placeholder="*" %}
+                                <div class="text-[10px] opacity-50 mt-1">Month</div>
+                            </div>
+                            <!-- Day of Week -->
+                            <div class="form-control text-center">
+                                <label class="label py-1.5 justify-center"><span class="label-text text-xs font-bold uppercase tracking-wider opacity-70">{% trans "周" %}</span></label>
+                                {% render_field form.cron_day_of_week class="input input-bordered input-sm w-full font-mono text-center focus:input-primary" placeholder="*" %}
+                                <div class="text-[10px] opacity-50 mt-1">Week</div>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-warning shadow-none bg-warning/5 border border-warning/20 text-xs flex items-center gap-2 p-3">
+                            <span class="material-symbols-outlined text-lg text-warning">warning</span>
+                            <div class="flex flex-col gap-0.5">
+                                <span class="font-bold text-warning-content">{% trans "使用标准 Crontab 语法" %}</span>
+                                <span class="opacity-70">{% trans "* = 所有, */5 = 每5个单位, 1-5 = 范围, 1,3 = 枚举" %}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+        <!-- Advanced -->
+        <div class="bg-base-100 border border-base-300 rounded-box p-6">
+            <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-warning">settings</span>
+                {% trans "高级设置" %}
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-bold">{% trans "队列 (Queue)" %}</span>
+                    </label>
+                    {% render_field form.queue class="input input-bordered w-full focus:input-primary transition-all" %}
+                </div>
+
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-bold">{% trans "过期时间 (Expires)" %}</span>
+                    </label>
+                    {% render_field form.expires class="input input-bordered w-full focus:input-primary transition-all" %}
+                </div>
+
+                <div class="form-control w-full">
+                    <label class="label cursor-pointer justify-start gap-4">
+                        <span class="label-text font-bold">{% trans "仅运行一次" %}</span> 
+                        {% render_field form.one_off class="checkbox checkbox-primary" %}
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

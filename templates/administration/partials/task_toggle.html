@@ -1,0 +1,10 @@
+{% load i18n %}
+<form class="inline-block" hx-target="this" hx-swap="outerHTML">
+    {% csrf_token %}
+    <input type="checkbox" 
+           class="toggle toggle-primary toggle-sm" 
+           {% if task.enabled %}checked{% endif %}
+           hx-post="{% url 'administration:periodic_task_toggle' task.pk %}"
+           hx-trigger="change"
+           title="{% if task.enabled %}{% trans '点击禁用' %}{% else %}{% trans '点击启用' %}{% endif %}">
+</form>

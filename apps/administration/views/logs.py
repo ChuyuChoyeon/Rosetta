@@ -70,8 +70,71 @@ class LogFileListView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
         
         # Sort by modification time desc
         logs.sort(key=lambda x: x["mtime"], reverse=True)
-        context["logs"] = logs
+        context["log_files"] = logs
+
+        # Handle selected file for split-pane view
+        current_file = self.request.GET.get("file")
+        if current_file:
+            # Validate filename to prevent traversal
+            if "/" in current_file or "\\" in current_file or ".." in current_file:
+                messages.error(self.request, _("非法的文件名"))
+            else:
+                file_path = log_dir / current_file
+                if file_path.exists() and file_path.is_file():
+                    context["current_file"] = current_file
+                    
+                    # Find file info
+                    for log in logs:
+                        if log["name"] == current_file:
+                            context["current_file_info"] = log
+                            break
+                            
+                    # Read content
+                    try:
+                        try:
+                            last_pos = int(self.request.GET.get("last_pos", 0))
+                        except (ValueError, TypeError):
+                            last_pos = 0
+
+                        with open(file_path, "r", encoding="utf-8", errors="ignore") as f:
+                            if last_pos > 0:
+                                # Incremental update
+                                f.seek(last_pos)
+                                content = f.read()
+                                context["log_content"] = content
+                                self.current_log_pos = f.tell()
+                            else:
+                                # Initial load or full refresh
+                                # Read all lines to get the last 2000
+                                # Note: For huge files, this is inefficient. 
+                                # Production grade would use seek relative to end.
+                                f.seek(0, 2)
+                                file_size = f.tell()
+                                self.current_log_pos = file_size
+                                
+                                f.seek(0)
+                                all_lines = f.readlines()
+                                context["log_content"] = "".join(all_lines[-2000:])
+                                
+                                # Pass initial pos to template
+                                context["initial_log_pos"] = file_size
+                    except Exception as e:
+                        messages.error(self.request, f"Error reading log: {e}")
+                        context["log_content"] = ""
+                        self.current_log_pos = 0
+                else:
+                     messages.error(self.request, _("文件不存在"))
+
+        if self.request.headers.get("HX-Request") and self.request.GET.get("partial") == "content":
+             pass
+
         return context
+
+    def render_to_response(self, context, **response_kwargs):
+        response = super().render_to_response(context, **response_kwargs)
+        if hasattr(self, "current_log_pos"):
+            response["X-Log-Pos"] = str(self.current_log_pos)
+        return response
 
 class LogFileView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
     """
@@ -115,11 +178,21 @@ class LogFileDownloadView(LoginRequiredMixin, SuperuserRequiredMixin, View):
 class LogFileDeleteView(LoginRequiredMixin, SuperuserRequiredMixin, View):
     def post(self, request, filename):
         file_path = settings.BASE_DIR / "logs" / filename
+        action = request.POST.get("action")
+        
         if file_path.exists():
             try:
-                os.remove(file_path)
-                messages.success(request, _("日志文件已删除"))
+                if action == "clear":
+                    # Clear file content instead of deleting
+                    with open(file_path, "w", encoding="utf-8") as f:
+                        f.write("")
+                    messages.success(request, _("日志已清空"))
+                    # Redirect back to the same file view
+                    return redirect(f"{reverse_lazy('administration:logfile_list')}?file={filename}")
+                else:
+                    os.remove(file_path)
+                    messages.success(request, _("日志文件已删除"))
             except Exception as e:
-                messages.error(request, _("删除失败: {error}").format(error=str(e)))
+                messages.error(request, _("操作失败: {error}").format(error=str(e)))
         
         return redirect("administration:logfile_list")

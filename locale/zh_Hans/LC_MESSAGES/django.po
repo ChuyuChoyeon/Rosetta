@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-30 03:16+0800\n"
+"POT-Creation-Date: 2026-02-04 08:20+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,170 +18,538 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: .\Rosetta\settings.py:270
+#: .\Rosetta\settings.py:278
 msgid "简体中文"
 msgstr "简体中文"
 
-#: .\Rosetta\settings.py:271
+#: .\Rosetta\settings.py:279
 msgid "繁體中文"
 msgstr "繁體中文"
 
-#: .\Rosetta\settings.py:272 .\templates\administration\poll_form.html:121
+#: .\Rosetta\settings.py:280
 msgid "English"
 msgstr "英语"
 
-#: .\Rosetta\settings.py:273 .\templates\administration\poll_form.html:123
+#: .\Rosetta\settings.py:281
 msgid "日本語"
 msgstr "日本語"
 
-#: .\apps\administration\forms.py:80 .\apps\blog\models.py:84
-#: .\apps\blog\models.py:161 .\apps\blog\views.py:656 .\apps\blog\views.py:672
-#: .\templates\administration\base.html:299
-#: .\templates\administration\post_form.html:289
+#: .\apps\administration\forms\interaction.py:52
+msgid "选项文本 (简中)"
+msgstr "选项文本 (简中)"
+
+#: .\apps\administration\forms\interaction.py:53
+msgid "选项文本 (英文)"
+msgstr "选项文本 (英文)"
+
+#: .\apps\administration\forms\interaction.py:54
+msgid "选项文本 (日文)"
+msgstr "选项文本 (日文)"
+
+#: .\apps\administration\forms\interaction.py:55
+msgid "选项文本 (繁中)"
+msgstr "选项文本 (繁中)"
+
+#: .\apps\administration\forms\posts.py:11 .\apps\blog\models.py:92
+#: .\apps\blog\models.py:169 .\apps\blog\views.py:673 .\apps\blog\views.py:689
+#: .\templates\administration\base.html:317
+#: .\templates\administration\post_form.html:474
 #: .\templates\administration\post_list.html:88
 #: .\templates\blog\search_results.html:15 .\templates\partials\footer.html:57
 #: .\templates\partials\navbar.html:28 .\templates\partials\navbar.html:122
 msgid "标签"
 msgstr "标签"
 
-#: .\apps\administration\forms.py:85 .\apps\blog\models.py:180
-#: .\templates\administration\post_form.html:190
+#: .\apps\administration\forms\posts.py:16 .\apps\blog\models.py:188
 #: .\templates\administration\post_list.html:90
-#: .\templates\blog\all_posts.html:128 .\templates\blog\post_detail.html:133
-#: .\templates\blog\post_list.html:149
+#: .\templates\blog\all_posts.html:128 .\templates\blog\post_detail.html:132
+#: .\templates\blog\post_list.html:157
 msgid "发布时间"
 msgstr "发布时间"
 
-#: .\apps\administration\forms.py:519
+#: .\apps\administration\forms\tasks.py:14
+msgid "调度类型"
+msgstr "调度类型"
+
+#: .\apps\administration\forms\tasks.py:15
+#: .\templates\administration\periodic_task_form.html:386
+msgid "间隔调度"
+msgstr "间隔调度"
+
+#: .\apps\administration\forms\tasks.py:15
+msgid "Crontab 表达式"
+msgstr "Crontab 表达式"
+
+#: .\apps\administration\forms\tasks.py:23
+msgid "间隔数值"
+msgstr "间隔数值"
+
+#: .\apps\administration\forms\tasks.py:30
+msgid "间隔单位"
+msgstr "间隔单位"
+
+#: .\apps\administration\forms\tasks.py:32
+msgid "天 (Days)"
+msgstr "天 (Days)"
+
+#: .\apps\administration\forms\tasks.py:33
+msgid "小时 (Hours)"
+msgstr "小时 (Hours)"
+
+#: .\apps\administration\forms\tasks.py:34
+msgid "分钟 (Minutes)"
+msgstr "分钟 (Minutes)"
+
+#: .\apps\administration\forms\tasks.py:35
+msgid "秒 (Seconds)"
+msgstr "秒 (Seconds)"
+
+#: .\apps\administration\forms\tasks.py:36
+msgid "微秒 (Microseconds)"
+msgstr "微秒 (Microseconds)"
+
+#: .\apps\administration\forms\tasks.py:44
+msgid "分 (Minute)"
+msgstr "分 (Minute)"
+
+#: .\apps\administration\forms\tasks.py:45
+msgid "时 (Hour)"
+msgstr "时 (Hour)"
+
+#: .\apps\administration\forms\tasks.py:46
+msgid "周 (Day of Week)"
+msgstr "周 (Day of Week)"
+
+#: .\apps\administration\forms\tasks.py:47
+msgid "日 (Day of Month)"
+msgstr "日 (Day of Month)"
+
+#: .\apps\administration\forms\tasks.py:48
+msgid "月 (Month of Year)"
+msgstr "月 (Month of Year)"
+
+#: .\apps\administration\forms\tasks.py:58
+#: .\templates\administration\periodic_task_form.html:60
+msgid "任务名称"
+msgstr "任务名称"
+
+#: .\apps\administration\forms\tasks.py:59
+#: .\templates\administration\periodic_task_form.html:89
+msgid "Task (注册路径)"
+msgstr "Task (注册路径)"
+
+#: .\apps\administration\forms\tasks.py:60
+#: .\templates\administration\periodic_task_form.html:155
+msgid "位置参数 (Args)"
+msgstr "位置参数 (Args)"
+
+#: .\apps\administration\forms\tasks.py:61
+#: .\templates\administration\periodic_task_form.html:200
+msgid "关键字参数 (Kwargs)"
+msgstr "关键字参数 (Kwargs)"
+
+#: .\apps\administration\forms\tasks.py:62
+#: .\templates\administration\periodic_task_form.html:494
+msgid "队列 (Queue)"
+msgstr "队列 (Queue)"
+
+#: .\apps\administration\forms\tasks.py:63
+msgid "优先级"
+msgstr "优先级"
+
+#: .\apps\administration\forms\tasks.py:64
+msgid "过期时间"
+msgstr "过期时间"
+
+#: .\apps\administration\forms\tasks.py:65
+#: .\templates\administration\periodic_task_form.html:508
+#: .\templates\administration\periodic_task_list.html:43
+msgid "仅运行一次"
+msgstr "仅运行一次"
+
+#: .\apps\administration\forms\tasks.py:66
+msgid "开始时间"
+msgstr "开始时间"
+
+#: .\apps\administration\forms\tasks.py:67
+#: .\apps\administration\views\tasks.py:117
+#: .\templates\administration\partials\poll_list_rows.html:43
+#: .\templates\administration\partials\searchplaceholder_list_rows.html:20
+#: .\templates\administration\searchplaceholder_list.html:20
+#: .\templates\administration\searchplaceholder_list.html:37
+#: .\templates\administration\searchplaceholder_list.html:44
+#: .\templates\administration\user_list.html:117
+msgid "启用"
+msgstr "启用"
+
+#: .\apps\administration\forms\tasks.py:68 .\apps\blog\models.py:28
+#: .\apps\core\models.py:105 .\apps\voting\models.py:12
+#: .\templates\administration\friendlink_list.html:70
+#: .\templates\administration\periodic_task_form.html:121
+msgid "描述"
+msgstr "描述"
+
+#: .\apps\administration\forms\tasks.py:83
+msgid "选择要执行的 Celery 任务。您可以参考 'core.tasks' 中的示例任务。"
+msgstr "选择要执行的 Celery 任务。您可以参考 'core.tasks' 中的示例任务。"
+
+#: .\apps\administration\forms\tasks.py:84
+msgid "JSON 格式的位置参数列表 (例如 [1, 'arg'])"
+msgstr "JSON 格式的位置参数列表 (例如 [1, 'arg'])"
+
+#: .\apps\administration\forms\tasks.py:85
+msgid "JSON 格式的关键字参数字典 (例如 {'key': 'value'})"
+msgstr "JSON 格式的关键字参数字典 (例如 {'key': 'value'})"
+
+#: .\apps\administration\forms\tasks.py:120
+msgid "参数必须是列表格式 (List)"
+msgstr "参数必须是列表格式 (List)"
+
+#: .\apps\administration\forms\tasks.py:122
+#: .\apps\administration\forms\tasks.py:133
+#: .\templates\administration\periodic_task_form.html:303
+#: .\templates\administration\periodic_task_form.html:365
+msgid "无效的 JSON 格式"
+msgstr "无效的 JSON 格式"
+
+#: .\apps\administration\forms\tasks.py:131
+msgid "参数必须是字典格式 (Dict)"
+msgstr "参数必须是字典格式 (Dict)"
+
+#: .\apps\administration\forms\tasks.py:144
+msgid "请填写完整的间隔调度信息"
+msgstr "请填写完整的间隔调度信息"
+
+#: .\apps\administration\forms\users.py:42
 msgid "新密码"
 msgstr "新密码"
 
-#: .\apps\administration\forms.py:520
+#: .\apps\administration\forms\users.py:43
 msgid "如需修改密码请在此输入，否则留空"
 msgstr "如需修改密码请在此输入，否则留空"
 
-#: .\apps\administration\forms.py:664
-msgid "选项文本 (简中)"
-msgstr "选项文本 (简中)"
-
-#: .\apps\administration\forms.py:665
-msgid "选项文本 (英文)"
-msgstr "选项文本 (英文)"
-
-#: .\apps\administration\forms.py:666
-msgid "选项文本 (日文)"
-msgstr "选项文本 (日文)"
-
-#: .\apps\administration\forms.py:667
-msgid "选项文本 (繁中)"
-msgstr "选项文本 (繁中)"
-
-#: .\apps\administration\views.py:152
-msgid "Rosetta Dashboard"
-msgstr "Rosetta Dashboard"
-
-#: .\apps\administration\views.py:296
-msgid "天"
-msgstr "天"
-
-#: .\apps\administration\views.py:298
-msgid "小时"
-msgstr "小时"
-
-#: .\apps\administration\views.py:299
-msgid "分钟"
-msgstr "分钟"
-
-#: .\apps\administration\views.py:301
-msgid "刚刚启动"
-msgstr "刚刚启动"
-
-#: .\apps\administration\views.py:406
+#: .\apps\administration\generics.py:96
 #, python-brace-format
 msgid "{name} 创建成功"
 msgstr "{name} 创建成功"
 
-#: .\apps\administration\views.py:407
+#: .\apps\administration\generics.py:97
 msgid "通过管理后台创建"
 msgstr "通过管理后台创建"
 
-#: .\apps\administration\views.py:413
+#: .\apps\administration\generics.py:103
 #, python-brace-format
 msgid "新建{name}"
 msgstr "新建{name}"
 
-#: .\apps\administration\views.py:445
+#: .\apps\administration\generics.py:135
 #, python-brace-format
 msgid "{name} 更新成功"
 msgstr "{name} 更新成功"
 
-#: .\apps\administration\views.py:449
+#: .\apps\administration\generics.py:139
 msgid "通过管理后台更新"
 msgstr "通过管理后台更新"
 
-#: .\apps\administration\views.py:451
+#: .\apps\administration\generics.py:141
 #, python-brace-format
 msgid "更新字段: {fields}"
 msgstr "更新字段: {fields}"
 
-#: .\apps\administration\views.py:459
+#: .\apps\administration\generics.py:149
 #, python-brace-format
 msgid "编辑{name}"
 msgstr "编辑{name}"
 
-#: .\apps\administration\views.py:504
+#: .\apps\administration\generics.py:194
 msgid "请上传 JSON 文件"
 msgstr "请上传 JSON 文件"
 
-#: .\apps\administration\views.py:511
+#: .\apps\administration\generics.py:203
 msgid "JSON 格式错误：根元素应为列表"
 msgstr "JSON 格式错误：根元素应为列表"
 
-#: .\apps\administration\views.py:538
+#: .\apps\administration\generics.py:230
 #, python-brace-format
 msgid "成功导入 {count} 条数据"
 msgstr "成功导入 {count} 条数据"
 
-#: .\apps\administration\views.py:541
+#: .\apps\administration\generics.py:233
 #, python-brace-format
 msgid "导入失败: {error}"
 msgstr "导入失败: {error}"
 
-#: .\apps\administration\views.py:562
+#: .\apps\administration\generics.py:256
 msgid "通过管理后台删除"
 msgstr "通过管理后台删除"
 
-#: .\apps\administration\views.py:575 .\apps\administration\views.py:582
+#: .\apps\administration\generics.py:269 .\apps\administration\generics.py:276
 #, python-brace-format
 msgid "{name} 删除成功"
 msgstr "{name} 删除成功"
 
-#: .\apps\blog\models.py:26 .\apps\blog\models.py:75
+#: .\apps\administration\services\dashboard.py:23
+msgid "Rosetta Dashboard"
+msgstr "Rosetta Dashboard"
+
+#: .\apps\administration\services\dashboard.py:146
+msgid "天"
+msgstr "天"
+
+#: .\apps\administration\services\dashboard.py:149
+msgid "小时"
+msgstr "小时"
+
+#: .\apps\administration\services\dashboard.py:149
+msgid "分钟"
+msgstr "分钟"
+
+#: .\apps\administration\services\tasks.py:39
+msgid "未知签名"
+msgstr "未知签名"
+
+#: .\apps\administration\views\logs.py:80
+msgid "非法的文件名"
+msgstr "非法的文件名"
+
+#: .\apps\administration\views\logs.py:126
+msgid "文件不存在"
+msgstr "文件不存在"
+
+#: .\apps\administration\views\logs.py:189
+msgid "日志已清空"
+msgstr "日志已清空"
+
+#: .\apps\administration\views\logs.py:194
+#, fuzzy
+#| msgid "日志文件"
+msgid "日志文件已删除"
+msgstr "日志文件"
+
+#: .\apps\administration\views\logs.py:196
+#: .\apps\administration\views\utils.py:57
+#, fuzzy, python-brace-format
+#| msgid "导入失败: {error}"
+msgid "操作失败: {error}"
+msgstr "导入失败: {error}"
+
+#: .\apps\administration\views\system.py:110
+msgid "未知的操作"
+msgstr "未知的操作"
+
+#: .\apps\administration\views\system.py:116
+msgid "媒体扫描任务正在进行中"
+msgstr "媒体扫描任务正在进行中"
+
+#: .\apps\administration\views\system.py:123
+msgid "已启动媒体扫描任务"
+msgstr "已启动媒体扫描任务"
+
+#: .\apps\administration\views\system.py:125
+msgid "无法启动扫描任务（可能已有任务在运行）"
+msgstr "无法启动扫描任务（可能已有任务在运行）"
+
+#: .\apps\administration\views\system.py:131
+msgid "媒体清理任务正在进行中"
+msgstr "媒体清理任务正在进行中"
+
+#: .\apps\administration\views\system.py:138
+msgid "已启动媒体清理任务"
+msgstr "已启动媒体清理任务"
+
+#: .\apps\administration\views\system.py:140
+#, python-brace-format
+msgid "无法启动清理任务: {error}"
+msgstr ""
+
+#: .\apps\administration\views\system.py:142
+msgid "无法启动清理任务"
+msgstr "无法启动清理任务"
+
+#: .\apps\administration\views\system.py:148
+msgid "索引重建任务正在进行中"
+msgstr "索引重建任务正在进行中"
+
+#: .\apps\administration\views\system.py:164
+msgid "已启动索引重建任务"
+msgstr "已启动索引重建任务"
+
+#: .\apps\administration\views\system.py:169
+#, fuzzy
+#| msgid "页面已存在"
+msgid "隐私政策页面已存在"
+msgstr "页面已存在"
+
+#: .\apps\administration\views\system.py:351
+msgid "隐私政策页面已初始化（包含中、英、日、繁体中文）"
+msgstr "隐私政策页面已初始化（包含中、英、日、繁体中文）"
+
+#: .\apps\administration\views\system.py:353
+#, fuzzy, python-brace-format
+#| msgid "导入失败: {error}"
+msgid "初始化失败: {error}"
+msgstr "导入失败: {error}"
+
+#: .\apps\administration\views\system.py:359
+msgid "图片处理任务正在进行中"
+msgstr "图片处理任务正在进行中"
+
+#: .\apps\administration\views\system.py:432
+#, fuzzy
+#| msgid "启动处理任务"
+msgid "已启动图片处理任务"
+msgstr "启动处理任务"
+
+#: .\apps\administration\views\system.py:449
+#, python-brace-format
+msgid "备份已创建: {name}"
+msgstr "备份已创建: {name}"
+
+#: .\apps\administration\views\system.py:452
+msgid "当前仅支持 SQLite 自动备份，请手动备份数据库"
+msgstr "当前仅支持 SQLite 自动备份，请手动备份数据库"
+
+#: .\apps\administration\views\system.py:455
+#, fuzzy, python-brace-format
+#| msgid "导入失败: {error}"
+msgid "备份失败: {error}"
+msgstr "导入失败: {error}"
+
+#: .\apps\administration\views\system.py:462
+#: .\apps\administration\views\system.py:489
+msgid "未指定文件名"
+msgstr "未指定文件名"
+
+#: .\apps\administration\views\system.py:467
+#, fuzzy
+#| msgid "暂无备份文件"
+msgid "备份文件不存在"
+msgstr "暂无备份文件"
+
+#: .\apps\administration\views\system.py:478
+msgid "数据库已恢复"
+msgstr "数据库已恢复"
+
+#: .\apps\administration\views\system.py:480
+msgid "当前仅支持 SQLite 自动恢复"
+msgstr "当前仅支持 SQLite 自动恢复"
+
+#: .\apps\administration\views\system.py:482
+#, fuzzy, python-brace-format
+#| msgid "导入失败: {error}"
+msgid "恢复失败: {error}"
+msgstr "导入失败: {error}"
+
+#: .\apps\administration\views\system.py:496
+#, fuzzy
+#| msgid "暂无备份文件"
+msgid "备份文件已删除"
+msgstr "暂无备份文件"
+
+#: .\apps\administration\views\system.py:498
+#, fuzzy, python-brace-format
+#| msgid "导入失败: {error}"
+msgid "删除失败: {error}"
+msgstr "导入失败: {error}"
+
+#: .\apps\administration\views\system.py:566
+#, fuzzy
+#| msgid "清理所有缓存"
+msgid "所有缓存已清理"
+msgstr "清理所有缓存"
+
+#: .\apps\administration\views\system.py:572
+#, fuzzy
+#| msgid "清理模板缓存"
+msgid "模板缓存已清理"
+msgstr "清理模板缓存"
+
+#: .\apps\administration\views\system.py:574
+msgid "未知操作"
+msgstr "未知操作"
+
+#: .\apps\administration\views\system.py:595
+msgid "请填写完整信息"
+msgstr "请填写完整信息"
+
+#: .\apps\administration\views\system.py:607
+#, fuzzy
+#| msgid "邮件发送测试"
+msgid "邮件发送成功"
+msgstr "邮件发送测试"
+
+#: .\apps\administration\views\system.py:609
+#, fuzzy, python-brace-format
+#| msgid "导入失败: {error}"
+msgid "发送失败: {error}"
+msgstr "导入失败: {error}"
+
+#: .\apps\administration\views\tasks.py:83
+#, python-brace-format
+msgid "任务 '{name}' 已手动触发"
+msgstr "任务 '{name}' 已手动触发"
+
+#: .\apps\administration\views\tasks.py:94
+#, fuzzy, python-brace-format
+#| msgid "导入失败: {error}"
+msgid "触发任务失败: {error}"
+msgstr "导入失败: {error}"
+
+#: .\apps\administration\views\tasks.py:115
+#, python-brace-format
+msgid "任务 '{name}' 已{status}"
+msgstr "任务 '{name}' 已{status}"
+
+#: .\apps\administration\views\tasks.py:117
+#: .\templates\administration\partials\searchplaceholder_list_rows.html:25
+#: .\templates\administration\partials\user_list_rows.html:68
+#: .\templates\administration\searchplaceholder_list.html:21
+#: .\templates\administration\searchplaceholder_list.html:38
+#: .\templates\administration\searchplaceholder_list.html:47
+#: .\templates\administration\user_list.html:120
+msgid "禁用"
+msgstr "禁用"
+
+#: .\apps\administration\views\utils.py:22
+msgid "未选择任何项目"
+msgstr "未选择任何项目"
+
+#: .\apps\administration\views\utils.py:45
+#, python-brace-format
+msgid "已删除 {count} 个项目"
+msgstr "已删除 {count} 个项目"
+
+#: .\apps\administration\views\utils.py:49
+#, python-brace-format
+msgid "已发布 {count} 个项目"
+msgstr "已发布 {count} 个项目"
+
+#: .\apps\administration\views\utils.py:53
+#, python-brace-format
+msgid "已设为草稿 {count} 个项目"
+msgstr "已设为草稿 {count} 个项目"
+
+#: .\apps\blog\models.py:26 .\apps\blog\models.py:83
 #: .\templates\administration\usertitle_list.html:53
 msgid "名称"
 msgstr "名称"
 
-#: .\apps\blog\models.py:27 .\apps\blog\models.py:76 .\apps\blog\models.py:121
-#: .\apps\core\models.py:25
+#: .\apps\blog\models.py:27 .\apps\blog\models.py:84 .\apps\blog\models.py:129
+#: .\apps\core\models.py:40
 msgid "别名"
 msgstr "别名"
 
-#: .\apps\blog\models.py:28 .\apps\core\models.py:77
-#: .\apps\voting\models.py:10
-#: .\templates\administration\friendlink_list.html:70
-#: .\templates\administration\poll_form.html:55
-msgid "描述"
-msgstr "描述"
-
-#: .\apps\blog\models.py:30 .\apps\blog\models.py:80
+#: .\apps\blog\models.py:30 .\apps\blog\models.py:88
+#: .\templates\administration\category_form.html:346
+#: .\templates\administration\components\category_modal.html:93
 msgid "图标"
 msgstr "图标"
 
-#: .\apps\blog\models.py:30 .\apps\blog\models.py:80
+#: .\apps\blog\models.py:30 .\apps\blog\models.py:88
 msgid "Material Symbols 图标代码"
 msgstr "Material Symbols 图标代码"
 
-#: .\apps\blog\models.py:33 .\apps\blog\models.py:77
+#: .\apps\blog\models.py:33 .\apps\blog\models.py:85
 msgid "颜色"
 msgstr "颜色"
 
@@ -189,30 +557,28 @@ msgstr "颜色"
 msgid "Tailwind 颜色类名 (如 primary, secondary)"
 msgstr "Tailwind 颜色类名 (如 primary, secondary)"
 
-#: .\apps\blog\models.py:44
-msgid "父分类"
-msgstr "父分类"
-
-#: .\apps\blog\models.py:47 .\apps\blog\models.py:131
-#: .\templates\administration\user_form.html:123
+#: .\apps\blog\models.py:39 .\apps\blog\models.py:139
+#: .\templates\administration\components\category_modal.html:108
+#: .\templates\administration\post_form.html:581
+#: .\templates\administration\user_form.html:146
 #: .\templates\users\includes\edit_profile_modal.html:58
 msgid "封面图"
 msgstr "封面图"
 
-#: .\apps\blog\models.py:55 .\apps\blog\models.py:158
-#: .\templates\administration\base.html:293
-#: .\templates\administration\post_form.html:257
+#: .\apps\blog\models.py:63 .\apps\blog\models.py:166
+#: .\templates\administration\base.html:311
+#: .\templates\administration\post_form.html:430
 #: .\templates\administration\post_list.html:87
 #: .\templates\blog\search_results.html:16 .\templates\partials\footer.html:53
 #: .\templates\partials\navbar.html:27 .\templates\partials\navbar.html:117
 msgid "分类"
 msgstr "分类"
 
-#: .\apps\blog\models.py:78 .\apps\blog\models.py:276
+#: .\apps\blog\models.py:86 .\apps\blog\models.py:289
 msgid "是否可见"
 msgstr "是否可见"
 
-#: .\apps\blog\models.py:108 .\apps\core\models.py:20
+#: .\apps\blog\models.py:116 .\apps\core\models.py:34
 #: .\templates\administration\page_list.html:51
 #: .\templates\administration\partials\page_list_rows.html:30
 #: .\templates\administration\partials\post_list_rows.html:80
@@ -221,95 +587,93 @@ msgstr "是否可见"
 msgid "草稿"
 msgstr "草稿"
 
-#: .\apps\blog\models.py:109 .\apps\core\models.py:21
+#: .\apps\blog\models.py:117 .\apps\core\models.py:35
 #: .\templates\administration\comment_list.html:189
 #: .\templates\administration\comment_list.html:216
 #: .\templates\administration\index.html:156
 #: .\templates\administration\page_list.html:47
-#: .\templates\administration\partials\comment_list_rows.html:53
+#: .\templates\administration\partials\comment_list_rows.html:63
 #: .\templates\administration\partials\page_list_rows.html:25
 #: .\templates\administration\partials\post_list_rows.html:75
 #: .\templates\administration\post_list.html:55
 msgid "已发布"
 msgstr "已发布"
 
-#: .\apps\blog\models.py:112 .\apps\core\models.py:23
-#: .\apps\core\models.py:102 .\apps\core\models.py:137
-#: .\apps\voting\models.py:9
+#: .\apps\blog\models.py:120 .\apps\core\models.py:38 .\apps\core\models.py:134
+#: .\apps\core\models.py:173 .\apps\voting\models.py:11
 #: .\templates\administration\navigation_list.html:68
 #: .\templates\administration\page_list.html:82
-#: .\templates\administration\poll_form.html:37
 msgid "标题"
 msgstr "标题"
 
-#: .\apps\blog\models.py:113
+#: .\apps\blog\models.py:121
 msgid "副标题"
 msgstr "副标题"
 
-#: .\apps\blog\models.py:114
+#: .\apps\blog\models.py:122
 msgid "来源"
 msgstr "来源"
 
-#: .\apps\blog\models.py:115
+#: .\apps\blog\models.py:123
 msgid "来源链接"
 msgstr "来源链接"
 
-#: .\apps\blog\models.py:116
+#: .\apps\blog\models.py:124
 msgid "音频"
 msgstr "音频"
 
-#: .\apps\blog\models.py:117
+#: .\apps\blog\models.py:125
 msgid "视频"
 msgstr "视频"
 
-#: .\apps\blog\models.py:119
+#: .\apps\blog\models.py:127
 msgid "视频链接"
 msgstr "视频链接"
 
-#: .\apps\blog\models.py:119
+#: .\apps\blog\models.py:127
 msgid "外部视频链接 (YouTube, Bilibili)"
 msgstr "外部视频链接 (YouTube, Bilibili)"
 
-#: .\apps\blog\models.py:126 .\templates\administration\post_list.html:86
-#: .\templates\blog\all_posts.html:138 .\templates\blog\post_list.html:158
+#: .\apps\blog\models.py:134 .\templates\administration\post_list.html:86
+#: .\templates\blog\all_posts.html:138 .\templates\blog\post_list.html:166
 msgid "作者"
 msgstr "作者"
 
-#: .\apps\blog\models.py:128 .\apps\blog\models.py:274
-#: .\apps\core\models.py:27 .\apps\core\models.py:138
-#: .\apps\guestbook\models.py:20 .\templates\administration\base.html:478
-#: .\templates\administration\base.html:479
-#: .\templates\administration\base.html:480
-#: .\templates\administration\base.html:481
-#: .\templates\administration\base.html:482
-#: .\templates\administration\base.html:483
-#: .\templates\administration\base.html:484
-#: .\templates\administration\base.html:485
-#: .\templates\administration\base.html:486
-#: .\templates\administration\base.html:493
-#: .\templates\administration\base.html:494
+#: .\apps\blog\models.py:136 .\apps\blog\models.py:287 .\apps\core\models.py:44
+#: .\apps\core\models.py:174 .\apps\guestbook\models.py:20
+#: .\templates\administration\base.html:546
+#: .\templates\administration\base.html:547
+#: .\templates\administration\base.html:548
+#: .\templates\administration\base.html:549
+#: .\templates\administration\base.html:550
+#: .\templates\administration\base.html:551
+#: .\templates\administration\base.html:552
+#: .\templates\administration\base.html:553
+#: .\templates\administration\base.html:554
+#: .\templates\administration\base.html:561
+#: .\templates\administration\base.html:562
 #: .\templates\administration\comment_form.html:44
 #: .\templates\guestbook\index.html:221
 msgid "内容"
 msgstr "内容"
 
-#: .\apps\blog\models.py:129
+#: .\apps\blog\models.py:137
 msgid "摘要"
 msgstr "摘要"
 
-#: .\apps\blog\models.py:167
+#: .\apps\blog\models.py:175
 msgid "点赞"
 msgstr "点赞"
 
-#: .\apps\blog\models.py:170 .\apps\core\models.py:29
+#: .\apps\blog\models.py:178 .\apps\core\models.py:46
 #: .\templates\administration\comment_list.html:248
 #: .\templates\administration\debug\permission.html:57
 #: .\templates\administration\friendlink_list.html:71
 #: .\templates\administration\navigation_list.html:72
-#: .\templates\administration\page_form.html:136
+#: .\templates\administration\page_form.html:276
 #: .\templates\administration\page_list.html:84
+#: .\templates\administration\periodic_task_list.html:28
 #: .\templates\administration\poll_list.html:39
-#: .\templates\administration\post_form.html:183
 #: .\templates\administration\post_list.html:89
 #: .\templates\administration\searchplaceholder_list.html:69
 #: .\templates\administration\tag_list.html:94
@@ -317,106 +681,106 @@ msgstr "点赞"
 msgid "状态"
 msgstr "状态"
 
-#: .\apps\blog\models.py:173 .\templates\administration\post_form.html:243
+#: .\apps\blog\models.py:181 .\templates\administration\post_form.html:536
 msgid "访问密码"
 msgstr "访问密码"
 
-#: .\apps\blog\models.py:176
+#: .\apps\blog\models.py:184
 msgid "设置此密码后，访问文章需要输入密码"
 msgstr "设置此密码后，访问文章需要输入密码"
 
-#: .\apps\blog\models.py:178 .\templates\blog\all_posts.html:132
-#: .\templates\blog\post_detail.html:141 .\templates\blog\post_list.html:153
+#: .\apps\blog\models.py:186 .\templates\blog\all_posts.html:132
+#: .\templates\blog\post_detail.html:140 .\templates\blog\post_list.html:161
 msgid "阅读量"
 msgstr "阅读量"
 
-#: .\apps\blog\models.py:179 .\apps\blog\models.py:275
-#: .\apps\core\models.py:31 .\apps\core\models.py:58 .\apps\core\models.py:143
-#: .\apps\guestbook\models.py:22 .\apps\voting\models.py:12
+#: .\apps\blog\models.py:187 .\apps\blog\models.py:288 .\apps\core\models.py:52
+#: .\apps\core\models.py:85 .\apps\core\models.py:179
+#: .\apps\guestbook\models.py:22 .\apps\voting\models.py:14
 #: .\templates\administration\page_list.html:85
 #: .\templates\administration\searchplaceholder_list.html:70
 #: .\templates\administration\system_tools.html:235
 msgid "创建时间"
 msgstr "创建时间"
 
-#: .\apps\blog\models.py:181 .\apps\core\models.py:32
+#: .\apps\blog\models.py:189 .\apps\core\models.py:53
 msgid "更新时间"
 msgstr "更新时间"
 
-#: .\apps\blog\models.py:182
+#: .\apps\blog\models.py:190
 #: .\templates\administration\partials\post_list_rows.html:26
-#: .\templates\blog\all_posts.html:107 .\templates\blog\post_list.html:132
+#: .\templates\blog\all_posts.html:107 .\templates\blog\post_list.html:140
 msgid "置顶"
 msgstr "置顶"
 
-#: .\apps\blog\models.py:183 .\templates\administration\post_form.html:213
+#: .\apps\blog\models.py:191 .\templates\administration\post_form.html:529
 msgid "允许评论"
 msgstr "允许评论"
 
-#: .\apps\blog\models.py:187
+#: .\apps\blog\models.py:195
 msgid "Meta 标题"
 msgstr "Meta 标题"
 
-#: .\apps\blog\models.py:187
+#: .\apps\blog\models.py:195
 msgid "覆盖默认的标题，用于搜索引擎显示"
 msgstr "覆盖默认的标题，用于搜索引擎显示"
 
-#: .\apps\blog\models.py:190
+#: .\apps\blog\models.py:198
 msgid "Meta 描述"
 msgstr "Meta 描述"
 
-#: .\apps\blog\models.py:190
+#: .\apps\blog\models.py:198
 msgid "覆盖默认的描述，建议 160 字以内"
 msgstr "覆盖默认的描述，建议 160 字以内"
 
-#: .\apps\blog\models.py:193
+#: .\apps\blog\models.py:201
 msgid "Meta 关键词"
 msgstr "Meta 关键词"
 
-#: .\apps\blog\models.py:193
+#: .\apps\blog\models.py:201
 msgid "逗号分隔的关键词"
 msgstr "逗号分隔的关键词"
 
-#: .\apps\blog\models.py:261 .\apps\blog\models.py:307
-#: .\apps\blog\views.py:662 .\apps\blog\views.py:676
-#: .\templates\administration\base.html:287
+#: .\apps\blog\models.py:274 .\apps\blog\models.py:320 .\apps\blog\views.py:679
+#: .\apps\blog\views.py:693 .\templates\administration\base.html:305
 #: .\templates\administration\debug.html:77
-#: .\templates\blog\post_detail.html:542
+#: .\templates\blog\post_detail.html:541
 #: .\templates\blog\search_results.html:13 .\templates\partials\footer.html:49
 #: .\templates\partials\navbar.html:26 .\templates\partials\navbar.html:112
 #: .\templates\users\includes\profile_tabs.html:4
 msgid "文章"
 msgstr "文章"
 
-#: .\apps\blog\models.py:264 .\apps\blog\models.py:304
-#: .\apps\core\models.py:134 .\apps\guestbook\models.py:14
-#: .\apps\voting\models.py:59 .\templates\administration\base.html:350
+#: .\apps\blog\models.py:277 .\apps\blog\models.py:317
+#: .\apps\core\models.py:169 .\apps\guestbook\models.py:14
+#: .\apps\voting\models.py:66 .\templates\administration\base.html:368
 #: .\templates\administration\debug.html:73
 #: .\templates\administration\logentry_list.html:56
 #: .\templates\administration\user_list.html:148
+#: .\templates\administration\usertitle_form.html:29
 #: .\templates\blog\search_results.html:14
 msgid "用户"
 msgstr "用户"
 
-#: .\apps\blog\models.py:272
+#: .\apps\blog\models.py:285
 msgid "父评论"
 msgstr "父评论"
 
-#: .\apps\blog\models.py:280 .\templates\administration\base.html:306
+#: .\apps\blog\models.py:293 .\templates\administration\base.html:324
 #: .\templates\administration\debug.html:81
 #: .\templates\administration\index.html:132
-#: .\templates\blog\post_detail.html:289
+#: .\templates\blog\post_detail.html:288
 #: .\templates\users\includes\profile_tabs.html:7
 msgid "评论"
 msgstr "评论"
 
-#: .\apps\blog\models.py:309
+#: .\apps\blog\models.py:322
 #: .\templates\users\includes\profile_content.html:129
 msgid "浏览时间"
 msgstr "浏览时间"
 
-#: .\apps\blog\models.py:313 .\templates\partials\navbar.html:80
-#: .\templates\partials\navbar.html:282
+#: .\apps\blog\models.py:326 .\templates\partials\navbar.html:80
+#: .\templates\partials\navbar.html:286
 #: .\templates\users\includes\profile_content.html:120
 msgid "浏览历史"
 msgstr "浏览历史"
@@ -438,68 +802,109 @@ msgstr "您的评论已发布！"
 msgid "评论创建失败: {error}"
 msgstr "评论创建失败: {error}"
 
-#: .\apps\blog\views.py:825
+#: .\apps\blog\views.py:842
 msgid "您没有权限删除此评论"
 msgstr "您没有权限删除此评论"
 
-#: .\apps\blog\views.py:835
+#: .\apps\blog\views.py:852
 msgid "评论已删除"
 msgstr "评论已删除"
 
-#: .\apps\core\models.py:25
-msgid "URL 路径的一部分，例如 about 或 contact"
+#: .\apps\core\context_processors.py:84
+msgid "搜索 {}..."
+msgstr "搜索 {}..."
+
+#: .\apps\core\context_processors.py:89
+#: .\templates\components\inspira\placeholders_and_vanish_input.html:34
+#: .\templates\partials\navbar.html:434
+msgid "搜索文章..."
+msgstr "搜索文章..."
+
+#: .\apps\core\context_processors.py:89
+#: .\templates\components\inspira\placeholders_and_vanish_input.html:35
+#: .\templates\partials\navbar.html:434
+msgid "搜索标签..."
+msgstr "搜索标签..."
+
+#: .\apps\core\models.py:42
+#, fuzzy
+#| msgid "URL 路径的一部分，例如 about 或 contact"
+msgid "URL 路径的一部分，例如 about 或 contact，留空将自动根据标题生成"
 msgstr "URL 路径的一部分，例如 about 或 contact"
 
-#: .\apps\core\models.py:35 .\templates\administration\base.html:324
-#: .\templates\administration\base.html:487
-#: .\templates\administration\base.html:488
+#: .\apps\core\models.py:44
+msgid "支持 Markdown 格式"
+msgstr "支持 Markdown 格式"
+
+#: .\apps\core\models.py:50
+msgid "控制页面是否对外可见"
+msgstr "控制页面是否对外可见"
+
+#: .\apps\core\models.py:56 .\templates\administration\base.html:342
+#: .\templates\administration\base.html:555
+#: .\templates\administration\base.html:556
 msgid "页面"
 msgstr "页面"
 
-#: .\apps\core\models.py:54
+#: .\apps\core\models.py:81
 msgid "占位符文本"
 msgstr "占位符文本"
 
-#: .\apps\core\models.py:54
+#: .\apps\core\models.py:81
 msgid "例如：搜索 Django..."
 msgstr "例如：搜索 Django..."
 
-#: .\apps\core\models.py:56
+#: .\apps\core\models.py:83
 msgid "是否启用"
 msgstr "是否启用"
 
-#: .\apps\core\models.py:57 .\apps\core\models.py:79 .\apps\core\models.py:107
+#: .\apps\core\models.py:84 .\apps\core\models.py:107 .\apps\core\models.py:139
 #: .\templates\administration\friendlink_list.html:72
 #: .\templates\administration\navigation_list.html:71
 #: .\templates\administration\searchplaceholder_list.html:68
 msgid "排序"
 msgstr "排序"
 
-#: .\apps\core\models.py:61 .\templates\administration\base.html:342
-#: .\templates\administration\base.html:499
+#: .\apps\core\models.py:84 .\apps\core\models.py:107 .\apps\core\models.py:139
+#, fuzzy
+#| msgid "数字越小越靠前 (默认 0)"
+msgid "数字越小越靠前"
+msgstr "数字越小越靠前 (默认 0)"
+
+#: .\apps\core\models.py:88 .\templates\administration\base.html:360
+#: .\templates\administration\base.html:567
 #: .\templates\administration\searchplaceholder_list.html:5
 #: .\templates\administration\searchplaceholder_list.html:32
 msgid "搜索占位符"
 msgstr "搜索占位符"
 
-#: .\apps\core\models.py:75 .\templates\administration\friendlink_list.html:68
+#: .\apps\core\models.py:103 .\templates\administration\friendlink_list.html:68
 msgid "网站名称"
 msgstr "网站名称"
 
-#: .\apps\core\models.py:76 .\templates\administration\friendlink_form.html:74
+#: .\apps\core\models.py:104
+#: .\templates\administration\friendlink_form.html:272
 msgid "网站链接"
 msgstr "网站链接"
 
-#: .\apps\core\models.py:78
+#: .\apps\core\models.py:106
 msgid "标志"
 msgstr "标志"
 
-#: .\apps\core\models.py:80 .\apps\core\models.py:108
+#: .\apps\core\models.py:108 .\apps\core\models.py:140
 msgid "是否显示"
 msgstr "是否显示"
 
-#: .\apps\core\models.py:83 .\templates\administration\base.html:336
-#: .\templates\administration\friendlink_form.html:14
+#: .\apps\core\models.py:109 .\apps\core\models.py:141
+#: .\templates\administration\navigation_form.html:324
+msgid "新窗口打开"
+msgstr "新窗口打开"
+
+#: .\apps\core\models.py:109 .\apps\core\models.py:141
+msgid "是否在新标签页中打开链接"
+msgstr "是否在新标签页中打开链接"
+
+#: .\apps\core\models.py:112 .\templates\administration\base.html:354
 #: .\templates\administration\friendlink_list.html:4
 #: .\templates\administration\friendlink_list.html:32
 #: .\templates\blog\partials\sidebar.html:153
@@ -507,62 +912,69 @@ msgstr "是否显示"
 msgid "友情链接"
 msgstr "友情链接"
 
-#: .\apps\core\models.py:98
+#: .\apps\core\models.py:129
 msgid "顶部导航"
 msgstr "顶部导航"
 
-#: .\apps\core\models.py:99
+#: .\apps\core\models.py:130
 msgid "底部链接"
 msgstr "底部链接"
 
-#: .\apps\core\models.py:100
-#: .\templates\administration\navigation_list.html:39
+#: .\apps\core\models.py:131 .\templates\administration\navigation_list.html:39
 msgid "侧边栏"
 msgstr "侧边栏"
 
-#: .\apps\core\models.py:105
-#: .\templates\administration\navigation_list.html:70
+#: .\apps\core\models.py:135
+msgid "可以是绝对路径或相对路径"
+msgstr "可以是绝对路径或相对路径"
+
+#: .\apps\core\models.py:137 .\templates\administration\navigation_list.html:70
 msgid "位置"
 msgstr "位置"
 
-#: .\apps\core\models.py:112 .\templates\blog\partials\sidebar.html:23
+#: .\apps\core\models.py:145 .\templates\blog\partials\sidebar.html:23
 msgid "导航菜单"
 msgstr "导航菜单"
 
-#: .\apps\core\models.py:126 .\templates\administration\page_form.html:168
+#: .\apps\core\models.py:160 .\templates\administration\page_form.html:308
 msgid "信息"
 msgstr "信息"
 
-#: .\apps\core\models.py:127
+#: .\apps\core\models.py:161
 msgid "成功"
 msgstr "成功"
 
-#: .\apps\core\models.py:128
+#: .\apps\core\models.py:162
 msgid "警告"
 msgstr "警告"
 
-#: .\apps\core\models.py:129
+#: .\apps\core\models.py:163
 msgid "错误"
 msgstr "错误"
 
-#: .\apps\core\models.py:140
+#: .\apps\core\models.py:171
+msgid "接收通知的用户"
+msgstr "接收通知的用户"
+
+#: .\apps\core\models.py:176
 msgid "级别"
 msgstr "级别"
 
-#: .\apps\core\models.py:142
+#: .\apps\core\models.py:178
 msgid "已读"
 msgstr "已读"
 
-#: .\apps\core\models.py:145
-#: .\templates\administration\friendlink_list.html:69
+#: .\apps\core\models.py:181 .\templates\administration\friendlink_list.html:69
 msgid "链接"
 msgstr "链接"
 
-#: .\apps\core\models.py:149
-msgid "可选，点击通知跳转的 URL"
+#: .\apps\core\models.py:185
+#, fuzzy
+#| msgid "可选，点击通知跳转的 URL"
+msgid "可选，点击通知跳转的 URL，例如评论所在的文章地址"
 msgstr "可选，点击通知跳转的 URL"
 
-#: .\apps\core\models.py:153 .\templates\users\includes\profile_tabs.html:17
+#: .\apps\core\models.py:189 .\templates\users\includes\profile_tabs.html:17
 msgid "通知"
 msgstr "通知"
 
@@ -602,7 +1014,7 @@ msgstr "您的网站 (可选)"
 msgid "写下您的留言..."
 msgstr "写下您的留言..."
 
-#: .\apps\guestbook\models.py:16 .\templates\administration\user_form.html:51
+#: .\apps\guestbook\models.py:16 .\templates\administration\user_form.html:55
 #: .\templates\guestbook\index.html:156
 #: .\templates\users\includes\edit_profile_modal.html:100
 #: .\templates\users\includes\user_info.html:7
@@ -667,57 +1079,57 @@ msgstr "注册成功，请登录"
 msgid "您的账号已被封禁，禁止登录。"
 msgstr "您的账号已被封禁，禁止登录。"
 
-#: .\apps\users\views.py:265
+#: .\apps\users\views.py:269
 msgid "您只能编辑自己的资料"
 msgstr "您只能编辑自己的资料"
 
-#: .\apps\users\views.py:283
+#: .\apps\users\views.py:287
 msgid "偏好设置已更新"
 msgstr "偏好设置已更新"
 
-#: .\apps\users\views.py:285
+#: .\apps\users\views.py:289
 msgid "偏好设置更新失败"
 msgstr "偏好设置更新失败"
 
-#: .\apps\users\views.py:294 .\apps\users\views.py:345
+#: .\apps\users\views.py:298 .\apps\users\views.py:349
 msgid "密码修改成功"
 msgstr "密码修改成功"
 
-#: .\apps\users\views.py:297
+#: .\apps\users\views.py:301
 msgid "密码修改失败，请检查输入"
 msgstr "密码修改失败，请检查输入"
 
-#: .\apps\users\views.py:321
+#: .\apps\users\views.py:325
 msgid "个人信息更新成功"
 msgstr "个人信息更新成功"
 
-#: .\apps\users\views.py:323
+#: .\apps\users\views.py:327
 msgid "个人信息更新失败，请检查输入"
 msgstr "个人信息更新失败，请检查输入"
 
-#: .\apps\users\views.py:402
+#: .\apps\users\views.py:400
 msgid "通知已删除"
 msgstr "通知已删除"
 
-#: .\apps\voting\models.py:11
+#: .\apps\voting\models.py:13
 msgid "是否开启"
 msgstr "是否开启"
 
-#: .\apps\voting\models.py:13
+#: .\apps\voting\models.py:15 .\templates\administration\poll_form.html:420
 msgid "允许多选"
 msgstr "允许多选"
 
-#: .\apps\voting\models.py:14
+#: .\apps\voting\models.py:16 .\templates\administration\poll_form.html:427
 msgid "结束时间"
 msgstr "结束时间"
 
-#: .\apps\voting\models.py:23 .\templates\administration\poll_form.html:69
+#: .\apps\voting\models.py:25 .\templates\administration\poll_form.html:216
 #: .\templates\administration\poll_list.html:38
 msgid "关联文章"
 msgstr "关联文章"
 
-#: .\apps\voting\models.py:27 .\apps\voting\models.py:58
-#: .\templates\administration\base.html:316
+#: .\apps\voting\models.py:29 .\apps\voting\models.py:65
+#: .\templates\administration\base.html:334
 #: .\templates\blog\search_results.html:17
 #: .\templates\blog\search_results.html:65
 #: .\templates\voting\components\sidebar_card.html:10
@@ -725,37 +1137,37 @@ msgstr "关联文章"
 msgid "投票"
 msgstr "投票"
 
-#: .\apps\voting\models.py:42
+#: .\apps\voting\models.py:47
 msgid "所属投票"
 msgstr "所属投票"
 
-#: .\apps\voting\models.py:43
+#: .\apps\voting\models.py:48
 msgid "选项文本"
 msgstr "选项文本"
 
-#: .\apps\voting\models.py:44
+#: .\apps\voting\models.py:49
 msgid "票数"
 msgstr "票数"
 
-#: .\apps\voting\models.py:47
+#: .\apps\voting\models.py:52
 #: .\templates\administration\partials\poll_list_rows.html:19
 msgid "选项"
 msgstr "选项"
 
-#: .\apps\voting\models.py:60
-#: .\templates\administration\category_form.html:170
+#: .\apps\voting\models.py:67 .\templates\administration\category_form.html:355
+#: .\templates\administration\components\category_modal.html:101
 msgid "选择"
 msgstr "选择"
 
-#: .\apps\voting\models.py:61
+#: .\apps\voting\models.py:68
 msgid "投票时间"
 msgstr "投票时间"
 
-#: .\apps\voting\models.py:64
+#: .\apps\voting\models.py:71
 msgid "投票记录"
 msgstr "投票记录"
 
-#: .\apps\voting\views.py:47
+#: .\apps\voting\views.py:63
 msgid "请选择一个选项！"
 msgstr "请选择一个选项！"
 
@@ -771,10 +1183,10 @@ msgstr "服务器无法理解您的请求。"
 msgid "这可能是由于无效的参数或请求格式错误导致的。"
 msgstr "这可能是由于无效的参数或请求格式错误导致的。"
 
-#: .\templates\400.html:27 .\templates\403.html:27
-#: .\templates\403_csrf.html:27 .\templates\404.html:29
-#: .\templates\429.html:31 .\templates\500.html:63 .\templates\502.html:28
-#: .\templates\blog\password_required.html:25 .\templates\maintenance.html:31
+#: .\templates\400.html:27 .\templates\403.html:27 .\templates\403_csrf.html:27
+#: .\templates\404.html:29 .\templates\429.html:31 .\templates\500.html:63
+#: .\templates\502.html:28 .\templates\blog\password_required.html:25
+#: .\templates\maintenance.html:31
 msgid "返回首页"
 msgstr "返回首页"
 
@@ -844,11 +1256,11 @@ msgstr "您的操作速度太快了，请喝杯咖啡稍作休息。"
 
 #: .\templates\429.html:26
 msgid ""
-"请在 <span id=\"countdown\" class=\"font-bold font-mono text-"
-"warning\">60</span> 秒后重试。"
+"请在 <span id=\"countdown\" class=\"font-bold font-mono text-warning\">60</"
+"span> 秒后重试。"
 msgstr ""
-"请在 <span id=\"countdown\" class=\"font-bold font-mono text-"
-"warning\">60</span> 秒后重试。"
+"请在 <span id=\"countdown\" class=\"font-bold font-mono text-warning\">60</"
+"span> 秒后重试。"
 
 #: .\templates\429.html:30 .\templates\500.html:66
 #: .\templates\maintenance.html:30
@@ -891,115 +1303,132 @@ msgstr "服务器暂时无法响应您的请求，请稍后重试。"
 msgid "重试连接"
 msgstr "重试连接"
 
-#: .\templates\administration\base.html:119
+#: .\templates\administration\base.html:137
 msgid "Rosetta Admin"
 msgstr "Rosetta Admin"
 
-#: .\templates\administration\base.html:151
-#: .\templates\administration\base.html:256
-#: .\templates\administration\base.html:526
-#: .\templates\administration\user_form.html:159
+#: .\templates\administration\base.html:169
+#: .\templates\administration\base.html:274
+#: .\templates\administration\base.html:593
+#: .\templates\administration\user_form.html:199
 msgid "个人资料"
 msgstr "个人资料"
 
-#: .\templates\administration\base.html:152
-#: .\templates\administration\base.html:257
-#: .\templates\administration\base.html:405
-#: .\templates\administration\base.html:527
-#: .\templates\partials\navbar.html:89
+#: .\templates\administration\base.html:170
+#: .\templates\administration\base.html:275
+#: .\templates\administration\base.html:429
+#: .\templates\administration\base.html:594 .\templates\partials\navbar.html:89
 msgid "退出登录"
 msgstr "退出登录"
 
-#: .\templates\administration\base.html:162
-#: .\templates\administration\base.html:528
+#: .\templates\administration\base.html:180
+#: .\templates\administration\base.html:595
 msgid "查看站点"
 msgstr "查看站点"
 
-#: .\templates\administration\base.html:186
+#: .\templates\administration\base.html:204
 msgid "搜索命令或页面…"
 msgstr "搜索命令或页面…"
 
-#: .\templates\administration\base.html:279
+#: .\templates\administration\base.html:297
 #: .\templates\administration\debug.html:5
 #: .\templates\administration\debug\base_debug.html:23
 msgid "概览"
 msgstr "概览"
 
-#: .\templates\administration\base.html:283
+#: .\templates\administration\base.html:301
 msgid "内容管理"
 msgstr "内容管理"
 
-#: .\templates\administration\base.html:320
+#: .\templates\administration\base.html:338
 #: .\templates\administration\page_list.html:4
 #: .\templates\administration\page_list.html:37
 msgid "页面管理"
 msgstr "页面管理"
 
-#: .\templates\administration\base.html:330
-#: .\templates\administration\base.html:477
-#: .\templates\partials\footer.html:41
+#: .\templates\administration\base.html:348
+#: .\templates\administration\base.html:545 .\templates\partials\footer.html:41
 msgid "导航"
 msgstr "导航"
 
-#: .\templates\administration\base.html:346
+#: .\templates\administration\base.html:364
 msgid "系统管理"
 msgstr "系统管理"
 
-#: .\templates\administration\base.html:356
+#: .\templates\administration\base.html:374
 #: .\templates\administration\user_list.html:155
 msgid "称号"
 msgstr "称号"
 
-#: .\templates\administration\base.html:362
+#: .\templates\administration\base.html:380
 msgid "用户组"
 msgstr "用户组"
 
-#: .\templates\administration\base.html:366
+#: .\templates\administration\base.html:384
 msgid "日志与审计"
 msgstr "日志与审计"
 
-#: .\templates\administration\base.html:370
-#: .\templates\administration\base.html:515
+#: .\templates\administration\base.html:388
+#: .\templates\administration\base.html:583
 #: .\templates\administration\logentry_list.html:5
 msgid "操作日志"
 msgstr "操作日志"
 
-#: .\templates\administration\base.html:376
-#: .\templates\administration\base.html:517
+#: .\templates\administration\base.html:394
+#: .\templates\administration\base.html:585
 #: .\templates\administration\logfile_list.html:5
 msgid "系统日志"
 msgstr "系统日志"
 
-#: .\templates\administration\base.html:380
+#: .\templates\administration\base.html:398
 msgid "维护与工具"
 msgstr "维护与工具"
 
-#: .\templates\administration\base.html:384
-#: .\templates\administration\base.html:518
-#: .\templates\administration\base.html:519
+#: .\templates\administration\base.html:402
+#: .\templates\administration\periodic_task_list.html:4
+#: .\templates\administration\periodic_task_list.html:16
+msgid "定时任务"
+msgstr ""
+
+#: .\templates\administration\base.html:408
+#: .\templates\administration\base.html:586
+#: .\templates\administration\base.html:587
 #: .\templates\administration\system_tools.html:5
 #: .\templates\administration\system_tools.html:12
 msgid "系统工具"
 msgstr "系统工具"
 
-#: .\templates\administration\base.html:390
-#: .\templates\administration\base.html:519
+#: .\templates\administration\base.html:414
+#: .\templates\administration\base.html:587
 #: .\templates\administration\index.html:110
 #: .\templates\administration\settings.html:5
 #: .\templates\administration\settings.html:12
 msgid "站点设置"
 msgstr "站点设置"
 
-#: .\templates\administration\base.html:396
+#: .\templates\administration\base.html:420
 #: .\templates\administration\debug\base_debug.html:4
 msgid "调试工具"
 msgstr "调试工具"
 
-#: .\templates\administration\base.html:418
+#: .\templates\administration\base.html:443
 msgid "Copyright © 2026 - All rights reserved"
 msgstr "Copyright © 2026 - All rights reserved"
 
-#: .\templates\administration\base.html:453
+#: .\templates\administration\base.html:468
+#: .\templates\administration\base.html:484
+msgid "表单提交有误，请检查填写内容"
+msgstr "表单提交有误，请检查填写内容"
+
+#: .\templates\administration\base.html:475
+msgid "表单提交有误，共有"
+msgstr "表单提交有误，共有"
+
+#: .\templates\administration\base.html:475
+msgid "处错误，请检查填写内容"
+msgstr "处错误，请检查填写内容"
+
+#: .\templates\administration\base.html:521
 #: .\templates\administration\category_list.html:94
 #: .\templates\administration\comment_list.html:127
 #: .\templates\administration\friendlink_list.html:119
@@ -1015,742 +1444,814 @@ msgstr "Copyright © 2026 - All rights reserved"
 msgid "批量操作"
 msgstr "批量操作"
 
-#: .\templates\administration\base.html:454
+#: .\templates\administration\base.html:522
 msgid "确定要执行此批量操作吗？"
 msgstr "确定要执行此批量操作吗？"
 
-#: .\templates\administration\base.html:477
+#: .\templates\administration\base.html:545
 msgid "管理后台首页"
 msgstr "管理后台首页"
 
-#: .\templates\administration\base.html:477
+#: .\templates\administration\base.html:545
 msgid "首页 概览 仪表盘"
 msgstr "首页 概览 仪表盘"
 
-#: .\templates\administration\base.html:478
+#: .\templates\administration\base.html:546
 #: .\templates\administration\post_list.html:103
 msgid "文章列表"
 msgstr "文章列表"
 
-#: .\templates\administration\base.html:478
+#: .\templates\administration\base.html:546
 msgid "文章 内容 列表"
 msgstr "文章 内容 列表"
 
-#: .\templates\administration\base.html:479
+#: .\templates\administration\base.html:547
 msgid "新建文章"
 msgstr "新建文章"
 
-#: .\templates\administration\base.html:479
+#: .\templates\administration\base.html:547
 msgid "文章 新建 新增 写作"
 msgstr "文章 新建 新增 写作"
 
-#: .\templates\administration\base.html:480
+#: .\templates\administration\base.html:548
 #: .\templates\administration\category_list.html:84
 msgid "分类列表"
 msgstr "分类列表"
 
-#: .\templates\administration\base.html:480
+#: .\templates\administration\base.html:548
 msgid "分类 列表"
 msgstr "分类 列表"
 
-#: .\templates\administration\base.html:481
+#: .\templates\administration\base.html:549
 #: .\templates\administration\category_list.html:22
 msgid "新建分类"
 msgstr "新建分类"
 
-#: .\templates\administration\base.html:481
+#: .\templates\administration\base.html:549
 msgid "分类 新建 新增"
 msgstr "分类 新建 新增"
 
-#: .\templates\administration\base.html:482
+#: .\templates\administration\base.html:550
 msgid "导出分类"
 msgstr "导出分类"
 
-#: .\templates\administration\base.html:482
+#: .\templates\administration\base.html:550
 msgid "分类 导出"
 msgstr "分类 导出"
 
-#: .\templates\administration\base.html:483
+#: .\templates\administration\base.html:551
 msgid "导入分类"
 msgstr "导入分类"
 
-#: .\templates\administration\base.html:483
+#: .\templates\administration\base.html:551
 msgid "分类 导入"
 msgstr "分类 导入"
 
-#: .\templates\administration\base.html:484
+#: .\templates\administration\base.html:552
 #: .\templates\administration\tag_list.html:108
 msgid "标签列表"
 msgstr "标签列表"
 
-#: .\templates\administration\base.html:484
+#: .\templates\administration\base.html:552
 msgid "标签 列表"
 msgstr "标签 列表"
 
-#: .\templates\administration\base.html:485
+#: .\templates\administration\base.html:553
 #: .\templates\administration\tag_list.html:25
 msgid "新建标签"
 msgstr "新建标签"
 
-#: .\templates\administration\base.html:485
+#: .\templates\administration\base.html:553
 msgid "标签 新建 新增"
 msgstr "标签 新建 新增"
 
-#: .\templates\administration\base.html:486
+#: .\templates\administration\base.html:554
 #: .\templates\administration\comment_list.html:261
 msgid "评论列表"
 msgstr "评论列表"
 
-#: .\templates\administration\base.html:486
+#: .\templates\administration\base.html:554
 msgid "评论 审核 列表"
 msgstr "评论 审核 列表"
 
-#: .\templates\administration\base.html:487
+#: .\templates\administration\base.html:555
 #: .\templates\administration\page_list.html:98
 msgid "页面列表"
 msgstr "页面列表"
 
-#: .\templates\administration\base.html:487
+#: .\templates\administration\base.html:555
 msgid "单页 页面 列表"
 msgstr "单页 页面 列表"
 
-#: .\templates\administration\base.html:488
+#: .\templates\administration\base.html:556
 #: .\templates\administration\page_list.html:30
 msgid "新建页面"
 msgstr "新建页面"
 
-#: .\templates\administration\base.html:488
+#: .\templates\administration\base.html:556
 msgid "页面 新建 新增"
 msgstr "页面 新建 新增"
 
-#: .\templates\administration\base.html:489
-#: .\templates\administration\navigation_form.html:14
+#: .\templates\administration\base.html:557
 #: .\templates\administration\navigation_list.html:4
 #: .\templates\administration\navigation_list.html:32
 msgid "导航管理"
 msgstr "导航管理"
 
-#: .\templates\administration\base.html:489
-#: .\templates\administration\base.html:490
-#: .\templates\administration\base.html:491
-#: .\templates\administration\base.html:492
-#: .\templates\administration\base.html:495
-#: .\templates\administration\base.html:496
-#: .\templates\administration\base.html:497
-#: .\templates\administration\base.html:498
-#: .\templates\administration\base.html:499
-#: .\templates\administration\base.html:500
-#: .\templates\administration\base.html:501
-#: .\templates\administration\base.html:502
+#: .\templates\administration\base.html:557
+#: .\templates\administration\base.html:558
+#: .\templates\administration\base.html:559
+#: .\templates\administration\base.html:560
+#: .\templates\administration\base.html:563
+#: .\templates\administration\base.html:564
+#: .\templates\administration\base.html:565
+#: .\templates\administration\base.html:566
+#: .\templates\administration\base.html:567
+#: .\templates\administration\base.html:568
+#: .\templates\administration\base.html:569
+#: .\templates\administration\base.html:570
 msgid "外观"
 msgstr "外观"
 
-#: .\templates\administration\base.html:489
+#: .\templates\administration\base.html:557
 msgid "导航 菜单 列表"
 msgstr "导航 菜单 列表"
 
-#: .\templates\administration\base.html:490
+#: .\templates\administration\base.html:558
 #: .\templates\administration\navigation_list.html:25
 msgid "新建导航"
 msgstr "新建导航"
 
-#: .\templates\administration\base.html:490
+#: .\templates\administration\base.html:558
 msgid "导航 新建 新增"
 msgstr "导航 新建 新增"
 
-#: .\templates\administration\base.html:491
+#: .\templates\administration\base.html:559
 msgid "导出导航"
 msgstr "导出导航"
 
-#: .\templates\administration\base.html:491
+#: .\templates\administration\base.html:559
 msgid "导航 导出"
 msgstr "导航 导出"
 
-#: .\templates\administration\base.html:492
+#: .\templates\administration\base.html:560
 msgid "导入导航"
 msgstr "导入导航"
 
-#: .\templates\administration\base.html:492
+#: .\templates\administration\base.html:560
 msgid "导航 导入"
 msgstr "导航 导入"
 
-#: .\templates\administration\base.html:493
+#: .\templates\administration\base.html:561
 #: .\templates\administration\poll_list.html:51
 #: .\templates\voting\poll_list.html:5
 msgid "投票列表"
 msgstr "投票列表"
 
-#: .\templates\administration\base.html:493
+#: .\templates\administration\base.html:561
 msgid "投票 问卷 列表"
 msgstr "投票 问卷 列表"
 
-#: .\templates\administration\base.html:494
+#: .\templates\administration\base.html:562
 #: .\templates\administration\poll_list.html:12
 msgid "新建投票"
 msgstr "新建投票"
 
-#: .\templates\administration\base.html:494
+#: .\templates\administration\base.html:562
 msgid "投票 新建 新增"
 msgstr "投票 新建 新增"
 
-#: .\templates\administration\base.html:495
+#: .\templates\administration\base.html:563
 msgid "友情链接管理"
 msgstr "友情链接管理"
 
-#: .\templates\administration\base.html:495
+#: .\templates\administration\base.html:563
 msgid "友链 列表"
 msgstr "友链 列表"
 
-#: .\templates\administration\base.html:496
+#: .\templates\administration\base.html:564
 msgid "新建友情链接"
 msgstr "新建友情链接"
 
-#: .\templates\administration\base.html:496
+#: .\templates\administration\base.html:564
 msgid "友链 新建 新增"
 msgstr "友链 新建 新增"
 
-#: .\templates\administration\base.html:497
+#: .\templates\administration\base.html:565
 msgid "导出友情链接"
 msgstr "导出友情链接"
 
-#: .\templates\administration\base.html:497
+#: .\templates\administration\base.html:565
 msgid "友链 导出"
 msgstr "友链 导出"
 
-#: .\templates\administration\base.html:498
+#: .\templates\administration\base.html:566
 msgid "导入友情链接"
 msgstr "导入友情链接"
 
-#: .\templates\administration\base.html:498
+#: .\templates\administration\base.html:566
 msgid "友链 导入"
 msgstr "友链 导入"
 
-#: .\templates\administration\base.html:499
+#: .\templates\administration\base.html:567
 msgid "搜索 占位符 列表"
 msgstr "搜索 占位符 列表"
 
-#: .\templates\administration\base.html:500
+#: .\templates\administration\base.html:568
 msgid "新建搜索占位符"
 msgstr "新建搜索占位符"
 
-#: .\templates\administration\base.html:500
+#: .\templates\administration\base.html:568
 msgid "占位符 新建 新增"
 msgstr "占位符 新建 新增"
 
-#: .\templates\administration\base.html:501
+#: .\templates\administration\base.html:569
 msgid "导出搜索占位符"
 msgstr "导出搜索占位符"
 
-#: .\templates\administration\base.html:501
+#: .\templates\administration\base.html:569
 msgid "占位符 导出"
 msgstr "占位符 导出"
 
-#: .\templates\administration\base.html:502
+#: .\templates\administration\base.html:570
 msgid "导入搜索占位符"
 msgstr "导入搜索占位符"
 
-#: .\templates\administration\base.html:502
+#: .\templates\administration\base.html:570
 msgid "占位符 导入"
 msgstr "占位符 导入"
 
-#: .\templates\administration\base.html:503
+#: .\templates\administration\base.html:571
 #: .\templates\administration\user_list.html:186
 msgid "用户列表"
 msgstr "用户列表"
 
-#: .\templates\administration\base.html:503
-#: .\templates\administration\base.html:504
-#: .\templates\administration\base.html:505
-#: .\templates\administration\base.html:506
-#: .\templates\administration\base.html:507
-#: .\templates\administration\base.html:508
-#: .\templates\administration\base.html:509
-#: .\templates\administration\base.html:510
-#: .\templates\administration\base.html:511
-#: .\templates\administration\base.html:512
-#: .\templates\administration\base.html:513
-#: .\templates\administration\base.html:514
+#: .\templates\administration\base.html:571
+#: .\templates\administration\base.html:572
+#: .\templates\administration\base.html:573
+#: .\templates\administration\base.html:574
+#: .\templates\administration\base.html:575
+#: .\templates\administration\base.html:576
+#: .\templates\administration\base.html:577
+#: .\templates\administration\base.html:578
+#: .\templates\administration\base.html:579
+#: .\templates\administration\base.html:580
+#: .\templates\administration\base.html:581
+#: .\templates\administration\base.html:582
 msgid "用户与权限"
 msgstr "用户与权限"
 
-#: .\templates\administration\base.html:503
+#: .\templates\administration\base.html:571
 msgid "用户 列表"
 msgstr "用户 列表"
 
-#: .\templates\administration\base.html:504
+#: .\templates\administration\base.html:572
 #: .\templates\administration\user_list.html:62
 msgid "新建用户"
 msgstr "新建用户"
 
-#: .\templates\administration\base.html:504
+#: .\templates\administration\base.html:572
 msgid "用户 新建 新增"
 msgstr "用户 新建 新增"
 
-#: .\templates\administration\base.html:505
+#: .\templates\administration\base.html:573
 msgid "导出用户"
 msgstr "导出用户"
 
-#: .\templates\administration\base.html:505
+#: .\templates\administration\base.html:573
 msgid "用户 导出"
 msgstr "用户 导出"
 
-#: .\templates\administration\base.html:506
+#: .\templates\administration\base.html:574
 msgid "导入用户"
 msgstr "导入用户"
 
-#: .\templates\administration\base.html:506
+#: .\templates\administration\base.html:574
 msgid "用户 导入"
 msgstr "用户 导入"
 
-#: .\templates\administration\base.html:507
-#: .\templates\administration\user_form.html:75
+#: .\templates\administration\base.html:575
+#: .\templates\administration\user_form.html:79
 msgid "用户称号"
 msgstr "用户称号"
 
-#: .\templates\administration\base.html:507
+#: .\templates\administration\base.html:575
 msgid "称号 头衔 列表"
 msgstr "称号 头衔 列表"
 
-#: .\templates\administration\base.html:508
+#: .\templates\administration\base.html:576
 msgid "新建用户称号"
 msgstr "新建用户称号"
 
-#: .\templates\administration\base.html:508
+#: .\templates\administration\base.html:576
 msgid "称号 新建 新增"
 msgstr "称号 新建 新增"
 
-#: .\templates\administration\base.html:509
+#: .\templates\administration\base.html:577
 msgid "导出用户称号"
 msgstr "导出用户称号"
 
-#: .\templates\administration\base.html:509
+#: .\templates\administration\base.html:577
 msgid "称号 导出"
 msgstr "称号 导出"
 
-#: .\templates\administration\base.html:510
+#: .\templates\administration\base.html:578
 msgid "导入用户称号"
 msgstr "导入用户称号"
 
-#: .\templates\administration\base.html:510
+#: .\templates\administration\base.html:578
 msgid "称号 导入"
 msgstr "称号 导入"
 
-#: .\templates\administration\base.html:511
+#: .\templates\administration\base.html:579
 #: .\templates\administration\group_list.html:4
 #: .\templates\administration\group_list.html:30
 msgid "用户组管理"
 msgstr "用户组管理"
 
-#: .\templates\administration\base.html:511
+#: .\templates\administration\base.html:579
 msgid "用户组 列表"
 msgstr "用户组 列表"
 
-#: .\templates\administration\base.html:512
+#: .\templates\administration\base.html:580
 #: .\templates\administration\group_list.html:23
 msgid "新建用户组"
 msgstr "新建用户组"
 
-#: .\templates\administration\base.html:512
+#: .\templates\administration\base.html:580
 msgid "用户组 新建 新增"
 msgstr "用户组 新建 新增"
 
-#: .\templates\administration\base.html:513
+#: .\templates\administration\base.html:581
 msgid "导出用户组"
 msgstr "导出用户组"
 
-#: .\templates\administration\base.html:513
+#: .\templates\administration\base.html:581
 msgid "用户组 导出"
 msgstr "用户组 导出"
 
-#: .\templates\administration\base.html:514
+#: .\templates\administration\base.html:582
 msgid "导入用户组"
 msgstr "导入用户组"
 
-#: .\templates\administration\base.html:514
+#: .\templates\administration\base.html:582
 msgid "用户组 导入"
 msgstr "用户组 导入"
 
-#: .\templates\administration\base.html:515
-#: .\templates\administration\base.html:516
-#: .\templates\administration\base.html:517
+#: .\templates\administration\base.html:583
+#: .\templates\administration\base.html:584
+#: .\templates\administration\base.html:585
 msgid "日志"
 msgstr "日志"
 
-#: .\templates\administration\base.html:515
+#: .\templates\administration\base.html:583
 msgid "审计 日志 操作记录"
 msgstr "审计 日志 操作记录"
 
-#: .\templates\administration\base.html:516
+#: .\templates\administration\base.html:584
 msgid "导出操作日志"
 msgstr "导出操作日志"
 
-#: .\templates\administration\base.html:516
+#: .\templates\administration\base.html:584
 msgid "日志 导出"
 msgstr "日志 导出"
 
-#: .\templates\administration\base.html:517
+#: .\templates\administration\base.html:585
 msgid "系统 日志 文件"
 msgstr "系统 日志 文件"
 
-#: .\templates\administration\base.html:518
+#: .\templates\administration\base.html:586
 msgid "系统 维护 索引 图片"
 msgstr "系统 维护 索引 图片"
 
-#: .\templates\administration\base.html:519
+#: .\templates\administration\base.html:587
 msgid "设置 配置 参数"
 msgstr "设置 配置 参数"
 
-#: .\templates\administration\base.html:520
+#: .\templates\administration\base.html:588
 msgid "调试面板"
 msgstr "调试面板"
 
-#: .\templates\administration\base.html:520
-#: .\templates\administration\base.html:521
-#: .\templates\administration\base.html:522
-#: .\templates\administration\base.html:523
-#: .\templates\administration\base.html:524
-#: .\templates\administration\base.html:525
+#: .\templates\administration\base.html:588
+#: .\templates\administration\base.html:589
+#: .\templates\administration\base.html:590
+#: .\templates\administration\base.html:591
+#: .\templates\administration\base.html:592
 msgid "调试"
 msgstr "调试"
 
-#: .\templates\administration\base.html:520
+#: .\templates\administration\base.html:588
 msgid "调试 面板"
 msgstr "调试 面板"
 
-#: .\templates\administration\base.html:521
+#: .\templates\administration\base.html:589
 msgid "调试 UI 测试"
 msgstr "调试 UI 测试"
 
-#: .\templates\administration\base.html:521
+#: .\templates\administration\base.html:589
 msgid "调试 UI 组件"
 msgstr "调试 UI 组件"
 
-#: .\templates\administration\base.html:522
+#: .\templates\administration\base.html:590
 msgid "调试 权限检查"
 msgstr "调试 权限检查"
 
-#: .\templates\administration\base.html:522
+#: .\templates\administration\base.html:590
 msgid "调试 权限"
 msgstr "调试 权限"
 
-#: .\templates\administration\base.html:523
-msgid "调试 模拟数据"
-msgstr "调试 模拟数据"
-
-#: .\templates\administration\base.html:523
-msgid "调试 模拟"
-msgstr "调试 模拟"
-
-#: .\templates\administration\base.html:524
+#: .\templates\administration\base.html:591
 msgid "调试 缓存状态"
 msgstr "调试 缓存状态"
 
-#: .\templates\administration\base.html:524
+#: .\templates\administration\base.html:591
 msgid "调试 缓存"
 msgstr "调试 缓存"
 
-#: .\templates\administration\base.html:525
+#: .\templates\administration\base.html:592
 msgid "调试 邮件发送"
 msgstr "调试 邮件发送"
 
-#: .\templates\administration\base.html:525
+#: .\templates\administration\base.html:592
 msgid "调试 邮件"
 msgstr "调试 邮件"
 
-#: .\templates\administration\base.html:526
-#: .\templates\administration\base.html:527
+#: .\templates\administration\base.html:593
+#: .\templates\administration\base.html:594
 msgid "账户"
 msgstr "账户"
 
-#: .\templates\administration\base.html:526
+#: .\templates\administration\base.html:593
 msgid "资料 账户"
 msgstr "资料 账户"
 
-#: .\templates\administration\base.html:527
+#: .\templates\administration\base.html:594
 msgid "登出 退出"
 msgstr "登出 退出"
 
-#: .\templates\administration\base.html:528
+#: .\templates\administration\base.html:595
 msgid "外部"
 msgstr "外部"
 
-#: .\templates\administration\base.html:528
+#: .\templates\administration\base.html:595
 msgid "前台 站点 首页"
 msgstr "前台 站点 首页"
 
-#: .\templates\administration\base.html:592
+#: .\templates\administration\base.html:659
 msgid "搜索命令或页面…（Ctrl+K）"
 msgstr "搜索命令或页面…（Ctrl+K）"
 
-#: .\templates\administration\base.html:618
+#: .\templates\administration\base.html:685
 msgid "未找到匹配结果"
 msgstr "未找到匹配结果"
 
-#: .\templates\administration\base.html:619
+#: .\templates\administration\base.html:686
 msgid "没有找到对应的命令，请尝试更换关键词。"
 msgstr "没有找到对应的命令，请尝试更换关键词。"
 
-#: .\templates\administration\base.html:625
+#: .\templates\administration\base.html:692
 msgid "切换"
 msgstr "切换"
 
-#: .\templates\administration\base.html:627
+#: .\templates\administration\base.html:694
 msgid "进入"
 msgstr "进入"
 
-#: .\templates\administration\base.html:629
-#: .\templates\administration\category_form.html:286
-#: .\templates\administration\logfile_list.html:147
-#: .\templates\partials\navbar.html:411
+#: .\templates\administration\base.html:696
+#: .\templates\administration\logfile_list.html:212
+#: .\templates\partials\navbar.html:416
 msgid "关闭"
 msgstr "关闭"
 
-#: .\templates\administration\category_form.html:11
+#: .\templates\administration\category_form.html:112
 msgid "编辑分类"
 msgstr "编辑分类"
 
-#: .\templates\administration\category_form.html:24
+#: .\templates\administration\category_form.html:126
 #: .\templates\administration\comment_form.html:33
-#: .\templates\administration\friendlink_form.html:36
+#: .\templates\administration\friendlink_form.html:110
 #: .\templates\administration\generic_form.html:23
 #: .\templates\administration\group_form.html:26
-#: .\templates\administration\navigation_form.html:36
-#: .\templates\administration\poll_form.html:25
-#: .\templates\administration\searchplaceholder_form.html:23
-#: .\templates\administration\tag_form.html:24
-#: .\templates\administration\user_form.html:28
+#: .\templates\administration\navigation_form.html:104
+#: .\templates\administration\periodic_task_form.html:34
+#: .\templates\administration\poll_form.html:30
+#: .\templates\administration\searchplaceholder_form.html:40
+#: .\templates\administration\tag_form.html:86
+#: .\templates\administration\user_form.html:29
 msgid "表单错误"
 msgstr "表单错误"
 
-#: .\templates\administration\category_form.html:35
-#: .\templates\administration\tag_form.html:35
+#: .\templates\administration\category_form.html:151
+#: .\templates\administration\friendlink_form.html:135
+#: .\templates\administration\navigation_form.html:129
+#: .\templates\administration\page_form.html:58
+#: .\templates\administration\poll_form.html:50
+#: .\templates\administration\post_form.html:58
+#: .\templates\administration\searchplaceholder_form.html:60
+#: .\templates\administration\tag_form.html:111
+#: .\templates\administration\usertitle_form.html:60
+#, fuzzy
+#| msgid "简体中文"
+msgid "中文"
+msgstr "简体中文"
+
+#: .\templates\administration\category_form.html:188
+#: .\templates\administration\friendlink_form.html:172
+#: .\templates\administration\navigation_form.html:161
+#: .\templates\administration\page_form.html:95
+#: .\templates\administration\poll_form.html:87
+#: .\templates\administration\post_form.html:105
+#: .\templates\administration\searchplaceholder_form.html:92
+#: .\templates\administration\tag_form.html:143
+#: .\templates\administration\usertitle_form.html:97
+msgid "自动翻译到其他语言"
+msgstr "自动翻译到其他语言"
+
+#: .\templates\administration\category_form.html:190
+#: .\templates\administration\components\category_modal.html:28
+#: .\templates\administration\friendlink_form.html:174
+#: .\templates\administration\navigation_form.html:163
+#: .\templates\administration\page_form.html:97
+#: .\templates\administration\poll_form.html:89
+#: .\templates\administration\post_form.html:107
+#: .\templates\administration\searchplaceholder_form.html:94
+#: .\templates\administration\tag_form.html:145
+#: .\templates\administration\usertitle_form.html:99
+msgid "一键翻译"
+msgstr "一键翻译"
+
+#: .\templates\administration\category_form.html:201
+#: .\templates\administration\components\category_modal.html:37
+#: .\templates\administration\tag_form.html:156
 msgid "名称 (中文)"
 msgstr "名称 (中文)"
 
-#: .\templates\administration\category_form.html:47
-#: .\templates\administration\tag_form.html:47
-msgid "Name (English)"
-msgstr "名称 (英文)"
+#: .\templates\administration\category_form.html:203
+#: .\templates\administration\tag_form.html:158
+#, fuzzy
+#| msgid "名称 (中文)"
+msgid " (中文)"
+msgstr "名称 (中文)"
 
-#: .\templates\administration\category_form.html:56
-#: .\templates\administration\tag_form.html:56
-msgid "这将是它在站点上显示的名字。"
-msgstr "这将是它在站点上显示的名字。"
-
-#: .\templates\administration\category_form.html:62
-#: .\templates\administration\tag_form.html:62
-msgid "名前 (Japanese)"
-msgstr "名前 (Japanese)"
-
-#: .\templates\administration\category_form.html:74
-#: .\templates\administration\tag_form.html:69
-msgid "名稱 (Traditional Chinese)"
-msgstr "名稱 (Traditional Chinese)"
-
-#: .\templates\administration\category_form.html:87
-#: .\templates\administration\page_form.html:122
-#: .\templates\administration\tag_form.html:77
-msgid "别名 (Slug)"
-msgstr "别名 (Slug)"
-
-#: .\templates\administration\category_form.html:96
-#: .\templates\administration\tag_form.html:86
-msgid "“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。"
-msgstr "“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。"
-
-#: .\templates\administration\category_form.html:103
+#: .\templates\administration\category_form.html:214
+#: .\templates\administration\components\category_modal.html:41
+#: .\templates\administration\poll_form.html:119
 msgid "描述 (中文)"
 msgstr "描述 (中文)"
 
-#: .\templates\administration\category_form.html:115
+#: .\templates\administration\category_form.html:216
+#, fuzzy
+#| msgid "名称 (中文)"
+msgid " (中文)..."
+msgstr "名称 (中文)"
+
+#: .\templates\administration\category_form.html:230
+#: .\templates\administration\components\category_modal.html:49
+#: .\templates\administration\tag_form.html:172
+#: .\templates\administration\usertitle_form.html:138
+msgid "Name (English)"
+msgstr "名称 (英文)"
+
+#: .\templates\administration\category_form.html:232
+#: .\templates\administration\tag_form.html:174
+#, fuzzy
+#| msgid "Name (English)"
+msgid " (English)"
+msgstr "名称 (英文)"
+
+#: .\templates\administration\category_form.html:240
+#: .\templates\administration\tag_form.html:182
+msgid "这将是它在站点上显示的名字。"
+msgstr "这将是它在站点上显示的名字。"
+
+#: .\templates\administration\category_form.html:246
+#: .\templates\administration\components\category_modal.html:53
+#: .\templates\administration\poll_form.html:146
+#: .\templates\administration\usertitle_form.html:144
 msgid "Description (English)"
 msgstr "描述 (英文)"
 
-#: .\templates\administration\category_form.html:127
+#: .\templates\administration\category_form.html:248
+#, fuzzy
+#| msgid "Name (English)"
+msgid " (English)..."
+msgstr "名称 (英文)"
+
+#: .\templates\administration\category_form.html:262
+#: .\templates\administration\components\category_modal.html:61
+#: .\templates\administration\tag_form.html:191
+msgid "名前 (Japanese)"
+msgstr "名前 (Japanese)"
+
+#: .\templates\administration\category_form.html:264
+#: .\templates\administration\tag_form.html:193
+#, fuzzy
+#| msgid "名前 (Japanese)"
+msgid " (Japanese)"
+msgstr "名前 (Japanese)"
+
+#: .\templates\administration\category_form.html:275
+#: .\templates\administration\components\category_modal.html:65
+#: .\templates\administration\poll_form.html:173
 msgid "説明 (Japanese)"
 msgstr "描述 (日文)"
 
-#: .\templates\administration\category_form.html:139
+#: .\templates\administration\category_form.html:277
+#, fuzzy
+#| msgid "名前 (Japanese)"
+msgid " (Japanese)..."
+msgstr "名前 (Japanese)"
+
+#: .\templates\administration\category_form.html:291
+#: .\templates\administration\components\category_modal.html:73
+#: .\templates\administration\tag_form.html:207
+msgid "名稱 (Traditional Chinese)"
+msgstr "名稱 (Traditional Chinese)"
+
+#: .\templates\administration\category_form.html:293
+#: .\templates\administration\tag_form.html:209
+#, fuzzy
+#| msgid "名稱 (Traditional Chinese)"
+msgid " (Traditional Chinese)"
+msgstr "名稱 (Traditional Chinese)"
+
+#: .\templates\administration\category_form.html:304
+#: .\templates\administration\components\category_modal.html:77
+#: .\templates\administration\poll_form.html:200
 msgid "描述 (Traditional Chinese)"
 msgstr "描述 (繁体中文)"
 
-#: .\templates\administration\category_form.html:148
-msgid "描述默认只在后台显示，部分主题可能会显示。"
-msgstr "描述默认只在后台显示，部分主题可能会显示。"
+#: .\templates\administration\category_form.html:306
+#, fuzzy
+#| msgid "名稱 (Traditional Chinese)"
+msgid " (Traditional Chinese)..."
+msgstr "名稱 (Traditional Chinese)"
 
-#: .\templates\administration\category_form.html:152
+#: .\templates\administration\category_form.html:321
+#: .\templates\administration\tag_form.html:224
+msgid "别名 (Slug)"
+msgstr "别名 (Slug)"
+
+#: .\templates\administration\category_form.html:330
+#: .\templates\administration\page_form.html:269
+#: .\templates\administration\post_form.html:290
+#: .\templates\administration\tag_form.html:233
+msgid ""
+"“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。"
+msgstr ""
+"“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。"
+
+#: .\templates\administration\category_form.html:339
 #: .\templates\administration\debug\permission.html:37
-#: .\templates\administration\friendlink_form.html:29
+#: .\templates\administration\friendlink_form.html:287
 #: .\templates\administration\group_form.html:51
-#: .\templates\administration\navigation_form.html:29
-#: .\templates\administration\poll_form.html:86
-#: .\templates\administration\searchplaceholder_form.html:16
-#: .\templates\administration\tag_form.html:90
-#: .\templates\administration\usertitle_form.html:109
+#: .\templates\administration\navigation_form.html:244
+#: .\templates\administration\periodic_task_form.html:54
+#: .\templates\administration\poll_form.html:233
+#: .\templates\administration\searchplaceholder_form.html:32
+#: .\templates\administration\tag_form.html:241
+#: .\templates\administration\usertitle_form.html:208
 #: .\templates\users\includes\edit_profile_modal.html:95
 msgid "基本信息"
 msgstr "基本信息"
 
-#: .\templates\administration\category_form.html:159
-msgid "图标 (Material Symbols)"
-msgstr "图标 (Material Symbols)"
-
-#: .\templates\administration\category_form.html:180
-msgid "使用 Google Material Symbols 代码。"
-msgstr "使用 Google Material Symbols 代码。"
-
-#: .\templates\administration\category_form.html:188
-msgid "颜色设置"
-msgstr "颜色设置"
-
-#: .\templates\administration\category_form.html:197
-msgid "选择分类的主题颜色。"
-msgstr "选择分类的主题颜色。"
-
-#: .\templates\administration\category_form.html:202
-#: .\templates\administration\tag_form.html:156
+#: .\templates\administration\category_form.html:366
+#: .\templates\administration\tag_form.html:325
 msgid "外观设置"
 msgstr "外观设置"
 
-#: .\templates\administration\category_form.html:213
+#: .\templates\administration\category_form.html:376
 #: .\templates\administration\comment_list.html:32
-#: .\templates\administration\friendlink_form.html:160
+#: .\templates\administration\friendlink_form.html:322
 #: .\templates\administration\group_form.html:81
-#: .\templates\administration\navigation_form.html:150
-#: .\templates\administration\poll_form.html:170
-#: .\templates\administration\post_form.html:227
-#: .\templates\administration\searchplaceholder_form.html:100
-#: .\templates\administration\tag_form.html:101
-#: .\templates\administration\usertitle_form.html:157
+#: .\templates\administration\navigation_form.html:286
+#: .\templates\administration\poll_form.html:371
+#: .\templates\administration\searchplaceholder_form.html:187
+#: .\templates\administration\tag_form.html:252
+#: .\templates\administration\usertitle_form.html:256
 #: .\templates\users\includes\edit_profile_modal.html:155
 msgid "保存更改"
 msgstr "保存更改"
 
-#: .\templates\administration\category_form.html:217
-#: .\templates\administration\friendlink_form.html:164
+#: .\templates\administration\category_form.html:380
+#: .\templates\administration\friendlink_form.html:326
 #: .\templates\administration\generic_form.html:68
 #: .\templates\administration\group_form.html:85
-#: .\templates\administration\navigation_form.html:154
-#: .\templates\administration\page_form.html:96
-#: .\templates\administration\poll_form.html:176
-#: .\templates\administration\post_form.html:233
-#: .\templates\administration\searchplaceholder_form.html:104
-#: .\templates\administration\tag_form.html:105
-#: .\templates\administration\user_form.html:208
+#: .\templates\administration\navigation_form.html:290
+#: .\templates\administration\page_form.html:234
+#: .\templates\administration\poll_form.html:377
+#: .\templates\administration\post_form.html:405
+#: .\templates\administration\searchplaceholder_form.html:191
+#: .\templates\administration\tag_form.html:256
+#: .\templates\administration\user_form.html:248
 msgid "保存并新增"
 msgstr "保存并新增"
 
-#: .\templates\administration\category_form.html:218
-#: .\templates\administration\friendlink_form.html:165
+#: .\templates\administration\category_form.html:381
+#: .\templates\administration\friendlink_form.html:327
 #: .\templates\administration\group_form.html:86
-#: .\templates\administration\navigation_form.html:155
-#: .\templates\administration\page_form.html:97
-#: .\templates\administration\poll_form.html:180
-#: .\templates\administration\post_form.html:232
-#: .\templates\administration\searchplaceholder_form.html:105
-#: .\templates\administration\tag_form.html:106
-#: .\templates\administration\user_form.html:209
+#: .\templates\administration\navigation_form.html:291
+#: .\templates\administration\page_form.html:235
+#: .\templates\administration\poll_form.html:381
+#: .\templates\administration\post_form.html:406
+#: .\templates\administration\searchplaceholder_form.html:192
+#: .\templates\administration\tag_form.html:257
+#: .\templates\administration\user_form.html:249
 msgid "保存并继续"
 msgstr "保存并继续"
 
-#: .\templates\administration\category_form.html:224
-#: .\templates\administration\category_form.html:231
+#: .\templates\administration\category_form.html:387
+#: .\templates\administration\category_form.html:394
 #: .\templates\administration\category_list.html:42
-#: .\templates\administration\comment_form.html:99
+#: .\templates\administration\comment_form.html:100
 #: .\templates\administration\comment_list.html:31
 #: .\templates\administration\comment_list.html:61
 #: .\templates\administration\comment_list.html:85
-#: .\templates\administration\friendlink_form.html:171
-#: .\templates\administration\friendlink_form.html:178
+#: .\templates\administration\components\category_modal.html:153
+#: .\templates\administration\friendlink_form.html:333
+#: .\templates\administration\friendlink_form.html:340
 #: .\templates\administration\friendlink_list.html:101
 #: .\templates\administration\generic_confirm_delete.html:23
 #: .\templates\administration\generic_form.html:67
 #: .\templates\administration\group_form.html:93
 #: .\templates\administration\group_form.html:103
 #: .\templates\administration\group_list.html:83
-#: .\templates\administration\logfile_list.html:141
-#: .\templates\administration\navigation_form.html:161
-#: .\templates\administration\navigation_form.html:168
+#: .\templates\administration\logfile_list.html:206
+#: .\templates\administration\navigation_form.html:297
+#: .\templates\administration\navigation_form.html:304
 #: .\templates\administration\navigation_list.html:101
-#: .\templates\administration\page_form.html:103
-#: .\templates\administration\page_form.html:110
+#: .\templates\administration\page_form.html:241
+#: .\templates\administration\page_form.html:248
 #: .\templates\administration\page_list.html:112
-#: .\templates\administration\poll_form.html:188
-#: .\templates\administration\poll_form.html:200
+#: .\templates\administration\poll_form.html:389
+#: .\templates\administration\poll_form.html:401
+#: .\templates\administration\post_form.html:412
+#: .\templates\administration\post_form.html:419
 #: .\templates\administration\post_list.html:42
-#: .\templates\administration\searchplaceholder_form.html:111
-#: .\templates\administration\searchplaceholder_form.html:119
+#: .\templates\administration\searchplaceholder_form.html:198
+#: .\templates\administration\searchplaceholder_form.html:206
 #: .\templates\administration\searchplaceholder_list.html:99
-#: .\templates\administration\tag_form.html:112
-#: .\templates\administration\tag_form.html:119
+#: .\templates\administration\tag_form.html:263
+#: .\templates\administration\tag_form.html:270
 #: .\templates\administration\tag_list.html:48
-#: .\templates\administration\user_form.html:215
-#: .\templates\administration\user_form.html:222
+#: .\templates\administration\user_form.html:255
+#: .\templates\administration\user_form.html:262
 #: .\templates\administration\user_list.html:202
-#: .\templates\administration\usertitle_form.html:159
+#: .\templates\administration\usertitle_form.html:258
 #: .\templates\administration\usertitle_list.html:85
 #: .\templates\components\confirm_modal.html:11
 #: .\templates\users\includes\edit_profile_modal.html:152
-#: .\templates\users\includes\edit_profile_modal.html:170
 #: .\templates\users\register.html:82
 msgid "取消"
 msgstr "取消"
 
-#: .\templates\administration\category_form.html:225
+#: .\templates\administration\category_form.html:388
 msgid "确定要删除分类"
 msgstr "确定要删除分类"
 
-#: .\templates\administration\category_form.html:225
-#: .\templates\administration\tag_form.html:113
+#: .\templates\administration\category_form.html:388
+#: .\templates\administration\tag_form.html:264
 msgid "吗？"
 msgstr "吗？"
 
-#: .\templates\administration\category_form.html:226
+#: .\templates\administration\category_form.html:389
 msgid "删除分类"
 msgstr "删除分类"
 
-#: .\templates\administration\category_form.html:235
-#: .\templates\administration\comment_form.html:88
+#: .\templates\administration\category_form.html:398
+#: .\templates\administration\comment_form.html:89
 #: .\templates\administration\comment_list.html:222
-#: .\templates\administration\friendlink_form.html:155
-#: .\templates\administration\navigation_form.html:145
-#: .\templates\administration\page_form.html:114
-#: .\templates\administration\partials\comment_list_rows.html:74
-#: .\templates\administration\poll_form.html:205
-#: .\templates\administration\post_form.html:237
+#: .\templates\administration\friendlink_form.html:344
+#: .\templates\administration\navigation_form.html:308
+#: .\templates\administration\page_form.html:252
+#: .\templates\administration\partials\comment_list_rows.html:84
+#: .\templates\administration\poll_form.html:406
+#: .\templates\administration\post_form.html:423
 #: .\templates\administration\post_list.html:61
-#: .\templates\administration\searchplaceholder_form.html:95
-#: .\templates\administration\tag_form.html:123
+#: .\templates\administration\searchplaceholder_form.html:182
+#: .\templates\administration\tag_form.html:274
 msgid "发布"
 msgstr "发布"
 
-#: .\templates\administration\category_form.html:246
-msgid "选择图标"
-msgstr "选择图标"
+#: .\templates\administration\category_form.html:415
+#: .\templates\administration\post_form.html:562
+#: .\templates\administration\user_form.html:155
+msgid "点击上传封面"
+msgstr "点击上传封面"
 
-#: .\templates\administration\category_form.html:250
-msgid "搜索图标 (如: user, edit)..."
-msgstr "搜索图标 (如: user, edit)..."
+#: .\templates\administration\category_form.html:416
+msgid "推荐 1200x300 (4:1)"
+msgstr "推荐 1200x300 (4:1)"
 
-#: .\templates\administration\category_form.html:269
-msgid "加载图标库..."
-msgstr "加载图标库..."
+#: .\templates\administration\category_form.html:435
+#: .\templates\administration\components\category_modal.html:132
+#: .\templates\administration\tag_form.html:314
+msgid "颜色标识"
+msgstr "颜色标识"
 
-#: .\templates\administration\category_form.html:275
-msgid "未找到匹配的图标"
-msgstr "未找到匹配的图标"
-
-#: .\templates\administration\category_form.html:281
-msgid "图标库: Material Symbols"
-msgstr "图标库: Material Symbols"
-
-#: .\templates\administration\category_form.html:282
-msgid "共"
-msgstr "共"
-
-#: .\templates\administration\category_form.html:282
-msgid "个图标"
-msgstr "个图标"
+#: .\templates\administration\category_form.html:447
+msgid "封面图与颜色"
+msgstr "封面图与颜色"
 
 #: .\templates\administration\category_list.html:4
 #: .\templates\administration\category_list.html:26
@@ -1824,8 +2325,8 @@ msgstr "开始导入"
 #: .\templates\administration\group_list.html:35
 #: .\templates\administration\navigation_list.html:51
 #: .\templates\administration\page_list.html:64
-#: .\templates\administration\partials\category_list_rows.html:56
-#: .\templates\administration\partials\comment_list_rows.html:89
+#: .\templates\administration\partials\category_list_rows.html:62
+#: .\templates\administration\partials\comment_list_rows.html:99
 #: .\templates\administration\partials\friendlink_list_rows.html:59
 #: .\templates\administration\partials\group_list_rows.html:42
 #: .\templates\administration\partials\logentry_list_rows.html:35
@@ -1838,16 +2339,17 @@ msgstr "开始导入"
 #: .\templates\administration\partials\tag_list_rows.html:60
 #: .\templates\administration\partials\user_list_rows.html:90
 #: .\templates\administration\partials\usertitle_list_rows.html:59
-#: .\templates\administration\poll_form.html:105
+#: .\templates\administration\periodic_task_list.html:123
+#: .\templates\administration\poll_form.html:252
 #: .\templates\administration\poll_list.html:21
 #: .\templates\administration\post_list.html:67
-#: .\templates\administration\searchplaceholder_form.html:114
+#: .\templates\administration\searchplaceholder_form.html:201
 #: .\templates\administration\searchplaceholder_list.html:50
 #: .\templates\administration\system_tools.html:262
 #: .\templates\administration\tag_list.html:74
 #: .\templates\administration\user_list.html:129
 #: .\templates\administration\usertitle_list.html:35
-#: .\templates\blog\post_detail.html:405
+#: .\templates\blog\post_detail.html:404
 #: .\templates\users\includes\comments_list.html:24
 #: .\templates\users\includes\profile_content.html:197
 msgid "删除"
@@ -1870,14 +2372,15 @@ msgstr "文章数"
 #: .\templates\administration\logentry_list.html:61
 #: .\templates\administration\navigation_list.html:73
 #: .\templates\administration\page_list.html:86
+#: .\templates\administration\periodic_task_list.html:30
 #: .\templates\administration\poll_list.html:41
 #: .\templates\administration\post_list.html:92
 #: .\templates\administration\searchplaceholder_list.html:71
 #: .\templates\administration\system_tools.html:236
 #: .\templates\administration\tag_list.html:96
-#: .\templates\administration\user_form.html:226
+#: .\templates\administration\user_form.html:266
 #: .\templates\administration\user_list.html:174
-#: .\templates\administration\usertitle_form.html:180
+#: .\templates\administration\usertitle_form.html:279
 #: .\templates\administration\usertitle_list.html:57
 #: .\templates\users\includes\profile_content.html:130
 msgid "操作"
@@ -1944,8 +2447,6 @@ msgid "项执行此操作吗？"
 msgstr "项执行此操作吗？"
 
 #: .\templates\administration\comment_form.html:10
-#: .\templates\administration\friendlink_form.html:13
-#: .\templates\administration\navigation_form.html:13
 #: .\templates\partials\footer.html:45 .\templates\partials\navbar.html:25
 #: .\templates\partials\navbar.html:107 .\templates\voting\poll_detail.html:11
 msgid "首页"
@@ -1959,7 +2460,7 @@ msgstr "评论管理"
 
 #: .\templates\administration\comment_form.html:12
 #: .\templates\administration\comment_list.html:12
-#: .\templates\administration\partials\comment_list_rows.html:35
+#: .\templates\administration\partials\comment_list_rows.html:45
 msgid "编辑评论"
 msgstr "编辑评论"
 
@@ -1968,48 +2469,52 @@ msgstr "编辑评论"
 msgid "评论内容"
 msgstr "评论内容"
 
-#: .\templates\administration\comment_form.html:61
+#: .\templates\administration\comment_form.html:46
+msgid "..."
+msgstr ""
+
+#: .\templates\administration\comment_form.html:62
 msgid "作者信息"
 msgstr "作者信息"
 
-#: .\templates\administration\comment_form.html:76
+#: .\templates\administration\comment_form.html:77
 msgid "查看用户"
 msgstr "查看用户"
 
-#: .\templates\administration\comment_form.html:93
+#: .\templates\administration\comment_form.html:94
 msgid "更新评论"
 msgstr "更新评论"
 
-#: .\templates\administration\comment_form.html:100
-#: .\templates\administration\partials\comment_list_rows.html:87
+#: .\templates\administration\comment_form.html:101
+#: .\templates\administration\partials\comment_list_rows.html:97
 #: .\templates\users\includes\comments_list.html:22
 msgid "确定要删除这条评论吗？"
 msgstr "确定要删除这条评论吗？"
 
-#: .\templates\administration\comment_form.html:101
-#: .\templates\blog\post_detail.html:402
+#: .\templates\administration\comment_form.html:102
+#: .\templates\blog\post_detail.html:401
 #: .\templates\users\includes\comments_list.html:22
 msgid "删除评论"
 msgstr "删除评论"
 
-#: .\templates\administration\comment_form.html:111
+#: .\templates\administration\comment_form.html:112
 msgid "元数据"
 msgstr "元数据"
 
-#: .\templates\administration\comment_form.html:116
+#: .\templates\administration\comment_form.html:117
 #: .\templates\administration\comment_list.html:25
 msgid "公开可见"
 msgstr "公开可见"
 
-#: .\templates\administration\comment_form.html:123
+#: .\templates\administration\comment_form.html:124
 msgid "评论于"
 msgstr "评论于"
 
-#: .\templates\administration\comment_form.html:128
+#: .\templates\administration\comment_form.html:129
 msgid "所属文章"
 msgstr "所属文章"
 
-#: .\templates\administration\comment_form.html:136
+#: .\templates\administration\comment_form.html:137
 msgid "回复给"
 msgstr "回复给"
 
@@ -2088,7 +2593,7 @@ msgstr "前台可见的评论"
 #: .\templates\administration\comment_list.html:200
 #: .\templates\administration\comment_list.html:211
 #: .\templates\administration\index.html:160
-#: .\templates\administration\partials\comment_list_rows.html:58
+#: .\templates\administration\partials\comment_list_rows.html:68
 msgid "待审核"
 msgstr "待审核"
 
@@ -2122,6 +2627,34 @@ msgstr "用户 / 内容"
 msgid "文章 / 时间"
 msgstr "文章 / 时间"
 
+#: .\templates\administration\components\category_modal.html:8
+msgid "新增分类"
+msgstr "新增分类"
+
+#: .\templates\administration\components\category_modal.html:20
+#, fuzzy
+#| msgid "基本信息"
+msgid "基本信息 (多语言)"
+msgstr "基本信息"
+
+#: .\templates\administration\components\category_modal.html:89
+msgid "视觉样式"
+msgstr "视觉样式"
+
+#: .\templates\administration\components\category_modal.html:117
+msgid "点击上传封面图"
+msgstr "点击上传封面图"
+
+#: .\templates\administration\components\category_modal.html:118
+#, fuzzy
+#| msgid "支持 JPG, PNG, GIF (推荐 1:1)"
+msgid "支持 JPG, PNG, WEBP"
+msgstr "支持 JPG, PNG, GIF (推荐 1:1)"
+
+#: .\templates\administration\components\category_modal.html:156
+msgid "保存分类"
+msgstr "保存分类"
+
 #: .\templates\administration\components\empty_state.html:6
 msgid "暂无数据"
 msgstr "暂无数据"
@@ -2129,6 +2662,20 @@ msgstr "暂无数据"
 #: .\templates\administration\components\empty_state.html:8
 msgid "当前列表没有任何数据。"
 msgstr "当前列表没有任何数据。"
+
+#: .\templates\administration\components\icon_picker_modal.html:6
+msgid "选择图标"
+msgstr "选择图标"
+
+#: .\templates\administration\components\icon_picker_modal.html:8
+msgid "搜索图标 (如: user, edit)..."
+msgstr "搜索图标 (如: user, edit)..."
+
+#: .\templates\administration\components\icon_picker_modal.html:33
+#, fuzzy
+#| msgid "未找到匹配的图标"
+msgid "未找到匹配图标"
+msgstr "未找到匹配的图标"
 
 #: .\templates\administration\components\list_container.html:33
 #: .\templates\blog\search_results.html:22
@@ -2220,16 +2767,12 @@ msgid "权限检查"
 msgstr "权限检查"
 
 #: .\templates\administration\debug\base_debug.html:35
-msgid "Mock 数据"
-msgstr "Mock 数据"
-
-#: .\templates\administration\debug\base_debug.html:39
 #: .\templates\administration\debug\cache.html:5
 #: .\templates\administration\debug\cache.html:12
 msgid "缓存管理"
 msgstr "缓存管理"
 
-#: .\templates\administration\debug\base_debug.html:43
+#: .\templates\administration\debug\base_debug.html:39
 #: .\templates\administration\debug\email.html:5
 msgid "邮件测试"
 msgstr "邮件测试"
@@ -2239,8 +2782,12 @@ msgid "缓存说明"
 msgstr "缓存说明"
 
 #: .\templates\administration\debug\cache.html:20
-msgid "系统使用 Django 默认缓存后端。清理缓存可能会导致短暂的性能下降，因为系统需要重新生成缓存数据。"
-msgstr "系统使用 Django 默认缓存后端。清理缓存可能会导致短暂的性能下降，因为系统需要重新生成缓存数据。"
+msgid ""
+"系统使用 Django 默认缓存后端。清理缓存可能会导致短暂的性能下降，因为系统需要"
+"重新生成缓存数据。"
+msgstr ""
+"系统使用 Django 默认缓存后端。清理缓存可能会导致短暂的性能下降，因为系统需要"
+"重新生成缓存数据。"
 
 #: .\templates\administration\debug\cache.html:30
 msgid "清理所有缓存"
@@ -2305,101 +2852,16 @@ msgid "邮件内容"
 msgstr "邮件内容"
 
 #: .\templates\administration\debug\email.html:53
-msgid "这是一条来自 Rosetta 管理后台的测试邮件。如果您收到这封邮件，说明系统的邮件发送功能配置正确。"
-msgstr "这是一条来自 Rosetta 管理后台的测试邮件。如果您收到这封邮件，说明系统的邮件发送功能配置正确。"
+msgid ""
+"这是一条来自 Rosetta 管理后台的测试邮件。如果您收到这封邮件，说明系统的邮件发"
+"送功能配置正确。"
+msgstr ""
+"这是一条来自 Rosetta 管理后台的测试邮件。如果您收到这封邮件，说明系统的邮件发"
+"送功能配置正确。"
 
 #: .\templates\administration\debug\email.html:58
 msgid "发送测试邮件"
 msgstr "发送测试邮件"
-
-#: .\templates\administration\debug\mock.html:5
-msgid "Mock 数据生成"
-msgstr "Mock 数据生成"
-
-#: .\templates\administration\debug\mock.html:11
-msgid "高级 Mock 数据生成器"
-msgstr "高级 Mock 数据生成器"
-
-#: .\templates\administration\debug\mock.html:13
-msgid "生成丰富的博客测试数据，包括长篇文章、用户资料、评论互动及站点配置。"
-msgstr "生成丰富的博客测试数据，包括长篇文章、用户资料、评论互动及站点配置。"
-
-#: .\templates\administration\debug\mock.html:24
-msgid "用户数据"
-msgstr "用户数据"
-
-#: .\templates\administration\debug\mock.html:27
-msgid "生成用户数量"
-msgstr "生成用户数量"
-
-#: .\templates\administration\debug\mock.html:29
-msgid "包含头像、简介、社交链接"
-msgstr "包含头像、简介、社交链接"
-
-#: .\templates\administration\debug\mock.html:32
-msgid "默认密码"
-msgstr "默认密码"
-
-#: .\templates\administration\debug\mock.html:45
-#: .\templates\blog\category_list.html:21
-msgid "内容分类"
-msgstr "内容分类"
-
-#: .\templates\administration\debug\mock.html:49
-msgid "分类数量"
-msgstr "分类数量"
-
-#: .\templates\administration\debug\mock.html:53
-msgid "标签数量"
-msgstr "标签数量"
-
-#: .\templates\administration\debug\mock.html:67
-msgid "文章与互动"
-msgstr "文章与互动"
-
-#: .\templates\administration\debug\mock.html:71
-msgid "文章数量"
-msgstr "文章数量"
-
-#: .\templates\administration\debug\mock.html:73
-msgid "生成包含代码块、表格、长文本的 Markdown 文章"
-msgstr "生成包含代码块、表格、长文本的 Markdown 文章"
-
-#: .\templates\administration\debug\mock.html:76
-msgid "评论数量"
-msgstr "评论数量"
-
-#: .\templates\administration\debug\mock.html:78
-msgid "生成多级嵌套评论与通知"
-msgstr "生成多级嵌套评论与通知"
-
-#: .\templates\administration\debug\mock.html:93
-msgid "站点配置"
-msgstr "站点配置"
-
-#: .\templates\administration\debug\mock.html:98
-msgid "生成附加数据"
-msgstr "生成附加数据"
-
-#: .\templates\administration\debug\mock.html:100
-msgid "包含：友情链接、导航菜单、搜索框占位符"
-msgstr "包含：友情链接、导航菜单、搜索框占位符"
-
-#: .\templates\administration\debug\mock.html:112
-msgid "重置"
-msgstr "重置"
-
-#: .\templates\administration\debug\mock.html:113
-msgid "生成数据"
-msgstr "生成数据"
-
-#: .\templates\administration\debug\mock.html:113
-msgid "确定要生成数据吗？这将向数据库添加新记录。"
-msgstr "确定要生成数据吗？这将向数据库添加新记录。"
-
-#: .\templates\administration\debug\mock.html:115
-msgid "开始生成"
-msgstr "开始生成"
 
 #: .\templates\administration\debug\permission.html:5
 msgid "权限调试"
@@ -2423,7 +2885,7 @@ msgstr "查询权限"
 
 #: .\templates\administration\debug\permission.html:63
 #: .\templates\administration\debug\permission.html:105
-#: .\templates\administration\user_form.html:280
+#: .\templates\administration\user_form.html:320
 msgid "超级用户"
 msgstr "超级用户"
 
@@ -2432,7 +2894,7 @@ msgid "员工状态"
 msgstr "员工状态"
 
 #: .\templates\administration\debug\permission.html:79
-#: .\templates\administration\user_form.html:166
+#: .\templates\administration\user_form.html:206
 msgid "所属用户组"
 msgstr "所属用户组"
 
@@ -2598,104 +3060,127 @@ msgid "Range"
 msgstr "Range"
 
 #: .\templates\administration\friendlink_form.html:6
-#: .\templates\administration\friendlink_form.html:15
+#: .\templates\administration\friendlink_form.html:96
 msgid "编辑友链"
 msgstr "编辑友链"
 
-#: .\templates\administration\friendlink_form.html:47
+#: .\templates\administration\friendlink_form.html:185
 msgid "网站名称 (中文)"
 msgstr "网站名称 (中文)"
 
-#: .\templates\administration\friendlink_form.html:49
+#: .\templates\administration\friendlink_form.html:187
 msgid "输入网站名称 (中文)"
 msgstr "输入网站名称 (中文)"
 
-#: .\templates\administration\friendlink_form.html:60
-msgid "Website Name (English)"
-msgstr "网站名称 (英文)"
-
-#: .\templates\administration\friendlink_form.html:62
-msgid "Enter website name (English)"
-msgstr "Enter website name (English)"
-
-#: .\templates\administration\friendlink_form.html:87
+#: .\templates\administration\friendlink_form.html:198
 msgid "网站描述 (中文)"
 msgstr "网站描述 (中文)"
 
-#: .\templates\administration\friendlink_form.html:89
+#: .\templates\administration\friendlink_form.html:200
 msgid "简短描述该网站 (中文)..."
 msgstr "简短描述该网站 (中文)..."
 
-#: .\templates\administration\friendlink_form.html:95
+#: .\templates\administration\friendlink_form.html:209
+msgid "Website Name (English)"
+msgstr "网站名称 (英文)"
+
+#: .\templates\administration\friendlink_form.html:211
+msgid "Enter website name (English)"
+msgstr "Enter website name (English)"
+
+#: .\templates\administration\friendlink_form.html:222
 msgid "Website Description (English)"
 msgstr "网站描述 (英文)"
 
-#: .\templates\administration\friendlink_form.html:97
+#: .\templates\administration\friendlink_form.html:224
 msgid "Short description (English)..."
 msgstr "简短描述 (英文)..."
 
-#: .\templates\administration\friendlink_form.html:103
+#: .\templates\administration\friendlink_form.html:233
+#, fuzzy
+#| msgid "タイトル (Japanese)"
+msgid "サイト名 (Japanese)"
+msgstr "タイトル (Japanese)"
+
+#: .\templates\administration\friendlink_form.html:235
+#, fuzzy
+#| msgid "タイトルを入力 (Japanese)"
+msgid "サイト名を入力 (Japanese)"
+msgstr "タイトルを入力 (Japanese)"
+
+#: .\templates\administration\friendlink_form.html:241
 msgid "ウェブサイトの説明 (Japanese)"
 msgstr "ウェブサイトの説明 (Japanese)"
 
-#: .\templates\administration\friendlink_form.html:105
+#: .\templates\administration\friendlink_form.html:243
 msgid "ウェブサイトの簡単な説明 (Japanese)..."
 msgstr "ウェブサイトの簡単な説明 (Japanese)..."
 
-#: .\templates\administration\friendlink_form.html:112
+#: .\templates\administration\friendlink_form.html:252
+#, fuzzy
+#| msgid "名稱 (Traditional Chinese)"
+msgid "網站名稱 (Traditional Chinese)"
+msgstr "名稱 (Traditional Chinese)"
+
+#: .\templates\administration\friendlink_form.html:254
+#, fuzzy
+#| msgid "輸入標題 (繁體中文)"
+msgid "輸入網站名稱 (繁體中文)"
+msgstr "輸入標題 (繁體中文)"
+
+#: .\templates\administration\friendlink_form.html:260
 msgid "網站描述 (Traditional Chinese)"
 msgstr "網站描述 (Traditional Chinese)"
 
-#: .\templates\administration\friendlink_form.html:114
+#: .\templates\administration\friendlink_form.html:262
 msgid "簡短描述該網站 (繁體中文)..."
 msgstr "簡短描述該網站 (繁體中文)..."
 
-#: .\templates\administration\friendlink_form.html:125
-msgid "Logo 设置"
-msgstr "Logo 设置"
-
-#: .\templates\administration\friendlink_form.html:130
+#: .\templates\administration\friendlink_form.html:294
 msgid "网站 Logo"
 msgstr "网站 Logo"
 
-#: .\templates\administration\friendlink_form.html:143
+#: .\templates\administration\friendlink_form.html:307
 msgid "建议尺寸: 64x64px 或 128x128px"
 msgstr "建议尺寸: 64x64px 或 128x128px"
 
-#: .\templates\administration\friendlink_form.html:172
-#: .\templates\administration\partials\friendlink_list_rows.html:57
+#: .\templates\administration\friendlink_form.html:311
+msgid "Logo 设置"
+msgstr "Logo 设置"
+
+#: .\templates\administration\friendlink_form.html:334
 #, python-format
 msgid "确定要删除友情链接《%(name)s》吗？"
 msgstr "确定要删除友情链接《%(name)s》吗？"
 
-#: .\templates\administration\friendlink_form.html:173
+#: .\templates\administration\friendlink_form.html:335
 msgid "删除友链"
 msgstr "删除友链"
 
-#: .\templates\administration\friendlink_form.html:187
-#: .\templates\administration\navigation_form.html:177
-#: .\templates\administration\searchplaceholder_form.html:128
-#: .\templates\administration\tag_form.html:137
-msgid "状态设置"
-msgstr "状态设置"
-
-#: .\templates\administration\friendlink_form.html:191
-#: .\templates\administration\navigation_form.html:181
-#: .\templates\administration\searchplaceholder_form.html:132
+#: .\templates\administration\friendlink_form.html:351
+#: .\templates\administration\navigation_form.html:315
+#: .\templates\administration\searchplaceholder_form.html:219
 msgid "启用显示"
 msgstr "启用显示"
 
-#: .\templates\administration\friendlink_form.html:200
-#: .\templates\administration\navigation_form.html:128
-#: .\templates\administration\searchplaceholder_form.html:141
+#: .\templates\administration\friendlink_form.html:360
+#: .\templates\administration\navigation_form.html:266
+#: .\templates\administration\searchplaceholder_form.html:228
 msgid "排序权重"
 msgstr "排序权重"
 
-#: .\templates\administration\friendlink_form.html:204
-#: .\templates\administration\navigation_form.html:132
-#: .\templates\administration\searchplaceholder_form.html:145
+#: .\templates\administration\friendlink_form.html:364
+#: .\templates\administration\navigation_form.html:270
+#: .\templates\administration\searchplaceholder_form.html:232
 msgid "数字越小越靠前 (默认 0)"
 msgstr "数字越小越靠前 (默认 0)"
+
+#: .\templates\administration\friendlink_form.html:368
+#: .\templates\administration\navigation_form.html:332
+#: .\templates\administration\searchplaceholder_form.html:215
+#: .\templates\administration\tag_form.html:288
+msgid "状态设置"
+msgstr "状态设置"
 
 #: .\templates\administration\friendlink_list.html:19
 #: .\templates\administration\navigation_list.html:19
@@ -2731,7 +3216,7 @@ msgstr "可见"
 #: .\templates\administration\friendlink_list.html:38
 #: .\templates\administration\friendlink_list.html:47
 #: .\templates\administration\navigation_list.html:48
-#: .\templates\administration\partials\comment_list_rows.html:74
+#: .\templates\administration\partials\comment_list_rows.html:84
 #: .\templates\administration\partials\friendlink_list_rows.html:42
 #: .\templates\administration\partials\navigation_list_rows.html:31
 #: .\templates\administration\partials\tag_list_rows.html:37
@@ -2770,16 +3255,20 @@ msgstr "确认删除?"
 
 #: .\templates\administration\generic_confirm_delete.html:16
 #, python-format
-msgid "您确定要删除 <span class=\"font-bold text-base-content\">\"%(obj)s\"</span> 吗？"
-msgstr "您确定要删除 <span class=\"font-bold text-base-content\">\"%(obj)s\"</span> 吗？"
+msgid ""
+"您确定要删除 <span class=\"font-bold text-base-content\">\"%(obj)s\"</span> "
+"吗？"
+msgstr ""
+"您确定要删除 <span class=\"font-bold text-base-content\">\"%(obj)s\"</span> "
+"吗？"
 
 #: .\templates\administration\generic_confirm_delete.html:17
 msgid "此操作无法撤销。"
 msgstr "此操作无法撤销。"
 
 #: .\templates\administration\generic_form.html:12
-#: .\templates\administration\partials\category_list_rows.html:46
-#: .\templates\administration\partials\comment_list_rows.html:67
+#: .\templates\administration\partials\category_list_rows.html:52
+#: .\templates\administration\partials\comment_list_rows.html:77
 #: .\templates\administration\partials\friendlink_list_rows.html:49
 #: .\templates\administration\partials\group_list_rows.html:32
 #: .\templates\administration\partials\navigation_list_rows.html:38
@@ -2790,7 +3279,8 @@ msgstr "此操作无法撤销。"
 #: .\templates\administration\partials\tag_list_rows.html:50
 #: .\templates\administration\partials\user_list_rows.html:80
 #: .\templates\administration\partials\usertitle_list_rows.html:49
-#: .\templates\blog\post_detail.html:150
+#: .\templates\administration\periodic_task_list.html:117
+#: .\templates\blog\post_detail.html:149
 msgid "编辑"
 msgstr "编辑"
 
@@ -2823,7 +3313,6 @@ msgid "权限分配"
 msgstr "权限分配"
 
 #: .\templates\administration\group_form.html:94
-#: .\templates\administration\partials\group_list_rows.html:40
 #, python-format
 msgid "确定要删除用户组《%(name)s》吗？"
 msgstr "确定要删除用户组《%(name)s》吗？"
@@ -3029,7 +3518,7 @@ msgid "查看日志"
 msgstr "查看日志"
 
 #: .\templates\administration\logfile_detail.html:15
-#: .\templates\administration\logfile_list.html:89
+#: .\templates\administration\logfile_list.html:98
 #: .\templates\administration\system_tools.html:246
 msgid "下载"
 msgstr "下载"
@@ -3060,28 +3549,36 @@ msgstr "修改"
 msgid "请选择一个文件查看"
 msgstr "请选择一个文件查看"
 
-#: .\templates\administration\logfile_list.html:83
-#: .\templates\administration\logfile_list.html:85
+#: .\templates\administration\logfile_list.html:84
+msgid "实时追踪最新日志"
+msgstr "实时追踪最新日志"
+
+#: .\templates\administration\logfile_list.html:86
+msgid "追踪"
+msgstr "追踪"
+
+#: .\templates\administration\logfile_list.html:92
+#: .\templates\administration\logfile_list.html:94
 msgid "刷新"
 msgstr "刷新"
 
-#: .\templates\administration\logfile_list.html:94
+#: .\templates\administration\logfile_list.html:103
 msgid "清空"
 msgstr "清空"
 
-#: .\templates\administration\logfile_list.html:108
+#: .\templates\administration\logfile_list.html:129
 msgid "文件为空"
 msgstr "文件为空"
 
-#: .\templates\administration\logfile_list.html:111
+#: .\templates\administration\logfile_list.html:132
 msgid "请选择左侧文件查看详情"
 msgstr "请选择左侧文件查看详情"
 
-#: .\templates\administration\logfile_list.html:130
+#: .\templates\administration\logfile_list.html:195
 msgid "确认清空日志?"
 msgstr "确认清空日志?"
 
-#: .\templates\administration\logfile_list.html:133
+#: .\templates\administration\logfile_list.html:198
 #, python-format
 msgid ""
 "您确定要清空 <span class=\"font-mono font-bold bg-base-200 px-1 "
@@ -3090,80 +3587,82 @@ msgstr ""
 "您确定要清空 <span class=\"font-mono font-bold bg-base-200 px-1 "
 "rounded\">%(filename)s</span> 的内容吗？"
 
-#: .\templates\administration\logfile_list.html:135
+#: .\templates\administration\logfile_list.html:200
 msgid "此操作不可恢复，请谨慎操作。"
 msgstr "此操作不可恢复，请谨慎操作。"
 
-#: .\templates\administration\logfile_list.html:142
+#: .\templates\administration\logfile_list.html:207
 msgid "确定清空"
 msgstr "确定清空"
 
 #: .\templates\administration\navigation_form.html:6
-#: .\templates\administration\navigation_form.html:15
+#: .\templates\administration\navigation_form.html:90
 msgid "编辑导航"
 msgstr "编辑导航"
 
-#: .\templates\administration\navigation_form.html:47
+#: .\templates\administration\navigation_form.html:174
 msgid "导航标题 (中文)"
 msgstr "导航标题 (中文)"
 
-#: .\templates\administration\navigation_form.html:49
+#: .\templates\administration\navigation_form.html:176
 msgid "输入导航显示名称 (中文)"
 msgstr "输入导航显示名称 (中文)"
 
-#: .\templates\administration\navigation_form.html:60
+#: .\templates\administration\navigation_form.html:190
 msgid "Navigation Title (English)"
 msgstr "导航标题 (英文)"
 
-#: .\templates\administration\navigation_form.html:62
+#: .\templates\administration\navigation_form.html:192
 msgid "Enter navigation title (English)"
 msgstr "输入导航标题 (英文)"
 
-#: .\templates\administration\navigation_form.html:73
+#: .\templates\administration\navigation_form.html:206
+#: .\templates\administration\poll_form.html:161
+#: .\templates\administration\post_form.html:172
 msgid "タイトル (Japanese)"
 msgstr "タイトル (Japanese)"
 
-#: .\templates\administration\navigation_form.html:75
+#: .\templates\administration\navigation_form.html:208
 msgid "タイトルを入力 (Japanese)"
 msgstr "タイトルを入力 (Japanese)"
 
-#: .\templates\administration\navigation_form.html:81
+#: .\templates\administration\navigation_form.html:217
+#: .\templates\administration\poll_form.html:188
 msgid "標題 (Traditional Chinese)"
 msgstr "標題 (Traditional Chinese)"
 
-#: .\templates\administration\navigation_form.html:83
+#: .\templates\administration\navigation_form.html:219
 msgid "輸入標題 (繁體中文)"
 msgstr "輸入標題 (繁體中文)"
 
-#: .\templates\administration\navigation_form.html:90
+#: .\templates\administration\navigation_form.html:233
 msgid "链接地址 (URL)"
 msgstr "链接地址 (URL)"
 
-#: .\templates\administration\navigation_form.html:92
+#: .\templates\administration\navigation_form.html:235
 msgid "输入链接地址 (如 /about/ 或 https://...)"
 msgstr "输入链接地址 (如 /about/ 或 https://...)"
 
-#: .\templates\administration\navigation_form.html:108
-msgid "配置选项"
-msgstr "配置选项"
-
-#: .\templates\administration\navigation_form.html:115
+#: .\templates\administration\navigation_form.html:253
 msgid "显示位置"
 msgstr "显示位置"
 
-#: .\templates\administration\navigation_form.html:162
-#: .\templates\administration\partials\navigation_list_rows.html:46
+#: .\templates\administration\navigation_form.html:275
+msgid "配置选项"
+msgstr "配置选项"
+
+#: .\templates\administration\navigation_form.html:298
 #, python-format
 msgid "确定要删除导航《%(title)s》吗？"
 msgstr "确定要删除导航《%(title)s》吗？"
 
-#: .\templates\administration\navigation_form.html:163
+#: .\templates\administration\navigation_form.html:299
 msgid "删除导航"
 msgstr "删除导航"
 
-#: .\templates\administration\navigation_form.html:185
-msgid "禁用后，该导航将不会在前端显示。"
-msgstr "禁用后，该导航将不会在前端显示。"
+#: .\templates\administration\navigation_form.html:327
+msgid "Open in new tab"
+msgstr "在新标签页打开"
 
 #: .\templates\administration\navigation_list.html:32
 msgid "管理网站菜单导航"
@@ -3186,78 +3685,101 @@ msgid "导入导航数据 (JSON)"
 msgstr "导入导航数据 (JSON)"
 
 #: .\templates\administration\page_form.html:5
-#: .\templates\administration\page_form.html:18
+#: .\templates\administration\page_form.html:15
 msgid "编辑页面"
 msgstr "编辑页面"
 
-#: .\templates\administration\page_form.html:29
+#: .\templates\administration\page_form.html:16
+#, fuzzy
+#| msgid "编辑文章内容和设置"
+msgid "编辑页面内容和设置"
+msgstr "编辑文章内容和设置"
+
+#: .\templates\administration\page_form.html:27
+#: .\templates\administration\post_form.html:27
+msgid "请修正以下错误"
+msgstr ""
+
+#: .\templates\administration\page_form.html:108
 msgid "页面标题 (中文)"
 msgstr "页面标题 (中文)"
 
-#: .\templates\administration\page_form.html:31
-msgid "输入页面标题 (中文)"
-msgstr "输入页面标题 (中文)"
-
-#: .\templates\administration\page_form.html:42
+#: .\templates\administration\page_form.html:123
 msgid "Page Title (English)"
 msgstr "页面标题 (英文)"
 
-#: .\templates\administration\page_form.html:44
-msgid "Enter page title (English)"
-msgstr "输入页面标题 (英文)"
-
-#: .\templates\administration\page_form.html:50
+#: .\templates\administration\page_form.html:138
 msgid "ページタイトル (Japanese)"
 msgstr "页面标题 (日文)"
 
-#: .\templates\administration\page_form.html:52
-msgid "ページタイトルを入力 (Japanese)"
-msgstr "ページタイトルを入力 (Japanese)"
-
-#: .\templates\administration\page_form.html:58
+#: .\templates\administration\page_form.html:148
 msgid "頁面標題 (Traditional Chinese)"
 msgstr "页面标题 (繁体中文)"
 
-#: .\templates\administration\page_form.html:60
-msgid "輸入頁面標題 (繁體中文)"
-msgstr "輸入頁面標題 (繁體中文)"
+#: .\templates\administration\page_form.html:175
+#: .\templates\administration\post_form.html:233
+#, fuzzy
+#| msgid "关键词内容 (中文)"
+msgid "内容 (中文)"
+msgstr "关键词内容 (中文)"
 
-#: .\templates\administration\page_form.html:66
-#: .\templates\administration\post_form.html:80
-msgid "内容 (当前语言)"
-msgstr "内容 (当前语言)"
+#: .\templates\administration\page_form.html:175
+#: .\templates\administration\post_form.html:233
+#, fuzzy
+#| msgid "Name (English)"
+msgid "Content (English)"
+msgstr "名称 (英文)"
 
-#: .\templates\administration\page_form.html:92
+#: .\templates\administration\page_form.html:175
+#: .\templates\administration\post_form.html:233
+#, fuzzy
+#| msgid "名前 (Japanese)"
+msgid "内容 (Japanese)"
+msgstr "名前 (Japanese)"
+
+#: .\templates\administration\page_form.html:175
+#: .\templates\administration\post_form.html:233
+#, fuzzy
+#| msgid "名稱 (Traditional Chinese)"
+msgid "內容 (Traditional Chinese)"
+msgstr "名稱 (Traditional Chinese)"
+
+#: .\templates\administration\page_form.html:230
 msgid "保存页面"
 msgstr "保存页面"
 
-#: .\templates\administration\page_form.html:104
-#: .\templates\administration\partials\page_list_rows.html:55
+#: .\templates\administration\page_form.html:242
 #, python-format
 msgid "确定要删除页面《%(title)s》吗？"
 msgstr "确定要删除页面《%(title)s》吗？"
 
-#: .\templates\administration\page_form.html:105
+#: .\templates\administration\page_form.html:243
 msgid "删除页面"
 msgstr "删除页面"
 
-#: .\templates\administration\page_form.html:124
-msgid "输入URL别名"
-msgstr "输入URL别名"
+#: .\templates\administration\page_form.html:260
+#: .\templates\administration\post_form.html:281
+#, fuzzy
+#| msgid "别名 (Slug)"
+msgid "URL 别名 (Slug)"
+msgstr "别名 (Slug)"
 
-#: .\templates\administration\page_form.html:146
-msgid "页面属性"
-msgstr "页面属性"
+#: .\templates\administration\page_form.html:286
+#: .\templates\administration\poll_form.html:432
+#: .\templates\administration\post_form.html:544
+#: .\templates\users\includes\profile_tabs.html:26
+msgid "设置"
+msgstr "设置"
 
-#: .\templates\administration\page_form.html:153
+#: .\templates\administration\page_form.html:293
 msgid "创建于:"
 msgstr "创建于:"
 
-#: .\templates\administration\page_form.html:157
+#: .\templates\administration\page_form.html:297
 msgid "更新于:"
 msgstr "更新于:"
 
-#: .\templates\administration\page_form.html:163
+#: .\templates\administration\page_form.html:303
 msgid "查看页面"
 msgstr "查看页面"
 
@@ -3273,7 +3795,7 @@ msgstr "修改成草稿"
 msgid "批量转草稿"
 msgstr "批量转草稿"
 
-#: .\templates\administration\partials\category_list_rows.html:43
+#: .\templates\administration\partials\category_list_rows.html:49
 #: .\templates\administration\partials\page_list_rows.html:38
 #: .\templates\administration\partials\post_list_rows.html:98
 #: .\templates\administration\partials\tag_list_rows.html:47
@@ -3281,36 +3803,43 @@ msgstr "批量转草稿"
 msgid "查看"
 msgstr "查看"
 
-#: .\templates\administration\partials\category_list_rows.html:54
-#, python-format
-msgid "确定要删除分类《%(name)s》吗？"
+#: .\templates\administration\partials\category_list_rows.html:60
+#, fuzzy, python-format
+#| msgid "确定要删除分类《%(name)s》吗？"
+msgid "确定要删除分类“%(name)s”吗？"
 msgstr "确定要删除分类《%(name)s》吗？"
 
-#: .\templates\administration\partials\category_list_rows.html:67
-#: .\templates\blog\category_list.html:96
+#: .\templates\administration\partials\category_list_rows.html:73
+#: .\templates\blog\category_list.html:98
 msgid "暂无分类"
 msgstr "暂无分类"
 
-#: .\templates\administration\partials\comment_list_rows.html:21
+#: .\templates\administration\partials\comment_list_rows.html:30
+#: .\templates\administration\partials\comment_list_rows.html:32
 #: .\templates\administration\partials\user_list_rows.html:53
 #: .\templates\administration\user_list.html:100
 #: .\templates\administration\user_list.html:111
-#: .\templates\administration\usertitle_form.html:30
-#: .\templates\blog\post_detail.html:387 .\templates\blog\post_detail.html:454
+#: .\templates\blog\post_detail.html:386 .\templates\blog\post_detail.html:453
 #: .\templates\guestbook\index.html:77
 msgid "管理员"
 msgstr "管理员"
 
-#: .\templates\administration\partials\comment_list_rows.html:31
-#: .\templates\administration\partials\comment_list_rows.html:64
-#: .\templates\blog\post_detail.html:397
+#: .\templates\administration\partials\comment_list_rows.html:41
+#: .\templates\administration\partials\comment_list_rows.html:74
+#: .\templates\blog\post_detail.html:396
 msgid "回复"
 msgstr "回复"
 
-#: .\templates\administration\partials\comment_list_rows.html:100
-#: .\templates\blog\post_detail.html:485
+#: .\templates\administration\partials\comment_list_rows.html:110
+#: .\templates\blog\post_detail.html:484
 msgid "暂无评论"
 msgstr "暂无评论"
+
+#: .\templates\administration\partials\friendlink_list_rows.html:57
+#, fuzzy, python-format
+#| msgid "确定要删除友情链接《%(name)s》吗？"
+msgid "确定要删除友情链接“%(name)s”吗？"
+msgstr "确定要删除友情链接《%(name)s》吗？"
 
 #: .\templates\administration\partials\friendlink_list_rows.html:72
 msgid "暂无友情链接"
@@ -3324,11 +3853,18 @@ msgstr "添加链接以与伙伴互联"
 msgid "成员"
 msgstr "成员"
 
+#: .\templates\administration\partials\group_list_rows.html:40
+#, fuzzy, python-format
+#| msgid "确定要删除用户组《%(name)s》吗？"
+msgid "确定要删除用户组“%(name)s”吗？"
+msgstr "确定要删除用户组《%(name)s》吗？"
+
 #: .\templates\administration\partials\group_list_rows.html:53
 msgid "暂无用户组"
 msgstr "暂无用户组"
 
 #: .\templates\administration\partials\logentry_list_rows.html:25
+#: .\templates\administration\post_form.html:431
 msgid "新增"
 msgstr "新增"
 
@@ -3339,6 +3875,12 @@ msgstr "确定要删除这条日志吗？"
 #: .\templates\administration\partials\logentry_list_rows.html:75
 msgid "暂无日志记录"
 msgstr "暂无日志记录"
+
+#: .\templates\administration\partials\navigation_list_rows.html:46
+#, fuzzy, python-format
+#| msgid "确定要删除导航《%(title)s》吗？"
+msgid "确定要删除导航“%(title)s”吗？"
+msgstr "确定要删除导航《%(title)s》吗？"
 
 #: .\templates\administration\partials\navigation_list_rows.html:59
 msgid "暂无导航数据"
@@ -3357,6 +3899,12 @@ msgstr "确定要复制这个页面吗？"
 msgid "复制"
 msgstr "复制"
 
+#: .\templates\administration\partials\page_list_rows.html:55
+#, fuzzy, python-format
+#| msgid "确定要删除页面《%(title)s》吗？"
+msgid "确定要删除页面“%(title)s”吗？"
+msgstr "确定要删除页面《%(title)s》吗？"
+
 #: .\templates\administration\partials\page_list_rows.html:68
 msgid "暂无页面"
 msgstr "暂无页面"
@@ -3368,15 +3916,6 @@ msgstr "多选"
 #: .\templates\administration\partials\poll_list_rows.html:23
 msgid "单选"
 msgstr "单选"
-
-#: .\templates\administration\partials\poll_list_rows.html:43
-#: .\templates\administration\partials\searchplaceholder_list_rows.html:20
-#: .\templates\administration\searchplaceholder_list.html:20
-#: .\templates\administration\searchplaceholder_list.html:37
-#: .\templates\administration\searchplaceholder_list.html:44
-#: .\templates\administration\user_list.html:117
-msgid "启用"
-msgstr "启用"
 
 #: .\templates\administration\partials\poll_list_rows.html:50
 msgid "停用"
@@ -3396,8 +3935,9 @@ msgid "永久有效"
 msgstr "永久有效"
 
 #: .\templates\administration\partials\poll_list_rows.html:83
-#, python-format
-msgid "确定要删除投票《%(title)s》吗？"
+#, fuzzy, python-format
+#| msgid "确定要删除投票《%(title)s》吗？"
+msgid "确定要删除投票“%(title)s”吗？"
 msgstr "确定要删除投票《%(title)s》吗？"
 
 #: .\templates\administration\partials\poll_list_rows.html:96
@@ -3414,27 +3954,20 @@ msgid "确定要复制这篇文章吗？"
 msgstr "确定要复制这篇文章吗？"
 
 #: .\templates\administration\partials\post_list_rows.html:107
+#: .\templates\administration\post_form.html:413
 #, python-format
 msgid "确定要删除文章《%(title)s》吗？"
 msgstr "确定要删除文章《%(title)s》吗？"
 
 #: .\templates\administration\partials\post_list_rows.html:118
-#: .\templates\blog\all_posts.html:161 .\templates\blog\post_list.html:177
+#: .\templates\blog\all_posts.html:161 .\templates\blog\post_list.html:185
 msgid "暂无文章"
 msgstr "暂无文章"
 
-#: .\templates\administration\partials\searchplaceholder_list_rows.html:25
-#: .\templates\administration\partials\user_list_rows.html:68
-#: .\templates\administration\searchplaceholder_list.html:21
-#: .\templates\administration\searchplaceholder_list.html:38
-#: .\templates\administration\searchplaceholder_list.html:47
-#: .\templates\administration\user_list.html:120
-msgid "禁用"
-msgstr "禁用"
-
 #: .\templates\administration\partials\searchplaceholder_list_rows.html:40
-#, python-format
-msgid "确定要删除关键词《%(text)s》吗？"
+#, fuzzy, python-format
+#| msgid "确定要删除关键词《%(text)s》吗？"
+msgid "确定要删除关键词“%(text)s”吗？"
 msgstr "确定要删除关键词《%(text)s》吗？"
 
 #: .\templates\administration\partials\searchplaceholder_list_rows.html:55
@@ -3466,14 +3999,23 @@ msgid "可用"
 msgstr "可用"
 
 #: .\templates\administration\partials\tag_list_rows.html:58
-#, python-format
-msgid "确定要删除标签《%(name)s》吗？"
+#, fuzzy, python-format
+#| msgid "确定要删除标签《%(name)s》吗？"
+msgid "确定要删除标签“%(name)s”吗？"
 msgstr "确定要删除标签《%(name)s》吗？"
 
 #: .\templates\administration\partials\tag_list_rows.html:71
 #: .\templates\blog\tag_list.html:75
 msgid "暂无标签"
 msgstr "暂无标签"
+
+#: .\templates\administration\partials\task_toggle.html:9
+msgid "点击禁用"
+msgstr "点击禁用"
+
+#: .\templates\administration\partials\task_toggle.html:9
+msgid "点击启用"
+msgstr "点击启用"
 
 #: .\templates\administration\partials\user_list_rows.html:48
 msgid "超级管理员"
@@ -3488,7 +4030,7 @@ msgid "正常"
 msgstr "正常"
 
 #: .\templates\administration\partials\user_list_rows.html:88
-#: .\templates\administration\user_form.html:216
+#: .\templates\administration\user_form.html:256
 #, python-format
 msgid "确定要删除用户 %(username)s 吗？"
 msgstr "确定要删除用户 %(username)s 吗？"
@@ -3498,74 +4040,256 @@ msgid "暂无用户"
 msgstr "暂无用户"
 
 #: .\templates\administration\partials\usertitle_list_rows.html:57
-#, python-format
-msgid "确定要删除称号《%(name)s》吗？"
+#, fuzzy, python-format
+#| msgid "确定要删除称号《%(name)s》吗？"
+msgid "确定要删除称号“%(name)s”吗？"
 msgstr "确定要删除称号《%(name)s》吗？"
 
 #: .\templates\administration\partials\usertitle_list_rows.html:70
 msgid "暂无称号"
 msgstr "暂无称号"
 
+#: .\templates\administration\periodic_task_form.html:4
+#: .\templates\administration\periodic_task_form.html:16
+msgid "编辑任务"
+msgstr "编辑任务"
+
+#: .\templates\administration\periodic_task_form.html:4
+#: .\templates\administration\periodic_task_form.html:18
+#: .\templates\administration\periodic_task_list.html:12
+msgid "新建任务"
+msgstr "新建任务"
+
+#: .\templates\administration\periodic_task_form.html:11
+msgid "保存任务"
+msgstr "保存任务"
+
+#: .\templates\administration\periodic_task_form.html:101
+msgid "任务说明"
+msgstr "任务说明"
+
+#: .\templates\administration\periodic_task_form.html:102
+#: .\templates\administration\usertitle_form.html:276
+#: .\templates\blog\post_list.html:53 .\templates\blog\search_results.html:84
+msgid "暂无描述"
+msgstr "暂无描述"
+
+#: .\templates\administration\periodic_task_form.html:128
+msgid "启用任务"
+msgstr "启用任务"
+
+#: .\templates\administration\periodic_task_form.html:139
+msgid "参数配置"
+msgstr "参数配置"
+
+#: .\templates\administration\periodic_task_form.html:145
+msgid "参数必须是合法的 JSON 格式"
+msgstr "参数必须是合法的 JSON 格式"
+
+#: .\templates\administration\periodic_task_form.html:159
+#: .\templates\administration\periodic_task_form.html:204
+#| msgid "可见"
+msgid "可视化"
+msgstr "可视化"
+
+#: .\templates\administration\periodic_task_form.html:159
+#: .\templates\administration\periodic_task_form.html:204
+msgid "源码"
+msgstr "源码"
+
+#: .\templates\administration\periodic_task_form.html:177
+#: .\templates\administration\periodic_task_form.html:223
+msgid "暂无参数"
+msgstr "暂无参数"
+
+#: .\templates\administration\periodic_task_form.html:182
+msgid "添加参数"
+msgstr "添加参数"
+
+#: .\templates\administration\periodic_task_form.html:188
+msgid "[1, \"text\"]"
+msgstr ""
+
+#: .\templates\administration\periodic_task_form.html:228
+msgid "添加键值对"
+msgstr "添加键值对"
+
+#: .\templates\administration\periodic_task_form.html:234
+msgid "{\"key\": \"value\"}"
+msgstr ""
+
+#: .\templates\administration\periodic_task_form.html:300
+msgid "必须是列表格式"
+msgstr "必须是列表格式"
+
+#: .\templates\administration\periodic_task_form.html:362
+msgid "必须是字典格式"
+msgstr "必须是字典格式"
+
+#: .\templates\administration\periodic_task_form.html:410
+msgid "执行频率"
+msgstr "执行频率"
+
+#: .\templates\administration\periodic_task_form.html:414
+msgid "每"
+msgstr "每"
+
+#: .\templates\administration\periodic_task_form.html:428
+msgid "例如：每 10 分钟执行一次，或每 2 小时执行一次。"
+msgstr "例如：每 10 分钟执行一次，或每 2 小时执行一次。"
+
+#: .\templates\administration\periodic_task_form.html:442
+#| msgid "分钟"
+msgid "分"
+msgstr "分"
+
+#: .\templates\administration\periodic_task_form.html:448
+#| msgid "小时"
+msgid "时"
+msgstr "时"
+
+#: .\templates\administration\periodic_task_form.html:454
+#| msgid "日志"
+msgid "日"
+msgstr "日"
+
+#: .\templates\administration\periodic_task_form.html:460
+#| msgid "或"
+msgid "月"
+msgstr "月"
+
+#: .\templates\administration\periodic_task_form.html:466
+msgid "周"
+msgstr "周"
+
+#: .\templates\administration\periodic_task_form.html:475
+msgid "使用标准 Crontab 语法"
+msgstr "使用标准 Crontab 语法"
+
+#: .\templates\administration\periodic_task_form.html:476
+msgid "* = 所有, */5 = 每5个单位, 1-5 = 范围, 1,3 = 枚举"
+msgstr "* = 所有, */5 = 每5个单位, 1-5 = 范围, 1,3 = 枚举"
+
+#: .\templates\administration\periodic_task_form.html:488
+msgid "高级设置"
+msgstr "高级设置"
+
+#: .\templates\administration\periodic_task_form.html:501
+msgid "过期时间 (Expires)"
+msgstr "过期时间 (Expires)"
+
+#: .\templates\administration\periodic_task_list.html:16
+msgid "管理系统后台的周期性任务"
+msgstr "管理系统后台的周期性任务"
+
+#: .\templates\administration\periodic_task_list.html:25
+msgid "任务信息"
+msgstr "任务信息"
+
+#: .\templates\administration\periodic_task_list.html:26
+msgid "调度规则"
+msgstr "调度规则"
+
+#: .\templates\administration\periodic_task_list.html:27
+msgid "参数"
+msgstr "参数"
+
+#: .\templates\administration\periodic_task_list.html:29
+msgid "最后运行"
+msgstr "最后运行"
+
+#: .\templates\administration\periodic_task_list.html:100
+#: .\templates\blog\partials\sidebar.html:132
+#: .\templates\users\includes\profile_content.html:186
+msgid "前"
+msgstr "前"
+
+#: .\templates\administration\periodic_task_list.html:102
+msgid "从未运行"
+msgstr "从未运行"
+
+#: .\templates\administration\periodic_task_list.html:111
+msgid "立即运行"
+msgstr "立即运行"
+
 #: .\templates\administration\poll_form.html:11
 msgid "编辑投票"
 msgstr "编辑投票"
 
-#: .\templates\administration\poll_form.html:40
-msgid "输入投票标题"
-msgstr "输入投票标题"
+#: .\templates\administration\poll_form.html:102
+#, fuzzy
+#| msgid "副标题 (中文)"
+msgid "标题 (中文)"
+msgstr "副标题 (中文)"
 
-#: .\templates\administration\poll_form.html:57
-msgid "输入投票描述，详细说明投票目的..."
-msgstr "输入投票描述，详细说明投票目的..."
+#: .\templates\administration\poll_form.html:134
+#: .\templates\administration\post_form.html:145
+#, fuzzy
+#| msgid "Page Title (English)"
+msgid "Title (English)"
+msgstr "页面标题 (英文)"
 
-#: .\templates\administration\poll_form.html:80
+#: .\templates\administration\poll_form.html:227
 msgid "可选：将投票关联到特定文章，投票将显示在该文章页面。"
 msgstr "可选：将投票关联到特定文章，投票将显示在该文章页面。"
 
-#: .\templates\administration\poll_form.html:103
+#: .\templates\administration\poll_form.html:250
 msgid "选项内容"
 msgstr "选项内容"
 
-#: .\templates\administration\poll_form.html:104
+#: .\templates\administration\poll_form.html:251
 msgid "当前票数"
 msgstr "当前票数"
 
-#: .\templates\administration\poll_form.html:119
-msgid "简中"
-msgstr "简中"
+#: .\templates\administration\poll_form.html:266
+#: .\templates\administration\poll_form.html:316
+msgid "多语言内容"
+msgstr "多语言内容"
 
-#: .\templates\administration\poll_form.html:125
-msgid "繁中"
-msgstr "繁中"
+#: .\templates\administration\poll_form.html:274
+#: .\templates\administration\poll_form.html:324
+msgid "一键翻译此选项"
+msgstr "一键翻译此选项"
 
-#: .\templates\administration\poll_form.html:134
+#: .\templates\administration\poll_form.html:276
+#: .\templates\administration\poll_form.html:326
+msgid "翻译"
+msgstr "翻译"
+
+#: .\templates\administration\poll_form.html:291
+#: .\templates\administration\poll_form.html:340
 msgid "删除此选项"
 msgstr "删除此选项"
 
-#: .\templates\administration\poll_form.html:151
+#: .\templates\administration\poll_form.html:352
 msgid "保存时将自动应用更改。"
 msgstr "保存时将自动应用更改。"
 
-#: .\templates\administration\poll_form.html:155
+#: .\templates\administration\poll_form.html:356
 msgid "添加选项"
 msgstr "添加选项"
 
-#: .\templates\administration\poll_form.html:159
+#: .\templates\administration\poll_form.html:360
 msgid "投票选项"
 msgstr "投票选项"
 
-#: .\templates\administration\poll_form.html:190
+#: .\templates\administration\poll_form.html:391
 msgid "确定要删除投票"
 msgstr "确定要删除投票"
 
-#: .\templates\administration\poll_form.html:191
+#: .\templates\administration\poll_form.html:392
 #, python-format
 msgid "确定要删除投票《%(object.title|escapejs)s》吗？"
 msgstr "确定要删除投票《%(object.title|escapejs)s》吗？"
 
-#: .\templates\administration\poll_form.html:194
+#: .\templates\administration\poll_form.html:395
 msgid "删除投票"
 msgstr "删除投票"
+
+#: .\templates\administration\poll_form.html:413
+#: .\templates\administration\tag_form.html:280
+msgid "启用状态"
+msgstr "启用状态"
 
 #: .\templates\administration\poll_list.html:4
 #: .\templates\administration\poll_list.html:16
@@ -3584,130 +4308,174 @@ msgstr "标题 / 描述"
 msgid "截止日期"
 msgstr "截止日期"
 
-#: .\templates\administration\post_form.html:4
-#: .\templates\administration\post_form.html:13
+#: .\templates\administration\post_form.html:5
+#: .\templates\administration\post_form.html:15
 msgid "编辑文章"
 msgstr "编辑文章"
 
-#: .\templates\administration\post_form.html:14
+#: .\templates\administration\post_form.html:16
 msgid "编辑文章内容和设置"
 msgstr "编辑文章内容和设置"
 
-#: .\templates\administration\post_form.html:27
+#: .\templates\administration\post_form.html:118
 msgid "文章标题 (中文)"
 msgstr "文章标题 (中文)"
 
-#: .\templates\administration\post_form.html:39
-msgid "文章标题 (英文)"
-msgstr "文章标题 (英文)"
-
-#: .\templates\administration\post_form.html:51
-msgid "文章标题 (日文)"
-msgstr "文章标题 (日文)"
-
-#: .\templates\administration\post_form.html:58
-msgid "文章标题 (繁体中文)"
-msgstr "文章标题 (繁体中文)"
-
-#: .\templates\administration\post_form.html:66
+#: .\templates\administration\post_form.html:129
 msgid "副标题 (中文)"
 msgstr "副标题 (中文)"
 
-#: .\templates\administration\post_form.html:72
-msgid "副标题 (英文)"
-msgstr "副标题 (英文)"
-
-#: .\templates\administration\post_form.html:98
+#: .\templates\administration\post_form.html:135
 msgid "摘要 (中文)"
 msgstr "摘要 (中文)"
 
-#: .\templates\administration\post_form.html:105
-msgid "摘要 (英文)"
-msgstr "摘要 (英文)"
+#: .\templates\administration\post_form.html:156
+#, fuzzy
+#| msgid "Page Title (English)"
+msgid "Subtitle (English)"
+msgstr "页面标题 (英文)"
 
-#: .\templates\administration\post_form.html:112
-msgid "摘要 (日文)"
-msgstr "摘要 (日文)"
+#: .\templates\administration\post_form.html:162
+#, fuzzy
+#| msgid "Description (English)"
+msgid "Excerpt (English)"
+msgstr "描述 (英文)"
 
-#: .\templates\administration\post_form.html:119
-msgid "摘要 (繁体中文)"
-msgstr "摘要 (繁体中文)"
+#: .\templates\administration\post_form.html:178
+#, fuzzy
+#| msgid "タイトル (Japanese)"
+msgid "サブタイトル (Japanese)"
+msgstr "タイトル (Japanese)"
 
-#: .\templates\administration\post_form.html:123
-msgid "可选，用于列表页展示"
-msgstr "可选，用于列表页展示"
+#: .\templates\administration\post_form.html:184
+#, fuzzy
+#| msgid "説明 (Japanese)"
+msgid "要約 (Japanese)"
+msgstr "描述 (日文)"
 
-#: .\templates\administration\post_form.html:133
-msgid "Slug (URL别名)"
-msgstr "Slug (URL别名)"
+#: .\templates\administration\post_form.html:194
+#, fuzzy
+#| msgid "標題 (Traditional Chinese)"
+msgid "文章標題 (Traditional Chinese)"
+msgstr "標題 (Traditional Chinese)"
 
-#: .\templates\administration\post_form.html:137
-msgid "留空将自动根据标题生成"
-msgstr "留空将自动根据标题生成"
+#: .\templates\administration\post_form.html:200
+#, fuzzy
+#| msgid "標題 (Traditional Chinese)"
+msgid "副標題 (Traditional Chinese)"
+msgstr "標題 (Traditional Chinese)"
 
-#: .\templates\administration\post_form.html:145
-msgid "Meta 标题 (Title)"
-msgstr "Meta 标题 (Title)"
+#: .\templates\administration\post_form.html:206
+#, fuzzy
+#| msgid "描述 (Traditional Chinese)"
+msgid "摘要 (Traditional Chinese)"
+msgstr "描述 (繁体中文)"
 
-#: .\templates\administration\post_form.html:149
-msgid "可选，覆盖默认标题"
-msgstr "可选，覆盖默认标题"
-
-#: .\templates\administration\post_form.html:155
-msgid "Meta 描述 (Description)"
-msgstr "Meta 描述 (Description)"
-
-#: .\templates\administration\post_form.html:159
-msgid "可选，覆盖自动生成的摘要"
-msgstr "可选，覆盖自动生成的摘要"
-
-#: .\templates\administration\post_form.html:165
-msgid "Meta 关键词 (Keywords)"
-msgstr "Meta 关键词 (Keywords)"
-
-#: .\templates\administration\post_form.html:169
-msgid "可选，逗号分隔"
-msgstr "可选，逗号分隔"
-
-#: .\templates\administration\post_form.html:173
+#: .\templates\administration\post_form.html:298
 msgid "SEO 设置"
 msgstr "SEO 设置"
 
-#: .\templates\administration\post_form.html:199
-msgid "留空将使用当前时间"
-msgstr "留空将使用当前时间"
+#: .\templates\administration\post_form.html:305
+msgid "Meta 标题 (Title)"
+msgstr "Meta 标题 (Title)"
 
-#: .\templates\administration\post_form.html:206
-msgid "是否置顶"
-msgstr "是否置顶"
+#: .\templates\administration\post_form.html:311
+#: .\templates\administration\post_form.html:377
+msgid "Meta 描述 (Description)"
+msgstr "Meta 描述 (Description)"
 
-#: .\templates\administration\post_form.html:224
-msgid "预览/查看"
-msgstr "预览/查看"
+#: .\templates\administration\post_form.html:317
+msgid "Meta 关键词 (Keywords)"
+msgstr "Meta 关键词 (Keywords)"
 
-#: .\templates\administration\post_form.html:247
-msgid "设置此密码后，访问文章需要输入密码。留空则公开访问。"
-msgstr "设置此密码后，访问文章需要输入密码。留空则公开访问。"
+#: .\templates\administration\post_form.html:327
+#, fuzzy
+#| msgid "Meta 标题 (Title)"
+msgid "Meta Title"
+msgstr "Meta 标题 (Title)"
 
-#: .\templates\administration\post_form.html:251
-msgid "访问控制"
-msgstr "访问控制"
+#: .\templates\administration\post_form.html:333
+#, fuzzy
+#| msgid "Meta 描述 (Description)"
+msgid "Meta Description"
+msgstr "Meta 描述 (Description)"
 
-#: .\templates\administration\post_form.html:314
-msgid "输入标签..."
+#: .\templates\administration\post_form.html:339
+#, fuzzy
+#| msgid "Meta 关键词 (Keywords)"
+msgid "Meta Keywords"
+msgstr "Meta 关键词 (Keywords)"
+
+#: .\templates\administration\post_form.html:349
+#, fuzzy
+#| msgid "タイトル (Japanese)"
+msgid "Meta タイトル"
+msgstr "タイトル (Japanese)"
+
+#: .\templates\administration\post_form.html:355
+msgid "Meta 説明文"
+msgstr "Meta 说明文"
+
+#: .\templates\administration\post_form.html:361
+msgid "Meta キーワード"
+msgstr "Meta 关键词"
+
+#: .\templates\administration\post_form.html:371
+#, fuzzy
+#| msgid "Meta 标题 (Title)"
+msgid "Meta 標題 (Title)"
+msgstr "Meta 标题 (Title)"
+
+#: .\templates\administration\post_form.html:383
+#, fuzzy
+#| msgid "Meta 关键词 (Keywords)"
+msgid "Meta 關鍵詞 (Keywords)"
+msgstr "Meta 关键词 (Keywords)"
+
+#: .\templates\administration\post_form.html:401
+msgid "保存文章"
+msgstr "保存文章"
+
+#: .\templates\administration\post_form.html:414
+msgid "删除文章"
+msgstr "删除文章"
+
+#: .\templates\administration\post_form.html:456
+msgid "标签已存在"
+msgstr "标签已存在"
+
+#: .\templates\administration\post_form.html:495
+#, fuzzy
+#| msgid "输入标签..."
+msgid "输入标签并回车..."
 msgstr "输入标签..."
 
-#: .\templates\administration\post_form.html:321
-msgid "输入标签后按回车或逗号添加"
+#: .\templates\administration\post_form.html:499
+#, fuzzy
+#| msgid "输入标签后按回车或逗号添加"
+msgid "输入新标签后按回车添加"
 msgstr "输入标签后按回车或逗号添加"
 
-#: .\templates\administration\post_form.html:325
+#: .\templates\administration\post_form.html:508
 msgid "分类与标签"
 msgstr "分类与标签"
 
-#: .\templates\administration\post_form.html:333
-msgid "封面图片"
-msgstr "封面图片"
+#: .\templates\administration\post_form.html:515
+msgid "文章状态"
+msgstr "文章状态"
+
+#: .\templates\administration\post_form.html:522
+#: .\templates\blog\partials\pin_button.html:3
+msgid "置顶文章"
+msgstr "置顶文章"
+
+#: .\templates\administration\post_form.html:540
+msgid "留空则公开访问"
+msgstr "留空则公开访问"
+
+#: .\templates\administration\post_form.html:563
+msgid "推荐 1200x630"
+msgstr "推荐 1200x630"
 
 #: .\templates\administration\post_list.html:4
 #: .\templates\administration\post_list.html:26
@@ -3734,31 +4502,31 @@ msgstr "浏览"
 msgid "批量设为草稿"
 msgstr "批量设为草稿"
 
-#: .\templates\administration\searchplaceholder_form.html:34
+#: .\templates\administration\searchplaceholder_form.html:105
 msgid "关键词内容 (中文)"
 msgstr "关键词内容 (中文)"
 
-#: .\templates\administration\searchplaceholder_form.html:36
+#: .\templates\administration\searchplaceholder_form.html:107
 msgid "输入搜索框提示文字 (中文)"
 msgstr "输入搜索框提示文字 (中文)"
 
-#: .\templates\administration\searchplaceholder_form.html:49
+#: .\templates\administration\searchplaceholder_form.html:123
 msgid "Enter placeholder text (English)"
 msgstr "Enter placeholder text (English)"
 
-#: .\templates\administration\searchplaceholder_form.html:62
+#: .\templates\administration\searchplaceholder_form.html:139
 msgid "プレースホルダーテキストを入力 (Japanese)"
 msgstr "プレースホルダーテキストを入力 (Japanese)"
 
-#: .\templates\administration\searchplaceholder_form.html:75
+#: .\templates\administration\searchplaceholder_form.html:155
 msgid "輸入搜索框提示文字 (繁體中文)"
 msgstr "輸入搜索框提示文字 (繁體中文)"
 
-#: .\templates\administration\searchplaceholder_form.html:83
+#: .\templates\administration\searchplaceholder_form.html:163
 msgid "这将作为搜索框的 placeholder 属性显示。"
 msgstr "这将作为搜索框的 placeholder 属性显示。"
 
-#: .\templates\administration\searchplaceholder_form.html:112
+#: .\templates\administration\searchplaceholder_form.html:199
 #, python-format
 msgid "确定要删除关键词《%(object.text|escapejs)s》吗？"
 msgstr "确定要删除关键词《%(object.text|escapejs)s》吗？"
@@ -3861,8 +4629,12 @@ msgid "未创建"
 msgstr "未创建"
 
 #: .\templates\administration\system_tools.html:52
-msgid "如果系统中缺少隐私政策页面（URL: privacy-policy），可以点击下方按钮自动创建默认的隐私政策页面。"
-msgstr "如果系统中缺少隐私政策页面（URL: privacy-policy），可以点击下方按钮自动创建默认的隐私政策页面。"
+msgid ""
+"如果系统中缺少隐私政策页面（URL: privacy-policy），可以点击下方按钮自动创建默"
+"认的隐私政策页面。"
+msgstr ""
+"如果系统中缺少隐私政策页面（URL: privacy-policy），可以点击下方按钮自动创建默"
+"认的隐私政策页面。"
 
 #: .\templates\administration\system_tools.html:59
 msgid "页面已存在"
@@ -3877,8 +4649,12 @@ msgid "全站搜索索引"
 msgstr "全站搜索索引"
 
 #: .\templates\administration\system_tools.html:81
-msgid "如果用户在前台搜索不到最新的文章或内容，请尝试重建索引。这通常在大量导入数据后需要手动执行。"
-msgstr "如果用户在前台搜索不到最新的文章或内容，请尝试重建索引。这通常在大量导入数据后需要手动执行。"
+msgid ""
+"如果用户在前台搜索不到最新的文章或内容，请尝试重建索引。这通常在大量导入数据"
+"后需要手动执行。"
+msgstr ""
+"如果用户在前台搜索不到最新的文章或内容，请尝试重建索引。这通常在大量导入数据"
+"后需要手动执行。"
 
 #: .\templates\administration\system_tools.html:84
 #: .\templates\administration\system_tools.html:126
@@ -3900,8 +4676,12 @@ msgid "图片预处理服务"
 msgstr "图片预处理服务"
 
 #: .\templates\administration\system_tools.html:111
-msgid "后台自动生成文章封面图的缩略图，提升前台页面加载速度。建议在上传大量图片后执行。"
-msgstr "后台自动生成文章封面图的缩略图，提升前台页面加载速度。建议在上传大量图片后执行。"
+msgid ""
+"后台自动生成文章封面图的缩略图，提升前台页面加载速度。建议在上传大量图片后执"
+"行。"
+msgstr ""
+"后台自动生成文章封面图的缩略图，提升前台页面加载速度。建议在上传大量图片后执"
+"行。"
 
 #: .\templates\administration\system_tools.html:115
 msgid "待优化图片"
@@ -3995,33 +4775,25 @@ msgstr "确定要删除此备份吗？"
 msgid "暂无备份文件"
 msgstr "暂无备份文件"
 
-#: .\templates\administration\tag_form.html:11
+#: .\templates\administration\tag_form.html:72
 msgid "编辑标签"
 msgstr "编辑标签"
 
-#: .\templates\administration\tag_form.html:113
+#: .\templates\administration\tag_form.html:264
 msgid "确定要删除标签"
 msgstr "确定要删除标签"
 
-#: .\templates\administration\tag_form.html:114
+#: .\templates\administration\tag_form.html:265
 msgid "删除标签"
 msgstr "删除标签"
 
-#: .\templates\administration\tag_form.html:129
-msgid "启用状态"
-msgstr "启用状态"
-
-#: .\templates\administration\tag_form.html:133
+#: .\templates\administration\tag_form.html:284
 msgid "禁用后，该标签将不会在前端显示。"
 msgstr "禁用后，该标签将不会在前端显示。"
 
-#: .\templates\administration\tag_form.html:143
-msgid "颜色标识"
-msgstr "颜色标识"
-
-#: .\templates\administration\tag_form.html:147
-msgid "直接使用自定义颜色，建议选择清晰耐看的色值。"
-msgstr "直接使用自定义颜色，建议选择清晰耐看的色值。"
+#: .\templates\administration\tag_form.html:296
+msgid "图标 (Material Symbols)"
+msgstr "图标 (Material Symbols)"
 
 #: .\templates\administration\tag_list.html:4
 #: .\templates\administration\tag_list.html:32
@@ -4049,118 +4821,125 @@ msgstr "批量隐藏"
 msgid "编辑用户"
 msgstr "编辑用户"
 
-#: .\templates\administration\user_form.html:39
-#: .\templates\users\login.html:34
+#: .\templates\administration\user_form.html:43 .\templates\users\login.html:34
 msgid "用户名"
 msgstr "用户名"
 
-#: .\templates\administration\user_form.html:63
+#: .\templates\administration\user_form.html:67
 msgid "电子邮箱"
 msgstr "电子邮箱"
 
-#: .\templates\administration\user_form.html:90
+#: .\templates\administration\user_form.html:94
 msgid "设置新密码"
 msgstr "设置新密码"
 
-#: .\templates\administration\user_form.html:92
+#: .\templates\administration\user_form.html:96
 msgid "留空则保持不变"
 msgstr "留空则保持不变"
 
-#: .\templates\administration\user_form.html:95
+#: .\templates\administration\user_form.html:99
 msgid "如需修改用户密码，请在此输入新密码。"
 msgstr "如需修改用户密码，请在此输入新密码。"
 
-#: .\templates\administration\user_form.html:99
+#: .\templates\administration\user_form.html:103
 msgid "账户信息"
 msgstr "账户信息"
 
-#: .\templates\administration\user_form.html:107
+#: .\templates\administration\user_form.html:115
 #: .\templates\users\includes\edit_profile_modal.html:31
 #: .\templates\users\register.html:41
 msgid "头像"
 msgstr "头像"
 
-#: .\templates\administration\user_form.html:138
+#: .\templates\administration\user_form.html:134
+msgid "建议尺寸: 300x300 (1:1)"
+msgstr "建议尺寸: 300x300 (1:1)"
+
+#: .\templates\administration\user_form.html:171
+msgid "建议尺寸: 1200x300 (4:1)"
+msgstr "建议尺寸: 1200x300 (4:1)"
+
+#: .\templates\administration\user_form.html:178
 #: .\templates\users\includes\edit_profile_modal.html:114
 #: .\templates\users\includes\user_info.html:22
 msgid "个人简介"
 msgstr "个人简介"
 
-#: .\templates\administration\user_form.html:140
+#: .\templates\administration\user_form.html:180
 msgid "输入个人简介..."
 msgstr "输入个人简介..."
 
-#: .\templates\administration\user_form.html:147
+#: .\templates\administration\user_form.html:187
 #: .\templates\users\includes\edit_profile_modal.html:134
 #: .\templates\users\includes\user_info.html:32
 msgid "个人网站"
 msgstr "个人网站"
 
-#: .\templates\administration\user_form.html:177
+#: .\templates\administration\user_form.html:217
 msgid "用户将获得所选组的所有权限。"
 msgstr "用户将获得所选组的所有权限。"
 
-#: .\templates\administration\user_form.html:185
+#: .\templates\administration\user_form.html:225
 msgid "个人权限"
 msgstr "个人权限"
 
-#: .\templates\administration\user_form.html:189
+#: .\templates\administration\user_form.html:229
 msgid "按住 Ctrl (或 Cmd) 可多选。通常建议通过用户组管理权限。"
 msgstr "按住 Ctrl (或 Cmd) 可多选。通常建议通过用户组管理权限。"
 
-#: .\templates\administration\user_form.html:193
+#: .\templates\administration\user_form.html:233
 msgid "权限与分组"
 msgstr "权限与分组"
 
-#: .\templates\administration\user_form.html:204
+#: .\templates\administration\user_form.html:244
 msgid "保存用户"
 msgstr "保存用户"
 
-#: .\templates\administration\user_form.html:217
+#: .\templates\administration\user_form.html:257
 msgid "删除用户"
 msgstr "删除用户"
 
-#: .\templates\administration\user_form.html:235
+#: .\templates\administration\user_form.html:275
 msgid "激活状态"
 msgstr "激活状态"
 
-#: .\templates\administration\user_form.html:240
+#: .\templates\administration\user_form.html:280
 msgid "取消激活可禁止用户登录，建议代替删除。"
 msgstr "取消激活可禁止用户登录，建议代替删除。"
 
-#: .\templates\administration\user_form.html:250
+#: .\templates\administration\user_form.html:290
 msgid "封禁账户"
 msgstr "封禁账户"
 
-#: .\templates\administration\user_form.html:256
+#: .\templates\administration\user_form.html:296
 msgid "状态控制"
 msgstr "状态控制"
 
-#: .\templates\administration\user_form.html:265
+#: .\templates\administration\user_form.html:305
 msgid "职员状态"
 msgstr "职员状态"
 
-#: .\templates\administration\user_form.html:270
+#: .\templates\administration\user_form.html:310
 msgid "指明用户是否可以登录到这个管理后台。"
 msgstr "指明用户是否可以登录到这个管理后台。"
 
-#: .\templates\administration\user_form.html:285
+#: .\templates\administration\user_form.html:325
 msgid "指明该用户缺省拥有所有权限。"
 msgstr "指明该用户缺省拥有所有权限。"
 
-#: .\templates\administration\user_form.html:289
+#: .\templates\administration\user_form.html:329
 msgid "角色权限"
 msgstr "角色权限"
 
-#: .\templates\administration\user_form.html:296
+#: .\templates\administration\user_form.html:336
 msgid "加入时间:"
 msgstr "加入时间:"
 
-#: .\templates\administration\user_form.html:300
+#: .\templates\administration\user_form.html:340
 msgid "最近登录:"
 msgstr "最近登录:"
 
-#: .\templates\administration\user_form.html:305
+#: .\templates\administration\user_form.html:345
 msgid "注册信息"
 msgstr "注册信息"
 
@@ -4235,13 +5014,9 @@ msgstr "编辑称号"
 msgid "新建称号"
 msgstr "新建称号"
 
-#: .\templates\administration\usertitle_form.html:20
+#: .\templates\administration\usertitle_form.html:21
 msgid "认证"
 msgstr "认证"
-
-#: .\templates\administration\usertitle_form.html:21
-msgid "皇冠"
-msgstr "皇冠"
 
 #: .\templates\administration\usertitle_form.html:22
 msgid "星星"
@@ -4252,8 +5027,8 @@ msgid "闪电"
 msgstr "闪电"
 
 #: .\templates\administration\usertitle_form.html:24
-msgid "钻石"
-msgstr "钻石"
+msgid "心形"
+msgstr "心形"
 
 #: .\templates\administration\usertitle_form.html:25
 msgid "盾牌"
@@ -4268,116 +5043,96 @@ msgid "火焰"
 msgstr "火焰"
 
 #: .\templates\administration\usertitle_form.html:28
-msgid "心形"
-msgstr "心形"
-
-#: .\templates\administration\usertitle_form.html:29
-msgid "火箭"
-msgstr "火箭"
-
-#: .\templates\administration\usertitle_form.html:31
-msgid "贡献者"
-msgstr "贡献者"
-
-#: .\templates\administration\usertitle_form.html:33
-msgid "Bug 猎手"
-msgstr "Bug 猎手"
-
-#: .\templates\administration\usertitle_form.html:34
-msgid "代码"
-msgstr "代码"
-
-#: .\templates\administration\usertitle_form.html:35
 msgid "魔法"
 msgstr "魔法"
 
-#: .\templates\administration\usertitle_form.html:36
-msgid "地球"
-msgstr "地球"
+#: .\templates\administration\usertitle_form.html:30
+msgid "代码"
+msgstr "代码"
 
-#: .\templates\administration\usertitle_form.html:37
-msgid "灯泡"
-msgstr "灯泡"
+#: .\templates\administration\usertitle_form.html:31
+msgid "学者"
+msgstr "学者"
 
-#: .\templates\administration\usertitle_form.html:38
-msgid "书本"
-msgstr "书本"
+#: .\templates\administration\usertitle_form.html:32
+msgid "想法"
+msgstr "想法"
 
-#: .\templates\administration\usertitle_form.html:39
-msgid "咖啡"
-msgstr "咖啡"
+#: .\templates\administration\usertitle_form.html:110
+#, fuzzy
+#| msgid "名称 (中文)"
+msgid "称号名称 (中文)"
+msgstr "名称 (中文)"
 
-#: .\templates\administration\usertitle_form.html:40
-msgid "音乐"
-msgstr "音乐"
-
-#: .\templates\administration\usertitle_form.html:41
-msgid "相机"
-msgstr "相机"
-
-#: .\templates\administration\usertitle_form.html:42
-msgid "调色板"
-msgstr "调色板"
-
-#: .\templates\administration\usertitle_form.html:43
-msgid "手柄"
-msgstr "手柄"
-
-#: .\templates\administration\usertitle_form.html:44
-msgid "叶子"
-msgstr "叶子"
-
-#: .\templates\administration\usertitle_form.html:66
-#: .\templates\administration\usertitle_form.html:174
-msgid "称号名称"
-msgstr "称号名称"
-
-#: .\templates\administration\usertitle_form.html:68
+#: .\templates\administration\usertitle_form.html:112
 msgid "例如：VIP"
 msgstr "例如：VIP"
 
-#: .\templates\administration\usertitle_form.html:80
+#: .\templates\administration\usertitle_form.html:122
+#, fuzzy
+#| msgid "称号说明"
+msgid "称号说明 (中文)"
+msgstr "称号说明"
+
+#: .\templates\administration\usertitle_form.html:124
+msgid "简短描述该称号的获取条件或含义"
+msgstr "简短描述该称号的获取条件或含义"
+
+#: .\templates\administration\usertitle_form.html:154
+#, fuzzy
+#| msgid "名称 (中文)"
+msgid "名称 (日本語)"
+msgstr "名称 (中文)"
+
+#: .\templates\administration\usertitle_form.html:160
+msgid "説明 (日本語)"
+msgstr "说明 (日文)"
+
+#: .\templates\administration\usertitle_form.html:170
+#, fuzzy
+#| msgid "繁體中文"
+msgid "名稱 (繁體中文)"
+msgstr "繁體中文"
+
+#: .\templates\administration\usertitle_form.html:176
+#, fuzzy
+#| msgid "繁體中文"
+msgid "說明 (繁體中文)"
+msgstr "繁體中文"
+
+#: .\templates\administration\usertitle_form.html:193
 #: .\templates\administration\usertitle_list.html:54
 msgid "颜色风格"
 msgstr "颜色风格"
 
-#: .\templates\administration\usertitle_form.html:85
+#: .\templates\administration\usertitle_form.html:198
 msgid "选择一个醒目的颜色来区分不同类型的称号"
 msgstr "选择一个醒目的颜色来区分不同类型的称号"
 
-#: .\templates\administration\usertitle_form.html:98
-msgid "称号说明"
-msgstr "称号说明"
-
-#: .\templates\administration\usertitle_form.html:100
-msgid "简短描述该称号的获取条件或含义"
-msgstr "简短描述该称号的获取条件或含义"
-
-#: .\templates\administration\usertitle_form.html:117
+#: .\templates\administration\usertitle_form.html:216
 msgid "预设图标"
 msgstr "预设图标"
 
-#: .\templates\administration\usertitle_form.html:135
+#: .\templates\administration\usertitle_form.html:234
 msgid "自定义 SVG 代码"
 msgstr "自定义 SVG 代码"
 
-#: .\templates\administration\usertitle_form.html:136
+#: .\templates\administration\usertitle_form.html:235
 msgid "推荐尺寸 24x24"
 msgstr "推荐尺寸 24x24"
 
-#: .\templates\administration\usertitle_form.html:146
+#: .\templates\administration\usertitle_form.html:245
 msgid "图标设置"
 msgstr "图标设置"
 
-#: .\templates\administration\usertitle_form.html:162
+#: .\templates\administration\usertitle_form.html:261
 #: .\templates\administration\usertitle_list.html:52
 msgid "预览"
 msgstr "预览"
 
-#: .\templates\administration\usertitle_form.html:177
-#: .\templates\blog\post_list.html:45 .\templates\blog\search_results.html:84
-msgid "暂无描述"
-msgstr "暂无描述"
+#: .\templates\administration\usertitle_form.html:273
+msgid "称号名称"
+msgstr "称号名称"
 
 #: .\templates\administration\usertitle_list.html:5
 msgid "用户称号管理"
@@ -4404,7 +5159,7 @@ msgstr "用户数"
 msgid "导入称号数据 (JSON)"
 msgstr "导入称号数据 (JSON)"
 
-#: .\templates\base.html:7
+#: .\templates\base.html:18
 msgid "RSS Feed"
 msgstr "RSS Feed"
 
@@ -4420,25 +5175,28 @@ msgstr "全部文章"
 #, python-format
 msgid ""
 "\n"
-"                    共收录 <span class=\"font-bold text-base-content\">%(counter)s</span> 篇文章\n"
+"                    共收录 <span class=\"font-bold text-base-"
+"content\">%(counter)s</span> 篇文章\n"
 "                    "
 msgid_plural ""
 "\n"
-"                    共收录 <span class=\"font-bold text-base-content\">%(counter)s</span> 篇文章\n"
+"                    共收录 <span class=\"font-bold text-base-"
+"content\">%(counter)s</span> 篇文章\n"
 "                    "
 msgstr[0] ""
 "\n"
-"                    共收录 <span class=\"font-bold text-base-content\">%(counter)s</span> 篇文章\n"
+"                    共收录 <span class=\"font-bold text-base-"
+"content\">%(counter)s</span> 篇文章\n"
 "                    "
 
-#: .\templates\blog\all_posts.html:47 .\templates\blog\post_list.html:60
-#: .\templates\blog\post_list.html:79
+#: .\templates\blog\all_posts.html:47 .\templates\blog\post_list.html:68
+#: .\templates\blog\post_list.html:87
 #: .\templates\users\includes\profile_content.html:31
 msgid "网格视图"
 msgstr "网格视图"
 
-#: .\templates\blog\all_posts.html:53 .\templates\blog\post_list.html:66
-#: .\templates\blog\post_list.html:73
+#: .\templates\blog\all_posts.html:53 .\templates\blog\post_list.html:74
+#: .\templates\blog\post_list.html:81
 #: .\templates\users\includes\profile_content.html:37
 msgid "列表视图"
 msgstr "列表视图"
@@ -4448,13 +5206,13 @@ msgid "这里还是一片荒原，等待知识的种子发芽。"
 msgstr "这里还是一片荒原，等待知识的种子发芽。"
 
 #: .\templates\blog\all_posts.html:175 .\templates\blog\all_posts.html:180
-#: .\templates\blog\post_list.html:187 .\templates\blog\post_list.html:189
+#: .\templates\blog\post_list.html:195 .\templates\blog\post_list.html:197
 #: .\templates\guestbook\index.html:126 .\templates\guestbook\index.html:128
 msgid "上一页"
 msgstr "上一页"
 
 #: .\templates\blog\all_posts.html:190 .\templates\blog\all_posts.html:195
-#: .\templates\blog\post_list.html:193 .\templates\blog\post_list.html:195
+#: .\templates\blog\post_list.html:201 .\templates\blog\post_list.html:203
 #: .\templates\guestbook\index.html:132 .\templates\guestbook\index.html:134
 msgid "下一页"
 msgstr "下一页"
@@ -4471,15 +5229,18 @@ msgstr "时光轴"
 #, python-format
 msgid ""
 "\n"
-"                共 <span class=\"font-bold text-base-content\">%(counter)s</span> 篇文章，记录成长的足迹。\n"
+"                共 <span class=\"font-bold text-base-content\">%(counter)s</"
+"span> 篇文章，记录成长的足迹。\n"
 "                "
 msgid_plural ""
 "\n"
-"                共 <span class=\"font-bold text-base-content\">%(counter)s</span> 篇文章，记录成长的足迹。\n"
+"                共 <span class=\"font-bold text-base-content\">%(counter)s</"
+"span> 篇文章，记录成长的足迹。\n"
 "                "
 msgstr[0] ""
 "\n"
-"                共 <span class=\"font-bold text-base-content\">%(counter)s</span> 篇文章，记录成长的足迹。\n"
+"                共 <span class=\"font-bold text-base-content\">%(counter)s</"
+"span> 篇文章，记录成长的足迹。\n"
 "                "
 
 #: .\templates\blog\archive.html:104
@@ -4494,44 +5255,47 @@ msgstr "开始创作，记录第一笔足迹吧！"
 msgid "探索知识库"
 msgstr "探索知识库"
 
+#: .\templates\blog\category_list.html:21
+msgid "内容分类"
+msgstr "内容分类"
+
 #: .\templates\blog\category_list.html:26
 #, python-format
 msgid ""
 "\n"
-"                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span class=\"font-bold text-base-content\">%(counter)s</span> 个分类。\n"
+"                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span "
+"class=\"font-bold text-base-content\">%(counter)s</span> 个分类。\n"
 "                "
 msgid_plural ""
 "\n"
-"                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span class=\"font-bold text-base-content\">%(counter)s</span> 个分类。\n"
+"                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span "
+"class=\"font-bold text-base-content\">%(counter)s</span> 个分类。\n"
 "                "
 msgstr[0] ""
 "\n"
-"                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span class=\"font-bold text-base-content\">%(counter)s</span> 个分类。\n"
+"                按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span "
+"class=\"font-bold text-base-content\">%(counter)s</span> 个分类。\n"
 "                "
 
 #: .\templates\blog\category_list.html:39
 msgid "搜索感兴趣的分类..."
 msgstr "搜索感兴趣的分类..."
 
-#: .\templates\blog\category_list.html:80
+#: .\templates\blog\category_list.html:82
 msgid "探索该分类下的所有精彩文章，发现更多有趣内容。"
 msgstr "探索该分类下的所有精彩文章，发现更多有趣内容。"
 
-#: .\templates\blog\category_list.html:86
+#: .\templates\blog\category_list.html:88
 msgid "Explore"
 msgstr "Explore"
 
-#: .\templates\blog\category_list.html:98
+#: .\templates\blog\category_list.html:100
 msgid "还没有添加任何分类，或者没有找到匹配的结果。"
 msgstr "还没有添加任何分类，或者没有找到匹配的结果。"
 
 #: .\templates\blog\partials\pin_button.html:2
 msgid "取消置顶"
 msgstr "取消置顶"
-
-#: .\templates\blog\partials\pin_button.html:3
-msgid "置顶文章"
-msgstr "置顶文章"
 
 #: .\templates\blog\partials\sidebar.html:10
 #: .\templates\blog\search_index.html:4
@@ -4549,11 +5313,6 @@ msgstr "标签云"
 #: .\templates\blog\partials\sidebar.html:119
 msgid "最新评论"
 msgstr "最新评论"
-
-#: .\templates\blog\partials\sidebar.html:132
-#: .\templates\users\includes\profile_content.html:186
-msgid "前"
-msgstr "前"
 
 #: .\templates\blog\password_required.html:4
 msgid "需要密码"
@@ -4575,67 +5334,67 @@ msgstr "在此输入密码"
 msgid "验证密码"
 msgstr "验证密码"
 
-#: .\templates\blog\post_detail.html:137
+#: .\templates\blog\post_detail.html:136
 msgid "阅读时间"
 msgstr "阅读时间"
 
-#: .\templates\blog\post_detail.html:139 .\templates\blog\post_detail.html:242
+#: .\templates\blog\post_detail.html:138 .\templates\blog\post_detail.html:241
 msgid "分钟阅读"
 msgstr "分钟阅读"
 
-#: .\templates\blog\post_detail.html:143 .\templates\blog\post_detail.html:547
+#: .\templates\blog\post_detail.html:142 .\templates\blog\post_detail.html:546
 msgid "阅读"
 msgstr "阅读"
 
-#: .\templates\blog\post_detail.html:200
+#: .\templates\blog\post_detail.html:199
 msgid "分享"
 msgstr "分享"
 
-#: .\templates\blog\post_detail.html:202
+#: .\templates\blog\post_detail.html:201
 msgid "分享到 X"
 msgstr "分享到 X"
 
-#: .\templates\blog\post_detail.html:205
+#: .\templates\blog\post_detail.html:204
 msgid "链接已复制！"
 msgstr "链接已复制！"
 
-#: .\templates\blog\post_detail.html:205
+#: .\templates\blog\post_detail.html:204
 msgid "复制链接"
 msgstr "复制链接"
 
-#: .\templates\blog\post_detail.html:215
+#: .\templates\blog\post_detail.html:214
 msgid "相关阅读"
 msgstr "相关阅读"
 
-#: .\templates\blog\post_detail.html:267
+#: .\templates\blog\post_detail.html:266
 msgid "上一篇"
 msgstr "上一篇"
 
-#: .\templates\blog\post_detail.html:278
+#: .\templates\blog\post_detail.html:277
 msgid "下一篇"
 msgstr "下一篇"
 
-#: .\templates\blog\post_detail.html:296
+#: .\templates\blog\post_detail.html:295
 msgid "发表你的观点"
 msgstr "发表你的观点"
 
-#: .\templates\blog\post_detail.html:310
+#: .\templates\blog\post_detail.html:309
 msgid "正在回复"
 msgstr "正在回复"
 
-#: .\templates\blog\post_detail.html:313
+#: .\templates\blog\post_detail.html:312
 msgid "取消回复"
 msgstr "取消回复"
 
-#: .\templates\blog\post_detail.html:323
+#: .\templates\blog\post_detail.html:322
 msgid "发布评论"
 msgstr "发布评论"
 
-#: .\templates\blog\post_detail.html:331
+#: .\templates\blog\post_detail.html:330
 msgid "需要登录"
 msgstr "需要登录"
 
-#: .\templates\blog\post_detail.html:332
+#: .\templates\blog\post_detail.html:331
 #, python-format
 msgid ""
 "请 <a href=\"%(login_url)s?next=%(request.path)s\" class=\"link link-primary "
@@ -4646,58 +5405,58 @@ msgstr ""
 "font-bold\">登录</a> 或 <a href=\"%(register_url)s\" class=\"link link-"
 "primary\">注册</a> 后参与讨论。"
 
-#: .\templates\blog\post_detail.html:341
+#: .\templates\blog\post_detail.html:340
 msgid "评论已关闭"
 msgstr "评论已关闭"
 
-#: .\templates\blog\post_detail.html:342
+#: .\templates\blog\post_detail.html:341
 msgid "管理员已暂时关闭评论功能。"
 msgstr "管理员已暂时关闭评论功能。"
 
-#: .\templates\blog\post_detail.html:356
+#: .\templates\blog\post_detail.html:355
 #, python-format
 msgid "查看 %(name)s 的主页"
 msgstr "查看 %(name)s 的主页"
 
-#: .\templates\blog\post_detail.html:390 .\templates\blog\post_detail.html:457
+#: .\templates\blog\post_detail.html:389 .\templates\blog\post_detail.html:456
 #, python-format
 msgid "• %(time)s前"
 msgstr "• %(time)s前"
 
-#: .\templates\blog\post_detail.html:402
+#: .\templates\blog\post_detail.html:401
 msgid "确定要删除这条评论及其所有回复吗？"
 msgstr "确定要删除这条评论及其所有回复吗？"
 
-#: .\templates\blog\post_detail.html:439
+#: .\templates\blog\post_detail.html:438
 #, python-format
 msgid "回复 @%(name)s"
 msgstr "回复 @%(name)s"
 
-#: .\templates\blog\post_detail.html:462
+#: .\templates\blog\post_detail.html:461
 msgid "确定要删除这条回复吗？"
 msgstr "确定要删除这条回复吗？"
 
-#: .\templates\blog\post_detail.html:462
+#: .\templates\blog\post_detail.html:461
 msgid "删除回复"
 msgstr "删除回复"
 
-#: .\templates\blog\post_detail.html:486
+#: .\templates\blog\post_detail.html:485
 msgid "你的观点很有价值，快来抢沙发吧！"
 msgstr "你的观点很有价值，快来抢沙发吧！"
 
-#: .\templates\blog\post_detail.html:501
+#: .\templates\blog\post_detail.html:500
 msgid "目录"
 msgstr "目录"
 
-#: .\templates\blog\post_detail.html:536
+#: .\templates\blog\post_detail.html:535
 msgid "这个作者很懒，什么都没写~"
 msgstr "这个作者很懒，什么都没写~"
 
-#: .\templates\blog\post_detail.html:551
+#: .\templates\blog\post_detail.html:550
 msgid "访问主页"
 msgstr "访问主页"
 
-#: .\templates\blog\post_list.html:30
+#: .\templates\blog\post_list.html:38
 #, python-format
 msgid ""
 "\n"
@@ -4712,15 +5471,15 @@ msgstr[0] ""
 "                    共 %(counter)s 篇文章\n"
 "                    "
 
-#: .\templates\blog\post_list.html:51
+#: .\templates\blog\post_list.html:59
 msgid "最新文章"
 msgstr "最新文章"
 
-#: .\templates\blog\post_list.html:136
+#: .\templates\blog\post_list.html:144
 msgid "最新"
 msgstr "最新"
 
-#: .\templates\blog\post_list.html:178
+#: .\templates\blog\post_list.html:186
 msgid "敬请期待更多精彩内容！"
 msgstr "敬请期待更多精彩内容！"
 
@@ -4734,7 +5493,8 @@ msgid "搜索文章、标签、分类或用户..."
 msgstr "搜索文章、标签、分类或用户..."
 
 #: .\templates\blog\search_index.html:34
-#: .\templates\components\inspira\placeholders_and_vanish_input.html:33
+#: .\templates\components\inspira\placeholders_and_vanish_input.html:36
+#: .\templates\partials\navbar.html:434
 msgid "输入关键词..."
 msgstr "输入关键词..."
 
@@ -4752,8 +5512,8 @@ msgstr "查看主页"
 msgid "%(count)s 人参与"
 msgstr "%(count)s 人参与"
 
-#: .\templates\blog\search_results.html:69
-#: .\templates\voting\poll_list.html:10 .\templates\voting\poll_list.html:33
+#: .\templates\blog\search_results.html:69 .\templates\voting\poll_list.html:10
+#: .\templates\voting\poll_list.html:33
 msgid "参与投票"
 msgstr "参与投票"
 
@@ -4777,15 +5537,18 @@ msgstr "话题索引"
 #, python-format
 msgid ""
 "\n"
-"                探索 <span class=\"font-bold text-base-content\">%(counter)s</span> 个精彩话题，发现更多相关内容。\n"
+"                探索 <span class=\"font-bold text-base-"
+"content\">%(counter)s</span> 个精彩话题，发现更多相关内容。\n"
 "                "
 msgid_plural ""
 "\n"
-"                探索 <span class=\"font-bold text-base-content\">%(counter)s</span> 个精彩话题，发现更多相关内容。\n"
+"                探索 <span class=\"font-bold text-base-"
+"content\">%(counter)s</span> 个精彩话题，发现更多相关内容。\n"
 "                "
 msgstr[0] ""
 "\n"
-"                探索 <span class=\"font-bold text-base-content\">%(counter)s</span> 个精彩话题，发现更多相关内容。\n"
+"                探索 <span class=\"font-bold text-base-"
+"content\">%(counter)s</span> 个精彩话题，发现更多相关内容。\n"
 "                "
 
 #: .\templates\blog\tag_list.html:39
@@ -4802,7 +5565,6 @@ msgstr "确定要执行此操作吗？"
 
 #: .\templates\components\confirm_modal.html:12
 #: .\templates\components\confirm_modal.html:29
-#: .\templates\users\includes\edit_profile_modal.html:171
 #: .\templates\users\register.html:83
 msgid "确定"
 msgstr "确定"
@@ -4810,14 +5572,6 @@ msgstr "确定"
 #: .\templates\components\confirm_modal.html:25
 msgid "提示"
 msgstr "提示"
-
-#: .\templates\components\inspira\placeholders_and_vanish_input.html:31
-msgid "搜索文章..."
-msgstr "搜索文章..."
-
-#: .\templates\components\inspira\placeholders_and_vanish_input.html:32
-msgid "搜索标签..."
-msgstr "搜索标签..."
 
 #: .\templates\guestbook\index.html:6 .\templates\guestbook\index.html:19
 #: .\templates\partials\footer.html:65 .\templates\partials\navbar.html:30
@@ -4924,7 +5678,7 @@ msgstr "隐私政策"
 msgid "Powered by"
 msgstr "Powered by"
 
-#: .\templates\partials\navbar.html:81 .\templates\partials\navbar.html:291
+#: .\templates\partials\navbar.html:81 .\templates\partials\navbar.html:295
 #: .\templates\users\includes\profile_content.html:275
 msgid "偏好设置"
 msgstr "偏好设置"
@@ -4933,41 +5687,37 @@ msgstr "偏好设置"
 msgid "管理后台"
 msgstr "管理后台"
 
-#: .\templates\partials\navbar.html:96 .\templates\partials\navbar.html:332
+#: .\templates\partials\navbar.html:96 .\templates\partials\navbar.html:336
 #: .\templates\users\login.html:4 .\templates\users\login.html:19
 #: .\templates\users\login.html:90
 msgid "登录"
 msgstr "登录"
 
-#: .\templates\partials\navbar.html:270
+#: .\templates\partials\navbar.html:274
 msgid "通知中心"
 msgstr "通知中心"
 
-#: .\templates\partials\navbar.html:302
+#: .\templates\partials\navbar.html:306
 msgid "个人主页"
 msgstr "个人主页"
 
-#: .\templates\partials\navbar.html:312
+#: .\templates\partials\navbar.html:316
 msgid "后台管理"
 msgstr "后台管理"
 
-#: .\templates\partials\navbar.html:325
+#: .\templates\partials\navbar.html:329
 msgid "注销登录"
 msgstr "注销登录"
 
-#: .\templates\partials\navbar.html:333 .\templates\users\register.html:4
+#: .\templates\partials\navbar.html:337 .\templates\users\register.html:4
 msgid "注册"
 msgstr "注册"
 
-#: .\templates\partials\navbar.html:347
+#: .\templates\partials\navbar.html:351
 msgid "全站搜索"
 msgstr "全站搜索"
 
-#: .\templates\partials\navbar.html:362
-msgid "搜索文章、标签、分类..."
-msgstr "搜索文章、标签、分类..."
-
-#: .\templates\partials\navbar.html:405
+#: .\templates\partials\navbar.html:410
 msgid "未找到相关结果"
 msgstr "未找到相关结果"
 
@@ -5026,10 +5776,6 @@ msgstr "简短的自我介绍"
 #: .\templates\users\includes\edit_profile_modal.html:128
 msgid "社交链接"
 msgstr "社交链接"
-
-#: .\templates\users\includes\edit_profile_modal.html:163
-msgid "裁剪图片"
-msgstr "裁剪图片"
 
 #: .\templates\users\includes\profile_card.html:48
 #: .\templates\users\includes\user_info.html:24
@@ -5107,7 +5853,7 @@ msgid "账号安全"
 msgstr "账号安全"
 
 #: .\templates\users\includes\profile_content.html:267
-#: .\templates\users\password_change.html:73
+#: .\templates\users\password_change.html:74
 msgid "保存修改"
 msgstr "保存修改"
 
@@ -5146,10 +5892,6 @@ msgstr "历史"
 #: .\templates\users\includes\profile_tabs.html:23
 msgid "安全"
 msgstr "安全"
-
-#: .\templates\users\includes\profile_tabs.html:26
-msgid "设置"
-msgstr "设置"
 
 #: .\templates\users\includes\user_info.html:16
 #: .\templates\users\includes\user_info.html:41
@@ -5290,3 +6032,250 @@ msgstr "人参与"
 #: .\templates\voting\poll_list.html:42
 msgid "目前没有任何正在进行的投票活动。"
 msgstr "目前没有任何正在进行的投票活动。"
+
+#~ msgid "刚刚启动"
+#~ msgstr "刚刚启动"
+
+#~ msgid "父分类"
+#~ msgstr "父分类"
+
+#~ msgid "调试 模拟数据"
+#~ msgstr "调试 模拟数据"
+
+#~ msgid "调试 模拟"
+#~ msgstr "调试 模拟"
+
+#~ msgid "描述默认只在后台显示，部分主题可能会显示。"
+#~ msgstr "描述默认只在后台显示，部分主题可能会显示。"
+
+#~ msgid "使用 Google Material Symbols 代码。"
+#~ msgstr "使用 Google Material Symbols 代码。"
+
+#~ msgid "颜色设置"
+#~ msgstr "颜色设置"
+
+#~ msgid "选择分类的主题颜色。"
+#~ msgstr "选择分类的主题颜色。"
+
+#~ msgid "加载图标库..."
+#~ msgstr "加载图标库..."
+
+#~ msgid "图标库: Material Symbols"
+#~ msgstr "图标库: Material Symbols"
+
+#~ msgid "共"
+#~ msgstr "共"
+
+#~ msgid "个图标"
+#~ msgstr "个图标"
+
+#~ msgid "Mock 数据"
+#~ msgstr "Mock 数据"
+
+#~ msgid "Mock 数据生成"
+#~ msgstr "Mock 数据生成"
+
+#~ msgid "高级 Mock 数据生成器"
+#~ msgstr "高级 Mock 数据生成器"
+
+#~ msgid "生成丰富的博客测试数据，包括长篇文章、用户资料、评论互动及站点配置。"
+#~ msgstr ""
+#~ "生成丰富的博客测试数据，包括长篇文章、用户资料、评论互动及站点配置。"
+
+#~ msgid "用户数据"
+#~ msgstr "用户数据"
+
+#~ msgid "生成用户数量"
+#~ msgstr "生成用户数量"
+
+#~ msgid "包含头像、简介、社交链接"
+#~ msgstr "包含头像、简介、社交链接"
+
+#~ msgid "默认密码"
+#~ msgstr "默认密码"
+
+#~ msgid "分类数量"
+#~ msgstr "分类数量"
+
+#~ msgid "标签数量"
+#~ msgstr "标签数量"
+
+#~ msgid "文章与互动"
+#~ msgstr "文章与互动"
+
+#~ msgid "文章数量"
+#~ msgstr "文章数量"
+
+#~ msgid "生成包含代码块、表格、长文本的 Markdown 文章"
+#~ msgstr "生成包含代码块、表格、长文本的 Markdown 文章"
+
+#~ msgid "评论数量"
+#~ msgstr "评论数量"
+
+#~ msgid "生成多级嵌套评论与通知"
+#~ msgstr "生成多级嵌套评论与通知"
+
+#~ msgid "站点配置"
+#~ msgstr "站点配置"
+
+#~ msgid "生成附加数据"
+#~ msgstr "生成附加数据"
+
+#~ msgid "包含：友情链接、导航菜单、搜索框占位符"
+#~ msgstr "包含：友情链接、导航菜单、搜索框占位符"
+
+#~ msgid "重置"
+#~ msgstr "重置"
+
+#~ msgid "生成数据"
+#~ msgstr "生成数据"
+
+#~ msgid "确定要生成数据吗？这将向数据库添加新记录。"
+#~ msgstr "确定要生成数据吗？这将向数据库添加新记录。"
+
+#~ msgid "开始生成"
+#~ msgstr "开始生成"
+
+#~ msgid "禁用后，该导航将不会在前端显示。"
+#~ msgstr "禁用后，该导航将不会在前端显示。"
+
+#~ msgid "输入页面标题 (中文)"
+#~ msgstr "输入页面标题 (中文)"
+
+#~ msgid "Enter page title (English)"
+#~ msgstr "输入页面标题 (英文)"
+
+#~ msgid "ページタイトルを入力 (Japanese)"
+#~ msgstr "ページタイトルを入力 (Japanese)"
+
+#~ msgid "輸入頁面標題 (繁體中文)"
+#~ msgstr "輸入頁面標題 (繁體中文)"
+
+#~ msgid "内容 (当前语言)"
+#~ msgstr "内容 (当前语言)"
+
+#~ msgid "输入URL别名"
+#~ msgstr "输入URL别名"
+
+#~ msgid "页面属性"
+#~ msgstr "页面属性"
+
+#~ msgid "输入投票标题"
+#~ msgstr "输入投票标题"
+
+#~ msgid "输入投票描述，详细说明投票目的..."
+#~ msgstr "输入投票描述，详细说明投票目的..."
+
+#~ msgid "简中"
+#~ msgstr "简中"
+
+#~ msgid "繁中"
+#~ msgstr "繁中"
+
+#~ msgid "文章标题 (英文)"
+#~ msgstr "文章标题 (英文)"
+
+#~ msgid "文章标题 (日文)"
+#~ msgstr "文章标题 (日文)"
+
+#~ msgid "文章标题 (繁体中文)"
+#~ msgstr "文章标题 (繁体中文)"
+
+#~ msgid "副标题 (英文)"
+#~ msgstr "副标题 (英文)"
+
+#~ msgid "摘要 (英文)"
+#~ msgstr "摘要 (英文)"
+
+#~ msgid "摘要 (日文)"
+#~ msgstr "摘要 (日文)"
+
+#~ msgid "摘要 (繁体中文)"
+#~ msgstr "摘要 (繁体中文)"
+
+#~ msgid "可选，用于列表页展示"
+#~ msgstr "可选，用于列表页展示"
+
+#~ msgid "Slug (URL别名)"
+#~ msgstr "Slug (URL别名)"
+
+#~ msgid "留空将自动根据标题生成"
+#~ msgstr "留空将自动根据标题生成"
+
+#~ msgid "可选，覆盖默认标题"
+#~ msgstr "可选，覆盖默认标题"
+
+#~ msgid "可选，覆盖自动生成的摘要"
+#~ msgstr "可选，覆盖自动生成的摘要"
+
+#~ msgid "可选，逗号分隔"
+#~ msgstr "可选，逗号分隔"
+
+#~ msgid "留空将使用当前时间"
+#~ msgstr "留空将使用当前时间"
+
+#~ msgid "是否置顶"
+#~ msgstr "是否置顶"
+
+#~ msgid "预览/查看"
+#~ msgstr "预览/查看"
+
+#~ msgid "设置此密码后，访问文章需要输入密码。留空则公开访问。"
+#~ msgstr "设置此密码后，访问文章需要输入密码。留空则公开访问。"
+
+#~ msgid "访问控制"
+#~ msgstr "访问控制"
+
+#~ msgid "封面图片"
+#~ msgstr "封面图片"
+
+#~ msgid "直接使用自定义颜色，建议选择清晰耐看的色值。"
+#~ msgstr "直接使用自定义颜色，建议选择清晰耐看的色值。"
+
+#~ msgid "皇冠"
+#~ msgstr "皇冠"
+
+#~ msgid "钻石"
+#~ msgstr "钻石"
+
+#~ msgid "火箭"
+#~ msgstr "火箭"
+
+#~ msgid "贡献者"
+#~ msgstr "贡献者"
+
+#~ msgid "Bug 猎手"
+#~ msgstr "Bug 猎手"
+
+#~ msgid "地球"
+#~ msgstr "地球"
+
+#~ msgid "灯泡"
+#~ msgstr "灯泡"
+
+#~ msgid "书本"
+#~ msgstr "书本"
+
+#~ msgid "咖啡"
+#~ msgstr "咖啡"
+
+#~ msgid "音乐"
+#~ msgstr "音乐"
+
+#~ msgid "相机"
+#~ msgstr "相机"
+
+#~ msgid "调色板"
+#~ msgstr "调色板"
+
+#~ msgid "手柄"
+#~ msgstr "手柄"
+
+#~ msgid "叶子"
+#~ msgstr "叶子"
+
+#~ msgid "搜索文章、标签、分类..."
+#~ msgstr "搜索文章、标签、分类..."
+
+#~ msgid "裁剪图片"
+#~ msgstr "裁剪图片"
