@@ -239,3 +239,4 @@ silk/
 =======
 apps/*/migrations/*
 >>>>>>> c6c7f6a (chore: 忽略所有apps子目录下的迁移文件)
+theme/static_src/package-lock.json
