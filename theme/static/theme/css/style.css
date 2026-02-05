@@ -1,0 +1,94 @@
+/* Global View Transitions */
+@keyframes slideUpFade {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Apply to main content when HTMX swaps */
+main, #main-wrapper {
+    animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.htmx-settling > * {
+    animation: slideUpFade 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Shadow Bloom Effect */
+.shadow-bloom {
+    transition: all 0.3s ease;
+}
+
+.shadow-bloom:hover {
+    box-shadow: 0 10px 40px -10px oklch(var(--p) / 0.4);
+    transform: translateY(-4px);
+}
+
+/* Floating Label Styles */
+.floating-input-group {
+    position: relative;
+}
+
+.floating-input {
+    padding-top: 1.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.floating-label {
+    position: absolute;
+    top: 0.5rem;
+    left: 1rem;
+    font-size: 0.75rem;
+    color: oklch(var(--bc) / 0.6);
+    transition: all 0.2s;
+    pointer-events: none;
+}
+
+/* Focus Ring Polish */
+:focus-visible {
+    outline: 2px solid oklch(var(--p));
+    outline-offset: 2px;
+}
+
+/* Smooth Scrolling */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Shake Animation for Errors */
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-4px); }
+    40% { transform: translateX(4px); }
+    60% { transform: translateX(-2px); }
+    80% { transform: translateX(2px); }
+}
+
+.animate-shake {
+    animation: shake 0.4s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+/* Custom Scrollbar Polish */
+::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background: oklch(var(--b1));
+}
+
+::-webkit-scrollbar-thumb {
+    background: oklch(var(--bc) / 0.2);
+    border-radius: 9999px;
+    border: 2px solid oklch(var(--b1));
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: oklch(var(--bc) / 0.4);
+}

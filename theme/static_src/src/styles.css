@@ -1,3 +1,4 @@
+@import "cropperjs/dist/cropper.css";
 @import "tailwindcss";
 
 @plugin "tailwindcss-animated";

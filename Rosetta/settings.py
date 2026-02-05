@@ -297,7 +297,8 @@ MODELTRANSLATION_FALLBACK_LANGUAGES = ('zh-hans', 'en')
 # 3. 确保容器挂载卷权限正确 (www-data 或 1000:1000)
 
 STATIC_URL = "/static/"
-STATIC_ROOT = BASE_DIR / "static"
+# 修改收集静态资源的目录名称，避免与源码目录冲突
+STATIC_ROOT = BASE_DIR / "collected_static"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -397,8 +398,8 @@ CONSTANCE_CONFIG = {
     "SITE_AUTHOR": ("Rosetta", "站点作者"),
     "SITE_EMAIL": ("admin@example.com", "站点联系邮箱"),
     "SHOW_SITE_LOGO": (True, "是否显示站点 Logo"),
-    "SITE_LOGO": ("/static/core/img/logo.svg", "站点 Logo URL"),
-    "SITE_FAVICON": ("/static/core/img/favicon.ico", "站点 Favicon URL"),
+    "SITE_LOGO": ("/static/theme/img/logo.svg", "站点 Logo URL"),
+    "SITE_FAVICON": ("/static/theme/img/favicon.ico", "站点 Favicon URL"),
     "SITE_HEADER": ("Rosetta Dashboard", "后台头部标题"),
     "SITE_ADMIN_SUFFIX": (" - Rosetta Dashboard", "后台页面标题后缀"),
     "SITE_TITLE_SUFFIX": (" - Rosetta", "站点标题后缀"),

@@ -75,7 +75,7 @@
   ],
   {% else %}
   "image": [
-    "{{ request.scheme }}://{{ request.get_host }}{% static 'core/img/logo.png' %}"
+    "{{ request.scheme }}://{{ request.get_host }}{% static 'theme/img/logo.png' %}"
   ],
   {% endif %}
   "datePublished": "{{ post.published_at|default:post.created_at|date:'c' }}",
@@ -90,7 +90,7 @@
       "name": "{{ config.SITE_NAME|default:'Rosetta Blog'|escapejs }}",
       "logo": {
           "@type": "ImageObject",
-          "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'core/img/logo.png' %}"
+          "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'theme/img/logo.png' %}"
       }
   },
   "articleBody": "{{ post.content|striptags|truncatechars:5000|escapejs }}"
@@ -602,7 +602,6 @@
     </div>
 </div>
 
-<script src="{% static 'js/viewer.js' %}"></script>
 <script>
     /**
      * 回复评论 (Reply to a comment)
@@ -626,25 +625,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-        // --- 初始化 ByteMD Viewer (Init ByteMD Viewer) ---
-        const contentData = document.getElementById('post-content-data');
-        if (contentData) {
-            try {
-                const content = JSON.parse(contentData.textContent);
-                if (window.initByteMDViewer) {
-                    window.initByteMDViewer('post-content', content);
-                } else {
-                    console.error('ByteMD Viewer script not loaded.');
-                }
-            } catch (e) {
-                console.error('Failed to parse post content:', e);
-            }
-        }
-
         // --- 自动生成目录 (Auto-generate TOC) ---
-        // 使用 setTimeout 确保 Viewer 渲染完成后再生成目录
+        // 使用 setTimeout 确保渲染完成后再生成目录
         setTimeout(() => {
-            const article = document.querySelector('article');
+            const article = document.getElementById('post-content');
+            if (!article) return;
+            
             const headings = article.querySelectorAll('h2, h3');
             const toc = document.getElementById('toc');
             
@@ -668,30 +654,32 @@
                         document.getElementById(id).scrollIntoView({behavior: 'smooth'});
                     });
                     
-                    toc.appendChild(link);
+                    if (toc) toc.appendChild(link);
                 });
                 
                 // --- 滚动监听 (ScrollSpy) ---
-                const observer = new IntersectionObserver((entries) => {
-                    entries.forEach(entry => {
-                        if (entry.isIntersecting) {
-                            const id = entry.target.id;
-                            document.querySelectorAll('#toc a').forEach(link => {
-                                link.classList.remove('border-primary', 'text-primary', 'font-medium', 'bg-primary/5');
-                                link.classList.add('border-base-content/10', 'text-base-content/60');
-                                
-                                if (link.getAttribute('href') === `#${id}`) {
-                                    link.classList.remove('border-base-content/10', 'text-base-content/60');
-                                    link.classList.add('border-primary', 'text-primary', 'font-medium', 'bg-primary/5');
-                                }
-                            });
-                        }
-                    });
-                }, { rootMargin: '-100px 0px -66%' });
-                
-                headings.forEach(heading => observer.observe(heading));
+                if (toc) {
+                    const observer = new IntersectionObserver((entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                const id = entry.target.id;
+                                document.querySelectorAll('#toc a').forEach(link => {
+                                    link.classList.remove('border-primary', 'text-primary', 'font-medium', 'bg-primary/5');
+                                    link.classList.add('border-base-content/10', 'text-base-content/60');
+                                    
+                                    if (link.getAttribute('href') === `#${id}`) {
+                                        link.classList.remove('border-base-content/10', 'text-base-content/60');
+                                        link.classList.add('border-primary', 'text-primary', 'font-medium', 'bg-primary/5');
+                                    }
+                                });
+                            }
+                        });
+                    }, { rootMargin: '-100px 0px -66%' });
+                    
+                    headings.forEach(heading => observer.observe(heading));
+                }
             }
-        }, 100); // 100ms 延迟，确保 Viewer 渲染完成
+        }, 100);
     });
 </script>
 

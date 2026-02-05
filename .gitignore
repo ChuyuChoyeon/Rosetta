@@ -33,7 +33,7 @@ db.sqlite3
 db.sqlite3-journal
 media/
 staticfiles/
-static/
+collected_static/
 # 注意：我们通常提交 static_src (源码)，但忽略 collectstatic 生成的 static (产物)
 # 如果你的项目 static 目录包含源码，请移除上方 static/ 规则，并只忽略 static/CACHE/ 等
 
@@ -82,8 +82,20 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 .npm/
-# Tailwind build outputs (if any in theme app)
+
+# Tailwind & Esbuild Generated Assets
 theme/static/css/dist/
+theme/static/js/editor.js
+theme/static/js/viewer.js
+theme/static/js/htmx-init.js
+theme/static/js/admin-translation.js
+theme/static/js/image-cropper.js
+theme/static/js/page-loader.js
+theme/static/js/ui-helpers.js
+# Generated CSS and Fonts from esbuild in js directory
+theme/static/js/*.css
+theme/static/js/KaTeX_*
+theme/static/js/*.map
 
 # --- Project Specific (Rosetta) ---
 # Logs directory
@@ -94,13 +106,17 @@ logs/
 .shared/
 
 # UV Package Manager
-uv.lock
+# uv.lock should be committed for reproducible builds
+# uv.lock
+
 .env.example
+
+# Migrations - strictly ignored as per user configuration
 core/migrations/*
 */migrations/*
-theme/static_src/package-lock.json
-<<<<<<< HEAD
-INDEX.md
+
+# theme/static_src/package-lock.json - Removed to allow version locking
+
 # --- Django 补充项 ---
 # 本地设置（多人协作时避免冲突）
 settings_local.py

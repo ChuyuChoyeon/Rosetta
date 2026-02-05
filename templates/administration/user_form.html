@@ -117,7 +117,7 @@
                     <div class="flex items-center gap-4">
                         <div class="avatar relative group cursor-pointer" @click="document.getElementById('{{ form.avatar.id_for_label }}').click()">
                             <div class="w-24 h-24 rounded-full ring ring-base-200 ring-offset-2 overflow-hidden bg-base-100">
-                                <img :src="previewUrl || '{% static 'core/img/avatar-default.svg' %}'" class="object-cover w-full h-full" />
+                                <img :src="previewUrl || '{% static 'theme/img/avatar-default.svg' %}'" class="object-cover w-full h-full" />
                                 <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white rounded-full">
                                     <span class="material-symbols-outlined">edit</span>
                                 </div>

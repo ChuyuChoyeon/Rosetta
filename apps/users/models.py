@@ -127,23 +127,23 @@ class User(AbstractUser):
 
         如果用户未上传头像，则返回默认的 SVG 头像。
         """
-        if self.avatar and hasattr(self.avatar, "url"):
+        if self.avatar:
             return self.avatar.url
-        return static("core/img/avatar-default.svg")
+        return static("theme/img/avatar-default.svg")
 
     @property
     def get_avatar_thumbnail_url(self):
         """获取用户头像缩略图URL"""
         if self.avatar and hasattr(self.avatar, "url"):
             return self.avatar_thumbnail.url
-        return static("core/img/avatar-default.svg")
+        return static("theme/img/avatar-default.svg")
 
     @property
     def get_avatar_medium_url(self):
         """获取用户头像中图URL"""
         if self.avatar and hasattr(self.avatar, "url"):
             return self.avatar_medium.url
-        return static("core/img/avatar-default.svg")
+        return static("theme/img/avatar-default.svg")
 
 
     @property

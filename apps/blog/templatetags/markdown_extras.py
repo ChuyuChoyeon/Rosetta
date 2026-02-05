@@ -132,9 +132,6 @@ def markdown_format(text):
                 pass
 
     # 3. DaisyUI 样式注入
-    # Code blocks
-    for div in soup.find_all("div", class_="codehilite"):
-        div["class"] = div.get("class", []) + ["mockup-code"]
     
     # Tables
     for table in soup.find_all("table"):

@@ -26,7 +26,7 @@ uv run python manage.py tailwind build
 uv run python manage.py makemigrations
 
 uv run python manage.py migrate
-uv run python manage.py collectstatic --noinput
+uv run python manage.py collectstatic --noinput --clear
 uv run python manage.py buildwatson
 
 uv run celery -A Rosetta worker -l info &
