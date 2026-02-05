@@ -455,6 +455,8 @@ document.addEventListener('DOMContentLoaded', initDashboardCharts);
 document.addEventListener('htmx:afterSwap', initDashboardCharts);
 document.addEventListener('htmx:historyRestore', initDashboardCharts);
 document.addEventListener('htmx:beforeHistorySave', destroyDashboardCharts);
+// Ensure charts are destroyed before content swap to prevent memory leaks and "forceXAxisUpdate" errors
+document.addEventListener('htmx:beforeSwap', destroyDashboardCharts);
 
 // Global Error Handling for HTMX
 document.addEventListener('htmx:responseError', function(evt) {
