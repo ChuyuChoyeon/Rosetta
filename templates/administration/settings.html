@@ -107,6 +107,12 @@
                                     </div>
                                 {% elif item.type == 'int' %}
                                     <input type="number" name="{{ item.key }}" value="{{ item.value }}" class="input input-bordered w-full max-w-md focus:input-primary transition-all">
+                                {% elif item.type == 'select' %}
+                                    <select name="{{ item.key }}" class="select select-bordered w-full max-w-md focus:select-primary transition-all">
+                                        {% for value, label in item.choices %}
+                                            <option value="{{ value }}" {% if item.value == value %}selected{% endif %}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
                                 {% else %}
                                     {% if 'WORDS' in item.key %}
                                         <!-- Flip Words Editor -->

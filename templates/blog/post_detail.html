@@ -4,56 +4,11 @@
 {% block extra_css %}
 <!-- 代码高亮样式 (Code Highlighting Styles) -->
 <link href="{% static 'theme/css/pygments/' %}{{ config.CODE_HIGHLIGHT_STYLE|default:'default' }}.css" rel="stylesheet">
+<!-- ByteMD Viewer CSS -->
+<link rel="stylesheet" href="{% static 'js/viewer.css' %}?v=4.4.0">
 
 <style>
-    /* 优化代码块样式 (Enhance Code Block Styles) */
-    .codehilite {
-        margin-bottom: 1.5rem;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-        font-size: 0.875rem; /* text-sm */
-        line-height: 1.5;
-    }
-    
-    /* DaisyUI Mockup Code 适配 */
-    .mockup-code {
-        min-width: 0; /* 允许在移动端收缩 */
-        border-radius: 0.75rem; /* 保持一致的圆角 */
-        background-color: #282a36 !important; /* 通用深色背景 */
-        color: #f8f8f2 !important; /* 浅色文字 */
-    }
-
-    /* 强制重置 pre 的背景和 padding，防止与 Pygments/DaisyUI 冲突 */
-    .codehilite pre {
-        margin: 0;
-        padding: 1.25rem;
-        padding-top: 0 !important; /* 避免与 mockup-code 头部 padding 叠加 */
-        background: transparent !important;
-        color: inherit !important; /* 继承 mockup-code 的浅色文字 */
-    }
-    
-    /* 修复 Shell/Bash 命令提示符对比度 */
-    .codehilite .gp { /* Generic.Prompt */
-        color: #ff79c6 !important; /* 亮粉色提示符 */
-        font-weight: bold;
-    }
-    
-    /* 修复普通文本和未高亮代码的颜色 */
-    .codehilite .n, .codehilite .p, .codehilite .w {
-        color: inherit; /* 让普通文本继承浅色 */
-    }
-    
-    /* 深色模式适配 (Dark Mode Adaptation) */
-    [data-theme='dark'] .codehilite {
-        border-color: rgba(255, 255, 255, 0.1);
-    }
-
-    /* Mermaid 图表居中 */
-    .mermaid {
-        display: flex;
-        justify-content: center;
-        margin-bottom: 2rem;
-        background: transparent !important;
-    }
+    /* 样式已迁移至 styles.css */
 </style>
 {% endblock %}
 
@@ -221,10 +176,31 @@
             <!-- 正文内容 (Content Body) -->
             <div class="bg-base-100 p-8 md:p-12 rounded-3xl shadow-sm border border-base-content/5 relative group/article overflow-hidden">
                 {% include 'components/inspira/border_beam.html' with duration='12' rx='24px' %}
-                <div id="post-content" class="min-h-[200px] markdown-body">
+                
+                <!-- Server-side Rendered Content (SEO & NoJS) -->
+                <div id="server-content" class="markdown-body min-h-[200px] {% if request.GET.nojs %}block{% else %}hidden{% endif %}">
                     {{ post.content|markdown }}
                 </div>
+
+                <!-- Client-side Viewer (ByteMD with Mermaid) -->
+                <div id="post-content" class="min-h-[200px] markdown-body"></div>
+                
                 {{ post.content|json_script:"post-content-data" }}
+                
+                <!-- Viewer Initialization -->
+                <script src="{% static 'js/viewer.js' %}?v=4.4.0"></script>
+                <script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const content = JSON.parse(document.getElementById('post-content-data').textContent);
+                        if (window.initByteMDViewer) {
+                            window.initByteMDViewer('post-content', content);
+                        } else {
+                            // Fallback if viewer.js fails to load
+                            document.getElementById('server-content').classList.remove('hidden');
+                            document.getElementById('post-content').classList.add('hidden');
+                        }
+                    });
+                </script>
             </div>
             
             <!-- 标签与分享 (Tags & Share) -->

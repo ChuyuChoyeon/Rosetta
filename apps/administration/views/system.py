@@ -13,6 +13,9 @@ from django.db import models
 from django.core.cache import cache
 from django.utils import timezone
 from django.utils.translation import gettext as _
+import platform
+import django
+from django.db import connection
 
 from ..mixins import StaffRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin
 
@@ -22,7 +25,7 @@ from datetime import datetime
 from django.core.management import call_command
 from django.db.models import Sum
 from core.models import Page
-from blog.models import Post
+from blog.models import Post, Comment
 from users.models import User
 
 # --- System Views ---
@@ -31,7 +34,217 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        from constance import config
+        from django.conf import settings as django_settings
+        from django.contrib.sites.models import Site
+
+        # Get Current Site
+        try:
+            context["current_site"] = Site.objects.get_current()
+        except Site.DoesNotExist:
+            context["current_site"] = None
+
+        # Define Fieldsets (Grouped Settings)
+        # We manually structure this to match the UI expectations
+        fieldsets_metadata = [
+            {
+                "slug": "general",
+                "title": _("常规设置"),
+                "icon": "settings",
+            },
+            {
+                "slug": "seo",
+                "title": _("SEO 优化"),
+                "icon": "search",
+            },
+            {
+                "slug": "social",
+                "title": _("社交媒体"),
+                "icon": "share",
+            },
+            {
+                "slug": "email",
+                "title": _("邮件服务"),
+                "icon": "mail",
+            },
+            {
+                "slug": "feature",
+                "title": _("功能开关"),
+                "icon": "toggle_on",
+            },
+            {
+                "slug": "admin",
+                "title": _("后台界面"),
+                "icon": "dashboard",
+            },
+            {
+                "slug": "analytics",
+                "title": _("统计分析"),
+                "icon": "analytics",
+            },
+             {
+                "slug": "custom",
+                "title": _("自定义代码"),
+                "icon": "code",
+            }
+        ]
+        
+        # Prepare fieldsets list
+        fieldsets = []
+        
+        # Helper to get config item
+        constance_conf = getattr(django_settings, 'CONSTANCE_CONFIG', {})
+        constance_fieldsets = getattr(django_settings, 'CONSTANCE_CONFIG_FIELDSETS', {})
+
+        def get_config_item(key):
+            if key not in constance_conf:
+                return None
+            
+            options = constance_conf[key]
+            if len(options) == 3:
+                default_val, help_text, type_data = options
+            elif len(options) == 2:
+                default_val, help_text = options
+                type_data = type(default_val)
+            else:
+                return None
+
+            # Determine type
+            field_type = 'text'
+            choices = None
+            
+            if isinstance(type_data, bool) or type_data is bool:
+                field_type = 'bool'
+            elif isinstance(type_data, int) or type_data is int:
+                field_type = 'number'
+            elif isinstance(type_data, (list, tuple)):
+                # If it's a tuple of tuples, it's choices
+                if len(type_data) > 0:
+                    if isinstance(type_data[0], (list, tuple)):
+                        field_type = 'select'
+                        choices = type_data
+                    else:
+                        # Simple list of values -> convert to choices
+                        field_type = 'select'
+                        choices = [(str(x), str(x)) for x in type_data]
+                else:
+                    field_type = 'text'
+            elif key.endswith('_IMAGE') or key.endswith('_LOGO') or key.endswith('_ICON'):
+                 field_type = 'image'
+            elif 'COLOR' in key:
+                 field_type = 'color'
+            
+            # Get current value
+            value = getattr(config, key)
+            
+            return {
+                "key": key,
+                "value": value,
+                "default": default_val,
+                "help_text": help_text,
+                "type": field_type,
+                "choices": choices
+            }
+
+        # Populate items based on CONSTANCE_CONFIG_FIELDSETS from settings
+        for meta in fieldsets_metadata:
+            slug = meta["slug"]
+            # Look up keys in settings.CONSTANCE_CONFIG_FIELDSETS
+            # If slug matches key in settings fieldsets, use those keys
+            keys = constance_fieldsets.get(slug, [])
+            
+            items = []
+            for key in keys:
+                item = get_config_item(key)
+                if item:
+                    items.append(item)
+            
+            # Add to fieldsets if we have metadata (even if empty items, user might want to see tab)
+            # But user complained about "Empty content", so we better have items.
+            # With new settings.py, all groups should have items.
+            group = meta.copy()
+            group["items"] = items
+            fieldsets.append(group)
+
+        # Fallback for keys NOT in any fieldset?
+        # Ideally we should capture them.
+        all_handled_keys = set()
+        for keys in constance_fieldsets.values():
+            all_handled_keys.update(keys)
+            
+        unhandled_keys = set(constance_conf.keys()) - all_handled_keys
+        if unhandled_keys:
+             # Find or create 'general' or 'other' group
+             general_group = next((g for g in fieldsets if g["slug"] == "general"), None)
+             if not general_group:
+                 general_group = {"slug": "general", "title": _("常规设置"), "icon": "settings", "items": []}
+                 fieldsets.append(general_group)
+             
+             for key in unhandled_keys:
+                 item = get_config_item(key)
+                 if item:
+                     general_group["items"].append(item)
+
+        context["fieldsets"] = fieldsets
         return context
+
+    def post(self, request):
+        from constance import config
+        from django.contrib.sites.models import Site
+        
+        # 1. Update Site Info
+        if 'site_domain' in request.POST and 'site_name' in request.POST:
+            try:
+                site = Site.objects.get_current()
+                site.domain = request.POST['site_domain']
+                site.name = request.POST['site_name']
+                site.save()
+            except Exception as e:
+                messages.error(request, _("站点信息更新失败: {error}").format(error=str(e)))
+
+        # 2. Update Constance Settings
+        # Iterate over all keys in config to check for POST data
+        # Note: Checkboxes for booleans might not send value if unchecked
+        from django.conf import settings as django_settings
+        constance_conf = getattr(django_settings, 'CONSTANCE_CONFIG', {})
+        
+        updated_count = 0
+        
+        for key, options in constance_conf.items():
+            if len(options) == 3:
+                default_val, help_text, type_data = options
+            elif len(options) == 2:
+                default_val, help_text = options
+                # Infer type from default value
+                type_data = type(default_val)
+            else:
+                continue # Skip invalid config
+            
+            # Boolean handling
+            is_bool = isinstance(type_data, bool) or type_data is bool
+            
+            if is_bool:
+                # Checkbox logic: presence means True, absence means False (if we know it's a bool field form submission)
+                # But to be safe against partial forms, we usually only update if we know we are submitting this form.
+                # Assuming this form submits ALL settings.
+                new_value = request.POST.get(key) == 'on'
+                setattr(config, key, new_value)
+                updated_count += 1
+            elif key in request.POST:
+                new_value = request.POST.get(key)
+                
+                # Type conversion
+                if isinstance(type_data, int) or type_data is int:
+                    try:
+                        new_value = int(new_value)
+                    except ValueError:
+                        continue # Skip invalid
+                        
+                setattr(config, key, new_value)
+                updated_count += 1
+                
+        messages.success(request, _("设置已更新"))
+        return redirect("administration:settings")
 
 class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
     template_name = "administration/system_tools.html"
@@ -448,6 +661,97 @@ class BackupDownloadView(LoginRequiredMixin, SuperuserRequiredMixin, View):
 # --- Debug Views ---
 class DebugDashboardView(LoginRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin, TemplateView):
     template_name = "administration/debug.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # 1. Database Status
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                row = cursor.fetchone()
+                context["db_ok"] = (row and row[0] == 1)
+        except Exception:
+            context["db_ok"] = False
+            
+        # 2. System Info
+        context["system_info"] = {
+            "python_version": platform.python_version(),
+            "django_version": django.get_version(),
+            "platform": platform.platform(),
+        }
+        
+        # 3. Data Counts
+        context["counts"] = {
+            "users": User.objects.count(),
+            "posts": Post.objects.count(),
+            "comments": Comment.objects.count(),
+        }
+
+        # 4. URL Patterns
+        from django.urls import get_resolver
+        from django.urls.resolvers import URLPattern, URLResolver
+
+        url_patterns = []
+        resolver = get_resolver()
+
+        def extract_patterns(patterns, prefix=""):
+            for pattern in patterns:
+                if isinstance(pattern, URLPattern):
+                    # Skip internal/admin patterns if desired, or keep all
+                    # Attempt to resolve name
+                    name = pattern.name or ""
+                    
+                    # Clean up pattern string for display
+                    pattern_str = str(pattern.pattern)
+                    display_pattern = prefix + pattern_str.lstrip('^').rstrip('$')
+                    
+                    # Generate sample URL only for parameter-less routes
+                    sample_url = None
+                    has_params = '<' in pattern_str or '(?P' in pattern_str
+                    
+                    if not has_params:
+                        try:
+                            # Try to reverse it if it has a name
+                            if name:
+                                from django.urls import reverse
+                                # If namespaced (which we don't have easily here recursively without passing namespace), 
+                                # reverse might fail if we don't know the full 'namespace:name'.
+                                # So simplistic approach: if it looks static, just append to prefix.
+                                # But prefix logic is tricky with includes.
+                                # Better approach: just check regex.
+                                pass
+                            
+                            # Construct a simple path representation
+                            # This is approximate for display
+                            sample_url = "/" + display_pattern
+                        except Exception:
+                            pass
+
+                    url_patterns.append({
+                        "name": name,
+                        "pattern": pattern_str,
+                        "display_pattern": display_pattern,
+                        "description": pattern.callback.__doc__.strip().split('\n')[0] if pattern.callback and pattern.callback.__doc__ else "",
+                        "sample_url": sample_url if not has_params else None
+                    })
+                elif isinstance(pattern, URLResolver):
+                    # Recursive extraction for includes
+                    # pattern.pattern is the prefix
+                    new_prefix = prefix + str(pattern.pattern).lstrip('^').rstrip('$')
+                    extract_patterns(pattern.url_patterns, new_prefix)
+
+        # Start extraction
+        try:
+            extract_patterns(resolver.url_patterns)
+            # Filter out some noise if needed, e.g., admin/ or static/
+            # url_patterns = [p for p in url_patterns if not p['display_pattern'].startswith('admin/')]
+            context["url_patterns"] = sorted(url_patterns, key=lambda x: x['display_pattern'])
+        except Exception as e:
+            context["url_patterns"] = []
+            # Optionally log error
+        
+        return context
 
 class DebugUITestView(LoginRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin, TemplateView):
     template_name = "administration/debug/ui_test.html"

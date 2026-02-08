@@ -68,7 +68,12 @@
     
     {% block extra_head %}{% endblock %}
 </head>
-    <!-- 注入后台配置的自定义 Head 代码 (如统计脚本) -->
+    <!-- 注入后台配置的统计代码 (Head) -->
+    {% if config.ANALYTICS_HEAD_CODE %}
+    {{ config.ANALYTICS_HEAD_CODE|safe }}
+    {% endif %}
+
+    <!-- 注入后台配置的自定义 Head 代码 (如 CSS/JS) -->
     {% if config.EXTRA_HEAD_CODE %}
     {{ config.EXTRA_HEAD_CODE|safe }}
     {% endif %}
@@ -229,6 +234,11 @@
             document.getElementById("readingProgress").style.width = scrolled + "%";
         };
     </script>
+
+    <!-- 注入后台配置的统计代码 (Body/Footer) -->
+    {% if config.ANALYTICS_BODY_CODE %}
+    {{ config.ANALYTICS_BODY_CODE|safe }}
+    {% endif %}
 
     <!-- 注入后台配置的自定义 Footer 代码 (如客服脚本) -->
     {% if config.EXTRA_FOOTER_CODE %}

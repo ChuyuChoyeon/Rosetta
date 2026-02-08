@@ -35,23 +35,6 @@ const injectStyles = () => {
             line-height: 1.75;
         }
         
-        /* Dark Mode Adaptation */
-        :root[data-theme="dark"] .markdown-body,
-        html.dark .markdown-body {
-            color: #a6adbb !important;
-        }
-        
-        :root[data-theme="dark"] .markdown-body code,
-        html.dark .markdown-body code {
-            background-color: #191e24 !important;
-            color: #a6adbb !important;
-        }
-        
-        :root[data-theme="dark"] .markdown-body pre,
-        html.dark .markdown-body pre {
-            background-color: #0d1117 !important;
-        }
-
         /* Adjustments for DaisyUI Prose conflict */
         .prose .markdown-body {
             max-width: none;
@@ -70,6 +53,17 @@ window.initByteMDViewer = function(elementId, content) {
   if (!container) return;
 
   injectStyles();
+
+  // Dark mode support for Mermaid
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                 document.documentElement.classList.contains('dark');
+  
+  if (isDark) {
+      // Try to configure mermaid if available globally or via plugin
+      // ByteMD's mermaid plugin usually renders SVGs directly.
+      // We can try to force dark theme via mermaid API if exposed, 
+      // but often CSS overrides are more reliable for SVGs.
+  }
 
   new Viewer({
     target: container,

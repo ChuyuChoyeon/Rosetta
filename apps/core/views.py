@@ -59,16 +59,32 @@ def robots_txt(request):
     """
     动态生成 robots.txt 文件。
     
-    指导搜索引擎爬虫的行为，禁止访问后台和用户中心，并指定 Sitemap 地址。
+    优先使用后台配置的内容，如果没有配置则使用默认规则。
     """
-    lines = [
-        "User-agent: *",
-        "Disallow: /admin/",
-        "Disallow: /users/",
-        "Allow: /",
-        f"Sitemap: {request.scheme}://{request.get_host()}/sitemap.xml",
-    ]
-    return HttpResponse("\n".join(lines), content_type="text/plain")
+    from constance import config
+    
+    # 获取后台配置
+    custom_robots = getattr(config, "SEO_ROBOTS_TXT", "")
+    
+    if custom_robots and custom_robots.strip():
+        content = custom_robots
+        # 确保 Sitemap 存在 (如果用户没写，自动追加吗？还是完全信任用户？)
+        # 既然是自定义，通常完全信任用户。但为了便利，如果没写 Sitemap 且我们有，可以考虑提示。
+        # 这里我们简单处理：如果用户没写 Sitemap，我们自动追加 Sitemap 地址
+        if "Sitemap:" not in content:
+             content += f"\nSitemap: {request.scheme}://{request.get_host()}/sitemap.xml"
+    else:
+        # 默认规则
+        lines = [
+            "User-agent: *",
+            "Disallow: /admin/",
+            "Disallow: /users/",
+            "Allow: /",
+            f"Sitemap: {request.scheme}://{request.get_host()}/sitemap.xml",
+        ]
+        content = "\n".join(lines)
+        
+    return HttpResponse(content, content_type="text/plain")
 
 
 @require_POST

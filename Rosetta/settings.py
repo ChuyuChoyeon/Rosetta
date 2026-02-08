@@ -391,6 +391,8 @@ META_USE_TWITTER_PROPERTIES = True
 # ------------------------------------------------------------------------------
 # Constance 配置定义 (保持不变)
 # ------------------------------------------------------------------------------
+import pygments.styles
+
 CONSTANCE_CONFIG = {
     "SITE_NAME": ("Rosetta Blog", "站点名称"),
     "SITE_DESCRIPTION": ("A modern Django blog.", "站点描述"),
@@ -431,38 +433,62 @@ CONSTANCE_CONFIG = {
     "MAINTENANCE_MODE": (False, "开启维护模式"),
     "ENABLE_COMMENTS": (True, "开启评论功能"),
     "ENABLE_REGISTRATION": (True, "开启用户注册"),
+    "ENABLE_RSS_FEED": (True, "开启 RSS 订阅"),
     "ENABLE_EMAIL_NOTIFICATIONS": (False, "开启邮件通知"),
     "EXTRA_HEAD_CODE": ("", "自定义 Head 代码 (CSS/JS)"),
     "EXTRA_FOOTER_CODE": ("", "自定义 Footer 代码 (JS)"),
-    "CODE_HIGHLIGHT_STYLE": ("default", "代码高亮风格 (Pygments)"),
+    "CODE_HIGHLIGHT_STYLE": ("default", "代码高亮风格 (Pygments)", list(pygments.styles.get_all_styles())),
     "BLOG_DEFAULT_VIEW_MODE": ("list", "博客文章列表默认视图 (list/grid)"),
+    "PAGINATION_PAGE_SIZE": (12, "文章列表每页显示数量"),
+    "DEFAULT_PREVIEW_IMAGE": ("/static/theme/img/default_cover.jpg", "默认文章封面图 (SEO)"),
+    "SITE_SINCE_YEAR": ("2024", "站点建站年份 (用于版权显示)"),
+    "ICP_GOV_CODE": ("", "公安备案号"),
+    "ICP_GOV_URL": ("", "公安备案链接"),
+    "ANALYTICS_HEAD_CODE": ("", "统计代码 (Head) - 如 Google Analytics"),
+    "ANALYTICS_BODY_CODE": ("", "统计代码 (Body) - 如百度统计"),
+    "SEO_ROBOTS_TXT": ("User-agent: *\nDisallow: /admin/", "Robots.txt 内容"),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {
-    "基本设置": (
+    "general": (
         "SITE_NAME",
         "SITE_TITLE_SUFFIX",
-        "SITE_DESCRIPTION",
-        "SITE_KEYWORDS",
         "SITE_AUTHOR",
         "SITE_EMAIL",
         "SHOW_SITE_LOGO",
         "SITE_LOGO",
         "SITE_FAVICON",
+        "SITE_SINCE_YEAR",
         "FOOTER_SLOGAN",
         "FOOTER_TEXT",
         "BEIAN_CODE",
+        "ICP_GOV_CODE",
+        "ICP_GOV_URL",
+        "BLOG_DEFAULT_VIEW_MODE",
+        "PAGINATION_PAGE_SIZE",
+        "CODE_HIGHLIGHT_STYLE",
     ),
-    "外观设置": ("CODE_HIGHLIGHT_STYLE", "BLOG_DEFAULT_VIEW_MODE"),
-    "后台界面": (
+    "seo": (
+        "SITE_DESCRIPTION",
+        "SITE_KEYWORDS",
+        "DEFAULT_PREVIEW_IMAGE",
+        "SEO_ROBOTS_TXT",
+    ),
+    "admin": (
         "SITE_HEADER",
         "SITE_ADMIN_SUFFIX",
         "ADMIN_NAVBAR_TITLE",
         "DASHBOARD_WELCOME_TEXT",
         "DASHBOARD_WELCOME_WORDS",
     ),
-    "社交与联系": ("GITHUB_URL", "X_URL", "BILIBILI_URL", "CONTACT_EMAIL"),
-    "邮件服务": (
+    "social": (
+        "GITHUB_URL",
+        "X_URL",
+        "BILIBILI_URL",
+        "CONTACT_EMAIL",
+        "ENABLE_RSS_FEED",
+    ),
+    "email": (
         "SMTP_HOST",
         "SMTP_PORT",
         "SMTP_USER",
@@ -471,8 +497,19 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "SMTP_FROM_EMAIL",
         "ENABLE_EMAIL_NOTIFICATIONS",
     ),
-    "功能开关": ("MAINTENANCE_MODE", "ENABLE_COMMENTS", "ENABLE_REGISTRATION"),
-    "自定义代码": ("EXTRA_HEAD_CODE", "EXTRA_FOOTER_CODE"),
+    "feature": (
+        "MAINTENANCE_MODE",
+        "ENABLE_COMMENTS",
+        "ENABLE_REGISTRATION",
+    ),
+    "analytics": (
+        "ANALYTICS_HEAD_CODE",
+        "ANALYTICS_BODY_CODE",
+    ),
+    "custom": (
+        "EXTRA_HEAD_CODE",
+        "EXTRA_FOOTER_CODE",
+    ),
 }
 
 # ------------------------------------------------------------------------------

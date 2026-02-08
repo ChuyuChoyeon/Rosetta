@@ -111,7 +111,9 @@ class HomeView(SidebarContextMixin, ListView):
     model = Post
     template_name = "blog/post_list.html"
     context_object_name = "posts"
-    paginate_by = 9
+
+    def get_paginate_by(self, queryset):
+        return getattr(config, "PAGINATION_PAGE_SIZE", 12)
     def get_queryset(self):
         """
         获取文章列表
@@ -232,10 +234,9 @@ class HomeView(SidebarContextMixin, ListView):
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
-        site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
-        context["meta"] = _build_meta(
-            f"首页{site_suffix}", self.request, site_desc, site_keywords
-        )
+        
+        # 使用配置的默认封面图
+        default_image = getattr(config, "DEFAULT_PREVIEW_IMAGE", "/static/theme/img/default_cover.jpg")
         
         # Add WebSite JSON-LD
         import json
@@ -245,6 +246,7 @@ class HomeView(SidebarContextMixin, ListView):
             "name": site_name,
             "url": self.request.build_absolute_uri("/"),
             "description": site_desc,
+            "image": self.request.build_absolute_uri(default_image),
             "potentialAction": {
                 "@type": "SearchAction",
                 "target": self.request.build_absolute_uri("/") + "search/?q={search_term_string}",
@@ -253,6 +255,10 @@ class HomeView(SidebarContextMixin, ListView):
         }
         context["website_schema"] = json.dumps(website_schema)
         
+        site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
+        context["meta"] = _build_meta(
+            f"首页{site_suffix}", self.request, site_desc, site_keywords
+        )
         return context
 
 
