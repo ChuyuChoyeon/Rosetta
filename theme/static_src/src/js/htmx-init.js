@@ -113,21 +113,33 @@ function initDashboardCharts() {
                         mounted: (chart) => {
                             // Watch for theme changes
                             const observer = new MutationObserver((mutations) => {
+                                // Safety check: if chart is destroyed or element removed, disconnect and return
+                                const el = document.getElementById('trendChart');
+                                if (!el || !el.chart) {
+                                    observer.disconnect();
+                                    return;
+                                }
+
                                 mutations.forEach((mutation) => {
                                     if (mutation.attributeName === 'data-theme' || mutation.attributeName === 'class') {
                                         const mode = getThemeMode();
                                         
-                                        chart.updateOptions({
-                                            theme: { mode: mode },
-                                            xaxis: {
-                                                categories: dates,
-                                                labels: {
-                                                    style: {
-                                                        colors: mode === 'dark' ? '#A6ADBB' : '#1f2937'
+                                        try {
+                                            chart.updateOptions({
+                                                theme: { mode: mode },
+                                                xaxis: {
+                                                    categories: dates,
+                                                    labels: {
+                                                        style: {
+                                                            colors: mode === 'dark' ? '#A6ADBB' : '#1f2937'
+                                                        }
                                                     }
                                                 }
-                                            }
-                                        });
+                                            });
+                                        } catch (e) {
+                                            console.warn('Chart update failed, likely destroyed:', e);
+                                            observer.disconnect();
+                                        }
                                     }
                                 });
                             });
@@ -204,27 +216,39 @@ function initDashboardCharts() {
                         mounted: (chart) => {
                             // Watch for theme changes
                             const observer = new MutationObserver((mutations) => {
+                                // Safety check
+                                const el = document.getElementById('commentDonut');
+                                if (!el || !el.chart) {
+                                    observer.disconnect();
+                                    return;
+                                }
+
                                 mutations.forEach((mutation) => {
                                     if (mutation.attributeName === 'data-theme' || mutation.attributeName === 'class') {
                                         const mode = getThemeMode();
                                         
-                                        chart.updateOptions({
-                                            theme: { mode: mode },
-                                            plotOptions: {
-                                                pie: {
-                                                    donut: {
-                                                        labels: {
-                                                            value: {
-                                                                color: mode === 'dark' ? '#A6ADBB' : '#1f2937'
-                                                            },
-                                                            total: {
-                                                                color: mode === 'dark' ? '#A6ADBB' : '#1f2937'
+                                        try {
+                                            chart.updateOptions({
+                                                theme: { mode: mode },
+                                                plotOptions: {
+                                                    pie: {
+                                                        donut: {
+                                                            labels: {
+                                                                value: {
+                                                                    color: mode === 'dark' ? '#A6ADBB' : '#1f2937'
+                                                                },
+                                                                total: {
+                                                                    color: mode === 'dark' ? '#A6ADBB' : '#1f2937'
+                                                                }
                                                             }
                                                         }
                                                     }
                                                 }
-                                            }
-                                        });
+                                            });
+                                        } catch (e) {
+                                            console.warn('Donut update failed:', e);
+                                            observer.disconnect();
+                                        }
                                     }
                                 });
                             });
@@ -304,18 +328,30 @@ function initDashboardCharts() {
                         mounted: (chart) => {
                             // Watch for theme changes
                             const observer = new MutationObserver((mutations) => {
+                                // Safety check
+                                const el = document.getElementById('categoryChart');
+                                if (!el || !el.chart) {
+                                    observer.disconnect();
+                                    return;
+                                }
+
                                 mutations.forEach((mutation) => {
                                     if (mutation.attributeName === 'data-theme' || mutation.attributeName === 'class') {
                                         const mode = getThemeMode();
                                         
-                                        chart.updateOptions({
-                                            theme: { mode: mode },
-                                            legend: {
-                                                labels: {
-                                                    colors: mode === 'dark' ? '#A6ADBB' : '#1f2937'
+                                        try {
+                                            chart.updateOptions({
+                                                theme: { mode: mode },
+                                                legend: {
+                                                    labels: {
+                                                        colors: mode === 'dark' ? '#A6ADBB' : '#1f2937'
+                                                    }
                                                 }
-                                            }
-                                        });
+                                            });
+                                        } catch (e) {
+                                            console.warn('Category chart update failed:', e);
+                                            observer.disconnect();
+                                        }
                                     }
                                 });
                             });
@@ -383,28 +419,40 @@ function initDashboardCharts() {
                         mounted: (chart) => {
                             // Watch for theme changes
                             const observer = new MutationObserver((mutations) => {
+                                // Safety check
+                                const el = document.getElementById('tagChart');
+                                if (!el || !el.chart) {
+                                    observer.disconnect();
+                                    return;
+                                }
+
                                 mutations.forEach((mutation) => {
                                     if (mutation.attributeName === 'data-theme' || mutation.attributeName === 'class') {
                                         const mode = getThemeMode();
                                         
-                                        chart.updateOptions({
-                                            theme: { mode: mode },
-                                            xaxis: {
-                                                categories: labels,
-                                                labels: {
-                                                    style: {
-                                                        colors: mode === 'dark' ? '#A6ADBB' : '#1f2937'
+                                        try {
+                                            chart.updateOptions({
+                                                theme: { mode: mode },
+                                                xaxis: {
+                                                    categories: labels,
+                                                    labels: {
+                                                        style: {
+                                                            colors: mode === 'dark' ? '#A6ADBB' : '#1f2937'
+                                                        }
+                                                    }
+                                                },
+                                                yaxis: {
+                                                    labels: {
+                                                        style: {
+                                                            colors: mode === 'dark' ? '#A6ADBB' : '#1f2937'
+                                                        }
                                                     }
                                                 }
-                                            },
-                                            yaxis: {
-                                                labels: {
-                                                    style: {
-                                                        colors: mode === 'dark' ? '#A6ADBB' : '#1f2937'
-                                                    }
-                                                }
-                                            }
-                                        });
+                                            });
+                                        } catch (e) {
+                                            console.warn('Tag chart update failed:', e);
+                                            observer.disconnect();
+                                        }
                                     }
                                 });
                             });
