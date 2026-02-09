@@ -28,12 +28,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
 # 复制项目依赖定义
-COPY pyproject.toml uv.lock ./
+# 注意：由于 uv.lock 未提交到版本控制，此处只复制 pyproject.toml
+# 构建时将自动解析依赖并生成新的锁定文件
+COPY pyproject.toml ./
 
 # 安装 Python 依赖
-# --frozen: 严格按照 uv.lock 安装
+# 移除 --frozen: 允许重新解析依赖
 # --no-dev: 不安装开发依赖
-RUN uv sync --frozen --no-dev
+RUN uv sync --no-dev
 
 # 复制项目代码
 COPY . .
