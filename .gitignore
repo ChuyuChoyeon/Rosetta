@@ -254,3 +254,4 @@ silk/
 *.pid.lock
 =======
 apps/*/migrations/*
+backup/
