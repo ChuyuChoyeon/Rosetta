@@ -1,0 +1,13 @@
+# Ignore templates from language statistics
+templates/** linguist-vendored
+apps/**/templates/** linguist-vendored
+
+# Ignore static assets (CSS/JS) from language statistics if desired
+theme/static/** linguist-vendored
+theme/static_src/** linguist-vendored
+
+# Force Python files to be counted (usually default, but good to be explicit)
+*.py linguist-detectable
+
+# Ensure documentation doesn't skew stats
+docs/** linguist-documentation
