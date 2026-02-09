@@ -73,6 +73,11 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
                 "icon": "toggle_on",
             },
             {
+                "slug": "About_Me",
+                "title": _("关于我"),
+                "icon": "person",
+            },
+            {
                 "slug": "admin",
                 "title": _("后台界面"),
                 "icon": "dashboard",

@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from .models import Comment, Post, Category, Tag
 from users.models import Notification, User
 from .schemas import CommentCreateSchema, PostCreateSchema
+from constance import config
 import re
 from typing import Optional
 
@@ -20,7 +21,15 @@ def create_comment(post: Post, user: User, data: CommentCreateSchema) -> Comment
         Comment: 创建的评论对象
     """
     with transaction.atomic():
-        comment = Comment(post=post, user=user, content=data.content)
+        # Determine if comment should be active immediately
+        require_approval = getattr(config, "COMMENT_REQUIRE_APPROVAL", False)
+        is_active = True
+        if require_approval:
+            # Staff and superusers bypass approval
+            if not (user.is_staff or user.is_superuser):
+                is_active = False
+
+        comment = Comment(post=post, user=user, content=data.content, active=is_active)
 
         parent_comment = None
         # 处理父评论（回复）

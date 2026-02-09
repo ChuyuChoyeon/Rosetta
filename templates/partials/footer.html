@@ -1,4 +1,4 @@
-{% load blog_extras i18n %}
+{% load blog_extras i18n static %}
 <footer class="footer p-10 bg-base-100/50 text-base-content border-t border-base-content/5 relative overflow-hidden">
   <!-- Decorative background elements -->
   <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50"></div>
@@ -33,6 +33,16 @@
             {% if config.X_URL %}
             <a href="{{ config.X_URL }}" target="_blank" class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all" title="X">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="fill-current opacity-70 hover:opacity-100"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            {% endif %}
+            {% if config.BILIBILI_URL %}
+            <a href="{{ config.BILIBILI_URL }}" target="_blank" class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all" title="Bilibili">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="fill-current opacity-70 hover:opacity-100"><path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.87.001 17.36V13.73h-.001v-3.743c.035-1.511.556-2.765 1.559-3.76 1.004-.996 2.262-1.52 3.773-1.574h.854l-2.07-2.071.699-.698 2.07 2.069h10.23l2.07-2.069.698.698-2.07 2.071zM5.333 15.384l5.203-3.469-.958 3.469H5.333zm13.334 0v-3.469l-4.245 3.469h4.245z"/></svg>
+            </a>
+            {% endif %}
+            {% if config.CONTACT_EMAIL %}
+            <a href="mailto:{{ config.CONTACT_EMAIL }}" class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all" title="Email">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="fill-current opacity-70 hover:opacity-100"><path d="M0 3v18h24V3H0zm6.623 7.929l-4.623 5.712V8.164l4.623 2.765zm2.253 2.545l3.124 2.124 3.124-2.124 5.297 6.526H3.579l5.297-6.526zm6.623-2.545l4.623-2.765v6.477l-4.623-5.712zM21.61 5.628l-9.61 5.744L2.39 5.628h19.22z"/></svg>
             </a>
             {% endif %}
         </div>
@@ -119,8 +129,14 @@
         <span class="hidden md:inline">|</span>
         <p>{{ config.FOOTER_TEXT|safe }}</p>
         {% endif %}
+        {% if config.PRIVACY_POLICY_URL %}
         <span class="hidden md:inline">|</span>
-        <a href="/p/privacy-policy/" class="link link-hover">{% trans "隐私政策" %}</a>
+        <a href="{{ config.PRIVACY_POLICY_URL }}" class="link link-hover">{% trans "隐私政策" %}</a>
+        {% endif %}
+        {% if config.TOS_URL %}
+        <span class="hidden md:inline">|</span>
+        <a href="{{ config.TOS_URL }}" class="link link-hover">{% trans "服务条款" %}</a>
+        {% endif %}
     </div>
     
     <div class="flex items-center gap-2">

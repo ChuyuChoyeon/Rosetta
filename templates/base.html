@@ -184,6 +184,13 @@
 
     <!-- 主内容包裹层 (Sticky Footer 布局) -->
     <div id="main-wrapper" class="flex flex-col min-h-screen">
+        <!-- 全局公告 (Global Announcement) -->
+        {% if config.GLOBAL_ANNOUNCEMENT_ENABLED and config.GLOBAL_ANNOUNCEMENT %}
+        <div class="bg-primary text-primary-content text-center py-2 px-4 text-sm font-medium relative z-50">
+            {{ config.GLOBAL_ANNOUNCEMENT|safe }}
+        </div>
+        {% endif %}
+
         <!-- 顶部导航栏 -->
         {% include 'partials/navbar.html' %}
 

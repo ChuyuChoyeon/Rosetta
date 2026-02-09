@@ -553,9 +553,12 @@ class PostDetailView(DetailView):
                     ),
                 )
 
-                create_comment(post=self.object, user=request.user, data=comment_data)
+                comment = create_comment(post=self.object, user=request.user, data=comment_data)
 
-                messages.success(request, _("您的评论已发布！"))
+                if comment.active:
+                    messages.success(request, _("您的评论已发布！"))
+                else:
+                    messages.warning(request, _("您的评论已提交，需等待审核后显示。"))
                 return redirect("post_detail", slug=self.object.slug)
             except ValueError as e:
                 messages.error(request, _("评论创建失败: {error}").format(error=str(e)))

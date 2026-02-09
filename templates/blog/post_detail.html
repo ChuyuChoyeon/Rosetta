@@ -214,6 +214,7 @@
                     {% endfor %}
                 </div>
 
+                {% if config.ENABLE_SOCIAL_SHARE %}
                 <div class="flex items-center gap-3">
                     <span class="font-bold text-sm uppercase tracking-wider opacity-50">{% trans "分享" %}</span>
                     <div class="join">
@@ -225,6 +226,7 @@
                         </button>
                     </div>
                 </div>
+                {% endif %}
             </div>
 
             <!-- 相关文章推荐 (Related Posts) -->
@@ -661,7 +663,7 @@
 
 <!-- Mermaid 图表渲染 -->
 <script type="module">
-    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    import mermaid from '{% static 'js/mermaid.js' %}';
     
     async function initMermaid() {
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';

@@ -393,6 +393,10 @@ META_USE_TWITTER_PROPERTIES = True
 # ------------------------------------------------------------------------------
 import pygments.styles
 
+CONSTANCE_ADDITIONAL_FIELDS = {
+    'image_field': ['django.forms.ImageField', {}]
+}
+
 CONSTANCE_CONFIG = {
     "SITE_NAME": ("Rosetta Blog", "站点名称"),
     "SITE_DESCRIPTION": ("A modern Django blog.", "站点描述"),
@@ -431,9 +435,17 @@ CONSTANCE_CONFIG = {
     "SMTP_USE_TLS": (True, "启用 SSL/TLS 加密"),
     "SMTP_FROM_EMAIL": ("", "默认发件人邮箱"),
     "MAINTENANCE_MODE": (False, "开启维护模式"),
+    "GLOBAL_ANNOUNCEMENT_ENABLED": (False, "开启全局公告"),
+    "GLOBAL_ANNOUNCEMENT": ("", "全局公告内容 (支持 HTML)"),
+    "SIDEBAR_ABOUT_WIDGET_ENABLED": (True, "开启侧边栏关于模块"),
+    "SIDEBAR_ABOUT_TITLE": ("About Me", "侧边栏关于标题"),
+    "SIDEBAR_ABOUT_CONTENT": ("Hello! I'm a Django developer.", "侧边栏关于内容 (支持 HTML)"),
+    "SIDEBAR_ABOUT_AVATAR": ("", "侧边栏头像", "image_field"),
     "ENABLE_COMMENTS": (True, "开启评论功能"),
+    "COMMENT_REQUIRE_APPROVAL": (False, "评论需要审核"),
     "ENABLE_REGISTRATION": (True, "开启用户注册"),
     "ENABLE_RSS_FEED": (True, "开启 RSS 订阅"),
+    "ENABLE_SOCIAL_SHARE": (True, "开启文章社交分享"),
     "ENABLE_EMAIL_NOTIFICATIONS": (False, "开启邮件通知"),
     "EXTRA_HEAD_CODE": ("", "自定义 Head 代码 (CSS/JS)"),
     "EXTRA_FOOTER_CODE": ("", "自定义 Footer 代码 (JS)"),
@@ -444,6 +456,8 @@ CONSTANCE_CONFIG = {
     "SITE_SINCE_YEAR": ("2024", "站点建站年份 (用于版权显示)"),
     "ICP_GOV_CODE": ("", "公安备案号"),
     "ICP_GOV_URL": ("", "公安备案链接"),
+    "TOS_URL": ("/p/terms-of-service/", "服务条款链接"),
+    "PRIVACY_POLICY_URL": ("/p/privacy-policy/", "隐私政策链接"),
     "ANALYTICS_HEAD_CODE": ("", "统计代码 (Head) - 如 Google Analytics"),
     "ANALYTICS_BODY_CODE": ("", "统计代码 (Body) - 如百度统计"),
     "SEO_ROBOTS_TXT": ("User-agent: *\nDisallow: /admin/", "Robots.txt 内容"),
@@ -464,6 +478,8 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "BEIAN_CODE",
         "ICP_GOV_CODE",
         "ICP_GOV_URL",
+        "TOS_URL",
+        "PRIVACY_POLICY_URL",
         "BLOG_DEFAULT_VIEW_MODE",
         "PAGINATION_PAGE_SIZE",
         "CODE_HIGHLIGHT_STYLE",
@@ -487,6 +503,7 @@ CONSTANCE_CONFIG_FIELDSETS = {
         "BILIBILI_URL",
         "CONTACT_EMAIL",
         "ENABLE_RSS_FEED",
+        "ENABLE_SOCIAL_SHARE",
     ),
     "email": (
         "SMTP_HOST",
@@ -499,8 +516,17 @@ CONSTANCE_CONFIG_FIELDSETS = {
     ),
     "feature": (
         "MAINTENANCE_MODE",
+        "GLOBAL_ANNOUNCEMENT_ENABLED",
+        "GLOBAL_ANNOUNCEMENT",
         "ENABLE_COMMENTS",
+        "COMMENT_REQUIRE_APPROVAL",
         "ENABLE_REGISTRATION",
+    ),
+    "About_Me": (
+        "SIDEBAR_ABOUT_WIDGET_ENABLED",
+        "SIDEBAR_ABOUT_TITLE",
+        "SIDEBAR_ABOUT_CONTENT",
+        "SIDEBAR_ABOUT_AVATAR",
     ),
     "analytics": (
         "ANALYTICS_HEAD_CODE",

@@ -1,5 +1,5 @@
 <div class="space-y-8">
-    {% load capture_tags cache i18n %}
+    {% load capture_tags cache i18n static %}
 
     <!-- Search Widget -->
     <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
@@ -102,6 +102,36 @@
         }
     }
     </script>
+
+    <!-- About Widget -->
+    {% if config.SIDEBAR_ABOUT_WIDGET_ENABLED %}
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">person</span>
+            </span>
+            {{ config.SIDEBAR_ABOUT_TITLE|default:"About Me" }}
+        </h3>
+        <div class="flex flex-col items-center text-center">
+            <div class="avatar mb-4">
+                <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                    {% if config.SIDEBAR_ABOUT_AVATAR %}
+                        {% if config.SIDEBAR_ABOUT_AVATAR|first == "/" or "http" in config.SIDEBAR_ABOUT_AVATAR %}
+                        <img src="{{ config.SIDEBAR_ABOUT_AVATAR }}" alt="Avatar" />
+                        {% else %}
+                        <img src="{{ MEDIA_URL }}{{ config.SIDEBAR_ABOUT_AVATAR }}" alt="Avatar" />
+                        {% endif %}
+                    {% else %}
+                        <img src="{% static 'theme/img/avatar.png' %}" alt="Avatar" />
+                    {% endif %}
+                </div>
+            </div>
+            <div class="prose prose-sm text-base-content/70">
+                {{ config.SIDEBAR_ABOUT_CONTENT|safe }}
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <!-- Navigation Menu -->
     {% if nav_sidebar %}
