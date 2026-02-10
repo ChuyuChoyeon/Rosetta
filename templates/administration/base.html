@@ -32,15 +32,6 @@
         <script defer src="{% static 'theme/js/alpine.min.js' %}"></script>
         <!-- HTMX -->
         <script src="{% static 'theme/js/htmx.min.js' %}"></script>
-        <script>
-            // HTMX Debug
-            if (window.htmx) {
-                console.log("[HTMX] Loaded successfully. Version:", htmx.version);
-                // htmx.logAll(); // Uncomment to see all HTMX events
-            } else {
-                console.error("[HTMX] Failed to load!");
-            }
-        </script>
         <script src="{% static 'js/htmx-init.js' %}?v=5.0"></script>
         <!-- Global UI Helpers -->
         <script src="{% static 'js/ui-helpers.js' %}?v=5.0.0"></script>
