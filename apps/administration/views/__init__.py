@@ -104,7 +104,6 @@ from .logs import (
 from .system import (
     SettingsView,
     SystemToolsView,
-    SystemMonitorView,
     BackupDownloadView,
     DebugPermissionView,
     DebugCacheView,

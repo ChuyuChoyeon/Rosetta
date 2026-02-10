@@ -405,11 +405,35 @@ class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
 
         # 5. Email Config (New)
         from constance import config
+        
+        email_host = (getattr(config, "SMTP_HOST", "") or getattr(settings, "EMAIL_HOST", "") or "").strip()
+        
+        raw_port = getattr(config, "SMTP_PORT", "") or getattr(settings, "EMAIL_PORT", "")
+        try:
+            email_port = int(raw_port) if raw_port else 25
+        except ValueError:
+            email_port = 25
+            
+        email_user = (getattr(config, "SMTP_USER", "") or getattr(settings, "EMAIL_HOST_USER", "") or "").strip()
+        
+        # Logic to determine effective security setting (mirrors handle_test_email)
+        use_tls_config = getattr(config, "SMTP_USE_TLS", False)
+        if use_tls_config is None:
+             use_tls_config = getattr(settings, "EMAIL_USE_TLS", False)
+        
+        use_ssl = False
+        use_tls = use_tls_config
+        
+        if email_port == 465:
+            use_ssl = True
+            use_tls = False # Implicit SSL
+        
         context["email_config"] = {
-            "host": getattr(config, "SMTP_HOST", "") or getattr(settings, "EMAIL_HOST", ""),
-            "port": getattr(config, "SMTP_PORT", "") or getattr(settings, "EMAIL_PORT", ""),
-            "user": getattr(config, "SMTP_USER", "") or getattr(settings, "EMAIL_HOST_USER", ""),
-            "use_tls": getattr(config, "SMTP_USE_TLS", False) or getattr(settings, "EMAIL_USE_TLS", False),
+            "host": email_host,
+            "port": email_port,
+            "user": email_user,
+            "use_tls": use_tls,
+            "use_ssl": use_ssl,
         }
 
         # 6. Permission Check (if requested via GET params)
@@ -781,22 +805,34 @@ If you have any questions about this Privacy Policy, please contact us.
             from constance import config
             
             # Prefer Constance settings (Using SMTP_ prefix as defined in settings.py)
-            email_host = getattr(config, "SMTP_HOST", "") or settings.EMAIL_HOST
-            email_port = getattr(config, "SMTP_PORT", "") or settings.EMAIL_PORT
-            email_user = getattr(config, "SMTP_USER", "") or settings.EMAIL_HOST_USER
-            email_password = getattr(config, "SMTP_PASSWORD", "") or settings.EMAIL_HOST_PASSWORD
+            # Ensure we strip whitespace to avoid connection errors
+            email_host = (getattr(config, "SMTP_HOST", "") or settings.EMAIL_HOST or "").strip()
+            
+            raw_port = getattr(config, "SMTP_PORT", "") or settings.EMAIL_PORT
+            try:
+                email_port = int(raw_port) if raw_port else 25
+            except ValueError:
+                email_port = 25
+                
+            email_user = (getattr(config, "SMTP_USER", "") or settings.EMAIL_HOST_USER or "").strip()
+            email_password = (getattr(config, "SMTP_PASSWORD", "") or settings.EMAIL_HOST_PASSWORD or "").strip()
             
             # Use TLS from config
             use_tls = getattr(config, "SMTP_USE_TLS", False)
             if use_tls is None: # Fallback if config is missing
                  use_tls = settings.EMAIL_USE_TLS
 
-            # Auto-detect SSL for port 465 if not explicitly handled
+            # Auto-detect SSL for port 465
+            # Port 465 standard is Implicit SSL, which corresponds to use_ssl=True, use_tls=False in Django
             use_ssl = False
-            if int(email_port or 25) == 465:
-                use_ssl = use_tls  # If TLS enabled and port 465, use SSL wrapper
-                use_tls = False    # Disable STARTTLS for implicit SSL port
-
+            
+            if email_port == 465:
+                use_ssl = True
+                use_tls = False  # Implicit SSL is incompatible with STARTTLS
+            
+            # If user explicitly set SSL config (though Constance usually just has USE_TLS)
+            # We trust port 465 convention over USE_TLS config for SSL
+            
             connection = get_connection(
                 host=email_host,
                 port=email_port,
@@ -804,6 +840,7 @@ If you have any questions about this Privacy Policy, please contact us.
                 password=email_password,
                 use_tls=use_tls,
                 use_ssl=use_ssl,
+                timeout=30, # Explicit timeout
                 fail_silently=False,
             )
 
@@ -815,40 +852,79 @@ If you have any questions about this Privacy Policy, please contact us.
                 connection=connection,
                 fail_silently=False,
             )
-            messages.success(request, _("邮件发送成功 (Host: {host}:{port})").format(host=email_host, port=email_port))
+            messages.success(request, _("邮件发送成功 (Host: {host}:{port}, SSL: {ssl})").format(
+                host=email_host, port=email_port, ssl=use_ssl
+            ))
         except Exception as e:
-            messages.error(request, _("发送失败 ({host}:{port}): {error}").format(host=email_host, port=email_port, error=str(e)))
+            import traceback
+            # Log detailed error for debugging
+            print(f"Email Send Error: {str(e)}")
+            print(traceback.format_exc())
+            
+            messages.error(request, _("发送失败 (Host: {host}:{port}, SSL: {ssl}, TLS: {tls}): {error}").format(
+                host=email_host, port=email_port, ssl=use_ssl, tls=use_tls, error=str(e)
+            ))
+            
+            # Diagnostic Probe
+            try:
+                import socket
+                import ssl
+                import smtplib
+                print("--- Diagnostic Probe ---")
+                
+                # 1. TCP Connect
+                print(f"Probing TCP connection to {email_host}:{email_port}...")
+                
+                # 2. SMTP Interaction
+                print("Attempting SMTP connection via smtplib...")
+                if use_ssl:
+                    # Explicitly use SMTP_SSL for port 465
+                    server = smtplib.SMTP_SSL(email_host, email_port, timeout=10)
+                else:
+                    server = smtplib.SMTP(email_host, email_port, timeout=10)
+                    if use_tls:
+                        server.starttls()
+                
+                # Force EHLO to ensure we have capabilities
+                server.ehlo()
+                print(f"EHLO Successful. Response: {server.ehlo_resp}")
+                
+                # 3. Login Probe
+                print("Attempting Login...")
+                try:
+                    server.login(email_user, email_password)
+                    print("Login successful!")
+                except Exception as login_e:
+                    print(f"Login failed: {login_e}")
+                    # Specific hint for QQ/Connection Closed
+                    err_str = str(login_e)
+                    if "Connection unexpectedly closed" in err_str:
+                        if "qq.com" in email_host:
+                            raise Exception("QQ邮箱拒绝连接。请检查：1. 是否使用了16位授权码（非登录密码）；2. 授权码是否过期。") from login_e
+                    raise login_e
+                finally:
+                    try:
+                        server.quit()
+                    except Exception:
+                        pass # Ignore quit errors if connection already closed
+
+                print("--- Probe Finished ---")
+            except Exception as probe_e:
+                import traceback
+                print(f"Diagnostic Probe Failed: {probe_e}")
+                print(traceback.format_exc())
+                
+                probe_msg = str(probe_e)
+                if "QQ邮箱拒绝连接" in probe_msg:
+                    messages.warning(request, _("诊断提示: {msg}").format(msg=probe_msg))
+                else:
+                    messages.warning(request, _("诊断提示: SMTP交互失败 ({error})。请检查控制台详细日志。").format(error=probe_msg))
 
         return redirect(redirect_url)
 
 
 # --- Debug Views ---
 # (Previous views remain, just updating their implementation if needed)
-
-
-class SystemMonitorView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
-    template_name = "administration/partials/system_monitor.html"
-
-    def get_context_data(self, **kwargs):
-        # This is usually HTMX polled, similar to dashboard logic
-        context = super().get_context_data(**kwargs)
-        
-        try:
-            from ..services.dashboard import DashboardService
-            # Use new efficient method to get only system info, avoiding DB queries
-            system_info = DashboardService.get_system_info()
-            # Flatten system_info for template accessibility (as template expects top-level variables)
-            context.update(system_info)
-        except Exception as e:
-            # Fallback to prevent 500 error
-            context.update({
-                "cpu_percent": 0,
-                "memory_percent": 0,
-                "disk_percent": 0,
-                "error": str(e)
-            })
-        
-        return context
 
 
 class BackupDownloadView(LoginRequiredMixin, SuperuserRequiredMixin, View):

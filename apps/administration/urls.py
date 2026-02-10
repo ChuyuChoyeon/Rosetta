@@ -276,7 +276,6 @@ urlpatterns = [
     # 系统设置与工具
     path("settings/", views.SettingsView.as_view(), name="settings"),
     path("system/tools/", views.SystemToolsView.as_view(), name="system_tools"),
-    path("system/monitor/", views.SystemMonitorView.as_view(), name="system_monitor"),
     path(
         "system/backup/download/<str:filename>/",
         views.BackupDownloadView.as_view(),

@@ -41,32 +41,6 @@
     <!-- Tab Content: Maintenance -->
     <div x-show="activeTab === 'maintenance'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
     
-    <!-- System Monitor (Full Width) -->
-    <div class="card bg-base-100 shadow-sm border border-base-content/5 mb-6">
-        <div class="card-body gap-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">monitor_heart</span>
-                    <h2 class="card-title">{% trans "实时系统监控" %}</h2>
-                </div>
-                <span class="loading loading-dots loading-xs text-primary htmx-indicator"
-                      id="monitor-loading"></span>
-            </div>
-            <div hx-get="{% url 'administration:system_monitor' %}"
-                 hx-trigger="load, every 2s"
-                 hx-swap="innerHTML"
-                 hx-indicator="#monitor-loading">
-                <!-- Initial Skeleton -->
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
-                    <div class="h-20 bg-base-200 rounded-lg"></div>
-                    <div class="h-20 bg-base-200 rounded-lg"></div>
-                    <div class="h-20 bg-base-200 rounded-lg"></div>
-                    <div class="h-20 bg-base-200 rounded-lg"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
         <!-- Media Scanner Card -->
@@ -438,9 +412,35 @@
                         <span class="material-symbols-outlined text-primary">mail</span>
                         <h2 class="card-title">{% trans "邮件发送测试" %}</h2>
                     </div>
-                    <div class="badge badge-outline gap-1">
-                        <span class="opacity-70">{% trans "SMTP Host:" %}</span>
-                        <span class="font-bold">{{ email_config.host }}</span>
+                    <div class="flex flex-wrap gap-2 justify-end max-w-[60%]">
+                        <div class="badge badge-outline gap-1 text-xs" title="{% trans 'SMTP Host' %}">
+                            <span class="material-symbols-outlined text-[14px] opacity-70">dns</span>
+                            <span class="font-mono">{{ email_config.host }}</span>
+                        </div>
+                        <div class="badge badge-outline gap-1 text-xs" title="{% trans 'Port' %}">
+                            <span class="material-symbols-outlined text-[14px] opacity-70">lan</span>
+                            <span class="font-mono">{{ email_config.port }}</span>
+                        </div>
+                        <div class="badge badge-outline gap-1 text-xs" title="{% trans 'User' %}">
+                            <span class="material-symbols-outlined text-[14px] opacity-70">person</span>
+                            <span class="font-mono">{{ email_config.user }}</span>
+                        </div>
+                        {% if email_config.use_ssl %}
+                        <div class="badge badge-success badge-outline gap-1 text-xs" title="SSL">
+                            <span class="material-symbols-outlined text-[14px]">lock</span>
+                            <span>SSL</span>
+                        </div>
+                        {% elif email_config.use_tls %}
+                        <div class="badge badge-info badge-outline gap-1 text-xs" title="TLS">
+                            <span class="material-symbols-outlined text-[14px]">lock_open</span>
+                            <span>TLS</span>
+                        </div>
+                        {% else %}
+                        <div class="badge badge-warning badge-outline gap-1 text-xs" title="Unencrypted">
+                            <span class="material-symbols-outlined text-[14px]">no_encryption</span>
+                            <span>None</span>
+                        </div>
+                        {% endif %}
                     </div>
                 </div>
                 <form method="post" action="{% url 'administration:system_tools' %}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
