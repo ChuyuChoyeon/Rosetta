@@ -256,34 +256,47 @@ class BaseDeleteView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Dele
 
     def form_valid(self, form):
         success_url = self.get_success_url()
+        self.object = self.get_object()
+        model_name = self.model._meta.verbose_name
 
-        # 在删除前记录日志
         try:
-            self.object = self.get_object()
-            self.log_action(DELETION, change_message=_("通过管理后台删除"))
-        except Exception:
-            pass
+            # 在删除前记录日志
+            try:
+                self.log_action(DELETION, change_message=_("通过管理后台删除"))
+            except Exception:
+                pass
 
-        self.object.delete()
-
-        # HTMX Support
-        if self.request.htmx:
-            # 返回空内容以移除行，并触发 Toast 消息
-            response = HttpResponse("")
-            response["HX-Trigger"] = json.dumps(
-                {
+            self.object.delete()
+            
+            success_message = _("{name} 删除成功").format(name=model_name)
+            
+            # HTMX Support
+            if self.request.htmx:
+                # 返回空内容以移除行，并触发 Toast 消息
+                response = HttpResponse("")
+                response["HX-Trigger"] = json.dumps({
                     "show-toast": {
-                        "message": _("{name} 删除成功").format(
-                            name=self.model._meta.verbose_name
-                        ),
+                        "message": success_message,
                         "type": "success",
                     }
-                }
-            )
-            return response
+                })
+                return response
 
-        messages.success(
-            self.request,
-            _("{name} 删除成功").format(name=self.model._meta.verbose_name),
-        )
-        return HttpResponseRedirect(success_url)
+            messages.success(self.request, success_message)
+            return HttpResponseRedirect(success_url)
+
+        except Exception as e:
+            error_message = _("删除 {name} 失败: {error}").format(name=model_name, error=str(e))
+            
+            if self.request.htmx:
+                response = HttpResponse(status=204) # No Content, but trigger error toast
+                response["HX-Trigger"] = json.dumps({
+                    "show-toast": {
+                        "message": error_message,
+                        "type": "error",
+                    }
+                })
+                return response
+                
+            messages.error(self.request, error_message)
+            return HttpResponseRedirect(success_url)

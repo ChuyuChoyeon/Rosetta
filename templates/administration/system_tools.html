@@ -258,6 +258,31 @@
             </div>
         {% endif %}
 
+        <!-- Terms of Service Init -->
+        {% if not tos_exists %}
+            <div class="card bg-base-100 shadow-sm border border-base-content/5 border-l-4 border-l-secondary">
+                <div class="card-body gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">gavel</span>
+                        <h2 class="card-title">{% trans "初始化服务条款" %}</h2>
+                    </div>
+                    <p class="text-xs opacity-70">
+                        {% trans "检测到系统缺少服务条款页面。点击下方按钮自动创建包含多语言支持的标准服务条款页面。" %}
+                    </p>
+                    <div class="card-actions justify-end mt-auto">
+                        <form method="post" action="{% url 'administration:system_tools' %}" class="w-full">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="init_tos">
+                            <button type="submit" class="btn btn-secondary btn-sm w-full gap-2">
+                                <span class="material-symbols-outlined text-lg">add_task</span>
+                                {% trans "立即创建" %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
     </div>
 
     <!-- Backup Section -->

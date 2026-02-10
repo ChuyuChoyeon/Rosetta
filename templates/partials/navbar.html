@@ -90,7 +90,8 @@
                     <div class="dropdown dropdown-end">
                         <div tabindex="0"
                              role="button"
-                             class="btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                             class="btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors"
+                             aria-label="{% trans '切换语言' %}">
                             <span class="material-symbols-outlined text-[20px]">translate</span>
                         </div>
                         <ul tabindex="0"
@@ -104,7 +105,8 @@
                         </ul>
                     </div>
                     <!-- 主题切换 -->
-                    <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors grid place-items-center">
+                    <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors grid place-items-center"
+                           aria-label="{% trans '切换主题' %}">
                         <input type="checkbox"
                                class="theme-controller hidden"
                                value="dark"
@@ -151,7 +153,8 @@
                         </div>
                     {% else %}
                         <a href="{% url 'users:login' %}"
-                           class="btn btn-primary btn-sm min-h-0 h-8 text-xs px-3">{% trans "登录" %}</a>
+                           class="btn btn-primary btn-sm min-h-0 h-8 text-xs px-3"
+                           aria-label="{% trans '登录账号' %}">{% trans "登录" %}</a>
                     {% endif %}
                 </div>
             </div>

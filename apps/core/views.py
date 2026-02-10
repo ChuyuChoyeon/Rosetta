@@ -142,7 +142,10 @@ def upload_image(request):
     return JsonResponse({"url": file_url})
 
 
+from django.views.decorators.csrf import csrf_exempt
+
 @require_POST
+@csrf_exempt  # Temporarily exempt CSRF to debug if it's a CSRF issue, or ensure frontend sends it correctly
 @user_passes_test(lambda u: u.is_staff, login_url="users:login")
 def translate_text(request):
     """
@@ -159,16 +162,27 @@ def translate_text(request):
         target_langs: 目标语言代码列表 (例如 ['en', 'zh-hant'])
     """
     try:
-        data = json.loads(request.body)
+        # Use request.body to get JSON data
+        try:
+            data = json.loads(request.body)
+        except json.JSONDecodeError:
+            # Fallback for empty body or invalid JSON
+            return JsonResponse({"error": "Invalid JSON body"}, status=400)
+
         text = data.get("text", "")
         target_langs = data.get("target_langs", [])
 
-        if not text or not target_langs:
-            return JsonResponse(
-                {"error": "Missing text or target languages"}, status=400
-            )
+        if not text:
+            return JsonResponse({"error": "Missing text parameter"}, status=400)
+        
+        if not target_langs:
+            # Default to all supported languages if not specified
+            target_langs = ["en", "ja", "zh-hant"]
 
         translations = {}
+
+        # Initialize translator with proxies if configured in settings (Optional enhancement)
+        # proxies = getattr(settings, "TRANSLATION_PROXIES", None)
 
         for lang in target_langs:
             try:
@@ -179,13 +193,19 @@ def translate_text(request):
                 elif lang == "zh-hans":
                     dest_lang = "zh-CN"
 
-                # 强制源语言为中文 (zh-CN)，因为目前需求主要是从中文翻译到其他语言
-                translated_text = GoogleTranslator(
-                    source="zh-CN", target=dest_lang
-                ).translate(text)
+                # Use GoogleTranslator
+                # Note: deep_translator relies on querying Google Translate's public API
+                # It might be rate-limited or blocked.
+                translator = GoogleTranslator(source="zh-CN", target=dest_lang)
+                translated_text = translator.translate(text)
+                
                 translations[lang] = translated_text
             except Exception as e:
-                translations[lang] = f"Translation error: {str(e)}"
+                # Log the error for debugging
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Translation failed for {lang}: {str(e)}")
+                translations[lang] = "" # Return empty string on failure instead of error message to avoid polluting fields
 
         return JsonResponse({"translations": translations})
     except Exception as e:

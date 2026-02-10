@@ -10,6 +10,7 @@
             window.USER_PREFERENCE_URL = "{% url 'users:update_theme' %}";
             {% endif %}
         </script>
+        <!-- Admin Core (No Build Dependency) - Must load before body -->
         <!-- 主题初始化 (防闪烁) -->
         {% include 'partials/theme_init.html' %}
         <meta charset="UTF-8">
@@ -30,10 +31,19 @@
         <!-- Alpine.js -->
         <script defer src="{% static 'theme/js/alpine.min.js' %}"></script>
         <!-- HTMX -->
-        {% django_htmx_script %}
+        <script src="{% static 'theme/js/htmx.min.js' %}"></script>
+        <script>
+            // HTMX Debug
+            if (window.htmx) {
+                console.log("[HTMX] Loaded successfully. Version:", htmx.version);
+                // htmx.logAll(); // Uncomment to see all HTMX events
+            } else {
+                console.error("[HTMX] Failed to load!");
+            }
+        </script>
         <script src="{% static 'js/htmx-init.js' %}?v=5.0"></script>
         <!-- Global UI Helpers -->
-        <script src="{% static 'js/ui-helpers.js' %}"></script>
+        <script src="{% static 'js/ui-helpers.js' %}?v=5.0.0"></script>
         <script src="{% static 'js/admin-translation.js' %}"></script>
         <!-- ApexCharts -->
         <script src="{% static 'theme/js/apexcharts.min.js' %}"></script>

@@ -1,0 +1,2916 @@
+
+<!--
+    全站基础模板 (Base Template)
+    
+    这是所有页面的父模板，定义了 HTML 骨架、全局样式、脚本以及公共组件（导航栏、页脚、Toast等）。
+    
+    可覆盖的 Block (Blocks available for override):
+    - title: 页面标题
+    - extra_css: 页面特定的 CSS 样式
+    - extra_head: 插入到 <head> 尾部的其他内容
+    - content: 页面主体内容
+-->
+<!DOCTYPE html>
+<html lang="zh-hans">
+    <head>
+        <title>
+            首页 - Choyeon Blog
+         - Choyeon Blog</title>
+        <link rel="icon"
+              type="image/png"
+              sizes="32x32"
+              href="/static/theme/img/favicon.ico">
+        <link rel="icon"
+              type="image/png"
+              sizes="16x16"
+              href="/static/theme/img/favicon.ico">
+        <link rel="shortcut icon" href="/static/theme/img/favicon.ico">
+        <link rel="alternate"
+              type="application/rss+xml"
+              title="RSS Feed"
+              href="/feed/">
+        <!-- Google 字体：Poppins & Open Sans (本地化托管) -->
+        <link href="/static/theme/css/fonts.css" rel="stylesheet">
+        <!-- Meta 标签 (SEO 与社交分享) -->
+        
+<meta name="description"
+      content="Choyeon 的个人博客">
+<meta name="keywords"
+      content="[]">
+<meta name="author"
+      content="Choyeon">
+<link rel="canonical"
+      href="http://127.0.0.1:8000/">
+<!-- Hreflang Tags -->
+
+
+    <link rel="alternate"
+          hreflang="zh-hans"
+          href="http://127.0.0.1:8000/">
+
+    <link rel="alternate"
+          hreflang="zh-hant"
+          href="http://127.0.0.1:8000/zh-hant/">
+
+    <link rel="alternate"
+          hreflang="en"
+          href="http://127.0.0.1:8000/en/">
+
+    <link rel="alternate"
+          hreflang="ja"
+          href="http://127.0.0.1:8000/ja/">
+
+<link rel="alternate"
+      hreflang="x-default"
+      href="http://127.0.0.1:8000/">
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website">
+<meta property="og:url"
+      content="http://127.0.0.1:8000/">
+<meta property="og:title"
+      content="首页 - Choyeon Blog">
+<meta property="og:description"
+      content="Choyeon 的个人博客">
+<meta property="og:site_name"
+      content="Choyeon Blog">
+<meta property="og:locale" content="zh-hans">
+
+    <meta property="og:image"
+          content="/static/theme/img/logo.svg">
+
+<!-- Twitter / X -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:url"
+      content="http://127.0.0.1:8000/">
+<meta name="twitter:title"
+      content="首页 - Choyeon Blog">
+<meta name="twitter:description"
+      content="Choyeon 的个人博客">
+
+
+    <meta name="twitter:image"
+          content="/static/theme/img/default_cover.jpg">
+
+<!-- JSON-LD Structured Data (Global) -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Choyeon Blog",
+  "url": "http://127.0.0.1:8000/",
+  "description": "Choyeon 的个人博客",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "http://127.0.0.1:8000/search/?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <!-- Material Symbols 图标字体配置 -->
+        <style>
+        @font-face {
+            font-family: 'Material Symbols Outlined';
+            font-style: normal;
+            font-weight: 100 700;
+            font-display: block; 
+            src: url("/static/theme/fonts/MaterialSymbolsOutlined.woff2") format('woff2');
+        }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+        }
+        </style>
+        <!-- 引入 Tailwind CSS (由 django-tailwind 编译) -->
+        
+
+<link rel="stylesheet" type="text/css" href="/static/css/dist/styles.css?v=1770719266">
+
+        <!-- 第三方库样式 -->
+        <link href="/static/theme/css/style.css" rel="stylesheet">
+        <!-- 预留给子模板的样式块 -->
+        
+        
+    <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Choyeon Blog", "url": "http://127.0.0.1:8000/", "description": "Choyeon \u7684\u4e2a\u4eba\u535a\u5ba2", "image": "http://127.0.0.1:8000/static/theme/img/default_cover.jpg", "potentialAction": {"@type": "SearchAction", "target": "http://127.0.0.1:8000/search/?q={search_term_string}", "query-input": "required name=search_term_string"}}</script>
+
+    </head>
+    <!-- 注入后台配置的统计代码 (Head) -->
+    
+    <!-- 注入后台配置的自定义 Head 代码 (如 CSS/JS) -->
+    
+    <!-- NProgress 加载进度条 (必须在 Tailwind 之后以获取 CSS 变量) -->
+    <script src="/static/theme/js/nprogress.js"></script>
+    <link rel="stylesheet" href="/static/theme/css/nprogress.css" />
+    <!-- 全局脚本库 -->
+    <script src="/static/js/page-loader.js"></script>
+    <script src="/static/django_htmx/django-htmx.js" data-debug="True" defer></script> <!-- HTMX 用于局部刷新 (Auto-loads debug extension in DEBUG mode) -->
+    <script defer src="/static/theme/js/alpine.min.js"></script> <!-- Alpine.js 用于轻量级交互 -->
+    <script src="/static/theme/js/geopattern.min.js"></script>
+    <script src="/static/theme/js/theme.js"></script>
+    <script src="/static/theme/js/ui.js"></script>
+    <script src="/static/js/ui-helpers.js"></script>
+    <script src="/static/js/htmx-init.js"></script>
+    <script>
+        // --- 全局配置 ---
+        // 如果用户已登录，设置主题更新 URL，供 theme.js 调用
+        
+    </script>
+    <!-- 主题初始化 (防闪烁) -->
+    <script>
+    // Theme initialization to prevent FOUC
+    (function() {
+        try {
+            // 1. Get stored theme or system preference
+            var localTheme = localStorage.getItem('theme');
+            var theme = localTheme || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            // 2. Server-side user preference override
+            
+
+            // 3. Apply theme
+            // If ThemeManager is loaded (theme.js), use it (frontend case)
+            if (window.ThemeManager) {
+                window.ThemeManager.applyTheme(theme, false);
+            } else {
+                // Fallback / Admin case: direct DOM manipulation
+                document.documentElement.setAttribute('data-theme', theme);
+                if (theme === 'dark' || (theme === 'auto' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+                // CRITICAL FIX: Always persist to localStorage even in fallback mode
+                // This ensures ThemeManager picks up the correct state when it finally initializes
+                localStorage.setItem('theme', theme);
+            }
+        } catch (e) {
+            console.error('Theme initialization error:', e);
+        }
+    })();
+</script>
+
+    <style>
+        /* 平滑滚动 */
+        html { scroll-behavior: smooth; }
+
+        /* 自定义滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: oklch(var(--bc) / 0.2);
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: oklch(var(--bc) / 0.4);
+        }
+        
+        /* 文本选中颜色 */
+        ::selection {
+            background-color: oklch(var(--p) / 0.3);
+            color: inherit;
+        }
+
+        /* 顶部阅读进度条容器 */
+        .progress-container {
+            position: fixed;
+            top: 0;
+            z-index: 100;
+            width: 100%;
+            height: 4px;
+            background: transparent;
+        }
+        
+        /* 进度条本体 */
+        .progress-bar {
+            height: 4px;
+            background: oklch(var(--p));
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        /* 玻璃拟态 (Glassmorphism) 工具类 */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+        
+        /* 暗色模式下的玻璃拟态 */
+        html[data-theme='dark'] .glass-panel {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<!-- 
+    Body 标签说明:
+    1. x-data: Alpine.js 状态，用于控制“回到顶部”按钮的显示
+    2. @scroll.window: 监听滚动事件
+    3. hx-headers: 为所有 HTMX 请求注入 CSRF Token
+-->
+<body class="min-h-screen flex flex-col font-sans text-base-content selection:bg-primary selection:text-primary-content scrollbar-thin scrollbar-thumb-base-300 scrollbar-track-base-100 debug-screens"
+      x-data="{ showScrollTop: false }"
+      @scroll.window="showScrollTop = (window.pageYOffset > 300)"
+      hx-headers='{"X-CSRFToken": "uow7ZPvULHX2iwYuiYb2Mn6H70BBYkLPbZpSdhbaKAN0p4jvDHYJnk8XsEifciDo"}'
+      hx-boost="true">
+    <!-- Inspira UI: 神经元背景动画特效 -->
+    <!-- Inspira UI: Neural Background -->
+<div class="fixed inset-0 -z-10 bg-base-100" x-data="neuralNetwork()">
+    <canvas x-ref="canvas" class="w-full h-full block opacity-50"></canvas>
+</div>
+<script>
+document.addEventListener('alpine:init', () => {
+    Alpine.data('neuralNetwork', () => ({
+        width: 0,
+        height: 0,
+        ctx: null,
+        particles: [],
+        
+        init() {
+            if (!this.$refs.canvas) return;
+            this.ctx = this.$refs.canvas.getContext('2d');
+            this.resize();
+            window.addEventListener('resize', () => this.resize());
+            
+            // Create particles
+            const particleCount = Math.min(Math.floor(window.innerWidth * window.innerHeight / 15000), 100);
+            for(let i = 0; i < particleCount; i++) {
+                this.particles.push({
+                    x: Math.random() * this.width,
+                    y: Math.random() * this.height,
+                    vx: (Math.random() - 0.5) * 1.5,
+                    vy: (Math.random() - 0.5) * 1.5,
+                    size: Math.random() * 2 + 1
+                });
+            }
+            
+            this.animate();
+        },
+        
+        resize() {
+            if (!this.$refs.canvas) return;
+            this.width = window.innerWidth;
+            this.height = window.innerHeight;
+            this.$refs.canvas.width = this.width;
+            this.$refs.canvas.height = this.height;
+        },
+        
+        animate() {
+            if (!this.ctx || !this.$refs.canvas) return;
+            this.ctx.clearRect(0, 0, this.width, this.height);
+            
+            // Get primary color from CSS variable or default to indigo
+            const pColor = getComputedStyle(document.documentElement).getPropertyValue('--p') || '99 102 241';
+            
+            // Update and draw particles
+            this.particles.forEach((p, i) => {
+                p.x += p.vx;
+                p.y += p.vy;
+                
+                if (p.x < 0 || p.x > this.width) p.vx *= -1;
+                if (p.y < 0 || p.y > this.height) p.vy *= -1;
+                
+                this.ctx.beginPath();
+                this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                this.ctx.fillStyle = `hsl(${pColor})`;
+                this.ctx.fill();
+                
+                // Draw connections
+                for (let j = i + 1; j < this.particles.length; j++) {
+                    const p2 = this.particles[j];
+                    const dx = p.x - p2.x;
+                    const dy = p.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    
+                    if (dist < 150) {
+                        this.ctx.beginPath();
+                        this.ctx.strokeStyle = `hsl(${pColor} / ${1 - dist/150})`;
+                        this.ctx.lineWidth = 0.5;
+                        this.ctx.moveTo(p.x, p.y);
+                        this.ctx.lineTo(p2.x, p2.y);
+                        this.ctx.stroke();
+                    }
+                }
+            });
+            
+            requestAnimationFrame(() => this.animate());
+        }
+    }));
+});
+</script>
+
+    <!-- 顶部阅读进度条 -->
+    <div class="progress-container">
+        <div class="progress-bar" id="readingProgress"></div>
+    </div>
+    <!-- 主内容包裹层 (Sticky Footer 布局) -->
+    <div id="main-wrapper" class="flex flex-col min-h-screen">
+        <!-- 全局公告 (Global Announcement) -->
+        
+            <div class="bg-primary text-primary-content text-center py-2 px-4 text-sm font-medium relative z-50">
+                测试公告
+            </div>
+        
+        <!-- 顶部导航栏 -->
+        
+<div class="navbar bg-base-100/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300 border-b border-base-content/5 supports-[backdrop-filter]:bg-base-100/60"
+     x-data="{ scrolled: false }"
+     @scroll.window="scrolled = (window.pageYOffset > 20)"
+     :class="{ 'shadow-md': scrolled, 'shadow-sm': !scrolled }">
+    <div class="container mx-auto px-4 flex flex-col lg:flex-row w-full lg:items-center">
+        <!-- 移动端头部 (Logo & 开关) -->
+        <div class="w-full flex flex-col lg:flex-row lg:items-center lg:w-auto">
+            <!-- 第一行：Logo & 标题 -->
+            <div class="w-full flex justify-center lg:justify-start lg:w-auto py-2 lg:py-0">
+                <a href="/"
+                   class="text-2xl font-heading font-bold text-base-content flex items-center gap-2 px-0 hover:opacity-80 transition-opacity whitespace-nowrap">
+                    
+                    <span class="text-primary truncate">Choyeon Blog</span>
+                </a>
+            </div>
+            <!-- 第二行：导航 (开关) & 操作 (仅移动端) -->
+            <div class="flex justify-between items-center w-full lg:hidden pb-2 border-b border-base-content/5 lg:border-0">
+                <!-- 移动端菜单开关 -->
+                <div class="dropdown">
+                    <div tabindex="0"
+                         role="button"
+                         class="btn btn-ghost btn-circle"
+                         aria-label="菜单">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="h-5 w-5"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
+                        </svg>
+                    </div>
+                    <ul tabindex="0"
+                        class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow-2xl bg-base-100 rounded-box w-[92vw] left-0 border border-base-content/5">
+                        <li>
+                            <a href="/" class="py-3 text-base font-medium">首页</a>
+                        </li>
+                        <li>
+                            <a href="/posts/" class="py-3 text-base font-medium">文章</a>
+                        </li>
+                        <li>
+                            <a href="/categories/" class="py-3 text-base font-medium">分类</a>
+                        </li>
+                        <li>
+                            <a href="/tags/" class="py-3 text-base font-medium">标签</a>
+                        </li>
+                        <li>
+                            <a href="/archives/" class="py-3 text-base font-medium">归档</a>
+                        </li>
+                        <li>
+                            <a href="/guestbook/" class="py-3 text-base font-medium">留言板</a>
+                        </li>
+                        <li>
+                            <a href="/about/" class="py-3 text-base font-medium">关于</a>
+                        </li>
+                        <li>
+                            <a href="/contact/" class="py-3 text-base font-medium">联系</a>
+                        </li>
+                        
+                            <li>
+                                <a href="/admin"
+                                   class="py-3 text-base font-medium"
+                                   >后台管理</a>
+                            </li>
+                        
+                    </ul>
+                </div>
+                <!-- 移动端右侧操作 (搜索 & 主题) -->
+                <div class="flex items-center gap-1">
+                    <!-- 搜索 -->
+                    <button class="btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors"
+                            onclick="search_modal.showModal()"
+                            aria-label="搜索">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="h-5 w-5"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </button>
+                    <!-- 语言切换 (移动端) -->
+                    
+                    
+                    <div class="dropdown dropdown-end">
+                        <div tabindex="0"
+                             role="button"
+                             class="btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">translate</span>
+                        </div>
+                        <ul tabindex="0"
+                            class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                            
+                                <li>
+                                    <a href="/"
+                                       class="active">简体中文</a>
+                                </li>
+                            
+                                <li>
+                                    <a href="/zh-hant/"
+                                       class="">繁體中文</a>
+                                </li>
+                            
+                                <li>
+                                    <a href="/en/"
+                                       class="">英语</a>
+                                </li>
+                            
+                                <li>
+                                    <a href="/ja/"
+                                       class="">日本語</a>
+                                </li>
+                            
+                        </ul>
+                    </div>
+                    <!-- 主题切换 -->
+                    <label class="swap swap-rotate btn btn-ghost btn-circle btn-sm hover:bg-primary/10 hover:text-primary transition-colors grid place-items-center">
+                        <input type="checkbox"
+                               class="theme-controller hidden"
+                               value="dark"
+                               onchange="updateTheme(this.checked ? 'dark' : 'light')" />
+                        <span class="material-symbols-outlined swap-off text-[20px] leading-none col-start-1 row-start-1">light_mode</span>
+                        <span class="material-symbols-outlined swap-on text-[20px] leading-none col-start-1 row-start-1">dark_mode</span>
+                    </label>
+                    <!-- 用户菜单 (移动端) -->
+                    
+                        <a href="/users/login/"
+                           class="btn btn-primary btn-sm min-h-0 h-8 text-xs px-3">登录</a>
+                    
+                </div>
+            </div>
+        </div>
+        <!-- 桌面端导航 & 操作 (移动端隐藏) -->
+        <div class="navbar-center hidden lg:flex flex-1 justify-center">
+            <ul class="menu menu-horizontal px-1 font-medium text-base gap-2">
+                <li>
+                    <a href="/"
+                       class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group bg-primary/10 text-primary font-bold">
+                        首页
+                    </a>
+                </li>
+                <li>
+                    <a href="/posts/"
+                       class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group ">
+                        文章
+                    </a>
+                </li>
+                <li>
+                    <a href="/categories/"
+                       class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group ">
+                        分类
+                    </a>
+                </li>
+                <li>
+                    <a href="/tags/"
+                       class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group ">
+                        标签
+                    </a>
+                </li>
+                <li>
+                    <a href="/archives/"
+                       class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group ">
+                        归档
+                    </a>
+                </li>
+                <li>
+                    <a href="/guestbook/"
+                       class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group ">
+                        留言板
+                    </a>
+                </li>
+                <li>
+                    <a href="/about/"
+                       class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group ">
+                        关于
+                    </a>
+                </li>
+                <li>
+                    <a href="/contact/"
+                       class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group ">
+                        联系
+                    </a>
+                </li>
+                
+                    <li>
+                        <a href="/admin"
+                           
+                           class="relative px-4 py-2 rounded-full hover:bg-primary/10 hover:text-primary transition-all duration-300 font-medium group ">
+                            后台管理
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+        <div class="navbar-end gap-2 hidden lg:flex lg:w-auto">
+            <!-- 搜索 -->
+            <button class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors"
+                    onclick="search_modal.showModal()"
+                    aria-label="搜索">
+                <svg xmlns="http://www.w3.org/2000/svg"
+                     class="h-5 w-5"
+                     fill="none"
+                     viewBox="0 0 24 24"
+                     stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </button>
+            <!-- 语言切换 (桌面端) -->
+            
+            
+            <div class="dropdown dropdown-end">
+                <div tabindex="0"
+                     role="button"
+                     class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-[24px]">translate</span>
+                </div>
+                <ul tabindex="0"
+                    class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    
+                        <li>
+                            <a href="/"
+                               class="active">简体中文</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/zh-hant/"
+                               class="">繁體中文</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/en/"
+                               class="">英语</a>
+                        </li>
+                    
+                        <li>
+                            <a href="/ja/"
+                               class="">日本語</a>
+                        </li>
+                    
+                </ul>
+            </div>
+            <!-- 主题切换 (Dropdown) -->
+            <div class="dropdown dropdown-end">
+                <div tabindex="0"
+                     role="button"
+                     class="btn btn-ghost btn-circle hover:bg-primary/10 hover:text-primary transition-colors">
+                    <span class="material-symbols-outlined text-[24px]"
+                          x-show="!$store.theme || $store.theme === 'system'">brightness_auto</span>
+                    <span class="material-symbols-outlined text-[24px]"
+                          x-show="$store.theme === 'light'"
+                          style="display: none">light_mode</span>
+                    <span class="material-symbols-outlined text-[24px]"
+                          x-show="$store.theme === 'dark'"
+                          style="display: none">dark_mode</span>
+                </div>
+                <ul tabindex="0"
+                    class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52">
+                    <li>
+                        <button class="flex justify-between"
+                                @click="updateTheme('light')"
+                                :class="{ 'active': $store.theme === 'light' }">
+                            <span class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">light_mode</span>
+                                浅色
+                            </span>
+                            <span class="material-symbols-outlined text-[16px]"
+                                  x-show="$store.theme === 'light'">check</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="flex justify-between"
+                                @click="updateTheme('dark')"
+                                :class="{ 'active': $store.theme === 'dark' }">
+                            <span class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">dark_mode</span>
+                                深色
+                            </span>
+                            <span class="material-symbols-outlined text-[16px]"
+                                  x-show="$store.theme === 'dark'">check</span>
+                        </button>
+                    </li>
+                    <li>
+                        <button class="flex justify-between"
+                                @click="updateTheme('system')"
+                                :class="{ 'active': $store.theme === 'system' }">
+                            <span class="flex items-center gap-2">
+                                <span class="material-symbols-outlined text-[20px]">brightness_auto</span>
+                                跟随系统
+                            </span>
+                            <span class="material-symbols-outlined text-[16px]"
+                                  x-show="!$store.theme || $store.theme === 'system'">check</span>
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <!-- Alpine Store for Theme -->
+            <script>
+          document.addEventListener('alpine:init', () => {
+              Alpine.store('theme', localStorage.getItem('theme') || 'system');
+          });
+
+          function updateTheme(theme) {
+              // Update Alpine store
+              if (window.Alpine) {
+                  Alpine.store('theme', theme);
+              }
+
+              // Use ThemeManager to apply theme
+              if (window.ThemeManager) {
+                  window.ThemeManager.updateTheme(theme);
+              } else {
+                  // Fallback
+                  if (theme === 'system') {
+                      localStorage.removeItem('theme');
+                      if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                          document.documentElement.setAttribute('data-theme', 'dark');
+                          document.documentElement.classList.add('dark');
+                      } else {
+                          document.documentElement.setAttribute('data-theme', 'light');
+                          document.documentElement.classList.remove('dark');
+                      }
+                  } else {
+                      document.documentElement.setAttribute('data-theme', theme);
+                      localStorage.setItem('theme', theme);
+                      if (theme === 'dark') {
+                          document.documentElement.classList.add('dark');
+                      } else {
+                          document.documentElement.classList.remove('dark');
+                      }
+                  }
+              }
+              
+              // Sync with backend if user is logged in
+              
+          }
+            </script>
+            
+                <a href="/users/login/"
+                   class="btn btn-primary btn-sm px-6 rounded-full font-bold shadow-lg shadow-primary/30 hover:shadow-primary/50 hover:-translate-y-0.5 transition-all">登录</a>
+                <a href="/users/register/" class="btn btn-ghost btn-sm">注册</a>
+            
+        </div>
+    </div>
+</div>
+<dialog id="search_modal" class="modal">
+    <div class="modal-box bg-base-100/90 backdrop-blur-md shadow-2xl border border-base-content/5 relative overflow-visible w-full max-w-2xl"
+         x-data="navSearchComponent({ searchUrl: '/search/', placeholders: ['搜索文章...', '搜索标签...', '输入关键词...'] })">
+        <!-- Background Effect -->
+        <div class="absolute -top-20 -right-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
+        <h3 class="font-bold text-lg mb-6 flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">search</span>
+            全站搜索
+        </h3>
+        <div class="py-4 relative">
+            <div class="relative w-full group">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within:text-primary">
+                    <span class="material-symbols-outlined text-xl">search</span>
+                </div>
+                <input type="text"
+                       x-model="query"
+                       @input.debounce.300ms="fetchSuggestions"
+                       @keydown.enter="search"
+                       class="input input-lg w-full pl-12 pr-4 rounded-xl bg-base-200/50 border-transparent focus:bg-base-100 focus:border-primary focus:outline-none transition-all duration-300"
+                       :placeholder="placeholders[currentPlaceholderIndex]"
+                       autofocus>
+                <div class="absolute inset-y-0 right-0 pr-4 flex items-center">
+                    <span x-show="loading"
+                          class="loading loading-spinner loading-sm text-primary"></span>
+                    <kbd class="kbd kbd-sm hidden md:inline-flex ml-2" x-show="!loading">↵</kbd>
+                </div>
+            </div>
+            <!-- Suggestions Dropdown -->
+            <div x-show="suggestions.length > 0"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 translate-y-2"
+                 class="absolute w-full mt-4 bg-base-100/95 backdrop-blur-xl rounded-xl shadow-2xl border border-base-content/10 overflow-hidden z-50"
+                 style="display: none">
+                <ul class="max-h-[60vh] overflow-y-auto">
+                    <template x-for="(item, index) in suggestions" :key="index">
+                        <li>
+                            <a :href="item.url"
+                               class="flex items-center justify-between px-4 py-3 hover:bg-primary/10 hover:text-primary transition-colors group border-b border-base-content/5 last:border-0 bg-base-100/50">
+                                <div class="flex items-center gap-3">
+                                    <span class="material-symbols-outlined text-base-content/50 group-hover:text-primary transition-colors text-xl"
+                                          x-text="getIcon(item.type)"></span>
+                                    <div class="flex flex-col">
+                                        <span class="font-medium" x-html="highlightMatch(item.text)"></span>
+                                        <span class="text-xs text-base-content/50" x-text="item.type_label"></span>
+                                    </div>
+                                </div>
+                                <span class="material-symbols-outlined text-base-content/30 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+                            </a>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+            <!-- Empty State -->
+            <div x-show="query.length > 0 && !loading && suggestions.length === 0"
+                 class="text-center py-8 text-base-content/60 animate-fade-in">
+                <span class="material-symbols-outlined text-4xl mb-2 opacity-50">search_off</span>
+                <p>未找到相关结果</p>
+            </div>
+        </div>
+        <div class="modal-action">
+            <form method="dialog">
+                <button class="btn btn-ghost hover:bg-base-200">关闭</button>
+            </form>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <!-- Toast 全局通知容器 -->
+            <!-- Toast Notification Component -->
+<div x-data="{ toasts: [], add(message, type = 'info') { const id = Date.now(); this.toasts.push({ id, message, type, show: true }); setTimeout(() => this.remove(id), 5000); }, remove(id) { const index = this.toasts.findIndex(t => t.id === id); if (index > -1) { this.toasts[index].show = false; setTimeout(() => { this.toasts = this.toasts.filter(t => t.id !== id); }, 300); } } }"
+     @notify.window="add($event.detail.message, $event.detail.type)"
+     @showToast.window="add($event.detail.message, $event.detail.type)"
+     @show-toast.window="add($event.detail.message, $event.detail.type)"
+     class="toast toast-end z-[100] fixed pointer-events-none p-4 top-24">
+    <!-- Server-side Messages -->
+    
+    <!-- Client-side Toasts -->
+    <template x-for="toast in toasts" :key="toast.id">
+        <div x-show="toast.show"
+             x-transition:enter="transform ease-out duration-300 transition"
+             x-transition:enter-start="translate-x-8 opacity-0"
+             x-transition:enter-end="translate-x-0 opacity-100"
+             x-transition:leave="transform ease-in duration-300 transition"
+             x-transition:leave-start="translate-x-0 opacity-100"
+             x-transition:leave-end="translate-x-8 opacity-0"
+             :class="{ 'alert-info': toast.type === 'info', 'alert-success': toast.type === 'success', 'alert-warning': toast.type === 'warning', 'alert-error': toast.type === 'error' }"
+             class="alert shadow-lg mb-2 pointer-events-auto min-w-[300px]">
+            <div class="flex items-center gap-2">
+                <span class="material-symbols-outlined"
+                      x-text=" toast.type === 'success' ? 'check_circle' : (toast.type === 'error' ? 'error' : (toast.type === 'warning' ? 'warning' : 'info')) "></span>
+                <span x-text="toast.message"></span>
+            </div>
+            <button class="btn btn-xs btn-ghost btn-circle" @click="remove(toast.id)">
+                <span class="material-symbols-outlined text-sm">close</span>
+            </button>
+        </div>
+    </template>
+</div>
+
+            <!-- 页面具体内容块 -->
+            
+    <div x-data="{ viewMode: localStorage.getItem('blogViewMode') || 'list', toggleView(mode) { this.viewMode = mode; localStorage.setItem('blogViewMode', mode); } }">
+        
+        <div class="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+            
+                <!-- Homepage Toggle -->
+                <div class="flex items-center gap-4">
+                    <h1 class="text-3xl font-bold font-heading hidden sm:block">发现</h1>
+                    <div class="join bg-base-200/50 p-1 rounded-xl border border-base-content/5 backdrop-blur-sm">
+                        <a href="/?filter=latest"
+                           class="join-item btn btn-sm border-0 rounded-lg transition-all duration-300 bg-base-100 shadow-sm text-primary font-bold">
+                            <span class="material-symbols-outlined text-lg">schedule</span>
+                            最新
+                        </a>
+                        <a href="/?filter=recommended"
+                           class="join-item btn btn-sm border-0 rounded-lg transition-all duration-300 btn-ghost opacity-60 hover:opacity-100">
+                            <span class="material-symbols-outlined text-lg">recommend</span>
+                            推荐
+                        </a>
+                    </div>
+                </div>
+            
+            <!-- View Toggle -->
+            <div class="flex items-center gap-1 p-1 bg-base-200/50 rounded-xl border border-base-content/5 backdrop-blur-sm">
+                
+                    <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300"
+                            :class="viewMode === 'list' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'"
+                            @click="toggleView('list')"
+                            title="列表视图">
+                        <span class="material-symbols-outlined text-lg">view_list</span>
+                    </button>
+                    <button class="btn btn-sm btn-ghost btn-square rounded-lg transition-all duration-300"
+                            :class="viewMode === 'grid' ? 'bg-base-100 shadow-sm text-primary scale-100' : 'opacity-60 hover:opacity-100 scale-90 hover:scale-100'"
+                            @click="toggleView('grid')"
+                            title="网格视图">
+                        <span class="material-symbols-outlined text-lg">grid_view</span>
+                    </button>
+                
+            </div>
+        </div>
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Main Content -->
+            <div class="flex-1 min-w-0">
+                <!-- Post Grid -->
+                <div id="post-grid"
+                     class="grid gap-6 transition-all duration-500 ease-in-out "
+                     :class="viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'">
+                    
+                        
+                    <div class="h-full">
+                        <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1"
+                             :class="viewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col'">
+                            <div class="h-full flex flex-col w-full rounded-3xl overflow-hidden border border-base-content/5 hover:border-primary/20 transition-colors"
+                                 :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                                
+                                    <figure class="overflow-hidden relative transition-all duration-300 ease-in-out"
+                                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'">
+                                        <img src="/media/CACHE/images/posts/QQ20260114-190543_9cnV5T1/44ccafe9354025f3e3fbaa135ad40d45.webp"
+                                             alt="无法投资网站基本这种"
+                                             width="400"
+                                             height="250"
+                                             class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 group-hover/card:scale-105"
+                                             loading="eager" />
+                                        <div class="absolute inset-0 transition-all duration-300 group-hover/card:bg-black/10 group-hover/card:backdrop-blur-[2px]">
+                                        </div>
+                                    </figure>
+                                
+                                <div class="card-body flex-1 p-6 relative">
+                                    <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                                        <a href="/post/measuretrialserve/"
+                                           class="line-clamp-2 before:absolute before:inset-0 z-20">无法投资网站基本这种</a>
+                                    </h2>
+                                    <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                                        
+                                        
+                                        
+                                            <a href="/category/withrulesafefew/"
+                                               class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                                                Python
+                                            </a>
+                                        
+                                    </div>
+                                    <p class="text-base-content/70 text-sm line-clamp-3 mb-4">
+                                        的话必须日期专业次数精华同时.由于网上如果在线联系工程计划.现在喜欢合作参加. 发布运行系统国内经营用户个人.他的是否会员这样对于产品. 单位但是特别.以后单位地区.国际学生如此实现任何方式行业...
+                                    </p>
+                                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1" title="发布时间">
+                                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                <span>02-09</span>
+                                            </div>
+                                            <div class="flex items-center gap-1" title="阅读量">
+                                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                                <span>1040</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1" title="作者">
+                                            <span class="material-symbols-outlined text-[14px]">person</span>
+                                            <span class="font-medium">刘宇</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                        
+                    <div class="h-full">
+                        <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1"
+                             :class="viewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col'">
+                            <div class="h-full flex flex-col w-full rounded-3xl overflow-hidden border border-base-content/5 hover:border-primary/20 transition-colors"
+                                 :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                                
+                                    <figure class="overflow-hidden relative transition-all duration-300 ease-in-out"
+                                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'">
+                                        <img src="/media/CACHE/images/posts/1123/e6d14eeeadecc03f5290d579770c5723.webp"
+                                             alt="学生参加等级的是部门也是地址"
+                                             width="400"
+                                             height="250"
+                                             class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 group-hover/card:scale-105"
+                                             loading="eager" />
+                                        <div class="absolute inset-0 transition-all duration-300 group-hover/card:bg-black/10 group-hover/card:backdrop-blur-[2px]">
+                                        </div>
+                                    </figure>
+                                
+                                <div class="card-body flex-1 p-6 relative">
+                                    <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                                        <a href="/post/againststafflikedo/"
+                                           class="line-clamp-2 before:absolute before:inset-0 z-20">学生参加等级的是部门也是地址</a>
+                                    </h2>
+                                    <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                                        
+                                        
+                                        
+                                            <a href="/category/systemsomething/"
+                                               class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                                                Redis
+                                            </a>
+                                        
+                                    </div>
+                                    <p class="text-base-content/70 text-sm line-clamp-3 mb-4">
+                                        实现不断法律什么行业来源事情.选择以及这里虽然的人文化. 经营你们北京国际登录起来.能力是否可以安全投资.专业论坛可以欢迎发布根据还是. 控制日本感觉这样.是一经营目前行业专业.工作中文下载关系...
+                                    </p>
+                                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1" title="发布时间">
+                                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                <span>02-01</span>
+                                            </div>
+                                            <div class="flex items-center gap-1" title="阅读量">
+                                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                                <span>7909</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1" title="作者">
+                                            <span class="material-symbols-outlined text-[14px]">person</span>
+                                            <span class="font-medium">冯红</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                        
+                    <div class="h-full">
+                        <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1"
+                             :class="viewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col'">
+                            <div class="h-full flex flex-col w-full rounded-3xl overflow-hidden border border-base-content/5 hover:border-primary/20 transition-colors"
+                                 :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                                
+                                    <figure class="overflow-hidden relative transition-all duration-300 ease-in-out"
+                                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'">
+                                        <img src="/media/CACHE/images/posts/11/3820e531cb9e6834c4acef27c4d14d32.webp"
+                                             alt="的人任何一样起来当然推荐最大"
+                                             width="400"
+                                             height="250"
+                                             class="absolute inset-0 object-cover w-full h-full transition-transform duration-500 group-hover/card:scale-105"
+                                             loading="eager" />
+                                        <div class="absolute inset-0 transition-all duration-300 group-hover/card:bg-black/10 group-hover/card:backdrop-blur-[2px]">
+                                        </div>
+                                    </figure>
+                                
+                                <div class="card-body flex-1 p-6 relative">
+                                    <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                                        <a href="/post/partwhomoil/"
+                                           class="line-clamp-2 before:absolute before:inset-0 z-20">的人任何一样起来当然推荐最大</a>
+                                    </h2>
+                                    <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                                        
+                                        
+                                        
+                                            <a href="/category/focusscenedetermine/"
+                                               class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                                                数据库测试
+                                            </a>
+                                        
+                                    </div>
+                                    <p class="text-base-content/70 text-sm line-clamp-3 mb-4">
+                                        搜索质量文件.部分教育注册当然自己. 提高精华音乐男人.时候是否发现设计你们这么一次日期.不同通过各种过程.情况对于具有工作那个专业. 说明怎么我们提供没有.这种中文是一. 规定回复的话.文件首...
+                                    </p>
+                                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1" title="发布时间">
+                                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                <span>01-31</span>
+                                            </div>
+                                            <div class="flex items-center gap-1" title="阅读量">
+                                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                                <span>4634</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1" title="作者">
+                                            <span class="material-symbols-outlined text-[14px]">person</span>
+                                            <span class="font-medium">李杨</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                        
+                    <div class="h-full">
+                        <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1"
+                             :class="viewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col'">
+                            <div class="h-full flex flex-col w-full rounded-3xl overflow-hidden border border-base-content/5 hover:border-primary/20 transition-colors"
+                                 :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                                
+                                    <figure class="pattern-placeholder relative overflow-hidden group-hover/card:brightness-110 transition-all duration-300 ease-in-out"
+                                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'"
+                                            data-seed="网络公司介绍不是一点个人但是"
+                                            x-init="initGeoPattern($el, '网络公司介绍不是一点个人但是')"
+                                            x-effect="initGeoPattern($el, '网络公司介绍不是一点个人但是')">
+                                        <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+                                            <div class="absolute inset-0 bg-black/10 backdrop-blur-[0px] group-hover/card:backdrop-blur-[2px] transition-all duration-500">
+                                            </div>
+                                            <div class="text-white font-bold text-lg leading-tight opacity-90 drop-shadow-md z-10 break-words w-full group-hover/card:opacity-100 transition-opacity relative px-4">
+                                                网络公司介绍不是一点个人但是
+                                            </div>
+                                        </div>
+                                    </figure>
+                                
+                                <div class="card-body flex-1 p-6 relative">
+                                    <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                                        <a href="/post/thoughtbacksystem/"
+                                           class="line-clamp-2 before:absolute before:inset-0 z-20">网络公司介绍不是一点个人但是</a>
+                                    </h2>
+                                    <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                                        
+                                        
+                                        
+                                            <a href="/category/systemsomething/"
+                                               class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                                                Redis
+                                            </a>
+                                        
+                                    </div>
+                                    <p class="text-base-content/70 text-sm line-clamp-3 mb-4">
+                                        方式经济手机你们.可是中国计划.程序是一这样这种成为系列密码.功能文件网站责任学生商品. 简介上海不断管理其中继续. 环境看到一切进入最新电影部分.必须通过不要发表不要软件作者.用户认为时间为什...
+                                    </p>
+                                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1" title="发布时间">
+                                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                <span>01-19</span>
+                                            </div>
+                                            <div class="flex items-center gap-1" title="阅读量">
+                                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                                <span>7053</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1" title="作者">
+                                            <span class="material-symbols-outlined text-[14px]">person</span>
+                                            <span class="font-medium">李杨</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                        
+                    <div class="h-full">
+                        <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1"
+                             :class="viewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col'">
+                            <div class="h-full flex flex-col w-full rounded-3xl overflow-hidden border border-base-content/5 hover:border-primary/20 transition-colors"
+                                 :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                                
+                                    <figure class="pattern-placeholder relative overflow-hidden group-hover/card:brightness-110 transition-all duration-300 ease-in-out"
+                                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'"
+                                            data-seed="责任政府其他控制空间简介大家"
+                                            x-init="initGeoPattern($el, '责任政府其他控制空间简介大家')"
+                                            x-effect="initGeoPattern($el, '责任政府其他控制空间简介大家')">
+                                        <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+                                            <div class="absolute inset-0 bg-black/10 backdrop-blur-[0px] group-hover/card:backdrop-blur-[2px] transition-all duration-500">
+                                            </div>
+                                            <div class="text-white font-bold text-lg leading-tight opacity-90 drop-shadow-md z-10 break-words w-full group-hover/card:opacity-100 transition-opacity relative px-4">
+                                                责任政府其他控制空间简介大家
+                                            </div>
+                                        </div>
+                                    </figure>
+                                
+                                <div class="card-body flex-1 p-6 relative">
+                                    <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                                        <a href="/post/startpaintingoften/"
+                                           class="line-clamp-2 before:absolute before:inset-0 z-20">责任政府其他控制空间简介大家</a>
+                                    </h2>
+                                    <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                                        
+                                        
+                                        
+                                            <a href="/category/systemsomething/"
+                                               class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                                                Redis
+                                            </a>
+                                        
+                                    </div>
+                                    <p class="text-base-content/70 text-sm line-clamp-3 mb-4">
+                                        管理之间大小资料.国际加入系统提高然后还是类别. 情况以上责任或者学生.图片都是阅读不会. 汽车已经文章是否但是.积分不过自己更新个人电子最大. 一些阅读能力最后深圳都是技术大学. 免费经营工作...
+                                    </p>
+                                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1" title="发布时间">
+                                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                <span>01-19</span>
+                                            </div>
+                                            <div class="flex items-center gap-1" title="阅读量">
+                                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                                <span>7313</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1" title="作者">
+                                            <span class="material-symbols-outlined text-[14px]">person</span>
+                                            <span class="font-medium">董雷</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                        
+                    <div class="h-full">
+                        <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1"
+                             :class="viewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col'">
+                            <div class="h-full flex flex-col w-full rounded-3xl overflow-hidden border border-base-content/5 hover:border-primary/20 transition-colors"
+                                 :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                                
+                                    <figure class="pattern-placeholder relative overflow-hidden group-hover/card:brightness-110 transition-all duration-300 ease-in-out"
+                                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'"
+                                            data-seed="应用科技目前我们发现"
+                                            x-init="initGeoPattern($el, '应用科技目前我们发现')"
+                                            x-effect="initGeoPattern($el, '应用科技目前我们发现')">
+                                        <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+                                            <div class="absolute inset-0 bg-black/10 backdrop-blur-[0px] group-hover/card:backdrop-blur-[2px] transition-all duration-500">
+                                            </div>
+                                            <div class="text-white font-bold text-lg leading-tight opacity-90 drop-shadow-md z-10 break-words w-full group-hover/card:opacity-100 transition-opacity relative px-4">
+                                                应用科技目前我们发现
+                                            </div>
+                                        </div>
+                                    </figure>
+                                
+                                <div class="card-body flex-1 p-6 relative">
+                                    <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                                        <a href="/post/badwaitsitetax/"
+                                           class="line-clamp-2 before:absolute before:inset-0 z-20">应用科技目前我们发现</a>
+                                    </h2>
+                                    <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                                        
+                                        
+                                        
+                                            <a href="/category/focusscenedetermine/"
+                                               class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                                                数据库测试
+                                            </a>
+                                        
+                                    </div>
+                                    <p class="text-base-content/70 text-sm line-clamp-3 mb-4">
+                                        美国等级大学我的不过欢迎.然后中心影响文章两个. 方面一个建设简介. 朋友组织语言地址城市作者一起.的是进入非常类别问题.计划主题处理正在表示. 为了显示由于提供还是经营现在.社区能够不能全部程...
+                                    </p>
+                                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1" title="发布时间">
+                                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                <span>01-19</span>
+                                            </div>
+                                            <div class="flex items-center gap-1" title="阅读量">
+                                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                                <span>1717</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1" title="作者">
+                                            <span class="material-symbols-outlined text-[14px]">person</span>
+                                            <span class="font-medium">李杨</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                        
+                    <div class="h-full">
+                        <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1"
+                             :class="viewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col'">
+                            <div class="h-full flex flex-col w-full rounded-3xl overflow-hidden border border-base-content/5 hover:border-primary/20 transition-colors"
+                                 :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                                
+                                    <figure class="pattern-placeholder relative overflow-hidden group-hover/card:brightness-110 transition-all duration-300 ease-in-out"
+                                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'"
+                                            data-seed="的人电影开始不能"
+                                            x-init="initGeoPattern($el, '的人电影开始不能')"
+                                            x-effect="initGeoPattern($el, '的人电影开始不能')">
+                                        <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+                                            <div class="absolute inset-0 bg-black/10 backdrop-blur-[0px] group-hover/card:backdrop-blur-[2px] transition-all duration-500">
+                                            </div>
+                                            <div class="text-white font-bold text-lg leading-tight opacity-90 drop-shadow-md z-10 break-words w-full group-hover/card:opacity-100 transition-opacity relative px-4">
+                                                的人电影开始不能
+                                            </div>
+                                        </div>
+                                    </figure>
+                                
+                                <div class="card-body flex-1 p-6 relative">
+                                    <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                                        <a href="/post/redamountmission/"
+                                           class="line-clamp-2 before:absolute before:inset-0 z-20">的人电影开始不能</a>
+                                    </h2>
+                                    <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                                        
+                                        
+                                        
+                                            <a href="/category/focusscenedetermine/"
+                                               class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                                                数据库测试
+                                            </a>
+                                        
+                                    </div>
+                                    <p class="text-base-content/70 text-sm line-clamp-3 mb-4">
+                                        选择基本深圳全部世界以上世界.销售环境经验当前设备. 电影网上能力进入他们问题电子.经营完成选择方面我的世界客户.次数不会名称当前. 当然公司学校.这个只要设备两个任何电话.而且网上系统中心已经...
+                                    </p>
+                                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1" title="发布时间">
+                                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                <span>01-19</span>
+                                            </div>
+                                            <div class="flex items-center gap-1" title="阅读量">
+                                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                                <span>2205</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1" title="作者">
+                                            <span class="material-symbols-outlined text-[14px]">person</span>
+                                            <span class="font-medium">董雷</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                        
+                    <div class="h-full">
+                        <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1"
+                             :class="viewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col'">
+                            <div class="h-full flex flex-col w-full rounded-3xl overflow-hidden border border-base-content/5 hover:border-primary/20 transition-colors"
+                                 :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                                
+                                    <figure class="pattern-placeholder relative overflow-hidden group-hover/card:brightness-110 transition-all duration-300 ease-in-out"
+                                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'"
+                                            data-seed="注意其实那些作品这是市场全国网站"
+                                            x-init="initGeoPattern($el, '注意其实那些作品这是市场全国网站')"
+                                            x-effect="initGeoPattern($el, '注意其实那些作品这是市场全国网站')">
+                                        <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+                                            <div class="absolute inset-0 bg-black/10 backdrop-blur-[0px] group-hover/card:backdrop-blur-[2px] transition-all duration-500">
+                                            </div>
+                                            <div class="text-white font-bold text-lg leading-tight opacity-90 drop-shadow-md z-10 break-words w-full group-hover/card:opacity-100 transition-opacity relative px-4">
+                                                注意其实那些作品这是市场全国网站
+                                            </div>
+                                        </div>
+                                    </figure>
+                                
+                                <div class="card-body flex-1 p-6 relative">
+                                    <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                                        <a href="/post/meetinggoaltravel/"
+                                           class="line-clamp-2 before:absolute before:inset-0 z-20">注意其实那些作品这是市场全国网站</a>
+                                    </h2>
+                                    <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                                        
+                                        
+                                        
+                                            <a href="/category/pictureimagecentral/"
+                                               class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                                                Web Development
+                                            </a>
+                                        
+                                    </div>
+                                    <p class="text-base-content/70 text-sm line-clamp-3 mb-4">
+                                        公司国家增加起来不是.都是经营应用.地址有关一点方面. 中文项目结果空间论坛活动上海威望.直接专业直接根据女人.时候一次位置密码. 关于搜索一种推荐.欢迎支持实现开发. 只要公司地方通过.不要而...
+                                    </p>
+                                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1" title="发布时间">
+                                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                <span>01-19</span>
+                                            </div>
+                                            <div class="flex items-center gap-1" title="阅读量">
+                                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                                <span>10007</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1" title="作者">
+                                            <span class="material-symbols-outlined text-[14px]">person</span>
+                                            <span class="font-medium">冯红</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+                        
+                    <div class="h-full">
+                        <div class="h-full group/card bg-base-100 rounded-3xl hover:shadow-2xl transition-all duration-300 hover:shadow-primary/5 hover:-translate-y-1"
+                             :class="viewMode === 'list' ? 'flex flex-col sm:flex-row' : 'flex flex-col'">
+                            <div class="h-full flex flex-col w-full rounded-3xl overflow-hidden border border-base-content/5 hover:border-primary/20 transition-colors"
+                                 :class="viewMode === 'list' ? 'sm:flex-row' : ''">
+                                
+                                    <figure class="pattern-placeholder relative overflow-hidden group-hover/card:brightness-110 transition-all duration-300 ease-in-out"
+                                            :class="viewMode === 'grid' ? 'w-full pb-[66.66%]' : 'w-full pb-[66.66%] sm:pb-0 sm:w-1/3 sm:shrink-0 sm:self-stretch sm:min-h-[14rem]'"
+                                            data-seed="华硕 ROG Zephyrus Duo 双屏游戏本亮相 CES 2026，至高可选 RTX 5090 显卡"
+                                            x-init="initGeoPattern($el, '华硕 ROG Zephyrus Duo 双屏游戏本亮相 CES 2026，至高可选 RTX 5090 显卡')"
+                                            x-effect="initGeoPattern($el, '华硕 ROG Zephyrus Duo 双屏游戏本亮相 CES 2026，至高可选 RTX 5090 显卡')">
+                                        <div class="absolute inset-0 flex items-center justify-center text-center p-4">
+                                            <div class="absolute inset-0 bg-black/10 backdrop-blur-[0px] group-hover/card:backdrop-blur-[2px] transition-all duration-500">
+                                            </div>
+                                            <div class="text-white font-bold text-lg leading-tight opacity-90 drop-shadow-md z-10 break-words w-full group-hover/card:opacity-100 transition-opacity relative px-4">
+                                                华硕 ROG Zephyrus Duo 双屏游戏本亮相 CES 2026，至高可选 RTX 5090 显卡
+                                            </div>
+                                        </div>
+                                    </figure>
+                                
+                                <div class="card-body flex-1 p-6 relative">
+                                    <h2 class="card-title text-xl font-bold font-heading leading-tight group-hover/card:text-primary transition-colors duration-300 mb-2">
+                                        <a href="/post/rog-zephyrus-duo-ces-2026-rtx-5090/"
+                                           class="line-clamp-2 before:absolute before:inset-0 z-20">华硕 ROG Zephyrus Duo 双屏游戏本亮相 CES 2026，至高可选 RTX 5090 显卡</a>
+                                    </h2>
+                                    <div class="flex flex-wrap gap-2 mb-3 z-30 relative">
+                                        
+                                        
+                                        
+                                            <a href="/category/acc/"
+                                               class="badge badge-ghost badge-sm hover:bg-primary/10 hover:text-primary transition-colors">
+                                                电脑硬件
+                                            </a>
+                                        
+                                    </div>
+                                    <p class="text-base-content/70 text-sm line-clamp-3 mb-4">
+                                        华硕 ROG Zephyrus Duo 双屏游戏本亮相 CES 2026，至高可选 RTX 5090 显卡
+                                    </p>
+                                    <div class="flex items-center justify-between mt-auto pt-4 border-t border-base-content/5 text-xs text-base-content/60 relative z-20">
+                                        <div class="flex items-center gap-3">
+                                            <div class="flex items-center gap-1" title="发布时间">
+                                                <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                                <span>01-06</span>
+                                            </div>
+                                            <div class="flex items-center gap-1" title="阅读量">
+                                                <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                                <span>76</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-1" title="作者">
+                                            <span class="material-symbols-outlined text-[14px]">person</span>
+                                            <span class="font-medium">Choyeon</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                
+            </div>
+            <!-- Pagination -->
+            
+        </div>
+        <!-- Sidebar (Visible only in List Mode) -->
+        <div class="hidden lg:block w-80 flex-shrink-0"
+             x-show="viewMode === 'list'"
+             x-transition:enter="transition ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-x-4"
+             x-transition:enter-end="opacity-100 translate-x-0"><div class="space-y-8">
+    
+    <!-- Search Widget -->
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300"
+         x-data="sidebarSearchComponent()">
+        <h3 class="font-bold text-lg mb-4 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">search</span>
+            </span>
+            搜索
+        </h3>
+        <div class="relative w-full group/search">
+            <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none transition-colors group-focus-within/search:text-primary">
+                <span class="material-symbols-outlined text-xl">search</span>
+            </div>
+            <input type="text"
+                   x-model="query"
+                   @input.debounce.300ms="fetchSuggestions"
+                   @keydown.enter="search"
+                   class="input input-lg w-full pl-12 pr-4 rounded-xl bg-base-200/50 border-transparent focus:bg-base-100 focus:border-primary focus:outline-none transition-all duration-300 h-12 text-sm"
+                   placeholder="搜索...">
+            <div class="absolute inset-y-0 right-0 pr-4 flex items-center">
+                <span x-show="loading"
+                      class="loading loading-spinner loading-xs text-primary"></span>
+            </div>
+            <!-- Sidebar Suggestions Dropdown -->
+            <div x-show="suggestions.length > 0"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 translate-y-2"
+                 class="absolute w-full mt-2 bg-base-100/95 backdrop-blur-xl rounded-xl shadow-xl border border-base-content/10 overflow-hidden z-50"
+                 style="display: none"
+                 @click.outside="suggestions = []">
+                <ul class="max-h-64 overflow-y-auto">
+                    <template x-for="(item, index) in suggestions" :key="index">
+                        <li>
+                            <a :href="item.url"
+                               class="flex items-center gap-3 px-4 py-2 hover:bg-primary/10 hover:text-primary transition-colors border-b border-base-content/5 last:border-0 text-sm bg-base-100/50">
+                                <span class="material-symbols-outlined text-base-content/50 text-lg"
+                                      x-text="getIcon(item.type)"></span>
+                                <span class="truncate" x-html="highlightMatch(item.text)"></span>
+                            </a>
+                        </li>
+                    </template>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script>
+    function sidebarSearchComponent() {
+        return {
+            query: '',
+            suggestions: [],
+            loading: false,
+
+            fetchSuggestions() {
+                if (this.query.length < 1) {
+                    this.suggestions = [];
+                    return;
+                }
+                
+                this.loading = true;
+                fetch(`/search/?type=suggest&q=${encodeURIComponent(this.query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        this.suggestions = data.results;
+                        this.loading = false;
+                    })
+                    .catch(() => {
+                        this.loading = false;
+                    });
+            },
+
+            search() {
+                if (this.query.trim()) {
+                    window.location.href = `/search/?q=${encodeURIComponent(this.query)}`;
+                }
+            },
+
+            getIcon(type) {
+                const icons = { 'post': 'article', 'tag': 'tag', 'category': 'category', 'user': 'person' };
+                return icons[type] || 'search';
+            },
+
+            highlightMatch(text) {
+                if (!this.query) return text;
+                try {
+                    const regex = new RegExp(`(${this.query})`, 'gi');
+                    return text.replace(regex, '<span class="text-primary font-bold">$1</span>');
+                } catch (e) { return text; }
+            }
+        }
+    }
+    </script>
+    <!-- About Widget -->
+    
+        <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 font-heading">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-lg">person</span>
+                </span>
+                关于我
+            </h3>
+            <div class="flex flex-col items-center text-center">
+                <div class="avatar mb-4">
+                    <div class="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+                        
+                            
+                                <img src="/static/theme/img/avatar.jpg" alt="Avatar" />
+                            
+                        
+                    </div>
+                </div>
+                <div class="prose prose-sm text-base-content/70">Hello! I'm a Django developer.</div>
+            </div>
+        </div>
+    
+    <!-- Navigation Menu -->
+    
+        <div class="bg-base-100 rounded-3xl border border-base-content/5 p-4 hover:border-primary/20 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300">
+            <h3 class="font-bold text-lg mb-4 flex items-center gap-2 font-heading px-2 pt-2">
+                <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-lg">menu_open</span>
+                </span>
+                导航菜单
+            </h3>
+            <ul class="flex flex-col gap-2">
+                
+                    <li>
+                        <a href="https://roll.choyeon.cc/"
+                           
+                           class="flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-base-content/5 hover:bg-base-200/50 transition-all duration-300 group w-full">
+                            <span class="font-medium text-sm pl-2 border-l-2 border-transparent group-hover:border-primary group-hover:text-primary transition-all duration-300">团队roll点工具</span>
+                            <span class="material-symbols-outlined text-[16px] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary">arrow_forward</span>
+                        </a>
+                    </li>
+                
+                    <li>
+                        <a href="/guestbook/"
+                           
+                           class="flex items-center justify-between px-3 py-2 rounded-xl border border-transparent hover:border-base-content/5 hover:bg-base-200/50 transition-all duration-300 group w-full">
+                            <span class="font-medium text-sm pl-2 border-l-2 border-transparent group-hover:border-primary group-hover:text-primary transition-all duration-300">留言板</span>
+                            <span class="material-symbols-outlined text-[16px] opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300 text-primary">arrow_forward</span>
+                        </a>
+                    </li>
+                
+            </ul>
+        </div>
+    
+    <!-- Popular Posts -->
+    
+        
+        <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-secondary/20 hover:shadow-xl hover:shadow-secondary/5 transition-all duration-300">
+            <h3 class="font-bold text-lg mb-5 flex items-center gap-2 font-heading">
+                <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                    <span class="material-symbols-outlined text-lg">trending_up</span>
+                </span>
+                热门文章
+            </h3>
+            <div class="flex flex-col gap-5">
+                
+                    <div class="flex gap-4 group/item relative">
+                        <span class="absolute -left-3 -top-2 text-6xl font-black text-base-content/5 select-none -z-10 transition-colors group-hover/item:text-secondary/10">1</span>
+                        <a href="/post/meetinggoaltravel/"
+                           class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-base-200 shadow-sm group-hover/item:shadow-md transition-all">
+                            
+                                <div class="w-full h-full pattern-placeholder bg-gradient-to-br from-primary/10 to-secondary/10"
+                                     data-seed="注意其实那些作品这是市场全国网站"></div>
+                            
+                        </a>
+                        <div class="flex flex-col justify-center py-1">
+                            <a href="/post/meetinggoaltravel/"
+                               class="font-bold text-sm leading-snug line-clamp-2 hover:text-secondary transition-colors mb-2">注意其实那些作品这是市场全国网站</a>
+                            <div class="flex items-center gap-3 text-xs text-base-content/50">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                    10007
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                    01-19
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="flex gap-4 group/item relative">
+                        <span class="absolute -left-3 -top-2 text-6xl font-black text-base-content/5 select-none -z-10 transition-colors group-hover/item:text-secondary/10">2</span>
+                        <a href="/post/againststafflikedo/"
+                           class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-base-200 shadow-sm group-hover/item:shadow-md transition-all">
+                            
+                                <img src="/media/CACHE/images/posts/1123/e6d14eeeadecc03f5290d579770c5723.webp"
+                                     alt="学生参加等级的是部门也是地址"
+                                     class="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-500"
+                                     loading="lazy">
+                            
+                        </a>
+                        <div class="flex flex-col justify-center py-1">
+                            <a href="/post/againststafflikedo/"
+                               class="font-bold text-sm leading-snug line-clamp-2 hover:text-secondary transition-colors mb-2">学生参加等级的是部门也是地址</a>
+                            <div class="flex items-center gap-3 text-xs text-base-content/50">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                    7909
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                    02-01
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="flex gap-4 group/item relative">
+                        <span class="absolute -left-3 -top-2 text-6xl font-black text-base-content/5 select-none -z-10 transition-colors group-hover/item:text-secondary/10">3</span>
+                        <a href="/post/startpaintingoften/"
+                           class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-base-200 shadow-sm group-hover/item:shadow-md transition-all">
+                            
+                                <div class="w-full h-full pattern-placeholder bg-gradient-to-br from-primary/10 to-secondary/10"
+                                     data-seed="责任政府其他控制空间简介大家"></div>
+                            
+                        </a>
+                        <div class="flex flex-col justify-center py-1">
+                            <a href="/post/startpaintingoften/"
+                               class="font-bold text-sm leading-snug line-clamp-2 hover:text-secondary transition-colors mb-2">责任政府其他控制空间简介大家</a>
+                            <div class="flex items-center gap-3 text-xs text-base-content/50">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                    7313
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                    01-19
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="flex gap-4 group/item relative">
+                        <span class="absolute -left-3 -top-2 text-6xl font-black text-base-content/5 select-none -z-10 transition-colors group-hover/item:text-secondary/10">4</span>
+                        <a href="/post/thoughtbacksystem/"
+                           class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-base-200 shadow-sm group-hover/item:shadow-md transition-all">
+                            
+                                <div class="w-full h-full pattern-placeholder bg-gradient-to-br from-primary/10 to-secondary/10"
+                                     data-seed="网络公司介绍不是一点个人但是"></div>
+                            
+                        </a>
+                        <div class="flex flex-col justify-center py-1">
+                            <a href="/post/thoughtbacksystem/"
+                               class="font-bold text-sm leading-snug line-clamp-2 hover:text-secondary transition-colors mb-2">网络公司介绍不是一点个人但是</a>
+                            <div class="flex items-center gap-3 text-xs text-base-content/50">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                    7053
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                    01-19
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                
+                    <div class="flex gap-4 group/item relative">
+                        <span class="absolute -left-3 -top-2 text-6xl font-black text-base-content/5 select-none -z-10 transition-colors group-hover/item:text-secondary/10">5</span>
+                        <a href="/post/partwhomoil/"
+                           class="w-20 h-20 rounded-2xl overflow-hidden shrink-0 bg-base-200 shadow-sm group-hover/item:shadow-md transition-all">
+                            
+                                <img src="/media/CACHE/images/posts/11/3820e531cb9e6834c4acef27c4d14d32.webp"
+                                     alt="的人任何一样起来当然推荐最大"
+                                     class="w-full h-full object-cover group-hover/item:scale-110 transition-transform duration-500"
+                                     loading="lazy">
+                            
+                        </a>
+                        <div class="flex flex-col justify-center py-1">
+                            <a href="/post/partwhomoil/"
+                               class="font-bold text-sm leading-snug line-clamp-2 hover:text-secondary transition-colors mb-2">的人任何一样起来当然推荐最大</a>
+                            <div class="flex items-center gap-3 text-xs text-base-content/50">
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">visibility</span>
+                                    4634
+                                </span>
+                                <span class="flex items-center gap-1">
+                                    <span class="material-symbols-outlined text-[14px]">calendar_today</span>
+                                    01-31
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                
+            </div>
+        </div>
+    
+
+<!-- Tag Cloud -->
+
+    
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-accent/20 hover:shadow-xl hover:shadow-accent/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-5 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">label</span>
+            </span>
+            标签云
+        </h3>
+        <div class="flex flex-wrap gap-2">
+            
+                
+                    <a href="/tag/python/"
+                       class="badge border-none py-3 px-3 gap-1.5 transition-all hover:scale-105 hover:brightness-110 shadow-sm"
+                       style="background-color: #3b82f615;
+                              color: #3b82f6">
+                        <span class="font-medium">Python</span>
+                        <span class="opacity-60 text-xs">0</span>
+                    </a>
+                
+            
+                
+                    <a href="/tag/olive-oil/"
+                       class="badge border-none py-3 px-3 gap-1.5 transition-all hover:scale-105 hover:brightness-110 shadow-sm"
+                       style="background-color: #64748B15;
+                              color: #64748B">
+                        <span class="font-medium">橄榄油</span>
+                        <span class="opacity-60 text-xs">0</span>
+                    </a>
+                
+            
+                
+                    <a href="/tag/testt/"
+                       class="badge border-none py-3 px-3 gap-1.5 transition-all hover:scale-105 hover:brightness-110 shadow-sm"
+                       style="background-color: #64748B15;
+                              color: #64748B">
+                        <span class="font-medium">测试</span>
+                        <span class="opacity-60 text-xs">0</span>
+                    </a>
+                
+            
+        </div>
+    </div>
+
+
+<!-- Recent Comments -->
+
+    
+    
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-info/20 hover:shadow-xl hover:shadow-info/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-5 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-info/10 text-info flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">forum</span>
+            </span>
+            最新评论
+        </h3>
+        <div class="flex flex-col gap-5">
+            
+                <div class="flex gap-3 group/comment">
+                    <div class="avatar placeholder shrink-0 mt-1">
+                        <div class="bg-base-200 rounded-xl w-10 h-10 ring-1 ring-base-content/5 group-hover/comment:ring-info/30 transition-all">
+                            <img src="/media/avatars/b_98b5914d18cf01d018577e99fb45acc9.jpg"
+                                 alt="admin">
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 min-w-0 bg-base-200/30 p-3 rounded-2xl rounded-tl-none hover:bg-base-200/60 transition-colors">
+                        <div class="flex justify-between items-center w-full mb-1">
+                            <span class="font-bold text-sm truncate">Choyeon</span>
+                            <span class="text-[10px] text-base-content/40 whitespace-nowrap">1 周，3 日前</span>
+                        </div>
+                        <a href="/post/partwhomoil/#comment-406"
+                           class="text-xs text-base-content/70 line-clamp-2 hover:text-info transition-colors leading-relaxed">
+                            测试
+                        </a>
+                    </div>
+                </div>
+            
+                <div class="flex gap-3 group/comment">
+                    <div class="avatar placeholder shrink-0 mt-1">
+                        <div class="bg-base-200 rounded-xl w-10 h-10 ring-1 ring-base-content/5 group-hover/comment:ring-info/30 transition-all">
+                            <img src="/static/theme/img/avatar-default.svg"
+                                 alt="guiyingtan">
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 min-w-0 bg-base-200/30 p-3 rounded-2xl rounded-tl-none hover:bg-base-200/60 transition-colors">
+                        <div class="flex justify-between items-center w-full mb-1">
+                            <span class="font-bold text-sm truncate">冯红</span>
+                            <span class="text-[10px] text-base-content/40 whitespace-nowrap">3 周前</span>
+                        </div>
+                        <a href="/post/partwhomoil/#comment-378"
+                           class="text-xs text-base-content/70 line-clamp-2 hover:text-info transition-colors leading-relaxed">
+                            一般同时控制增加可是政府.教育技术点击这样.导弹
+                        </a>
+                    </div>
+                </div>
+            
+                <div class="flex gap-3 group/comment">
+                    <div class="avatar placeholder shrink-0 mt-1">
+                        <div class="bg-base-200 rounded-xl w-10 h-10 ring-1 ring-base-content/5 group-hover/comment:ring-info/30 transition-all">
+                            <img src="/static/theme/img/avatar-default.svg"
+                                 alt="xiulanding">
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 min-w-0 bg-base-200/30 p-3 rounded-2xl rounded-tl-none hover:bg-base-200/60 transition-colors">
+                        <div class="flex justify-between items-center w-full mb-1">
+                            <span class="font-bold text-sm truncate">董雷</span>
+                            <span class="text-[10px] text-base-content/40 whitespace-nowrap">3 周前</span>
+                        </div>
+                        <a href="/post/partwhomoil/#comment-377"
+                           class="text-xs text-base-content/70 line-clamp-2 hover:text-info transition-colors leading-relaxed">
+                            最大深圳操作免费.
+                        </a>
+                    </div>
+                </div>
+            
+                <div class="flex gap-3 group/comment">
+                    <div class="avatar placeholder shrink-0 mt-1">
+                        <div class="bg-base-200 rounded-xl w-10 h-10 ring-1 ring-base-content/5 group-hover/comment:ring-info/30 transition-all">
+                            <img src="/static/theme/img/avatar-default.svg"
+                                 alt="liaoyan">
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 min-w-0 bg-base-200/30 p-3 rounded-2xl rounded-tl-none hover:bg-base-200/60 transition-colors">
+                        <div class="flex justify-between items-center w-full mb-1">
+                            <span class="font-bold text-sm truncate">李杨</span>
+                            <span class="text-[10px] text-base-content/40 whitespace-nowrap">3 周前</span>
+                        </div>
+                        <a href="/post/partwhomoil/#comment-376"
+                           class="text-xs text-base-content/70 line-clamp-2 hover:text-info transition-colors leading-relaxed">
+                            是否能够其实单位密码无法.关于报告合作为什.地址程序事情电话.信息商品帮助控制.回复结果电脑希望现在系列决定支持.
+                        </a>
+                    </div>
+                </div>
+            
+                <div class="flex gap-3 group/comment">
+                    <div class="avatar placeholder shrink-0 mt-1">
+                        <div class="bg-base-200 rounded-xl w-10 h-10 ring-1 ring-base-content/5 group-hover/comment:ring-info/30 transition-all">
+                            <img src="/static/theme/img/avatar-default.svg"
+                                 alt="guiyingtan">
+                        </div>
+                    </div>
+                    <div class="flex flex-col flex-1 min-w-0 bg-base-200/30 p-3 rounded-2xl rounded-tl-none hover:bg-base-200/60 transition-colors">
+                        <div class="flex justify-between items-center w-full mb-1">
+                            <span class="font-bold text-sm truncate">冯红</span>
+                            <span class="text-[10px] text-base-content/40 whitespace-nowrap">3 周前</span>
+                        </div>
+                        <a href="/post/partwhomoil/#comment-375"
+                           class="text-xs text-base-content/70 line-clamp-2 hover:text-info transition-colors leading-relaxed">
+                            主要学校会员中文日本那个文件论坛.
+                        </a>
+                    </div>
+                </div>
+            
+        </div>
+    </div>
+
+
+<!-- Friend Links -->
+
+    
+    <div class="group bg-base-100 rounded-3xl border border-base-content/5 p-6 hover:border-success/20 hover:shadow-xl hover:shadow-success/5 transition-all duration-300">
+        <h3 class="font-bold text-lg mb-5 flex items-center gap-2 font-heading">
+            <span class="w-8 h-8 rounded-lg bg-success/10 text-success flex items-center justify-center">
+                <span class="material-symbols-outlined text-lg">link</span>
+            </span>
+            友情链接
+        </h3>
+        <div class="grid grid-cols-2 gap-3">
+            
+                <a href="https://www.bilibili.com/"
+                   target="_blank"
+                   class="flex items-center gap-2 p-2 rounded-xl hover:bg-base-200/50 transition-all group/link">
+                    
+                        <img src="https://www.bilibili.com/favicon.ico"
+                             class="w-6 h-6 rounded-lg object-cover shrink-0 shadow-sm group-hover/link:scale-110 transition-transform"
+                             onerror="this.src='https://ui-avatars.com/api/?name=哔哩哔哩&background=random'">
+                    
+                    <span class="truncate text-sm font-medium opacity-80 group-hover/link:opacity-100 group-hover/link:text-success transition-colors">哔哩哔哩</span>
+                </a>
+            
+                <a href="https://www.djangoproject.com/"
+                   target="_blank"
+                   class="flex items-center gap-2 p-2 rounded-xl hover:bg-base-200/50 transition-all group/link">
+                    
+                        <img src="https://www.djangoproject.com/favicon.ico"
+                             class="w-6 h-6 rounded-lg object-cover shrink-0 shadow-sm group-hover/link:scale-110 transition-transform"
+                             onerror="this.src='https://ui-avatars.com/api/?name=Django Official&background=random'">
+                    
+                    <span class="truncate text-sm font-medium opacity-80 group-hover/link:opacity-100 group-hover/link:text-success transition-colors">Django Official</span>
+                </a>
+            
+                <a href="https://www.ithome.com/"
+                   target="_blank"
+                   class="flex items-center gap-2 p-2 rounded-xl hover:bg-base-200/50 transition-all group/link">
+                    
+                        <img src="https://www.ithome.com/favicon.ico"
+                             class="w-6 h-6 rounded-lg object-cover shrink-0 shadow-sm group-hover/link:scale-110 transition-transform"
+                             onerror="this.src='https://ui-avatars.com/api/?name=it之家&background=random'">
+                    
+                    <span class="truncate text-sm font-medium opacity-80 group-hover/link:opacity-100 group-hover/link:text-success transition-colors">it之家</span>
+                </a>
+            
+                <a href="https://www.python.org/"
+                   target="_blank"
+                   class="flex items-center gap-2 p-2 rounded-xl hover:bg-base-200/50 transition-all group/link">
+                    
+                        <img src="https://www.python.org/favicon.ico"
+                             class="w-6 h-6 rounded-lg object-cover shrink-0 shadow-sm group-hover/link:scale-110 transition-transform"
+                             onerror="this.src='https://ui-avatars.com/api/?name=Python&background=random'">
+                    
+                    <span class="truncate text-sm font-medium opacity-80 group-hover/link:opacity-100 group-hover/link:text-success transition-colors">Python</span>
+                </a>
+            
+                <a href="https://tailwindcss.com/"
+                   target="_blank"
+                   class="flex items-center gap-2 p-2 rounded-xl hover:bg-base-200/50 transition-all group/link">
+                    
+                        <img src="https://tailwindcss.com/favicon.ico"
+                             class="w-6 h-6 rounded-lg object-cover shrink-0 shadow-sm group-hover/link:scale-110 transition-transform"
+                             onerror="this.src='https://ui-avatars.com/api/?name=Tailwind CSS&background=random'">
+                    
+                    <span class="truncate text-sm font-medium opacity-80 group-hover/link:opacity-100 group-hover/link:text-success transition-colors">Tailwind CSS</span>
+                </a>
+            
+                <a href="https://github.com/"
+                   target="_blank"
+                   class="flex items-center gap-2 p-2 rounded-xl hover:bg-base-200/50 transition-all group/link">
+                    
+                        <img src="https://github.com/favicon.ico"
+                             class="w-6 h-6 rounded-lg object-cover shrink-0 shadow-sm group-hover/link:scale-110 transition-transform"
+                             onerror="this.src='https://ui-avatars.com/api/?name=GitHub&background=random'">
+                    
+                    <span class="truncate text-sm font-medium opacity-80 group-hover/link:opacity-100 group-hover/link:text-success transition-colors">GitHub</span>
+                </a>
+            
+                <a href="https://stackoverflow.com/"
+                   target="_blank"
+                   class="flex items-center gap-2 p-2 rounded-xl hover:bg-base-200/50 transition-all group/link">
+                    
+                        <img src="https://stackoverflow.com/favicon.ico"
+                             class="w-6 h-6 rounded-lg object-cover shrink-0 shadow-sm group-hover/link:scale-110 transition-transform"
+                             onerror="this.src='https://ui-avatars.com/api/?name=Stack Overflow&background=random'">
+                    
+                    <span class="truncate text-sm font-medium opacity-80 group-hover/link:opacity-100 group-hover/link:text-success transition-colors">Stack Overflow</span>
+                </a>
+            
+        </div>
+    </div>
+
+
+</div>
+</div>
+    </div>
+</div>
+
+        </main>
+        <!-- 全局确认弹窗 (用于删除操作等) -->
+        <!-- Global Confirmation Modal -->
+
+<dialog id="global_confirm_modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg flex items-center gap-2 text-warning"
+            id="global_confirm_title">
+            <span class="material-symbols-outlined">warning</span>
+            <span id="confirm_title_text">确认操作</span>
+        </h3>
+        <p class="py-4 text-base-content/80" id="global_confirm_message">确定要执行此操作吗？</p>
+        <div class="modal-action">
+            <button type="button"
+                    class="btn btn-ghost"
+                    data-modal-close="global_confirm_modal">取消</button>
+            <button type="button"
+                    id="global_confirm_btn"
+                    class="btn btn-error text-white shadow-lg shadow-error/20">确定</button>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+<!-- Global Alert Modal -->
+<dialog id="global_alert_modal" class="modal">
+    <div class="modal-box">
+        <h3 class="font-bold text-lg flex items-center gap-2 text-info">
+            <span class="material-symbols-outlined">info</span>
+            提示
+        </h3>
+        <p class="py-4 text-base-content/80" id="global_alert_message"></p>
+        <div class="modal-action">
+            <button type="button"
+                    class="btn btn-primary"
+                    data-modal-close="global_alert_modal">确定</button>
+        </div>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>close</button>
+    </form>
+</dialog>
+<script>
+    // Bind close buttons for included modals
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('[data-modal-close]').forEach((el) => {
+            if (el.dataset.bound === '1') return;
+            el.dataset.bound = '1';
+            el.addEventListener('click', (evt) => {
+                evt.preventDefault();
+                const modalId = el.getAttribute('data-modal-close');
+                const modal = document.getElementById(modalId);
+                if (modal) modal.close();
+            });
+        });
+    });
+</script>
+
+        <!-- 文章详情页骨架屏 (加载占位) -->
+        <div id="article-skeleton"
+     class="htmx-indicator fixed inset-0 z-50 bg-base-100 overflow-y-auto opacity-0 pointer-events-none transition-opacity duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 animate-pulse">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
+            <!-- Content Column -->
+            <div class="lg:col-span-8">
+                <!-- Header Skeleton -->
+                <div class="flex flex-col items-center mb-12">
+                    <div class="h-6 w-24 bg-base-300 rounded-full mb-6"></div>
+                    <div class="h-12 w-3/4 bg-base-300 rounded-lg mb-6"></div>
+                    <div class="flex gap-6">
+                        <div class="h-4 w-20 bg-base-300 rounded"></div>
+                        <div class="h-4 w-20 bg-base-300 rounded"></div>
+                        <div class="h-4 w-20 bg-base-300 rounded"></div>
+                    </div>
+                </div>
+                <!-- Cover Image Skeleton -->
+                <div class="w-full aspect-video bg-base-300 rounded-3xl mb-12"></div>
+                <!-- Body Skeleton -->
+                <div class="space-y-4">
+                    <div class="h-4 bg-base-300 rounded w-full"></div>
+                    <div class="h-4 bg-base-300 rounded w-full"></div>
+                    <div class="h-4 bg-base-300 rounded w-5/6"></div>
+                    <div class="h-4 bg-base-300 rounded w-full"></div>
+                    <div class="h-32 bg-base-300 rounded w-full my-8"></div>
+                    <!-- Code block / Image -->
+                    <div class="h-4 bg-base-300 rounded w-full"></div>
+                    <div class="h-4 bg-base-300 rounded w-4/5"></div>
+                </div>
+            </div>
+            <!-- Sidebar Skeleton -->
+            <div class="hidden lg:block lg:col-span-4 space-y-8">
+                <div class="h-64 bg-base-300 rounded-2xl"></div>
+                <div class="h-96 bg-base-300 rounded-2xl"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- 页脚 -->
+        
+<footer class="footer p-10 bg-base-100/50 text-base-content border-t border-base-content/5 relative overflow-hidden">
+    <!-- Decorative background elements -->
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50">
+    </div>
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 w-full max-w-7xl mx-auto relative z-10">
+        <!-- Branding -->
+        <div class="md:col-span-1 flex flex-col gap-4">
+            <a href="/" class="flex items-center gap-2">
+                
+                <span class="text-2xl font-heading font-bold text-primary">Choyeon Blog</span>
+            </a>
+            <p class="opacity-70 text-sm leading-relaxed">
+                
+                测试阶段
+            </p>
+            <div class="flex gap-2 mt-2">
+                
+                    <a href="/feed/"
+                       target="_blank"
+                       class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
+                       title="RSS 订阅">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             width="20"
+                             height="20"
+                             viewBox="0 0 24 24"
+                             class="fill-current opacity-70 hover:opacity-100">
+                            <path d="M19 20.001C19 11.729 12.271 5 4 5v2c7.168 0 13 5.832 13 13.001h2zM4 11v2c3.859 0 7 3.14 7 7h2c0-4.962-4.038-9-9-9zm4 8.333c0 .921-.746 1.667-1.667 1.667-.92 0-1.667-.746-1.667-1.667s.747-1.667 1.667-1.667c.921 0 1.667.746 1.667 1.667z" />
+                        </svg>
+                    </a>
+                
+                
+                
+                
+                
+                    <a href="mailto:choyoen@foxmail.com"
+                       class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
+                       title="Email">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             width="20"
+                             height="20"
+                             viewBox="0 0 24 24"
+                             class="fill-current opacity-70 hover:opacity-100">
+                            <path d="M0 3v18h24V3H0zm6.623 7.929l-4.623 5.712V8.164l4.623 2.765zm2.253 2.545l3.124 2.124 3.124-2.124 5.297 6.526H3.579l5.297-6.526zm6.623-2.545l4.623-2.765v6.477l-4.623-5.712zM21.61 5.628l-9.61 5.744L2.39 5.628h19.22z" />
+                        </svg>
+                    </a>
+                
+            </div>
+        </div>
+        <!-- Quick Links -->
+        <div class="md:col-span-1 flex flex-col gap-4">
+            <span class="footer-title opacity-100 text-base font-bold text-primary">导航</span>
+            <div class="flex flex-col gap-2">
+                <a href="/"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    首页
+                </a>
+                <a href="/posts/"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    文章
+                </a>
+                <a href="/categories/"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    分类
+                </a>
+                <a href="/tags/"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    标签
+                </a>
+                <a href="/archives/"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    归档
+                </a>
+                <a href="/guestbook/"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    留言板
+                </a>
+                <a href="/about/"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    关于
+                </a>
+                <a href="/contact/"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    联系
+                </a>
+                <a href="/sitemap.xml"
+                   target="_blank"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    网站地图
+                </a>
+            </div>
+        </div>
+        <!-- Subscribe -->
+        <div class="md:col-span-2 flex flex-col gap-4">
+            
+                <div>
+                    <span class="footer-title opacity-100 text-base mb-3 block">友情链接</span>
+                    <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm opacity-70">
+                        
+                            <a href="https://www.bilibili.com/"
+                               target="_blank"
+                               class="link link-hover hover:text-primary transition-colors inline-flex items-center gap-1">
+                                
+                                    <img src="https://www.bilibili.com/favicon.ico"
+                                         alt="哔哩哔哩"
+                                         class="w-4 h-4 object-contain"
+                                         onerror="this.style.display='none'">
+                                
+                                哔哩哔哩
+                            </a>
+                        
+                            <a href="https://www.djangoproject.com/"
+                               target="_blank"
+                               class="link link-hover hover:text-primary transition-colors inline-flex items-center gap-1">
+                                
+                                    <img src="https://www.djangoproject.com/favicon.ico"
+                                         alt="Django Official"
+                                         class="w-4 h-4 object-contain"
+                                         onerror="this.style.display='none'">
+                                
+                                Django Official
+                            </a>
+                        
+                            <a href="https://www.ithome.com/"
+                               target="_blank"
+                               class="link link-hover hover:text-primary transition-colors inline-flex items-center gap-1">
+                                
+                                    <img src="https://www.ithome.com/favicon.ico"
+                                         alt="it之家"
+                                         class="w-4 h-4 object-contain"
+                                         onerror="this.style.display='none'">
+                                
+                                it之家
+                            </a>
+                        
+                            <a href="https://www.python.org/"
+                               target="_blank"
+                               class="link link-hover hover:text-primary transition-colors inline-flex items-center gap-1">
+                                
+                                    <img src="https://www.python.org/favicon.ico"
+                                         alt="Python"
+                                         class="w-4 h-4 object-contain"
+                                         onerror="this.style.display='none'">
+                                
+                                Python
+                            </a>
+                        
+                            <a href="https://tailwindcss.com/"
+                               target="_blank"
+                               class="link link-hover hover:text-primary transition-colors inline-flex items-center gap-1">
+                                
+                                    <img src="https://tailwindcss.com/favicon.ico"
+                                         alt="Tailwind CSS"
+                                         class="w-4 h-4 object-contain"
+                                         onerror="this.style.display='none'">
+                                
+                                Tailwind CSS
+                            </a>
+                        
+                            <a href="https://github.com/"
+                               target="_blank"
+                               class="link link-hover hover:text-primary transition-colors inline-flex items-center gap-1">
+                                
+                                    <img src="https://github.com/favicon.ico"
+                                         alt="GitHub"
+                                         class="w-4 h-4 object-contain"
+                                         onerror="this.style.display='none'">
+                                
+                                GitHub
+                            </a>
+                        
+                            <a href="https://stackoverflow.com/"
+                               target="_blank"
+                               class="link link-hover hover:text-primary transition-colors inline-flex items-center gap-1">
+                                
+                                    <img src="https://stackoverflow.com/favicon.ico"
+                                         alt="Stack Overflow"
+                                         class="w-4 h-4 object-contain"
+                                         onerror="this.style.display='none'">
+                                
+                                Stack Overflow
+                            </a>
+                        
+                    </div>
+                </div>
+            
+        </div>
+    </div>
+    <div class="w-full max-w-7xl mx-auto border-t border-base-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs opacity-60">
+        <div class="flex flex-col md:flex-row gap-4 items-center">
+            <p>
+                &copy;
+                2026-
+                2026 Choyeon Blog. All rights reserved.
+            </p>
+            
+            
+            
+                <span class="hidden md:inline">|</span>
+                <p>© 2026 Choyeon Blog</p>
+            
+            
+                <span class="hidden md:inline">|</span>
+                <a href="/p/privacy-policy/" class="link link-hover">隐私政策</a>
+            
+            
+                <span class="hidden md:inline">|</span>
+                <a href="/p/terms-of-service/" class="link link-hover">服务条款</a>
+            
+        </div>
+        <div class="flex items-center gap-2">
+            <span>Powered by <a href="https://github.com/ChuyuChoyeon/Rosetta"
+    target="_blank"
+    class="link link-hover font-bold text-primary hover:underline">Rosetta</a></span>
+            
+        </div>
+    </div>
+</footer>
+
+    </div>
+    <!-- 回到顶部按钮 (Floating Action Button) -->
+    <button x-show="showScrollTop"
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 translate-y-10"
+            x-transition:enter-end="opacity-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-300"
+            x-transition:leave-start="opacity-100 translate-y-0"
+            x-transition:leave-end="opacity-0 translate-y-10"
+            @click="window.scrollTo({top: 0, behavior: 'smooth'})"
+            class="fixed bottom-8 right-8 btn btn-circle btn-primary shadow-xl z-40 glass-panel border-none text-primary-content hover:scale-110 transition-transform duration-200"
+            aria-label="Scroll to top">
+        <svg xmlns="http://www.w3.org/2000/svg"
+             class="h-6 w-6"
+             fill="none"
+             viewBox="0 0 24 24"
+             stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+        </svg>
+    </button>
+    <!-- 注入后台配置的统计代码 (Body/Footer) -->
+    
+    <!-- 注入后台配置的自定义 Footer 代码 (如客服脚本) -->
+    
+
+
+<link rel="stylesheet" href="/static/debug_toolbar/css/print.css" media="print">
+<link rel="stylesheet" href="/static/debug_toolbar/css/toolbar.css">
+
+
+<script type="module" src="/static/debug_toolbar/js/toolbar.js" async></script>
+
+<div id="djDebug" class="djdt-hidden" dir="ltr"
+     
+     data-request-id="1fa7ee4401bb422786fb7b77073b19fc"
+     data-render-panel-url="/__debug__/render_panel/"
+     
+     
+     
+     data-sidebar-url="/__debug__/history_sidebar/"
+     
+     data-default-show="true"
+       data-update-on-fetch="False">
+  <div class="djdt-hidden" id="djDebugToolbar">
+    <ul id="djDebugPanelList">
+      <li><a id="djHideToolBarButton" href="#" title="Hide toolbar">Hide »</a></li>
+      <li>
+        <a id="djToggleThemeButton" href="#" title="Toggle Theme">
+          Toggle Theme <svg
+  aria-hidden="true"
+  class="djdt-hidden theme-auto"
+  fill="currentColor"
+  viewBox="0 0 32 32"
+  version="1.1"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M0 16q0 3.264 1.28 6.24t3.392 5.088 5.12 3.424 6.208 1.248q3.264 0 6.24-1.248t5.088-3.424 3.392-5.088 1.28-6.24-1.28-6.208-3.392-5.12-5.088-3.392-6.24-1.28q-3.264 0-6.208 1.28t-5.12 3.392-3.392 5.12-1.28 6.208zM4 16q0-3.264 1.6-6.016t4.384-4.352 6.016-1.632 6.016 1.632 4.384 4.352 1.6 6.016-1.6 6.048-4.384 4.352-6.016 1.6-6.016-1.6-4.384-4.352-1.6-6.048zM16 26.016q2.72 0 5.024-1.344t3.648-3.648 1.344-5.024-1.344-4.992-3.648-3.648-5.024-1.344v20z"
+  ></path>
+</svg>
+<svg
+  aria-hidden="true"
+  class="djdt-hidden theme-light"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    fill-rule="evenodd"
+    clip-rule="evenodd"
+    d="M12 1.25C12.4142 1.25 12.75 1.58579 12.75 2V4C12.75 4.41421 12.4142 4.75 12 4.75C11.5858 4.75 11.25 4.41421 11.25 4V2C11.25 1.58579 11.5858 1.25 12 1.25ZM3.66865 3.71609C3.94815 3.41039 4.42255 3.38915 4.72825 3.66865L6.95026 5.70024C7.25596 5.97974 7.2772 6.45413 6.9977 6.75983C6.7182 7.06553 6.2438 7.08677 5.9381 6.80727L3.71609 4.77569C3.41039 4.49619 3.38915 4.02179 3.66865 3.71609ZM20.3314 3.71609C20.6109 4.02179 20.5896 4.49619 20.2839 4.77569L18.0619 6.80727C17.7562 7.08677 17.2818 7.06553 17.0023 6.75983C16.7228 6.45413 16.744 5.97974 17.0497 5.70024L19.2718 3.66865C19.5775 3.38915 20.0518 3.41039 20.3314 3.71609ZM12 7.75C9.65279 7.75 7.75 9.65279 7.75 12C7.75 14.3472 9.65279 16.25 12 16.25C14.3472 16.25 16.25 14.3472 16.25 12C16.25 9.65279 14.3472 7.75 12 7.75ZM6.25 12C6.25 8.82436 8.82436 6.25 12 6.25C15.1756 6.25 17.75 8.82436 17.75 12C17.75 15.1756 15.1756 17.75 12 17.75C8.82436 17.75 6.25 15.1756 6.25 12ZM1.25 12C1.25 11.5858 1.58579 11.25 2 11.25H4C4.41421 11.25 4.75 11.5858 4.75 12C4.75 12.4142 4.41421 12.75 4 12.75H2C1.58579 12.75 1.25 12.4142 1.25 12ZM19.25 12C19.25 11.5858 19.5858 11.25 20 11.25H22C22.4142 11.25 22.75 11.5858 22.75 12C22.75 12.4142 22.4142 12.75 22 12.75H20C19.5858 12.75 19.25 12.4142 19.25 12ZM17.0255 17.0252C17.3184 16.7323 17.7933 16.7323 18.0862 17.0252L20.3082 19.2475C20.6011 19.5404 20.601 20.0153 20.3081 20.3082C20.0152 20.6011 19.5403 20.601 19.2475 20.3081L17.0255 18.0858C16.7326 17.7929 16.7326 17.3181 17.0255 17.0252ZM6.97467 17.0253C7.26756 17.3182 7.26756 17.7931 6.97467 18.086L4.75244 20.3082C4.45955 20.6011 3.98468 20.6011 3.69178 20.3082C3.39889 20.0153 3.39889 19.5404 3.69178 19.2476L5.91401 17.0253C6.2069 16.7324 6.68177 16.7324 6.97467 17.0253ZM12 19.25C12.4142 19.25 12.75 19.5858 12.75 20V22C12.75 22.4142 12.4142 22.75 12 22.75C11.5858 22.75 11.25 22.4142 11.25 22V20C11.25 19.5858 11.5858 19.25 12 19.25Z"
+    fill="currentColor"
+  />
+</svg>
+<svg
+  aria-hidden="true"
+  class="djdt-hidden theme-dark"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M3.32031 11.6835C3.32031 16.6541 7.34975 20.6835 12.3203 20.6835C16.1075 20.6835 19.3483 18.3443 20.6768 15.032C19.6402 15.4486 18.5059 15.6834 17.3203 15.6834C12.3497 15.6834 8.32031 11.654 8.32031 6.68342C8.32031 5.50338 8.55165 4.36259 8.96453 3.32996C5.65605 4.66028 3.32031 7.89912 3.32031 11.6835Z"
+    stroke="currentColor"
+    stroke-width="2"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+</svg>
+
+        </a>
+      </li>
+      
+        
+
+<li id="djdt-HistoryPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtHistoryPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="历史" class="HistoryPanel">
+  
+  历史
+  
+    
+      <br><small>/</small>
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-VersionsPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtVersionsPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="Versions" class="VersionsPanel">
+  
+  Versions
+  
+    
+      <br><small>Django 6.0</small>
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-TimerPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtTimerPanel" checked title="Disable for next and successive requests">
+  
+    <div class="djdt-contentless">
+  
+  时间
+  
+    
+      <br><small>Total: 170.30ms</small>
+    
+  
+  
+    </div>
+  
+</li>
+
+      
+        
+
+<li id="djdt-SettingsPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtSettingsPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="Settings from &#x27;Rosetta.settings&#x27;" class="SettingsPanel">
+  
+  Settings
+  
+    
+      
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-HeadersPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtHeadersPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="Headers" class="HeadersPanel">
+  
+  Headers
+  
+    
+      
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-RequestPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtRequestPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="Request" class="RequestPanel">
+  
+  Request
+  
+    
+      <br><small>HomeView</small>
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-SQLPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtSQLPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="SQL queries from 1 connection" class="SQLPanel">
+  
+  SQL
+  
+    
+      <br><small>69 queries in 5.37ms</small>
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-StaticFilesPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtStaticFilesPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="Static files (0 found, 16 used)" class="StaticFilesPanel">
+  
+  Static files
+  
+    
+      <br><small>16 files used</small>
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-TemplatesPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtTemplatesPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="Templates (12 rendered)" class="TemplatesPanel">
+  
+  Templates
+  
+    
+      <br><small>blog/post_list.html</small>
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-AlertsPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtAlertsPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="Alerts" class="AlertsPanel">
+  
+  Alerts
+  
+    
+      
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-CachePanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtCachePanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="Cache calls from 1 backend" class="CachePanel">
+  
+  Cache
+  
+    
+      <br><small>35 calls in 0.90ms</small>
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-SignalsPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtSignalsPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="Signals" class="SignalsPanel">
+  
+  Signals
+  
+    
+      <br><small>94 receivers of 15 signals</small>
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-CommunityPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtCommunityPanel" checked title="Disable for next and successive requests">
+  
+    <a href="#" title="Community" class="CommunityPanel">
+  
+  Community
+  
+    
+      
+    
+  
+  
+    </a>
+  
+</li>
+
+      
+        
+
+<li id="djdt-RedirectsPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtRedirectsPanel" title="Enable for next and successive requests">
+  
+    <div class="djdt-contentless djdt-disabled">
+  
+  Intercept redirects
+  
+  
+    </div>
+  
+</li>
+
+      
+        
+
+<li id="djdt-ProfilingPanel" class="djDebugPanelButton">
+  <input type="checkbox" data-cookie="djdtProfilingPanel" title="Enable for next and successive requests">
+  
+    <div class="djdt-contentless djdt-disabled">
+  
+  Profiling
+  
+  
+    </div>
+  
+</li>
+
+      
+    </ul>
+  </div>
+  <div class="djdt-hidden" id="djDebugToolbarHandle">
+    <div title="Show toolbar" id="djShowToolBarButton">
+      <span id="djShowToolBarD">D</span><span id="djShowToolBarJ">J</span>DT
+    </div>
+  </div>
+
+  
+    
+
+
+  <div id="HistoryPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>历史</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+  <div id="VersionsPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>Versions</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+
+  
+    
+
+
+  <div id="SettingsPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>Settings from &#x27;Rosetta.settings&#x27;</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+  <div id="HeadersPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>Headers</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+  <div id="RequestPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>Request</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+  <div id="SQLPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>SQL queries from 1 connection</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+  <div id="StaticFilesPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>Static files (0 found, 16 used)</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+  <div id="TemplatesPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>Templates (12 rendered)</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+  <div id="AlertsPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>Alerts</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+  <div id="CachePanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>Cache calls from 1 backend</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+  <div id="SignalsPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>Signals</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+  <div id="CommunityPanel" class="djdt-panelContent djdt-hidden">
+    <div class="djDebugPanelTitle">
+      <h3>Community</h3>
+      <button type="button" class="djDebugClose">×</button>
+    </div>
+    <div class="djDebugPanelContent">
+      
+        <div class="djdt-loader"></div>
+        <div class="djdt-scroll"></div>
+      
+    </div>
+  </div>
+
+
+  
+    
+
+
+
+  
+    
+
+
+
+  
+  <div id="djDebugWindow" class="djdt-panelContent djdt-hidden"></div>
+</div>
+<script src="/static/django-browser-reload/reload-listener.js" data-worker-script-path="/static/django-browser-reload/reload-worker.js" data-events-path="/__reload__/events/" defer></script></body>
+</html>

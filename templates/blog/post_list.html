@@ -54,7 +54,7 @@
             {% else %}
                 <!-- Homepage Toggle -->
                 <div class="flex items-center gap-4">
-                    <h1 class="text-3xl font-bold font-heading hidden sm:block">{% trans "发现" %}</h1>
+                    <h1 class="text-3xl font-bold font-heading sr-only sm:not-sr-only sm:block">{% trans "发现" %}</h1>
                     <div class="join bg-base-200/50 p-1 rounded-xl border border-base-content/5 backdrop-blur-sm">
                         <a href="{% url 'home' %}?filter=latest"
                            class="join-item btn btn-sm border-0 rounded-lg transition-all duration-300 {% if current_filter != 'recommended' %}bg-base-100 shadow-sm text-primary font-bold{% else %}btn-ghost opacity-60 hover:opacity-100{% endif %}">

@@ -29,7 +29,7 @@
                 </div>
                 <!-- Client-side Viewer (ByteMD with Mermaid) -->
                 <div id="page-content" class="min-h-[200px] markdown-body"></div>
-                {{ page.content|json_script:"page-content-data" }}
+                {{ rendered_content|default:page.content|json_script:"page-content-data" }}
                 <!-- Viewer Initialization -->
                 <script src="{% static 'js/viewer.js' %}?v=4.4.0"></script>
                 <script>

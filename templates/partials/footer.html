@@ -26,12 +26,14 @@
                     <a href="{% url 'post_feed' %}"
                        target="_blank"
                        class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
-                       title="{% trans 'RSS 订阅' %}">
+                       title="{% trans 'RSS 订阅' %}"
+                       aria-label="{% trans 'RSS 订阅' %}">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              width="20"
                              height="20"
                              viewBox="0 0 24 24"
-                             class="fill-current opacity-70 hover:opacity-100">
+                             class="fill-current opacity-70 hover:opacity-100"
+                             aria-hidden="true">
                             <path d="M19 20.001C19 11.729 12.271 5 4 5v2c7.168 0 13 5.832 13 13.001h2zM4 11v2c3.859 0 7 3.14 7 7h2c0-4.962-4.038-9-9-9zm4 8.333c0 .921-.746 1.667-1.667 1.667-.92 0-1.667-.746-1.667-1.667s.747-1.667 1.667-1.667c.921 0 1.667.746 1.667 1.667z" />
                         </svg>
                     </a>
@@ -40,12 +42,14 @@
                     <a href="{{ config.GITHUB_URL }}"
                        target="_blank"
                        class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
-                       title="GitHub">
+                       title="GitHub"
+                       aria-label="GitHub">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              width="20"
                              height="20"
                              viewBox="0 0 24 24"
-                             class="fill-current opacity-70 hover:opacity-100">
+                             class="fill-current opacity-70 hover:opacity-100"
+                             aria-hidden="true">
                             <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
                         </svg>
                     </a>
@@ -54,12 +58,14 @@
                     <a href="{{ config.X_URL }}"
                        target="_blank"
                        class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
-                       title="X">
+                       title="X"
+                       aria-label="X (Twitter)">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              width="20"
                              height="20"
                              viewBox="0 0 24 24"
-                             class="fill-current opacity-70 hover:opacity-100">
+                             class="fill-current opacity-70 hover:opacity-100"
+                             aria-hidden="true">
                             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                         </svg>
                     </a>
@@ -68,12 +74,14 @@
                     <a href="{{ config.BILIBILI_URL }}"
                        target="_blank"
                        class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
-                       title="Bilibili">
+                       title="Bilibili"
+                       aria-label="Bilibili">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              width="20"
                              height="20"
                              viewBox="0 0 24 24"
-                             class="fill-current opacity-70 hover:opacity-100">
+                             class="fill-current opacity-70 hover:opacity-100"
+                             aria-hidden="true">
                             <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.87.001 17.36V13.73h-.001v-3.743c.035-1.511.556-2.765 1.559-3.76 1.004-.996 2.262-1.52 3.773-1.574h.854l-2.07-2.071.699-.698 2.07 2.069h10.23l2.07-2.069.698.698-2.07 2.071zM5.333 15.384l5.203-3.469-.958 3.469H5.333zm13.334 0v-3.469l-4.245 3.469h4.245z" />
                         </svg>
                     </a>
@@ -81,12 +89,14 @@
                 {% if config.CONTACT_EMAIL %}
                     <a href="mailto:{{ config.CONTACT_EMAIL }}"
                        class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
-                       title="Email">
+                       title="Email"
+                       aria-label="{% trans '发送邮件' %}">
                         <svg xmlns="http://www.w3.org/2000/svg"
                              width="20"
                              height="20"
                              viewBox="0 0 24 24"
-                             class="fill-current opacity-70 hover:opacity-100">
+                             class="fill-current opacity-70 hover:opacity-100"
+                             aria-hidden="true">
                             <path d="M0 3v18h24V3H0zm6.623 7.929l-4.623 5.712V8.164l4.623 2.765zm2.253 2.545l3.124 2.124 3.124-2.124 5.297 6.526H3.579l5.297-6.526zm6.623-2.545l4.623-2.765v6.477l-4.623-5.712zM21.61 5.628l-9.61 5.744L2.39 5.628h19.22z" />
                         </svg>
                     </a>

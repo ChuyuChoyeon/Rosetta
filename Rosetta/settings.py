@@ -400,10 +400,16 @@ CONSTANCE_ADDITIONAL_FIELDS = {"image_field": ["django.forms.ImageField", {}]}
 
 CONSTANCE_CONFIG = {
     "SITE_NAME": ("Rosetta Blog", "站点名称"),
-    "SITE_DESCRIPTION": ("A modern Django blog.", "站点描述"),
-    "SITE_KEYWORDS": ("blog, django, python", "SEO 关键词"),
-    "SITE_AUTHOR": ("Rosetta", "站点作者"),
-    "SITE_EMAIL": ("admin@example.com", "站点联系邮箱"),
+    "SITE_DESCRIPTION": (
+        "Rosetta 是一个基于 Django 和 Tailwind CSS 构建的现代博客平台，专注于提供卓越的阅读体验和代码分享。",
+        "站点描述",
+    ),
+    "SITE_KEYWORDS": (
+        "Rosetta, Django, Python, Tailwind CSS, 博客, 技术分享, 编程",
+        "SEO 关键词",
+    ),
+    "SITE_AUTHOR": ("Rosetta Team", "站点作者"),
+    "SITE_EMAIL": ("contact@rosetta.dev", "站点联系邮箱"),
     "SHOW_SITE_LOGO": (True, "是否显示站点 Logo"),
     "SITE_LOGO": ("/static/theme/img/logo.svg", "站点 Logo URL"),
     "SITE_FAVICON": ("/static/theme/img/favicon.ico", "站点 Favicon URL"),
@@ -412,11 +418,11 @@ CONSTANCE_CONFIG = {
     "SITE_TITLE_SUFFIX": (" - Rosetta", "站点标题后缀"),
     "ADMIN_NAVBAR_TITLE": ("Rosetta 管理后台", "后台导航栏标题"),
     "DASHBOARD_WELCOME_TEXT": (
-        "这里是您的站点概览，祝您有美好的一天。",
+        "欢迎回来！这里是您的站点概览。",
         "仪表盘欢迎语",
     ),
     "DASHBOARD_WELCOME_WORDS": (
-        "['Creator', 'Admin', 'Master', 'Manager']",
+        "['Creator', 'Admin', 'Master', 'Manager', 'Developer']",
         "仪表盘动态欢迎词 (Flip Words)",
     ),
     "FOOTER_TEXT": ("© 2026 Rosetta Blog", "页脚版权文本"),
@@ -454,7 +460,7 @@ CONSTANCE_CONFIG = {
     "EXTRA_HEAD_CODE": ("", "自定义 Head 代码 (CSS/JS)"),
     "EXTRA_FOOTER_CODE": ("", "自定义 Footer 代码 (JS)"),
     "CODE_HIGHLIGHT_STYLE": (
-        "default",
+        "monokai",
         "代码高亮风格 (Pygments)",
         list(pygments.styles.get_all_styles()),
     ),
@@ -471,7 +477,7 @@ CONSTANCE_CONFIG = {
     "PRIVACY_POLICY_URL": ("/p/privacy-policy/", "隐私政策链接"),
     "ANALYTICS_HEAD_CODE": ("", "统计代码 (Head) - 如 Google Analytics"),
     "ANALYTICS_BODY_CODE": ("", "统计代码 (Body) - 如百度统计"),
-    "SEO_ROBOTS_TXT": ("User-agent: *\nDisallow: /admin/", "Robots.txt 内容"),
+    "SEO_ROBOTS_TXT": ("User-agent: *\nAllow: /\nDisallow: /admin/\nDisallow: /api/", "Robots.txt 内容"),
 }
 
 CONSTANCE_CONFIG_FIELDSETS = {

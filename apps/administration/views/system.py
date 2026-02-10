@@ -308,9 +308,12 @@ class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
             }
         )
 
-        # 4. Privacy Policy Status
+        # 4. Privacy Policy & ToS Status
         context["privacy_policy_exists"] = Page.objects.filter(
             slug="privacy-policy"
+        ).exists()
+        context["tos_exists"] = Page.objects.filter(
+            slug="terms-of-service"
         ).exists()
 
         # 5. Backups
@@ -459,6 +462,7 @@ class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
             "clean_media": self.handle_clean_media,
             "rebuild_watson": self.handle_rebuild_watson,
             "init_privacy_policy": self.handle_init_privacy_policy,
+            "init_tos": self.handle_init_tos,
             "queue_images": self.handle_queue_images,
             "create_backup": self.handle_create_backup,
             "restore_backup": self.handle_restore_backup,
@@ -710,6 +714,202 @@ If you have any questions about this Privacy Policy, please contact us.
             page.save()
             messages.success(
                 request, _("隐私政策页面已初始化（包含中、英、日、繁体中文）")
+            )
+        except Exception as e:
+            messages.error(request, _("初始化失败: {error}").format(error=str(e)))
+
+        return redirect("administration:system_tools")
+
+    def handle_init_tos(self, request):
+        if Page.objects.filter(slug="terms-of-service").exists():
+            messages.warning(request, _("服务条款页面已存在"))
+            return redirect("administration:system_tools")
+
+        try:
+            # 1. Prepare Content for all supported languages
+            content_map = {
+                "zh_hans": {
+                    "title": "服务条款",
+                    "content": """## 服务条款
+
+**生效日期：** 2024年1月1日
+
+欢迎使用我们的服务。请在使用本网站之前仔细阅读以下条款。使用本网站即表示您同意遵守这些条款。
+
+### 1. 接受条款
+
+通过访问或使用本网站，您确认已阅读、理解并同意受本条款的约束。如果您不同意这些条款，请勿使用本网站。
+
+### 2. 服务变更
+
+我们保留随时修改、暂停或终止服务的权利，恕不另行通知。我们不对任何服务的修改、暂停或终止向您或任何第三方承担责任。
+
+### 3. 用户行为
+
+您同意在使用本网站时遵守所有适用的法律法规，并且不会：
+- 发布非法、有害、威胁、辱骂、骚扰、诽谤、淫秽或其他令人反感的内容。
+- 冒充任何人或实体，或虚假陈述您与任何人或实体的关系。
+- 干扰或破坏本网站的运行或服务器。
+
+### 4. 知识产权
+
+本网站上的所有内容（包括但不限于文本、图像、代码）均归我们或其各自所有者所有，受版权法保护。未经许可，不得复制或分发。
+
+### 5. 免责声明
+
+本网站按“原样”提供，不提供任何形式的明示或暗示保证。我们不保证服务不会中断或没有错误。
+
+### 6. 适用法律
+
+本条款受法律管辖，任何争议应提交至有管辖权的法院解决。
+
+### 7. 联系我们
+
+如果您对本服务条款有任何疑问，请联系我们。
+""",
+                },
+                "en": {
+                    "title": "Terms of Service",
+                    "content": """## Terms of Service
+
+**Effective Date:** January 1, 2024
+
+Welcome to our service. Please read the following terms carefully before using this website. By using this website, you agree to comply with these terms.
+
+### 1. Acceptance of Terms
+
+By accessing or using this website, you acknowledge that you have read, understood, and agree to be bound by these terms. If you do not agree to these terms, please do not use this website.
+
+### 2. Changes to Service
+
+We reserve the right to modify, suspend, or terminate the service at any time without notice. We shall not be liable to you or any third party for any modification, suspension, or termination of the service.
+
+### 3. User Conduct
+
+You agree to comply with all applicable laws and regulations when using this website and will not:
+- Post content that is illegal, harmful, threatening, abusive, harassing, defamatory, obscene, or otherwise objectionable.
+- Impersonate any person or entity, or falsely state your affiliation with any person or entity.
+- Interfere with or disrupt the operation of this website or servers.
+
+### 4. Intellectual Property
+
+All content on this website (including but not limited to text, images, code) is owned by us or their respective owners and is protected by copyright laws. Reproduction or distribution without permission is prohibited.
+
+### 5. Disclaimer
+
+This website is provided on an "as is" basis without warranties of any kind, either express or implied. We do not warrant that the service will be uninterrupted or error-free.
+
+### 6. Governing Law
+
+These terms shall be governed by the laws, and any disputes shall be submitted to a court of competent jurisdiction.
+
+### 7. Contact Us
+
+If you have any questions about these Terms of Service, please contact us.
+""",
+                },
+                "zh_hant": {
+                    "title": "服務條款",
+                    "content": """## 服務條款
+
+**生效日期：** 2024年1月1日
+
+歡迎使用我們的服務。請在使用本網站之前仔細閱讀以下條款。使用本網站即表示您同意遵守這些條款。
+
+### 1. 接受條款
+
+通過訪問或使用本網站，您確認已閱讀、理解並同意受本條款的約束。如果您不同意這些條款，請勿使用本網站。
+
+### 2. 服務變更
+
+我們保留隨時修改、暫停或終止服務的權利，恕不另行通知。我們不對任何服務的修改、暫停或終止向您或任何第三方承擔責任。
+
+### 3. 用戶行為
+
+您同意在使用本網站時遵守所有適用的法律法規，並且不會：
+- 發佈非法、有害、威脅、辱罵、騷擾、誹謗、淫穢或其他令人反感的內容。
+- 冒充任何人或實體，或虛假陳述您與任何人或實體的關係。
+- 干擾或破壞本網站的運行或服務器。
+
+### 4. 知識產權
+
+本網站上的所有內容（包括但不限於文本、圖像、代碼）均歸我們或其各自所有者所有，受版權法保護。未經許可，不得複製或分發。
+
+### 5. 免責聲明
+
+本網站按“原樣”提供，不提供任何形式的明示或暗示保證。我們不保證服務不會中斷或沒有錯誤。
+
+### 6. 適用法律
+
+本條款受法律管轄，任何爭議應提交至有管轄權的法院解決。
+
+### 7. 聯繫我們
+
+如果您對本服務條款有任何疑問，請聯繫我們。
+""",
+                },
+                "ja": {
+                    "title": "利用規約",
+                    "content": """## 利用規約
+
+**発効日：** 2024年1月1日
+
+当社のサービスをご利用いただきありがとうございます。本ウェブサイトをご利用になる前に、以下の規約をよくお読みください。本ウェブサイトを利用することにより、お客様はこれらの規約を遵守することに同意したものとみなされます。
+
+### 1. 規約の承諾
+
+本ウェブサイトにアクセスまたは使用することにより、お客様は本規約を読み、理解し、これに拘束されることに同意したものとみなされます。これらの規約に同意されない場合は、本ウェブサイトを使用しないでください。
+
+### 2. サービスの変更
+
+当社は、予告なしにいつでもサービスを変更、一時停止、または終了する権利を留保します。サービスの変更、一時停止、または終了について、当社はお客様または第三者に対して一切の責任を負いません。
+
+### 3. ユーザーの行動
+
+お客様は、本ウェブサイトを使用する際、適用されるすべての法律および規制を遵守することに同意し、以下の行為を行わないものとします：
+- 違法、有害、脅迫的、虐待的、嫌がらせ、中傷的、わいせつ、またはその他不快なコンテンツを投稿すること。
+- 個人または団体になりすますこと、または個人または団体との関係を偽ること。
+- 本ウェブサイトまたはサーバーの運営を妨害または破壊すること。
+
+### 4. 知的財産権
+
+本ウェブサイト上のすべてのコンテンツ（テキスト、画像、コードを含みますがこれらに限定されません）は、当社またはそれぞれの所有者に帰属し、著作権法により保護されています。許可なく複製または配布することは禁止されています。
+
+### 5. 免責事項
+
+本ウェブサイトは「現状有姿」で提供され、明示または黙示を問わず、いかなる種類の保証も行いません。当社は、サービスが中断されないこと、またはエラーがないことを保証しません。
+
+### 6. 準拠法
+
+本規約は法律に準拠し、紛争は管轄裁判所に提出されるものとします。
+
+### 7. お問い合わせ
+
+本利用規約についてご質問がある場合は、お問い合わせください。
+""",
+                },
+            }
+
+            # 2. Create Page object
+            # Use zh_hans as default content
+            page = Page(
+                title=content_map["zh_hans"]["title"],
+                slug="terms-of-service",
+                status="published",
+                content=content_map["zh_hans"]["content"],
+            )
+
+            # 3. Set translated fields dynamically
+            for lang, data in content_map.items():
+                # Fix for language codes with underscore/dash mismatch if necessary
+                # modeltranslation uses underscores (e.g. zh_hans, zh_hant)
+                # content_map keys match modeltranslation field suffixes
+                setattr(page, f"title_{lang}", data["title"])
+                setattr(page, f"content_{lang}", data["content"])
+
+            page.save()
+            messages.success(
+                request, _("服务条款页面已初始化（包含中、英、日、繁体中文）")
             )
         except Exception as e:
             messages.error(request, _("初始化失败: {error}").format(error=str(e)))
