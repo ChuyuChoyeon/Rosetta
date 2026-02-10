@@ -78,7 +78,7 @@
     <link rel="stylesheet" href="{% static 'theme/css/nprogress.css' %}" />
     <!-- 全局脚本库 -->
     <script src="{% static 'js/page-loader.js' %}"></script>
-    {% django_htmx_script %} <!-- HTMX 用于局部刷新 (Auto-loads debug extension in DEBUG mode) -->
+    <script src="{% static 'theme/js/htmx.min.js' %}"></script> <!-- HTMX 用于局部刷新 -->
     <script defer src="{% static 'theme/js/alpine.min.js' %}"></script> <!-- Alpine.js 用于轻量级交互 -->
     <script src="{% static 'theme/js/geopattern.min.js' %}"></script>
     <script src="{% static 'theme/js/theme.js' %}"></script>

@@ -104,7 +104,7 @@ logs/
 # Trae/AI IDE
 .trae/
 .shared/
-
+.kiro/
 # UV Package Manager
 # uv.lock should be committed for reproducible builds
 # uv.lock
