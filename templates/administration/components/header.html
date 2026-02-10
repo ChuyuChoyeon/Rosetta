@@ -4,19 +4,12 @@
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 class="text-2xl font-bold font-heading flex items-center gap-2">
-                {% if icon %}
-                <span class="material-symbols-outlined text-primary/80">{{ icon }}</span>
-                {% endif %}
+                {% if icon %}<span class="material-symbols-outlined text-primary/80">{{ icon }}</span>{% endif %}
                 {{ title }}
             </h1>
-            {% if subtitle %}
-            <p class="text-base-content/60 text-sm mt-1">{{ subtitle }}</p>
-            {% endif %}
+            {% if subtitle %}<p class="text-base-content/60 text-sm mt-1">{{ subtitle }}</p>{% endif %}
         </div>
-        
         <!-- Actions -->
-        <div class="flex flex-wrap gap-2 items-center">
-            {{ actions }}
-        </div>
+        <div class="flex flex-wrap gap-2 items-center">{{ actions }}</div>
     </div>
 </div>

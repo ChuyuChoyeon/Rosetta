@@ -1,17 +1,12 @@
-from typing import Any, Dict
 from django.views import View
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponse, Http404, FileResponse
+from django.contrib.auth import get_user_model
+from django.http import Http404, FileResponse
 from django.conf import settings
 from django.contrib import messages
 from django.shortcuts import redirect
-import os
-from pathlib import Path
-from django.apps import apps
-from django.db import models
 from django.core.cache import cache
-from django.utils import timezone
 from django.utils.translation import gettext as _
 import platform
 import django
@@ -19,33 +14,30 @@ from django.db import connection
 
 from ..mixins import StaffRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin
 
-import shutil
-import time
 from datetime import datetime
-from django.core.management import call_command
-from django.db.models import Sum
 from core.models import Page
 from blog.models import Post, Comment
 from users.models import User
 
-# --- System Views ---
+
+# --- 系统视图 ---
 class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     template_name = "administration/settings.html"
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         from constance import config
         from django.conf import settings as django_settings
         from django.contrib.sites.models import Site
 
-        # Get Current Site
+        # 获取当前站点
         try:
             context["current_site"] = Site.objects.get_current()
         except Site.DoesNotExist:
             context["current_site"] = None
 
-        # Define Fieldsets (Grouped Settings)
-        # We manually structure this to match the UI expectations
+        # 定义字段集（分组设置）
+        # 手动构建结构以匹配 UI 预期
         fieldsets_metadata = [
             {
                 "slug": "general",
@@ -87,24 +79,24 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
                 "title": _("统计分析"),
                 "icon": "analytics",
             },
-             {
+            {
                 "slug": "custom",
                 "title": _("自定义代码"),
                 "icon": "code",
-            }
+            },
         ]
-        
-        # Prepare fieldsets list
+
+        # 准备字段集列表
         fieldsets = []
-        
-        # Helper to get config item
-        constance_conf = getattr(django_settings, 'CONSTANCE_CONFIG', {})
-        constance_fieldsets = getattr(django_settings, 'CONSTANCE_CONFIG_FIELDSETS', {})
+
+        # 获取配置项的辅助函数
+        constance_conf = getattr(django_settings, "CONSTANCE_CONFIG", {})
+        constance_fieldsets = getattr(django_settings, "CONSTANCE_CONFIG_FIELDSETS", {})
 
         def get_config_item(key):
             if key not in constance_conf:
                 return None
-            
+
             options = constance_conf[key]
             if len(options) == 3:
                 default_val, help_text, type_data = options
@@ -115,40 +107,42 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
                 return None
 
             # Determine type
-            field_type = 'text'
+            field_type = "text"
             choices = None
-            
+
             if isinstance(type_data, bool) or type_data is bool:
-                field_type = 'bool'
+                field_type = "bool"
             elif isinstance(type_data, int) or type_data is int:
-                field_type = 'number'
+                field_type = "number"
             elif isinstance(type_data, (list, tuple)):
                 # If it's a tuple of tuples, it's choices
                 if len(type_data) > 0:
                     if isinstance(type_data[0], (list, tuple)):
-                        field_type = 'select'
+                        field_type = "select"
                         choices = type_data
                     else:
                         # Simple list of values -> convert to choices
-                        field_type = 'select'
+                        field_type = "select"
                         choices = [(str(x), str(x)) for x in type_data]
                 else:
-                    field_type = 'text'
-            elif key.endswith('_IMAGE') or key.endswith('_LOGO') or key.endswith('_ICON'):
-                 field_type = 'image'
-            elif 'COLOR' in key:
-                 field_type = 'color'
-            
+                    field_type = "text"
+            elif (
+                key.endswith("_IMAGE") or key.endswith("_LOGO") or key.endswith("_ICON")
+            ):
+                field_type = "image"
+            elif "COLOR" in key:
+                field_type = "color"
+
             # Get current value
             value = getattr(config, key)
-            
+
             return {
                 "key": key,
                 "value": value,
                 "default": default_val,
                 "help_text": help_text,
                 "type": field_type,
-                "choices": choices
+                "choices": choices,
             }
 
         # Populate items based on CONSTANCE_CONFIG_FIELDSETS from settings
@@ -157,13 +151,13 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             # Look up keys in settings.CONSTANCE_CONFIG_FIELDSETS
             # If slug matches key in settings fieldsets, use those keys
             keys = constance_fieldsets.get(slug, [])
-            
+
             items = []
             for key in keys:
                 item = get_config_item(key)
                 if item:
                     items.append(item)
-            
+
             # Add to fieldsets if we have metadata (even if empty items, user might want to see tab)
             # But user complained about "Empty content", so we better have items.
             # With new settings.py, all groups should have items.
@@ -176,19 +170,24 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         all_handled_keys = set()
         for keys in constance_fieldsets.values():
             all_handled_keys.update(keys)
-            
+
         unhandled_keys = set(constance_conf.keys()) - all_handled_keys
         if unhandled_keys:
-             # Find or create 'general' or 'other' group
-             general_group = next((g for g in fieldsets if g["slug"] == "general"), None)
-             if not general_group:
-                 general_group = {"slug": "general", "title": _("常规设置"), "icon": "settings", "items": []}
-                 fieldsets.append(general_group)
-             
-             for key in unhandled_keys:
-                 item = get_config_item(key)
-                 if item:
-                     general_group["items"].append(item)
+            # Find or create 'general' or 'other' group
+            general_group = next((g for g in fieldsets if g["slug"] == "general"), None)
+            if not general_group:
+                general_group = {
+                    "slug": "general",
+                    "title": _("常规设置"),
+                    "icon": "settings",
+                    "items": [],
+                }
+                fieldsets.append(general_group)
+
+            for key in unhandled_keys:
+                item = get_config_item(key)
+                if item:
+                    general_group["items"].append(item)
 
         context["fieldsets"] = fieldsets
         return context
@@ -196,25 +195,28 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     def post(self, request):
         from constance import config
         from django.contrib.sites.models import Site
-        
+
         # 1. Update Site Info
-        if 'site_domain' in request.POST and 'site_name' in request.POST:
+        if "site_domain" in request.POST and "site_name" in request.POST:
             try:
                 site = Site.objects.get_current()
-                site.domain = request.POST['site_domain']
-                site.name = request.POST['site_name']
+                site.domain = request.POST["site_domain"]
+                site.name = request.POST["site_name"]
                 site.save()
             except Exception as e:
-                messages.error(request, _("站点信息更新失败: {error}").format(error=str(e)))
+                messages.error(
+                    request, _("站点信息更新失败: {error}").format(error=str(e))
+                )
 
         # 2. Update Constance Settings
         # Iterate over all keys in config to check for POST data
         # Note: Checkboxes for booleans might not send value if unchecked
         from django.conf import settings as django_settings
-        constance_conf = getattr(django_settings, 'CONSTANCE_CONFIG', {})
-        
+
+        constance_conf = getattr(django_settings, "CONSTANCE_CONFIG", {})
+
         updated_count = 0
-        
+
         for key, options in constance_conf.items():
             if len(options) == 3:
                 default_val, help_text, type_data = options
@@ -223,37 +225,38 @@ class SettingsView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
                 # Infer type from default value
                 type_data = type(default_val)
             else:
-                continue # Skip invalid config
-            
+                continue  # Skip invalid config
+
             # Boolean handling
             is_bool = isinstance(type_data, bool) or type_data is bool
-            
+
             if is_bool:
                 # Checkbox logic: presence means True, absence means False (if we know it's a bool field form submission)
                 # But to be safe against partial forms, we usually only update if we know we are submitting this form.
                 # Assuming this form submits ALL settings.
-                new_value = request.POST.get(key) == 'on'
+                new_value = request.POST.get(key) == "on"
                 setattr(config, key, new_value)
                 updated_count += 1
             elif key in request.POST:
                 new_value = request.POST.get(key)
-                
+
                 # Type conversion
                 if isinstance(type_data, int) or type_data is int:
                     try:
                         new_value = int(new_value)
                     except ValueError:
-                        continue # Skip invalid
-                        
+                        continue  # Skip invalid
+
                 setattr(config, key, new_value)
                 updated_count += 1
-                
+
         messages.success(request, _("设置已更新"))
         return redirect("administration:settings")
 
+
 class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
     template_name = "administration/system_tools.html"
-    
+
     def _get_async_task_status(self, latest_key_pointer):
         task_key = cache.get(latest_key_pointer)
         if not task_key:
@@ -262,46 +265,53 @@ class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
+        # --- Maintenance Context ---
         # 1. Media Scan Stats
-        # media_scan_stats uses direct key "media_scan_stats" in current utils.py logic? 
-        # Wait, utils.py trigger_media_scan_async sets "media:scan:latest" -> task_key -> result
-        # The OLD view code read "media_scan_stats". I should update this too.
-        
         scan_task = self._get_async_task_status("media:scan:latest")
-        context.update({
-            "media_scan_status": scan_task.get("status", "idle"),
-            "media_scan_updated_at": scan_task.get("updated_at"),
-            "media_scan_orphaned_count": scan_task.get("orphaned_count", 0),
-            "media_scan_orphaned_size": scan_task.get("orphaned_size", 0),
-        })
-        
+        context.update(
+            {
+                "media_scan_status": scan_task.get("status", "idle"),
+                "media_scan_updated_at": scan_task.get("updated_at"),
+                "media_scan_orphaned_count": scan_task.get("orphaned_count", 0),
+                "media_scan_orphaned_size": scan_task.get("orphaned_size", 0),
+            }
+        )
+
         clean_task = self._get_async_task_status("media:clean:latest")
-        context.update({
-            "media_clean_status": clean_task.get("status", "idle"),
-            "media_clean_cleaned_count": clean_task.get("cleaned_count", 0),
-            "media_clean_cleaned_size": clean_task.get("cleaned_size", 0),
-            "media_clean_error": clean_task.get("detail"), # utils.py uses 'detail' for error
-        })
+        context.update(
+            {
+                "media_clean_status": clean_task.get("status", "idle"),
+                "media_clean_cleaned_count": clean_task.get("cleaned_count", 0),
+                "media_clean_cleaned_size": clean_task.get("cleaned_size", 0),
+                "media_clean_error": clean_task.get("detail"),
+            }
+        )
 
         # 2. Watson Rebuild Stats
         watson_task = self._get_async_task_status("watson:rebuild:latest")
-        context.update({
-            "watson_rebuild_status": watson_task.get("status", "idle"),
-            "watson_rebuild_updated_at": watson_task.get("updated_at"),
-        })
+        context.update(
+            {
+                "watson_rebuild_status": watson_task.get("status", "idle"),
+                "watson_rebuild_updated_at": watson_task.get("updated_at"),
+            }
+        )
 
         # 3. Image Queue Stats
         img_task = self._get_async_task_status("image:queue:latest")
-        context.update({
-            "image_queue_status": img_task.get("status", "idle"),
-            "image_queue_updated_at": img_task.get("updated_at"),
-            "image_queue_queued": img_task.get("queued", 0),
-            "image_queue_processed": img_task.get("processed", 0),
-        })
+        context.update(
+            {
+                "image_queue_status": img_task.get("status", "idle"),
+                "image_queue_updated_at": img_task.get("updated_at"),
+                "image_queue_queued": img_task.get("queued", 0),
+                "image_queue_processed": img_task.get("processed", 0),
+            }
+        )
 
         # 4. Privacy Policy Status
-        context["privacy_policy_exists"] = Page.objects.filter(slug="privacy-policy").exists()
+        context["privacy_policy_exists"] = Page.objects.filter(
+            slug="privacy-policy"
+        ).exists()
 
         # 5. Backups
         backup_dir = settings.BASE_DIR / "backups"
@@ -310,20 +320,116 @@ class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
             for f in backup_dir.glob("*"):
                 if f.is_file() and not f.name.startswith("."):
                     stat = f.stat()
-                    backups.append({
-                        "name": f.name,
-                        "size": stat.st_size,
-                        "mtime": datetime.fromtimestamp(stat.st_mtime),
-                        "path": str(f),
-                    })
+                    backups.append(
+                        {
+                            "name": f.name,
+                            "size": stat.st_size,
+                            "mtime": datetime.fromtimestamp(stat.st_mtime),
+                            "path": str(f),
+                        }
+                    )
         backups.sort(key=lambda x: x["mtime"], reverse=True)
         context["backups"] = backups
+
+        # --- Debug Context ---
+        # 1. Database Status
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
+                row = cursor.fetchone()
+                context["db_ok"] = row and row[0] == 1
+        except Exception:
+            context["db_ok"] = False
+
+        # 2. System Info
+        context["system_info"] = {
+            "python_version": platform.python_version(),
+            "django_version": django.get_version(),
+            "platform": platform.platform(),
+        }
+
+        # 3. Data Counts
+        context["counts"] = {
+            "users": User.objects.count(),
+            "posts": Post.objects.count(),
+            "comments": Comment.objects.count(),
+        }
+
+        # 4. URL Patterns
+        from django.urls import get_resolver
+        from django.urls.resolvers import URLPattern, URLResolver
+
+        url_patterns = []
+        resolver = get_resolver()
+
+        def extract_patterns(patterns, prefix=""):
+            for pattern in patterns:
+                if isinstance(pattern, URLPattern):
+                    name = pattern.name or ""
+                    pattern_str = str(pattern.pattern)
+                    display_pattern = prefix + pattern_str.lstrip("^").rstrip("$")
+                    
+                    sample_url = None
+                    has_params = "<" in pattern_str or "(?P" in pattern_str
+
+                    if not has_params:
+                        try:
+                            sample_url = "/" + display_pattern
+                        except Exception:
+                            pass
+
+                    doc = ""
+                    if pattern.callback and pattern.callback.__doc__:
+                        doc = pattern.callback.__doc__.strip().split("\n")[0]
+
+                    url_patterns.append(
+                        {
+                            "name": name,
+                            "pattern": pattern_str,
+                            "display_pattern": display_pattern,
+                            "description": doc,
+                            "sample_url": sample_url if not has_params else None,
+                        }
+                    )
+                elif isinstance(pattern, URLResolver):
+                    new_prefix = prefix + str(pattern.pattern).lstrip("^").rstrip("$")
+                    extract_patterns(pattern.url_patterns, new_prefix)
+
+        try:
+            extract_patterns(resolver.url_patterns)
+            context["url_patterns"] = sorted(
+                url_patterns, key=lambda x: x["display_pattern"]
+            )
+        except Exception:
+            context["url_patterns"] = []
+
+        # 5. Email Config (New)
+        from constance import config
+        context["email_config"] = {
+            "host": getattr(config, "SMTP_HOST", "") or getattr(settings, "EMAIL_HOST", ""),
+            "port": getattr(config, "SMTP_PORT", "") or getattr(settings, "EMAIL_PORT", ""),
+            "user": getattr(config, "SMTP_USER", "") or getattr(settings, "EMAIL_HOST_USER", ""),
+            "use_tls": getattr(config, "SMTP_USE_TLS", False) or getattr(settings, "EMAIL_USE_TLS", False),
+        }
+
+        # 6. Permission Check (if requested via GET params)
+        username = self.request.GET.get("username")
+        if username:
+            UserModel = get_user_model()
+            try:
+                target_user = UserModel.objects.get(username=username)
+                context["target_user"] = target_user
+                context["user_permissions"] = sorted(list(target_user.get_all_permissions()))
+                context["group_permissions"] = target_user.get_group_permissions()
+                context["user_groups"] = target_user.groups.all()
+            except UserModel.DoesNotExist:
+                context["error"] = _("未找到用户: {username}").format(username=username)
 
         return context
 
     def post(self, request):
         action = request.POST.get("action")
-        
+
         handlers = {
             "scan_media": self.handle_scan_media,
             "clean_media": self.handle_clean_media,
@@ -333,12 +439,15 @@ class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
             "create_backup": self.handle_create_backup,
             "restore_backup": self.handle_restore_backup,
             "delete_backup": self.handle_delete_backup,
+            # New handlers
+            "clear_cache": self.handle_clear_cache,
+            "test_email": self.handle_test_email,
         }
 
         handler = handlers.get(action)
         if handler:
             return handler(request)
-        
+
         messages.warning(request, _("未知的操作"))
         return redirect("administration:system_tools")
 
@@ -349,13 +458,14 @@ class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
             return redirect("administration:system_tools")
 
         from core.utils import trigger_media_scan_async
+
         result = trigger_media_scan_async()
-        
+
         if result["accepted"]:
             messages.success(request, _("已启动媒体扫描任务"))
         else:
             messages.warning(request, _("无法启动扫描任务（可能已有任务在运行）"))
-            
+
         return redirect("administration:system_tools")
 
     def handle_clean_media(self, request):
@@ -364,26 +474,30 @@ class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
             return redirect("administration:system_tools")
 
         from core.utils import trigger_media_clean_async
+
         result = trigger_media_clean_async()
-        
+
         if result["accepted"]:
-             messages.success(request, _("已启动媒体清理任务"))
+            messages.success(request, _("已启动媒体清理任务"))
         elif result.get("error"):
-             messages.error(request, _("无法启动清理任务: {error}").format(error=result["error"]))
+            messages.error(
+                request, _("无法启动清理任务: {error}").format(error=result["error"])
+            )
         else:
-             messages.warning(request, _("无法启动清理任务"))
-             
-        return redirect("administration:system_tools") 
+            messages.warning(request, _("无法启动清理任务"))
+
+        return redirect("administration:system_tools")
 
     def handle_rebuild_watson(self, request):
         from core.utils import trigger_watson_rebuild_async
+
         result = trigger_watson_rebuild_async()
-        
+
         if result["accepted"]:
             messages.success(request, _("已启动索引重建任务"))
         else:
             messages.warning(request, _("索引重建任务正在进行中"))
-            
+
         return redirect("administration:system_tools")
 
     def handle_init_privacy_policy(self, request):
@@ -431,7 +545,7 @@ class SystemToolsView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
 ### 6. 联系我们
 
 如果您对本隐私政策有任何疑问，请联系我们。
-"""
+""",
                 },
                 "en": {
                     "title": "Privacy Policy",
@@ -470,7 +584,7 @@ You have the right to access, correct, or delete your personal information. To e
 ### 6. Contact Us
 
 If you have any questions about this Privacy Policy, please contact us.
-"""
+""",
                 },
                 "ja": {
                     "title": "プライバシーポリシー",
@@ -509,7 +623,7 @@ If you have any questions about this Privacy Policy, please contact us.
 ### 6. お問い合わせ
 
 本プライバシーポリシーについてご質問がある場合は、お問い合わせください。
-"""
+""",
                 },
                 "zh_hant": {
                     "title": "隱私政策",
@@ -548,10 +662,10 @@ If you have any questions about this Privacy Policy, please contact us.
 ### 6. 聯繫我們
 
 如果您對本隱私政策有任何疑問，請聯繫我們。
-"""
+""",
                 },
             }
-            
+
             # 2. Create Page object
             # Use zh_hans as default content
             page = Page(
@@ -560,7 +674,7 @@ If you have any questions about this Privacy Policy, please contact us.
                 status="published",
                 content=content_map["zh_hans"]["content"],
             )
-            
+
             # 3. Set translated fields dynamically
             for lang, data in content_map.items():
                 # Assuming django-modeltranslation uses fields like title_en, content_en
@@ -568,34 +682,36 @@ If you have any questions about this Privacy Policy, please contact us.
                 # Usually underscores are used in field names.
                 setattr(page, f"title_{lang}", data["title"])
                 setattr(page, f"content_{lang}", data["content"])
-            
+
             page.save()
-            messages.success(request, _("隐私政策页面已初始化（包含中、英、日、繁体中文）"))
+            messages.success(
+                request, _("隐私政策页面已初始化（包含中、英、日、繁体中文）")
+            )
         except Exception as e:
             messages.error(request, _("初始化失败: {error}").format(error=str(e)))
-            
+
         return redirect("administration:system_tools")
 
     def handle_queue_images(self, request):
         from core.utils import queue_post_images_async
-        
+
         try:
             limit = int(request.POST.get("limit", 20))
         except ValueError:
             limit = 20
 
         result = queue_post_images_async(limit=limit)
-        
+
         if result["accepted"]:
             messages.success(request, _("已启动图片处理任务"))
         else:
             messages.warning(request, _("图片处理任务正在进行中"))
-            
+
         return redirect("administration:system_tools")
 
     def handle_create_backup(self, request):
         from core.tasks import backup_database_task
-        
+
         # 启动后台备份任务
         backup_database_task.delay()
         messages.success(request, _("已启动数据库备份任务，请稍后刷新查看"))
@@ -606,14 +722,15 @@ If you have any questions about this Privacy Policy, please contact us.
         if not filename:
             messages.error(request, _("未指定文件名"))
             return redirect("administration:system_tools")
-            
+
         try:
             from core.utils import restore_backup
+
             restore_backup(filename)
             messages.success(request, _("数据库已成功恢复"))
         except Exception as e:
-             messages.error(request, _("恢复失败: {error}").format(error=str(e)))
-             
+            messages.error(request, _("恢复失败: {error}").format(error=str(e)))
+
         return redirect("administration:system_tools")
 
     def handle_delete_backup(self, request):
@@ -621,214 +738,201 @@ If you have any questions about this Privacy Policy, please contact us.
         if not filename:
             messages.error(request, _("未指定文件名"))
             return redirect("administration:system_tools")
-            
+
         try:
             from core.utils import delete_backup
+
             delete_backup(filename)
             messages.success(request, _("备份文件已删除"))
         except Exception as e:
             messages.error(request, _("删除失败: {error}").format(error=str(e)))
-        
+
         return redirect("administration:system_tools")
+
+    def handle_clear_cache(self, request):
+        sub_action = request.POST.get("sub_action")
+        if sub_action == "clear_all":
+            cache.clear()
+            messages.success(request, _("所有缓存已清理"))
+        elif sub_action == "clear_templates":
+            cache.clear()
+            messages.success(request, _("模板缓存已清理"))
+        else:
+            # Default to clear all if just action=clear_cache
+            cache.clear()
+            messages.success(request, _("所有缓存已清理"))
+        return redirect("administration:system_tools")
+
+    def handle_test_email(self, request):
+        recipient = request.POST.get("recipient")
+        subject = request.POST.get("subject")
+        message = request.POST.get("message")
+        
+        # Prepare redirect URL with tab parameter
+        from django.urls import reverse
+        redirect_url = reverse("administration:system_tools") + "?tab=tools"
+
+        if not recipient or not subject or not message:
+            messages.error(request, _("请填写完整邮件信息"))
+            return redirect(redirect_url)
+
+        try:
+            from django.core.mail import get_connection, send_mail
+            from constance import config
+            
+            # Prefer Constance settings (Using SMTP_ prefix as defined in settings.py)
+            email_host = getattr(config, "SMTP_HOST", "") or settings.EMAIL_HOST
+            email_port = getattr(config, "SMTP_PORT", "") or settings.EMAIL_PORT
+            email_user = getattr(config, "SMTP_USER", "") or settings.EMAIL_HOST_USER
+            email_password = getattr(config, "SMTP_PASSWORD", "") or settings.EMAIL_HOST_PASSWORD
+            
+            # Use TLS from config
+            use_tls = getattr(config, "SMTP_USE_TLS", False)
+            if use_tls is None: # Fallback if config is missing
+                 use_tls = settings.EMAIL_USE_TLS
+
+            # Auto-detect SSL for port 465 if not explicitly handled
+            use_ssl = False
+            if int(email_port or 25) == 465:
+                use_ssl = use_tls  # If TLS enabled and port 465, use SSL wrapper
+                use_tls = False    # Disable STARTTLS for implicit SSL port
+
+            connection = get_connection(
+                host=email_host,
+                port=email_port,
+                username=email_user,
+                password=email_password,
+                use_tls=use_tls,
+                use_ssl=use_ssl,
+                fail_silently=False,
+            )
+
+            send_mail(
+                subject,
+                message,
+                getattr(config, "SMTP_FROM_EMAIL", "") or email_user or settings.DEFAULT_FROM_EMAIL,
+                [recipient],
+                connection=connection,
+                fail_silently=False,
+            )
+            messages.success(request, _("邮件发送成功 (Host: {host}:{port})").format(host=email_host, port=email_port))
+        except Exception as e:
+            messages.error(request, _("发送失败 ({host}:{port}): {error}").format(host=email_host, port=email_port, error=str(e)))
+
+        return redirect(redirect_url)
+
 
 # --- Debug Views ---
 # (Previous views remain, just updating their implementation if needed)
 
+
 class SystemMonitorView(LoginRequiredMixin, SuperuserRequiredMixin, TemplateView):
     template_name = "administration/partials/system_monitor.html"
-    
+
     def get_context_data(self, **kwargs):
         # This is usually HTMX polled, similar to dashboard logic
-        from ..services.dashboard import DashboardService
         context = super().get_context_data(**kwargs)
-        dashboard_data = DashboardService.get_dashboard_context()
         
-        # Flatten system_info for template accessibility
-        if "system_info" in dashboard_data:
-            context.update(dashboard_data["system_info"])
-            
-        context.update(dashboard_data)
+        try:
+            from ..services.dashboard import DashboardService
+            # Use new efficient method to get only system info, avoiding DB queries
+            system_info = DashboardService.get_system_info()
+            # Flatten system_info for template accessibility (as template expects top-level variables)
+            context.update(system_info)
+        except Exception as e:
+            # Fallback to prevent 500 error
+            context.update({
+                "cpu_percent": 0,
+                "memory_percent": 0,
+                "disk_percent": 0,
+                "error": str(e)
+            })
+        
         return context
+
 
 class BackupDownloadView(LoginRequiredMixin, SuperuserRequiredMixin, View):
     def get(self, request, filename):
         # Assuming backups are in a specific directory
         backup_dir = settings.BASE_DIR / "backups"
         file_path = backup_dir / filename
-        
+
         if not file_path.exists():
             raise Http404("Backup file not found")
-            
+
         response = FileResponse(open(file_path, "rb"))
         response["Content-Disposition"] = f'attachment; filename="{filename}"'
         return response
 
+
 # --- Debug Views ---
-class DebugDashboardView(LoginRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin, TemplateView):
-    template_name = "administration/debug.html"
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # 1. Database Status
-        try:
-            with connection.cursor() as cursor:
-                cursor.execute("SELECT 1")
-                row = cursor.fetchone()
-                context["db_ok"] = (row and row[0] == 1)
-        except Exception:
-            context["db_ok"] = False
-            
-        # 2. System Info
-        context["system_info"] = {
-            "python_version": platform.python_version(),
-            "django_version": django.get_version(),
-            "platform": platform.platform(),
-        }
-        
-        # 3. Data Counts
-        context["counts"] = {
-            "users": User.objects.count(),
-            "posts": Post.objects.count(),
-            "comments": Comment.objects.count(),
-        }
-
-        # 4. URL Patterns
-        from django.urls import get_resolver
-        from django.urls.resolvers import URLPattern, URLResolver
-
-        url_patterns = []
-        resolver = get_resolver()
-
-        def extract_patterns(patterns, prefix=""):
-            for pattern in patterns:
-                if isinstance(pattern, URLPattern):
-                    # Skip internal/admin patterns if desired, or keep all
-                    # Attempt to resolve name
-                    name = pattern.name or ""
-                    
-                    # Clean up pattern string for display
-                    pattern_str = str(pattern.pattern)
-                    display_pattern = prefix + pattern_str.lstrip('^').rstrip('$')
-                    
-                    # Generate sample URL only for parameter-less routes
-                    sample_url = None
-                    has_params = '<' in pattern_str or '(?P' in pattern_str
-                    
-                    if not has_params:
-                        try:
-                            # Try to reverse it if it has a name
-                            if name:
-                                from django.urls import reverse
-                                # If namespaced (which we don't have easily here recursively without passing namespace), 
-                                # reverse might fail if we don't know the full 'namespace:name'.
-                                # So simplistic approach: if it looks static, just append to prefix.
-                                # But prefix logic is tricky with includes.
-                                # Better approach: just check regex.
-                                pass
-                            
-                            # Construct a simple path representation
-                            # This is approximate for display
-                            sample_url = "/" + display_pattern
-                        except Exception:
-                            pass
-
-                    url_patterns.append({
-                        "name": name,
-                        "pattern": pattern_str,
-                        "display_pattern": display_pattern,
-                        "description": pattern.callback.__doc__.strip().split('\n')[0] if pattern.callback and pattern.callback.__doc__ else "",
-                        "sample_url": sample_url if not has_params else None
-                    })
-                elif isinstance(pattern, URLResolver):
-                    # Recursive extraction for includes
-                    # pattern.pattern is the prefix
-                    new_prefix = prefix + str(pattern.pattern).lstrip('^').rstrip('$')
-                    extract_patterns(pattern.url_patterns, new_prefix)
-
-        # Start extraction
-        try:
-            extract_patterns(resolver.url_patterns)
-            # Filter out some noise if needed, e.g., admin/ or static/
-            # url_patterns = [p for p in url_patterns if not p['display_pattern'].startswith('admin/')]
-            context["url_patterns"] = sorted(url_patterns, key=lambda x: x['display_pattern'])
-        except Exception as e:
-            context["url_patterns"] = []
-            # Optionally log error
-        
-        return context
-
-class DebugUITestView(LoginRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin, TemplateView):
-    template_name = "administration/debug/ui_test.html"
-
-class DebugPermissionView(LoginRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin, TemplateView):
+class DebugPermissionView(
+    LoginRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin, TemplateView
+):
     template_name = "administration/debug/permission.html"
-    
+
+    def get(self, request, *args, **kwargs):
+        if not request.htmx:
+            from django.urls import reverse
+            query_string = ""
+            if request.GET:
+                query_string = "&" + request.GET.urlencode()
+            return redirect(reverse("administration:system_tools") + "?tab=permission" + query_string)
+        return super().get(request, *args, **kwargs)
+
+    def get_template_names(self):
+        if self.request.htmx:
+            return ["administration/partials/debug/permission.html"]
+        return [self.template_name]
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # Add permission check logic here if needed
-        # For now, we can list all permissions for the current user
-        from django.contrib.auth.models import Permission
+        username = self.request.GET.get("username")
         
-        user = self.request.user
-        if user.is_superuser:
-            context["user_permissions"] = "Superuser (All Permissions)"
+        if username:
+            User = get_user_model()
+            try:
+                target_user = User.objects.get(username=username)
+                context["target_user"] = target_user
+                
+                # Basic Info
+                context["user_permissions"] = sorted(list(target_user.get_all_permissions()))
+                context["group_permissions"] = target_user.get_group_permissions()
+                context["user_groups"] = target_user.groups.all()
+                
+            except User.DoesNotExist:
+                context["error"] = _("未找到用户: {username}").format(username=username)
         else:
-            perms = user.get_all_permissions()
-            context["user_permissions"] = sorted(list(perms))
-            
+            # Default to current user if no search, or just empty
+            # If loaded via HTMX without query, we might want to show empty state
+            pass
+
         return context
 
-class DebugCacheView(LoginRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin, TemplateView):
+
+class DebugCacheView(
+    LoginRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin, TemplateView
+):
     template_name = "administration/debug/cache.html"
-    
-    def post(self, request):
-        action = request.POST.get("action")
-        if action == "clear_all":
-            cache.clear()
-            messages.success(request, _("所有缓存已清理"))
-        elif action == "clear_templates":
-            # Clearing specific keys if possible, but default cache.clear() is safer for simple setups
-            # If using specific template cache backend, we would clear that.
-            # For now, standard clear is fine or we can try to delete specific patterns if using Redis
-            cache.clear() 
-            messages.success(request, _("模板缓存已清理"))
-        else:
-            messages.warning(request, _("未知操作"))
-            
-        return redirect("administration:debug_cache")
 
-class DebugEmailView(LoginRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin, TemplateView):
-    template_name = "administration/debug/email.html"
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["email_host"] = getattr(settings, "EMAIL_HOST", "")
-        context["email_port"] = getattr(settings, "EMAIL_PORT", "")
-        context["email_host_user"] = getattr(settings, "EMAIL_HOST_USER", "")
-        context["email_use_tls"] = getattr(settings, "EMAIL_USE_TLS", "")
-        return context
-        
+    def get(self, request, *args, **kwargs):
+        from django.urls import reverse
+        return redirect(reverse("administration:system_tools") + "?tab=tools")
+
     def post(self, request):
-        recipient = request.POST.get("recipient")
-        subject = request.POST.get("subject")
-        message = request.POST.get("message")
-        
-        if not recipient or not subject or not message:
-            messages.error(request, _("请填写完整信息"))
-            return redirect("administration:debug_email")
-            
-        try:
-            from django.core.mail import send_mail
-            send_mail(
-                subject,
-                message,
-                None, # Use default FROM
-                [recipient],
-                fail_silently=False,
-            )
-            messages.success(request, _("邮件发送成功"))
-        except Exception as e:
-            messages.error(request, _("发送失败: {error}").format(error=str(e)))
-            
-        return redirect("administration:debug_email")
+        from django.urls import reverse
+        return redirect(reverse("administration:system_tools") + "?tab=tools")
+
+
+class DebugEmailView(
+    LoginRequiredMixin, SuperuserRequiredMixin, DebugToolRequiredMixin, TemplateView
+):
+    template_name = "administration/debug/email.html"
+
+    def get(self, request, *args, **kwargs):
+        from django.urls import reverse
+        return redirect(reverse("administration:system_tools") + "?tab=tools")
+
+    def post(self, request):
+        from django.urls import reverse
+        return redirect(reverse("administration:system_tools") + "?tab=tools")

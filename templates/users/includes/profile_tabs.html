@@ -1,29 +1,36 @@
 {% load i18n %}
-<div id="profile-tabs" role="tablist" class="tabs tabs-bordered mb-6 overflow-x-auto flex-nowrap" hx-boost="true" hx-target="#profile-container" hx-push-url="true">
-    <a role="tab" class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'articles' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}" href="?tab=articles">
-        {% trans "文章" %}
-    </a>
-    <a role="tab" class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'comments' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}" href="?tab=comments">
-        {% trans "评论" %}
-    </a>
+<div id="profile-tabs"
+     role="tablist"
+     class="tabs tabs-bordered mb-6 overflow-x-auto flex-nowrap"
+     hx-boost="true"
+     hx-target="#profile-container"
+     hx-push-url="true">
+    <a role="tab"
+       class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'articles' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}"
+       href="?tab=articles">{% trans "文章" %}</a>
+    <a role="tab"
+       class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'comments' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}"
+       href="?tab=comments">{% trans "评论" %}</a>
     {% if user.is_authenticated and user == profile_user %}
-        <a role="tab" class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'info' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}" href="?tab=info">
-            {% trans "资料" %}
-        </a>
-        <a role="tab" class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'history' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}" href="?tab=history">
-            {% trans "历史" %}
-        </a>
-        <a role="tab" class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'notifications' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}" href="?tab=notifications">
+        <a role="tab"
+           class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'info' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}"
+           href="?tab=info">{% trans "资料" %}</a>
+        <a role="tab"
+           class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'history' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}"
+           href="?tab=history">{% trans "历史" %}</a>
+        <a role="tab"
+           class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'notifications' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}"
+           href="?tab=notifications">
             {% trans "通知" %}
             {% if profile_user.unread_notification_count > 0 %}
                 <span class="badge badge-sm badge-error ml-2 animate-pulse">{{ profile_user.unread_notification_count }}</span>
             {% endif %}
         </a>
-        <a role="tab" class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'security' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}" href="?tab=security">
-            {% trans "安全" %}
-        </a>
-        <a role="tab" class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'settings' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}" href="?tab=settings">
-            {% trans "设置" %}
-        </a>
+        <a role="tab"
+           class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'security' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}"
+           href="?tab=security">{% trans "安全" %}</a>
+        <a role="tab"
+           class="tab whitespace-nowrap px-6 transition-all duration-300 {% if active_tab == 'settings' %}tab-active font-bold border-primary text-primary{% else %}hover:text-primary/70 hover:border-base-content/20{% endif %}"
+           href="?tab=settings">{% trans "设置" %}</a>
     {% endif %}
 </div>

@@ -2,16 +2,18 @@ from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 
+
 class GuestbookEntry(models.Model):
     """
     留言板模型
     """
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        verbose_name=_("用户")
+        verbose_name=_("用户"),
     )
     nickname = models.CharField(_("昵称"), max_length=50, blank=True)
     email = models.EmailField(_("邮箱"), blank=True)
@@ -20,7 +22,7 @@ class GuestbookEntry(models.Model):
     content = models.TextField(_("内容"))
     is_public = models.BooleanField(_("公开"), default=True)
     created_at = models.DateTimeField(_("创建时间"), auto_now_add=True)
-    
+
     # 管理员回复
     reply_content = models.TextField(_("回复内容"), blank=True)
     reply_at = models.DateTimeField(_("回复时间"), null=True, blank=True)

@@ -1,288 +1,297 @@
 {% extends "administration/base.html" %}
 {% load static capture_tags core_extras i18n %}
-
 {% block title %}{{ config.SITE_HEADER|default:dashboard_title }}{% endblock %}
-
 {% block content %}
-<div class="space-y-8">
-    <!-- Hero Section -->
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div>
-            <h1 class="text-4xl font-bold font-heading mb-2 flex items-center gap-2">
-                {% trans "Hello," %} 
-                {% with words=config.DASHBOARD_WELCOME_WORDS|default:"['Creator', 'Admin', 'Master', 'Manager']" %}
-                    {% include "components/inspira/flip_words.html" with words=words extra_classes="text-primary" %}
+    <div class="space-y-8">
+        <!-- Hero Section -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+            <div>
+                <h1 class="text-4xl font-bold font-heading mb-2 flex items-center gap-2">
+                    {% trans "Hello," %}
+                    {% with words=config.DASHBOARD_WELCOME_WORDS|default:"['Creator', 'Admin', 'Master', 'Manager']" %}
+                        {% include "components/inspira/flip_words.html" with words=words extra_classes="text-primary" %}
+                    {% endwith %}
+                </h1>
+                <p class="text-base-content/60 text-lg">
+                    {% if config.DASHBOARD_WELCOME_TEXT %}
+                        {{ config.DASHBOARD_WELCOME_TEXT }}
+                    {% else %}
+                        {% trans "欢迎回到" %} {{ config.SITE_NAME|default:"Rosetta" }} {% trans "控制台。这里是您的数字指挥中心。" %}
+                    {% endif %}
+                </p>
+            </div>
+            <div class="flex gap-3">
+                {% url 'administration:post_create' as create_url %}
+                {% captureas btn_text %}{% trans "写文章" %}{% endcaptureas %}
+                {% with text=btn_text icon="edit_note" href=create_url %}
+                    {% include "components/inspira/rainbow_button.html" %}
                 {% endwith %}
-            </h1>
-            <p class="text-base-content/60 text-lg">{% if config.DASHBOARD_WELCOME_TEXT %}{{ config.DASHBOARD_WELCOME_TEXT }}{% else %}{% trans "欢迎回到 Rosetta 控制台。这里是您的数字指挥中心。" %}{% endif %}</p>
-        </div>
-        <div class="flex gap-3">
-            {% url 'administration:post_create' as create_url %}
-            {% captureas btn_text %}{% trans "写文章" %}{% endcaptureas %}
-            {% with text=btn_text icon="edit_note" href=create_url %}
-                {% include "components/inspira/rainbow_button.html" %}
-            {% endwith %}
-        </div>
-    </div>
-
-    <!-- Stats Grid (KPI Cards) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <!-- Total Posts -->
-        <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
-            <div class="stat relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors"></div>
-                <div class="stat-figure text-primary">
-                    <span class="material-symbols-outlined text-3xl">article</span>
-                </div>
-                <div class="stat-title font-bold text-base-content/60">{% trans "总文章数" %}</div>
-                <div class="stat-value text-primary text-4xl font-heading mt-1">{{ total_posts }}</div>
-                <div class="stat-desc mt-2 flex items-center gap-1 font-medium">
-                    {% if post_growth >= 0 %}
-                    <span class="text-success flex items-center bg-success/10 px-1.5 py-0.5 rounded-md">
-                        <span class="material-symbols-outlined text-sm">trending_up</span>
-                        {{ post_growth }}%
-                    </span>
-                    <span class="opacity-60">{% trans "较上月" %}</span>
-                    {% else %}
-                    <span class="text-error flex items-center bg-error/10 px-1.5 py-0.5 rounded-md">
-                        <span class="material-symbols-outlined text-sm">trending_down</span>
-                        {{ post_growth }}%
-                    </span>
-                    <span class="opacity-60">{% trans "较上月" %}</span>
-                    {% endif %}
-                </div>
             </div>
         </div>
-
-        <!-- Total Comments -->
-        <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
-            <div class="stat relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary/5 rounded-full blur-2xl group-hover:bg-secondary/10 transition-colors"></div>
-                <div class="stat-figure text-secondary">
-                    <span class="material-symbols-outlined text-3xl">comment</span>
-                </div>
-                <div class="stat-title font-bold text-base-content/60">{% trans "总评论数" %}</div>
-                <div class="stat-value text-secondary text-4xl font-heading mt-1">{{ total_comments }}</div>
-                <div class="stat-desc mt-2 flex items-center gap-1 font-medium">
-                    {% if pending_comments > 0 %}
-                    <span class="text-warning flex items-center bg-warning/10 px-1.5 py-0.5 rounded-md animate-pulse">
-                        <span class="material-symbols-outlined text-sm">pending</span>
-                        {{ pending_comments }} {% trans "待审" %}
-                    </span>
-                    {% else %}
-                    <span class="text-success flex items-center bg-success/10 px-1.5 py-0.5 rounded-md">
-                        <span class="material-symbols-outlined text-sm">check_circle</span>
-                        {% trans "全部已审" %}
-                    </span>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-        
-        <!-- System Health -->
-        <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
-            <div class="stat relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-success/5 rounded-full blur-2xl group-hover:bg-success/10 transition-colors"></div>
-                <div class="stat-figure text-success">
-                    <div class="radial-progress text-success bg-success/10 border-4 border-transparent text-xs font-bold" style="--value:{{ system_health }}; --size:2.5rem; --thickness: 4px;">{{ system_health }}%</div>
-                </div>
-                <div class="stat-title font-bold text-base-content/60">{% trans "系统健康度" %}</div>
-                <div class="stat-value text-success text-4xl font-heading mt-1">{{ system_health }}%</div>
-                <div class="stat-desc mt-2 font-medium opacity-60">{% trans "运行正常" %}</div>
-            </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
-            <div class="stat relative overflow-hidden group">
-                <div class="absolute -right-4 -top-4 w-24 h-24 bg-info/5 rounded-full blur-2xl group-hover:bg-info/10 transition-colors"></div>
-                <div class="stat-figure text-info">
-                    <span class="material-symbols-outlined text-3xl">bolt</span>
-                </div>
-                <div class="stat-title font-bold text-base-content/60">{% trans "快捷操作" %}</div>
-                <div class="mt-3 flex gap-2">
-                    <a href="{% url 'administration:debug_cache' %}" class="btn btn-sm btn-outline btn-info gap-1 h-9 min-h-0">
-                        <span class="material-symbols-outlined text-base">cleaning_services</span>
-                        {% trans "清理缓存" %}
-                    </a>
-                    <a href="{% url 'administration:settings' %}" class="btn btn-sm btn-ghost gap-1 h-9 min-h-0 bg-base-200/50 hover:bg-base-200">
-                        <span class="material-symbols-outlined text-base">settings</span>
-                        {% trans "站点设置" %}
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Charts Grid (Bento Box 2) -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Main Trend Chart (Span 2) -->
-        <div class="lg:col-span-2 relative group rounded-3xl bg-base-100 border border-base-content/5 shadow-xl overflow-hidden">
-             {% include "components/inspira/border_beam.html" %}
-             <div class="p-6">
-                 <div class="flex justify-between items-center mb-6">
-                     <h3 class="font-bold text-lg flex items-center gap-2 font-heading">
-                         <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                             <span class="material-symbols-outlined text-lg">ssid_chart</span>
-                         </span>
-                         {% trans "活跃趋势" %}
-                     </h3>
-                     <div class="flex gap-2">
-                         <span class="badge badge-sm badge-ghost gap-1">
-                             <span class="w-2 h-2 rounded-full bg-primary"></span> {% trans "评论" %}
-                         </span>
-                     </div>
-                 </div>
-                <div id="trendChart"
-                     class="w-full h-[320px]"
-                     data-trend-counts="{{ trend_counts }}"
-                     data-user-trend-counts="{{ user_trend_counts }}"
-                     data-trend-dates="{{ trend_dates }}"></div>
-             </div>
-        </div>
-
-        <!-- Side Widgets (Span 1) -->
-        <div class="flex flex-col gap-6">
-            <!-- Comment Status -->
-            <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden">
-                <h3 class="font-bold text-sm mb-4 opacity-70 uppercase tracking-wider">{% trans "评论分布" %}</h3>
-                <div class="flex items-center justify-between">
-                    <div id="commentDonut"
-                         class="flex-1 min-w-0"
-                         data-comment-status="{{ comment_status_data }}"></div>
-                    <div class="flex flex-col gap-3 text-xs shrink-0 whitespace-nowrap pl-4 border-l border-base-content/5">
-                        <div class="flex items-center gap-2">
-                            <div class="w-2.5 h-2.5 rounded-full bg-success shadow-sm shadow-success/50"></div>
-                            <span class="font-medium">{% trans "已发布" %}</span>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <div class="w-2.5 h-2.5 rounded-full bg-warning shadow-sm shadow-warning/50"></div>
-                            <span class="font-medium">{% trans "待审核" %}</span>
-                        </div>
+        <!-- Stats Grid (KPI Cards) -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Total Posts -->
+            <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
+                <div class="stat relative overflow-hidden group">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-colors">
+                    </div>
+                    <div class="stat-figure text-primary">
+                        <span class="material-symbols-outlined text-3xl">article</span>
+                    </div>
+                    <div class="stat-title font-bold text-base-content/60">{% trans "总文章数" %}</div>
+                    <div class="stat-value text-primary text-4xl font-heading mt-1">{{ total_posts }}</div>
+                    <div class="stat-desc mt-2 flex items-center gap-1 font-medium">
+                        {% if post_growth >= 0 %}
+                            <span class="text-success flex items-center bg-success/10 px-1.5 py-0.5 rounded-md">
+                                <span class="material-symbols-outlined text-sm">trending_up</span>
+                                {{ post_growth }}%
+                            </span>
+                            <span class="opacity-60">{% trans "较上月" %}</span>
+                        {% else %}
+                            <span class="text-error flex items-center bg-error/10 px-1.5 py-0.5 rounded-md">
+                                <span class="material-symbols-outlined text-sm">trending_down</span>
+                                {{ post_growth }}%
+                            </span>
+                            <span class="opacity-60">{% trans "较上月" %}</span>
+                        {% endif %}
                     </div>
                 </div>
             </div>
-            
-            <!-- Top Posts List -->
-            <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 flex-1 relative overflow-hidden">
-                 <h3 class="font-bold text-sm mb-5 opacity-70 uppercase tracking-wider">{% trans "热门文章 TOP 5" %}</h3>
-                 <div class="flex flex-col gap-4">
-                     {% for post in top_posts %}
-                     <a href="{% url 'post_detail' post.slug %}" target="_blank" class="group block relative">
-                         <div class="flex justify-between items-center text-sm mb-1.5 relative z-10">
-                             <span class="truncate max-w-[180px] font-medium group-hover:text-primary transition-colors">{{ post.title }}</span>
-                             <span class="badge badge-sm bg-base-200 border-none font-mono text-xs opacity-80 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
-                                {{ post.views }}
-                             </span>
-                         </div>
-                         <div class="w-full h-1.5 bg-base-200 rounded-full overflow-hidden">
-                             <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full opacity-80 group-hover:opacity-100 transition-all duration-500" style="width: {% widthratio post.views top_posts.0.views 100 %}%"></div>
-                         </div>
-                     </a>
-                     {% endfor %}
-                 </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Analytics Grid (New) -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Category Distribution -->
-        <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden group">
-            <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors"></div>
-            <h3 class="font-bold text-lg mb-6 flex items-center gap-2 font-heading relative z-10">
-                <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-lg">pie_chart</span>
-                </span>
-                {% trans "分类分布" %}
-            </h3>
-            <div id="categoryChart" 
-                 class="w-full h-[300px]"
-                 data-category-labels="{{ category_labels }}"
-                 data-category-data="{{ category_data }}"></div>
-        </div>
-
-        <!-- Tag Usage -->
-        <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden group">
-            <div class="absolute -right-10 -top-10 w-32 h-32 bg-secondary/5 rounded-full blur-3xl group-hover:bg-secondary/10 transition-colors"></div>
-            <h3 class="font-bold text-lg mb-6 flex items-center gap-2 font-heading relative z-10">
-                <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
-                    <span class="material-symbols-outlined text-lg">tag</span>
-                </span>
-                {% trans "热门标签" %}
-            </h3>
-            <div id="tagChart" 
-                 class="w-full h-[300px]"
-                 data-tag-labels="{{ tag_labels }}"
-                 data-tag-data="{{ tag_data }}"></div>
-        </div>
-    </div>
-    
-    <!-- Bottom Grid -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Recent Comments -->
-        <div class="lg:col-span-2 rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="font-bold text-lg font-heading flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
-                        <span class="material-symbols-outlined text-lg">forum</span>
-                    </span>
-                    {% trans "最近评论" %}
-                </h3>
-                <a href="{% url 'administration:comment_list' %}" class="btn btn-sm btn-ghost hover:bg-base-200">{% trans "查看全部" %}</a>
-            </div>
-            
-            {% captureas list_content %}
-                {% for comment in recent_comments %}
-                <div class="flex items-start gap-4 p-4 hover:bg-base-200/40 rounded-2xl transition-all cursor-default group border border-transparent hover:border-base-content/5">
-                    <div class="avatar">
-                        <div class="w-10 h-10 rounded-full ring-1 ring-base-content/5 group-hover:ring-secondary/30 transition-all overflow-hidden bg-base-200">
-                            <img src="{{ comment.user.get_avatar_url }}" alt="{{ comment.user.username }}" class="w-full h-full object-cover">
-                        </div>
+            <!-- Total Comments -->
+            <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
+                <div class="stat relative overflow-hidden group">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-secondary/5 rounded-full blur-2xl group-hover:bg-secondary/10 transition-colors">
                     </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-start mb-1">
-                            <div class="flex items-center gap-2">
-                                <span class="font-bold text-sm">{{ comment.user.nickname|default:comment.user.username }}</span>
-                                {% if not comment.active %}
-                                <span class="badge badge-xs badge-warning font-bold">{% trans "待审" %}</span>
-                                {% endif %}
-                            </div>
-                            <span class="text-xs font-mono opacity-40">{{ comment.created_at|time_ago }}</span>
-                        </div>
-                        <a href="{% url 'post_detail' comment.post.slug %}#comment-{{ comment.id }}" target="_blank" class="text-sm opacity-80 line-clamp-2 hover:text-secondary transition-colors leading-relaxed">
-                            {{ comment.content }}
+                    <div class="stat-figure text-secondary">
+                        <span class="material-symbols-outlined text-3xl">comment</span>
+                    </div>
+                    <div class="stat-title font-bold text-base-content/60">{% trans "总评论数" %}</div>
+                    <div class="stat-value text-secondary text-4xl font-heading mt-1">{{ total_comments }}</div>
+                    <div class="stat-desc mt-2 flex items-center gap-1 font-medium">
+                        {% if pending_comments > 0 %}
+                            <span class="text-warning flex items-center bg-warning/10 px-1.5 py-0.5 rounded-md animate-pulse">
+                                <span class="material-symbols-outlined text-sm">pending</span>
+                                {{ pending_comments }} {% trans "待审" %}
+                            </span>
+                        {% else %}
+                            <span class="text-success flex items-center bg-success/10 px-1.5 py-0.5 rounded-md">
+                                <span class="material-symbols-outlined text-sm">check_circle</span>
+                                {% trans "全部已审" %}
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            <!-- System Health -->
+            <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
+                <div class="stat relative overflow-hidden group">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-success/5 rounded-full blur-2xl group-hover:bg-success/10 transition-colors">
+                    </div>
+                    <div class="stat-figure text-success">
+                        <div class="radial-progress text-success bg-success/10 border-4 border-transparent text-xs font-bold"
+                             style="--value:{{ system_health }};
+                                    --size:2.5rem;
+                                    --thickness: 4px">{{ system_health }}%</div>
+                    </div>
+                    <div class="stat-title font-bold text-base-content/60">{% trans "系统健康度" %}</div>
+                    <div class="stat-value text-success text-4xl font-heading mt-1">{{ system_health }}%</div>
+                    <div class="stat-desc mt-2 font-medium opacity-60">{% trans "运行正常" %}</div>
+                </div>
+            </div>
+            <!-- Quick Actions -->
+            <div class="stats shadow-xl bg-base-100 border border-base-content/5 overflow-visible">
+                <div class="stat relative overflow-hidden group">
+                    <div class="absolute -right-4 -top-4 w-24 h-24 bg-info/5 rounded-full blur-2xl group-hover:bg-info/10 transition-colors">
+                    </div>
+                    <div class="stat-figure text-info">
+                        <span class="material-symbols-outlined text-3xl">bolt</span>
+                    </div>
+                    <div class="stat-title font-bold text-base-content/60">{% trans "快捷操作" %}</div>
+                    <div class="mt-3 flex gap-2">
+                        <a href="{% url 'administration:system_tools' %}"
+                           class="btn btn-sm btn-outline btn-info gap-1 h-9 min-h-0">
+                            <span class="material-symbols-outlined text-base">cleaning_services</span>
+                            {% trans "清理缓存" %}
                         </a>
-                        <div class="flex items-center gap-1 mt-2 text-xs opacity-40 group-hover:opacity-60 transition-opacity">
-                            <span class="material-symbols-outlined text-[12px]">article</span>
-                            <span>{{ comment.post.title }}</span>
+                        <a href="{% url 'administration:settings' %}"
+                           class="btn btn-sm btn-ghost gap-1 h-9 min-h-0 bg-base-200/50 hover:bg-base-200">
+                            <span class="material-symbols-outlined text-base">settings</span>
+                            {% trans "站点设置" %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Charts Grid (Bento Box 2) -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Main Trend Chart (Span 2) -->
+            <div class="lg:col-span-2 relative group rounded-3xl bg-base-100 border border-base-content/5 shadow-xl overflow-hidden">
+                {% include "components/inspira/border_beam.html" %}
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-bold text-lg flex items-center gap-2 font-heading">
+                            <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                                <span class="material-symbols-outlined text-lg">ssid_chart</span>
+                            </span>
+                            {% trans "活跃趋势" %}
+                        </h3>
+                        <div class="flex gap-2">
+                            <span class="badge badge-sm badge-ghost gap-1">
+                                <span class="w-2 h-2 rounded-full bg-primary"></span> {% trans "评论" %}
+                            </span>
+                        </div>
+                    </div>
+                    <div id="trendChart"
+                         class="w-full h-[320px]"
+                         data-trend-counts="{{ trend_counts }}"
+                         data-user-trend-counts="{{ user_trend_counts }}"
+                         data-trend-dates="{{ trend_dates }}"></div>
+                </div>
+            </div>
+            <!-- Side Widgets (Span 1) -->
+            <div class="flex flex-col gap-6">
+                <!-- Comment Status -->
+                <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden">
+                    <h3 class="font-bold text-sm mb-4 opacity-70 uppercase tracking-wider">{% trans "评论分布" %}</h3>
+                    <div class="flex items-center justify-between">
+                        <div id="commentDonut"
+                             class="flex-1 min-w-0"
+                             data-comment-status="{{ comment_status_data }}"></div>
+                        <div class="flex flex-col gap-3 text-xs shrink-0 whitespace-nowrap pl-4 border-l border-base-content/5">
+                            <div class="flex items-center gap-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-success shadow-sm shadow-success/50"></div>
+                                <span class="font-medium">{% trans "已发布" %}</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-2.5 h-2.5 rounded-full bg-warning shadow-sm shadow-warning/50"></div>
+                                <span class="font-medium">{% trans "待审核" %}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
-                {% empty %}
-                <div class="text-center opacity-50 py-10 flex flex-col items-center gap-2">
-                    <span class="material-symbols-outlined text-4xl">inbox</span>
-                    <span>{% trans "暂无活动" %}</span>
+                <!-- Top Posts List -->
+                <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 flex-1 relative overflow-hidden">
+                    <h3 class="font-bold text-sm mb-5 opacity-70 uppercase tracking-wider">{% trans "热门文章 TOP 5" %}</h3>
+                    <div class="flex flex-col gap-4">
+                        {% for post in top_posts %}
+                            <a href="{% url 'post_detail' post.slug %}"
+                               target="_blank"
+                               class="group block relative">
+                                <div class="flex justify-between items-center text-sm mb-1.5 relative z-10">
+                                    <span class="truncate max-w-[180px] font-medium group-hover:text-primary transition-colors">{{ post.title }}</span>
+                                    <span class="badge badge-sm bg-base-200 border-none font-mono text-xs opacity-80 group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                        {{ post.views }}
+                                    </span>
+                                </div>
+                                <div class="w-full h-1.5 bg-base-200 rounded-full overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-primary to-secondary rounded-full opacity-80 group-hover:opacity-100 transition-all duration-500"
+                                         style="width: {% widthratio post.views top_posts.0.views 100 %}%"></div>
+                                </div>
+                            </a>
+                        {% endfor %}
+                    </div>
                 </div>
+            </div>
+        </div>
+        <!-- Analytics Grid (New) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- Category Distribution -->
+            <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden group">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-colors">
+                </div>
+                <h3 class="font-bold text-lg mb-6 flex items-center gap-2 font-heading relative z-10">
+                    <span class="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">pie_chart</span>
+                    </span>
+                    {% trans "分类分布" %}
+                </h3>
+                <div id="categoryChart"
+                     class="w-full h-[300px]"
+                     data-category-labels="{{ category_labels }}"
+                     data-category-data="{{ category_data }}"></div>
+            </div>
+            <!-- Tag Usage -->
+            <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden group">
+                <div class="absolute -right-10 -top-10 w-32 h-32 bg-secondary/5 rounded-full blur-3xl group-hover:bg-secondary/10 transition-colors">
+                </div>
+                <h3 class="font-bold text-lg mb-6 flex items-center gap-2 font-heading relative z-10">
+                    <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                        <span class="material-symbols-outlined text-lg">tag</span>
+                    </span>
+                    {% trans "热门标签" %}
+                </h3>
+                <div id="tagChart"
+                     class="w-full h-[300px]"
+                     data-tag-labels="{{ tag_labels }}"
+                     data-tag-data="{{ tag_data }}"></div>
+            </div>
+        </div>
+        <!-- Bottom Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Recent Comments -->
+            <div class="lg:col-span-2 rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="font-bold text-lg font-heading flex items-center gap-2">
+                        <span class="w-8 h-8 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+                            <span class="material-symbols-outlined text-lg">forum</span>
+                        </span>
+                        {% trans "最近评论" %}
+                    </h3>
+                    <a href="{% url 'administration:comment_list' %}"
+                       class="btn btn-sm btn-ghost hover:bg-base-200">{% trans "查看全部" %}</a>
+                </div>
+                {% captureas list_content %}
+                {% for comment in recent_comments %}
+                    <div class="flex items-start gap-4 p-4 hover:bg-base-200/40 rounded-2xl transition-all cursor-default group border border-transparent hover:border-base-content/5">
+                        <div class="avatar">
+                            <div class="w-10 h-10 rounded-full ring-1 ring-base-content/5 group-hover:ring-secondary/30 transition-all overflow-hidden bg-base-200">
+                                <img src="{{ comment.user.get_avatar_url }}"
+                                     alt="{{ comment.user.username }}"
+                                     class="w-full h-full object-cover">
+                            </div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex justify-between items-start mb-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="font-bold text-sm">{{ comment.user.nickname|default:comment.user.username }}</span>
+                                    {% if not comment.active %}
+                                        <span class="badge badge-xs badge-warning font-bold">{% trans "待审" %}</span>
+                                    {% endif %}
+                                </div>
+                                <span class="text-xs font-mono opacity-40">{{ comment.created_at|time_ago }}</span>
+                            </div>
+                            <a href="{% url 'post_detail' comment.post.slug %}#comment-{{ comment.id }}"
+                               target="_blank"
+                               class="text-sm opacity-80 line-clamp-2 hover:text-secondary transition-colors leading-relaxed">
+                                {{ comment.content }}
+                            </a>
+                            <div class="flex items-center gap-1 mt-2 text-xs opacity-40 group-hover:opacity-60 transition-opacity">
+                                <span class="material-symbols-outlined text-[12px]">article</span>
+                                <span>{{ comment.post.title }}</span>
+                            </div>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center opacity-50 py-10 flex flex-col items-center gap-2">
+                        <span class="material-symbols-outlined text-4xl">inbox</span>
+                        <span>{% trans "暂无活动" %}</span>
+                    </div>
                 {% endfor %}
             {% endcaptureas %}
-            
             {# Using Animated List if available, otherwise just render #}
             {% include "components/inspira/animated_list.html" with slot_content=list_content %}
         </div>
-        
         <!-- System Info -->
         <div class="rounded-3xl bg-base-100 border border-base-content/5 shadow-xl p-6 relative overflow-hidden">
             <!-- Background Decoration -->
-            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-3xl pointer-events-none"></div>
-            
+            <div class="absolute -right-10 -bottom-10 w-40 h-40 bg-gradient-to-br from-primary/10 to-secondary/10 rounded-full blur-3xl pointer-events-none">
+            </div>
             <h3 class="font-bold text-lg mb-6 flex items-center gap-2 font-heading">
                 <span class="w-8 h-8 rounded-lg bg-accent/10 text-accent flex items-center justify-center">
                     <span class="material-symbols-outlined text-lg">memory</span>
                 </span>
                 {% trans "系统状态" %}
             </h3>
-            
             <div class="space-y-6 relative z-10">
                 <!-- Resources -->
                 <div class="space-y-4">
@@ -292,30 +301,32 @@
                             <span class="text-xs font-bold opacity-70">{% trans "CPU" %}</span>
                             <span class="font-mono text-xs font-bold">{{ system_info.cpu_percent }}%</span>
                         </div>
-                        <progress class="progress progress-primary w-full h-2" value="{{ system_info.cpu_percent }}" max="100"></progress>
+                        <progress class="progress progress-primary w-full h-2"
+                                  value="{{ system_info.cpu_percent }}"
+                                  max="100"></progress>
                     </div>
-                    
                     <!-- Memory -->
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
                             <span class="text-xs font-bold opacity-70">{% trans "内存" %}</span>
                             <span class="font-mono text-xs font-bold">{{ system_info.memory_percent }}%</span>
                         </div>
-                        <progress class="progress progress-secondary w-full h-2" value="{{ system_info.memory_percent }}" max="100"></progress>
+                        <progress class="progress progress-secondary w-full h-2"
+                                  value="{{ system_info.memory_percent }}"
+                                  max="100"></progress>
                     </div>
-
                     <!-- Disk -->
                     <div>
                         <div class="flex justify-between items-center mb-1.5">
                             <span class="text-xs font-bold opacity-70">{% trans "存储" %}</span>
                             <span class="font-mono text-xs font-bold">{{ system_info.disk_percent }}%</span>
                         </div>
-                        <progress class="progress progress-accent w-full h-2" value="{{ system_info.disk_percent }}" max="100"></progress>
+                        <progress class="progress progress-accent w-full h-2"
+                                  value="{{ system_info.disk_percent }}"
+                                  max="100"></progress>
                     </div>
                 </div>
-                
                 <div class="divider my-2 opacity-10"></div>
-                
                 <!-- Environment -->
                 <div class="grid grid-cols-2 gap-4 text-xs">
                     <div>
@@ -328,7 +339,8 @@
                     </div>
                     <div>
                         <span class="block opacity-50 mb-1">{% trans "系统" %}</span>
-                        <span class="font-mono font-bold truncate" title="{{ system_info.platform_system }} {{ system_info.platform_release }}">{{ system_info.platform_system }}</span>
+                        <span class="font-mono font-bold truncate"
+                              title="{{ system_info.platform_system }} {{ system_info.platform_release }}">{{ system_info.platform_system }}</span>
                     </div>
                     <div>
                         <span class="block opacity-50 mb-1">{% trans "运行时间" %}</span>
@@ -338,7 +350,5 @@
             </div>
         </div>
     </div>
-
 </div>
-
 {% endblock %}

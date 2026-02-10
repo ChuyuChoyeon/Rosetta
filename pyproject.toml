@@ -6,9 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "django>=6.0",
-    "django-comments-xtd>=2.10.11",
     "django-constance[redis]>=4.3.4",
-    "django-contrib-comments>=2.2.0",
     "django-guardian>=3.2.0",
     "django-htmx>=1.27.0",
     "django-imagekit>=6.0.0",
@@ -42,7 +40,6 @@ dependencies = [
     "django-modeltranslation>=0.19.19",
     "deep-translator>=1.11.4",
     "polib>=1.2.0",
-    "googletrans==4.0.0rc1",
     "whitenoise>=6.11.0",
     "gunicorn>=24.1.1",
     "sentry-sdk>=2.51.0",
@@ -65,10 +62,12 @@ omit = [
 [dependency-groups]
 dev = [
     "black>=26.1.0",
+    "djlint>=1.36.4",
     "factory-boy>=3.3.3",
     "flake8>=7.3.0",
     "isort>=7.0.0",
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "pytest-django>=4.11.1",
+    "ruff>=0.15.0",
 ]

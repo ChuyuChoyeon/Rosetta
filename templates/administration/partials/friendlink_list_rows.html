@@ -1,78 +1,88 @@
 {% load i18n %}
 {% for link in friendlinks %}
-<tr class="hover">
-    <th class="pl-6">
-        <label>
-            <input type="checkbox" name="selected_ids" value="{{ link.pk }}" class="checkbox checkbox-sm rounded-sm row-checkbox" onchange="updateBulkToolbar()" />
-        </label>
-    </th>
-    <td class="w-16">
-        <div class="avatar">
-            <div class="w-8 h-8 rounded-lg bg-base-100 ring-1 ring-base-200 p-0.5 overflow-hidden">
-                {% if link.logo %}
-                    <img src="{{ link.logo.url }}" alt="{{ link.name }}" class="object-cover w-full h-full rounded-md" />
-                {% else %}
-                    <div class="bg-base-200 w-full h-full flex items-center justify-center rounded-md">
-                        <span class="text-xs font-bold opacity-50">{{ link.name|slice:":1"|upper }}</span>
-                    </div>
-                {% endif %}
+    <tr class="hover">
+        <th class="pl-6">
+            <label>
+                <input type="checkbox"
+                       name="selected_ids"
+                       value="{{ link.pk }}"
+                       class="checkbox checkbox-sm rounded-sm row-checkbox"
+                       onchange="updateBulkToolbar()" />
+            </label>
+        </th>
+        <td class="w-16">
+            <div class="avatar">
+                <div class="w-8 h-8 rounded-lg bg-base-100 ring-1 ring-base-200 p-0.5 overflow-hidden">
+                    {% if link.logo %}
+                        <img src="{{ link.logo.url }}"
+                             alt="{{ link.name }}"
+                             class="object-cover w-full h-full rounded-md" />
+                    {% else %}
+                        <div class="bg-base-200 w-full h-full flex items-center justify-center rounded-md">
+                            <span class="text-xs font-bold opacity-50">{{ link.name|slice:":1"|upper }}</span>
+                        </div>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-    </td>
-    <td>
-        <a href="{% url 'administration:friendlink_edit' link.pk %}" class="font-bold text-sm hover:text-primary transition-colors block truncate max-w-[150px]">{{ link.name }}</a>
-    </td>
-    <td class="hidden lg:table-cell">
-        <a href="{{ link.url }}" target="_blank" class="link link-hover text-xs text-primary/70 font-mono truncate max-w-[200px] block" title="{{ link.url }}">{{ link.url }}</a>
-    </td>
-    <td class="hidden xl:table-cell max-w-xs">
-        <div class="text-xs text-base-content/60 truncate" title="{{ link.description }}">
-            {{ link.description|default:"-" }}
-        </div>
-    </td>
-    <td class="text-center hidden sm:table-cell">
-        {% if link.is_active %}
-            <span class="badge badge-success badge-sm gap-1 badge-outline bg-success/5 border-success/30">
-                <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
-                {% trans "可见" %}
-            </span>
-        {% else %}
-            <span class="badge badge-ghost badge-sm gap-1 badge-outline opacity-60">
-                <span class="w-1.5 h-1.5 rounded-full bg-base-content/30"></span>
-                {% trans "隐藏" %}
-            </span>
-        {% endif %}
-    </td>
-    <td class="text-center font-mono text-xs opacity-60 hidden md:table-cell">{{ link.order }}</td>
-    <td class="text-right pr-6">
-        <div class="join">
-            <a href="{% url 'administration:friendlink_edit' link.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '编辑' %}">
-                <span class="material-symbols-outlined text-base">edit</span>
-            </a>
-            <button type="button" 
-                    hx-post="{% url 'administration:friendlink_delete' link.pk %}"
-                    hx-trigger="confirmed"
-                    hx-target="closest tr"
-                    hx-swap="outerHTML swap:0.5s"
-                    onclick="confirmHtmx(this, '{% blocktrans with name=link.name|escapejs %}确定要删除友情链接“{{ name }}”吗？{% endblocktrans %}')"
-                    class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" 
-                    data-tip="{% trans '删除' %}">
-                <span class="material-symbols-outlined text-base">delete</span>
-            </button>
-        </div>
-    </td>
-</tr>
+        </td>
+        <td>
+            <a href="{% url 'administration:friendlink_edit' link.pk %}"
+               class="font-bold text-sm hover:text-primary transition-colors block truncate max-w-[150px]">{{ link.name }}</a>
+        </td>
+        <td class="hidden lg:table-cell">
+            <a href="{{ link.url }}"
+               target="_blank"
+               class="link link-hover text-xs text-primary/70 font-mono truncate max-w-[200px] block"
+               title="{{ link.url }}">{{ link.url }}</a>
+        </td>
+        <td class="hidden xl:table-cell max-w-xs">
+            <div class="text-xs text-base-content/60 truncate"
+                 title="{{ link.description }}">{{ link.description|default:"-" }}</div>
+        </td>
+        <td class="text-center hidden sm:table-cell">
+            {% if link.is_active %}
+                <span class="badge badge-success badge-sm gap-1 badge-outline bg-success/5 border-success/30">
+                    <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                    {% trans "可见" %}
+                </span>
+            {% else %}
+                <span class="badge badge-ghost badge-sm gap-1 badge-outline opacity-60">
+                    <span class="w-1.5 h-1.5 rounded-full bg-base-content/30"></span>
+                    {% trans "隐藏" %}
+                </span>
+            {% endif %}
+        </td>
+        <td class="text-center font-mono text-xs opacity-60 hidden md:table-cell">{{ link.order }}</td>
+        <td class="text-right pr-6">
+            <div class="join">
+                <a href="{% url 'administration:friendlink_edit' link.pk %}"
+                   class="btn btn-ghost btn-xs join-item tooltip tooltip-left"
+                   data-tip="{% trans '编辑' %}">
+                    <span class="material-symbols-outlined text-base">edit</span>
+                </a>
+                <button type="button"
+                        hx-post="{% url 'administration:friendlink_delete' link.pk %}"
+                        hx-trigger="confirmed"
+                        hx-target="closest tr"
+                        hx-swap="outerHTML swap:0.5s"
+                        onclick="confirmHtmx(this, '{% blocktrans with name=link.name|escapejs %}确定要删除友情链接“{{ name }}”吗？{% endblocktrans %}')"
+                        class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left"
+                        data-tip="{% trans '删除' %}">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+            </div>
+        </td>
+    </tr>
 {% empty %}
-<tr>
-    <td colspan="8">
-        <div class="flex flex-col items-center justify-center py-12 text-base-content/40">
-            <div class="w-16 h-16 rounded-full bg-base-200/50 flex items-center justify-center mb-4">
-                <span class="material-symbols-outlined text-3xl opacity-50">link_off</span>
+    <tr>
+        <td colspan="8">
+            <div class="flex flex-col items-center justify-center py-12 text-base-content/40">
+                <div class="w-16 h-16 rounded-full bg-base-200/50 flex items-center justify-center mb-4">
+                    <span class="material-symbols-outlined text-3xl opacity-50">link_off</span>
+                </div>
+                <h3 class="font-bold text-lg text-base-content/70">{% trans "暂无友情链接" %}</h3>
+                <p class="text-sm opacity-50 mt-1">{% trans "添加链接以与伙伴互联" %}</p>
             </div>
-            <h3 class="font-bold text-lg text-base-content/70">{% trans "暂无友情链接" %}</h3>
-            <p class="text-sm opacity-50 mt-1">{% trans "添加链接以与伙伴互联" %}</p>
-        </div>
-    </td>
-</tr>
+        </td>
+    </tr>
 {% endfor %}
-

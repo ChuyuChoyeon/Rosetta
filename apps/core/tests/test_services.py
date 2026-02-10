@@ -7,6 +7,7 @@ from users.models import Notification
 
 User = get_user_model()
 
+
 @pytest.mark.django_db
 class TestMockDataGenerator:
     @pytest.fixture(autouse=True)
@@ -51,8 +52,10 @@ class TestMockDataGenerator:
         users = self.generator.create_users(count=1)
         categories = self.generator.create_categories(count=1)
         tags = self.generator.create_tags(count=1)
-        
-        posts = self.generator.create_posts(count=3, users=users, categories=categories, tags=tags)
+
+        posts = self.generator.create_posts(
+            count=3, users=users, categories=categories, tags=tags
+        )
         assert len(posts) == 3
         assert Post.objects.count() >= 3
         for post in posts:
@@ -64,11 +67,11 @@ class TestMockDataGenerator:
         # Need prerequisites
         users = self.generator.create_users(count=2)
         posts = self.generator.create_posts(count=1, users=users)
-        
+
         comments = self.generator.create_comments(count=5, users=users, posts=posts)
         assert len(comments) == 5
         assert Comment.objects.count() >= 5
-        
+
         # Check notifications
         assert Notification.objects.count() > 0
 
@@ -87,6 +90,7 @@ class TestMockDataGenerator:
         assert len(placeholders) > 0
         assert SearchPlaceholder.objects.count() >= len(placeholders)
 
+
 @pytest.mark.django_db
 def test_generate_mock_data_service():
     """Test the main entry point function"""
@@ -96,9 +100,9 @@ def test_generate_mock_data_service():
         tags_count=2,
         posts_count=2,
         comments_count=2,
-        generate_extras=True
+        generate_extras=True,
     )
-    
+
     assert result["users"] == 2
     assert result["categories"] == 2
     assert result["tags"] == 2
@@ -107,6 +111,6 @@ def test_generate_mock_data_service():
     assert result["friend_links"] > 0
     assert result["navigations"] > 0
     assert result["placeholders"] > 0
-    
+
     assert User.objects.count() >= 2
     assert Post.objects.count() >= 2

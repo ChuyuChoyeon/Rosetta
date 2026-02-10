@@ -1,18 +1,20 @@
-
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from django.urls import reverse
 from django.contrib.auth import get_user_model
 from core.models import Page
 
 User = get_user_model()
 
+
 @pytest.mark.django_db
 class TestSystemToolsView:
     @pytest.fixture(autouse=True)
     def setup(self, client):
         self.client = client
-        self.superuser = User.objects.create_superuser(username="admin", password="password")
+        self.superuser = User.objects.create_superuser(
+            username="admin", password="password"
+        )
         self.client.force_login(self.superuser)
         self.url = reverse("administration:system_tools")
 
@@ -27,7 +29,7 @@ class TestSystemToolsView:
         response = self.client.post(self.url, {"action": "scan_media"})
         assert response.status_code == 302
         mock_trigger.assert_called_once()
-        
+
         # Test already running
         with patch("django.core.cache.cache.get", return_value="running"):
             response = self.client.post(self.url, {"action": "scan_media"})
@@ -53,7 +55,7 @@ class TestSystemToolsView:
         response = self.client.post(self.url, {"action": "init_privacy_policy"})
         assert response.status_code == 302
         assert Page.objects.filter(slug="privacy-policy").exists()
-        
+
         # Test already exists
         response = self.client.post(self.url, {"action": "init_privacy_policy"})
         assert response.status_code == 302
@@ -73,13 +75,17 @@ class TestSystemToolsView:
 
     @patch("core.utils.restore_backup")
     def test_restore_backup(self, mock_restore):
-        response = self.client.post(self.url, {"action": "restore_backup", "filename": "backup.json"})
+        response = self.client.post(
+            self.url, {"action": "restore_backup", "filename": "backup.json"}
+        )
         assert response.status_code == 302
         mock_restore.assert_called_with("backup.json")
 
     @patch("core.utils.delete_backup")
     def test_delete_backup(self, mock_delete):
-        response = self.client.post(self.url, {"action": "delete_backup", "filename": "backup.json"})
+        response = self.client.post(
+            self.url, {"action": "delete_backup", "filename": "backup.json"}
+        )
         assert response.status_code == 302
         mock_delete.assert_called_with("backup.json")
 
@@ -87,10 +93,13 @@ class TestSystemToolsView:
         response = self.client.post(self.url, {"action": "unknown"})
         assert response.status_code == 302
 
+
 @pytest.mark.django_db
 class TestSettingsView:
     def test_settings_view(self, client):
-        user = User.objects.create_user(username="staff", password="password", is_staff=True)
+        user = User.objects.create_user(
+            username="staff", password="password", is_staff=True
+        )
         client.force_login(user)
         url = reverse("administration:settings")
         response = client.get(url)

@@ -1,59 +1,74 @@
-{% extends "administration/debug/base_debug.html" %}
+{% extends "administration/base.html" %}
 {% load capture_tags %}
 {% load i18n %}
-
-{% block debug_title %}{% trans "缓存管理" %}{% endblock %}
-
-{% block debug_content %}
-{% captureas card_content %}
-<div class="p-6">
-    <h2 class="card-title mb-6 flex items-center gap-2">
-        <span class="material-symbols-outlined text-warning">cleaning_services</span>
-        {% trans "缓存管理" %}
-    </h2>
-    
-    <div class="alert alert-info mb-6">
-        <span class="material-symbols-outlined">info</span>
-        <div>
-            <h3 class="font-bold">{% trans "缓存说明" %}</h3>
-            <div class="text-xs">
-                {% trans "系统使用 Django 默认缓存后端。清理缓存可能会导致短暂的性能下降，因为系统需要重新生成缓存数据。" %}
-            </div>
-        </div>
-    </div>
+{% block title %}
+    {% trans "缓存调试" %}{% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock title %}
+{% block content %}
+    <!-- Header -->
+    {% captureas header_actions %}
+        <a href="{% url 'administration:system_tools' %}" class="btn btn-sm btn-ghost gap-2">
+            <span class="material-symbols-outlined">arrow_back</span>
+            {% trans "返回系统工具" %}
+        </a>
+    {% endcaptureas %}
+    {% trans "缓存调试" as title_text %}
+    {% trans "查看与管理系统缓存状态" as subtitle_text %}
+    {% include "administration/components/header.html" with title=title_text subtitle=subtitle_text icon="memory" actions=header_actions %}
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <!-- Clear All Cache -->
-        <div class="border border-base-200 rounded-lg p-6 flex flex-col items-center text-center gap-4 hover:bg-base-200/50 transition-colors">
-            <span class="material-symbols-outlined text-4xl text-error">delete_forever</span>
-            <div>
-                <h3 class="font-bold">{% trans "清理所有缓存" %}</h3>
-                <p class="text-sm opacity-70 mt-1">{% trans "清除系统中的所有缓存数据，包括页面缓存、数据库查询缓存等。" %}</p>
+        <!-- Cache Control -->
+        <div class="p-6 bg-base-100 rounded-xl border border-base-content/10">
+            <h2 class="card-title mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-warning">cleaning_services</span>
+                {% trans "缓存操作" %}
+            </h2>
+            <div class="space-y-4">
+                <div class="alert alert-warning shadow-sm">
+                    <span class="material-symbols-outlined">warning</span>
+                    <span>{% trans "清理缓存可能会导致系统性能暂时下降，请谨慎操作。" %}</span>
+                </div>
+                <div class="flex flex-wrap gap-4">
+                    <form method="post" onsubmit="return confirm('{% trans "确定要清理所有缓存吗？" %}');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="clear_all">
+                        <button type="submit" class="btn btn-error">
+                            <span class="material-symbols-outlined">delete_forever</span>
+                            {% trans "清理所有缓存" %}
+                        </button>
+                    </form>
+                    <form method="post" onsubmit="return confirm('{% trans "确定要清理模板缓存吗？" %}');">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="clear_templates">
+                        <button type="submit" class="btn btn-warning">
+                            <span class="material-symbols-outlined">web</span>
+                            {% trans "仅清理模板缓存" %}
+                        </button>
+                    </form>
+                </div>
             </div>
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="clear_all">
-                <button type="button" class="btn btn-error btn-sm" onclick="showConfirmModal('{% trans "清理缓存"|escapejs %}', '{% trans "确定要清理所有缓存吗？"|escapejs %}', () => this.form.submit())">{% trans "立即清理" %}</button>
-            </form>
         </div>
 
-        <!-- Clear Template Cache -->
-        <div class="border border-base-200 rounded-lg p-6 flex flex-col items-center text-center gap-4 hover:bg-base-200/50 transition-colors">
-            <span class="material-symbols-outlined text-4xl text-warning">layers_clear</span>
-            <div>
-                <h3 class="font-bold">{% trans "清理模板缓存" %}</h3>
-                <p class="text-sm opacity-70 mt-1">{% trans "仅清除编译后的模板缓存。如果在修改模板后未生效，请尝试此操作。" %}</p>
+        <!-- Cache Info (Placeholder) -->
+        <div class="p-6 bg-base-100 rounded-xl border border-base-content/10">
+            <h2 class="card-title mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-info">info</span>
+                {% trans "缓存信息" %}
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <tbody>
+                        <tr>
+                            <td class="font-medium">Backend</td>
+                            <td class="font-mono text-sm opacity-70">{{ settings.CACHES.default.BACKEND }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium">Location</td>
+                            <td class="font-mono text-sm opacity-70">{{ settings.CACHES.default.LOCATION|default:"-" }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <form method="post">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="clear_templates">
-                <button type="submit" class="btn btn-warning btn-sm">{% trans "清理模板" %}</button>
-            </form>
         </div>
     </div>
-</div>
-{% endcaptureas %}
-<div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-    {{ card_content }}
-</div>
-{% endblock %}
+{% endblock content %}

@@ -1,56 +1,61 @@
 {% extends "administration/base.html" %}
 {% load capture_tags i18n %}
-
-{% block title %}{% trans "投票管理" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
-
+{% block title %}
+    {% trans "投票管理" %}{% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock %}
 {% block content %}
     <!-- Header -->
     {% url 'administration:poll_create' as create_url %}
     {% captureas actions_block %}
-        <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-2 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105">
-            <span class="material-symbols-outlined text-lg">add_circle</span>
-            {% trans "新建投票" %}
-        </a>
-    {% endcaptureas %}
-
-    {% include "administration/components/header.html" with title=_("投票管理") subtitle=_("管理网站投票") breadcrumbs=None actions=actions_block %}
-
-    <!-- Main List Container -->
-    {% captureas bulk_actions_block %}
-        <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error-focus text-white border-none gap-2 rounded-lg">
-            <span class="material-symbols-outlined text-[16px]">delete</span> {% trans "删除" %}
-        </button>
-    {% endcaptureas %}
-
-    {% captureas table_content %}
-        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='poll' %}">
-            {% csrf_token %}
-            <table class="table table-pin-rows w-full">
-                <thead class="bg-base-200/50 text-base-content/60 font-medium text-xs uppercase tracking-wider">
-                    <tr>
-                        <th class="w-10 pl-6">
-                            <label>
-                                <input type="checkbox" class="checkbox checkbox-xs rounded-sm" onclick="toggleAll(this)" />
-                            </label>
-                        </th>
-                        <th class="w-16 font-mono hidden md:table-cell">ID</th>
-                        <th>{% trans "标题 / 描述" %}</th>
-                        <th class="hidden lg:table-cell">{% trans "关联文章" %}</th>
-                        <th class="w-24 text-center hidden sm:table-cell">{% trans "状态" %}</th>
-                        <th class="w-32 text-center hidden lg:table-cell">{% trans "截止日期" %}</th>
-                        <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
-                    </tr>
-                </thead>
-                <tbody id="poll-table-body" class="divide-y divide-base-content/5">
-                    {% include "administration/partials/poll_list_rows.html" %}
-                </tbody>
-            </table>
-        </form>
-    {% endcaptureas %}
-
-    {% include "administration/components/list_container.html" with title=_("投票列表") icon="poll" search_url="." bulk_actions=bulk_actions_block content=table_content %}
-
-    <script>
+    <a href="{{ create_url }}"
+       class="btn btn-sm btn-primary gap-2 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105">
+        <span class="material-symbols-outlined text-lg">add_circle</span>
+        {% trans "新建投票" %}
+    </a>
+{% endcaptureas %}
+{% trans "投票管理" as t_title %}
+{% trans "管理网站投票" as t_subtitle %}
+{% include "administration/components/header.html" with title=_("投票管理") title=t_title breadcrumbs=None actions=actions_block %}
+<!-- Main List Container -->
+{% captureas bulk_actions_block %}
+<button type="button"
+        onclick="submitBulkAction('delete')"
+        class="btn btn-sm btn-error hover:bg-error-focus text-white border-none gap-2 rounded-lg">
+    <span class="material-symbols-outlined text-[16px]">delete</span> {% trans "删除" %}
+</button>
+{% endcaptureas %}
+{% captureas table_content %}
+<form id="bulk-form"
+      method="post"
+      action="{% url 'administration:bulk_action' model='poll' %}">
+    {% csrf_token %}
+    <table class="table table-pin-rows w-full">
+        <thead class="bg-base-200/50 text-base-content/60 font-medium text-xs uppercase tracking-wider">
+            <tr>
+                <th class="w-10 pl-6">
+                    <label>
+                        <input type="checkbox"
+                               class="checkbox checkbox-xs rounded-sm"
+                               onclick="toggleAll(this)" />
+                    </label>
+                </th>
+                <th class="w-16 font-mono hidden md:table-cell">{% trans "ID" %}</th>
+                <th>{% trans "标题 / 描述" %}</th>
+                <th class="hidden lg:table-cell">{% trans "关联文章" %}</th>
+                <th class="w-24 text-center hidden sm:table-cell">{% trans "状态" %}</th>
+                <th class="w-32 text-center hidden lg:table-cell">{% trans "截止日期" %}</th>
+                <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
+            </tr>
+        </thead>
+        <tbody id="poll-table-body" class="divide-y divide-base-content/5">
+            {% include "administration/partials/poll_list_rows.html" %}
+        </tbody>
+    </table>
+</form>
+{% endcaptureas %}
+{% trans "投票列表" as t_title %}
+{% include "administration/components/list_container.html" with title=t_title icon="poll" search_url="." bulk_actions=bulk_actions_block content=table_content %}
+<script>
         function submitBulkAction(action) {
             const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
             if (checkedBoxes.length === 0) {
@@ -75,5 +80,5 @@
                 }
             );
         }
-    </script>
+</script>
 {% endblock %}

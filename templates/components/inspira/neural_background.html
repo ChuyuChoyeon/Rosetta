@@ -2,7 +2,6 @@
 <div class="fixed inset-0 -z-10 bg-base-100" x-data="neuralNetwork()">
     <canvas x-ref="canvas" class="w-full h-full block opacity-50"></canvas>
 </div>
-
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('neuralNetwork', () => ({

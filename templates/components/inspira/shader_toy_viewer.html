@@ -1,9 +1,9 @@
 <!-- Inspira UI: Shader Toy Viewer -->
-<div class="relative w-full h-full overflow-hidden {{ extra_classes }}" x-data="shaderToy()">
+<div class="relative w-full h-full overflow-hidden {{ extra_classes }}"
+     x-data="shaderToy()">
     <canvas x-ref="canvas" class="w-full h-full block"></canvas>
     <div class="absolute inset-0 bg-black/20"></div>
 </div>
-
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('shaderToy', () => ({

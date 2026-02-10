@@ -5,30 +5,35 @@
         <div class="flex items-center justify-between p-4 border-b border-base-200 bg-base-50">
             <h3 class="font-bold text-lg">{% trans "选择图标" %}</h3>
             <div class="join w-full max-w-xs mx-4">
-                <input type="text" x-model="searchQuery" class="input input-bordered input-sm w-full join-item" placeholder="{% trans '搜索图标 (如: user, edit)...' %}">
+                <input type="text"
+                       x-model="searchQuery"
+                       class="input input-bordered input-sm w-full join-item"
+                       placeholder="{% trans '搜索图标 (如: user, edit)...' %}">
                 <button class="btn btn-sm btn-square join-item">
                     <span class="material-symbols-outlined text-lg">search</span>
                 </button>
             </div>
-            <button type="button" class="btn btn-sm btn-circle btn-ghost" onclick="document.getElementById('icon_picker_modal').close()">✕</button>
+            <button type="button"
+                    class="btn btn-sm btn-circle btn-ghost"
+                    onclick="document.getElementById('icon_picker_modal').close()">✕</button>
         </div>
-        
         <!-- Grid -->
         <div class="flex-1 overflow-y-auto p-6 bg-base-100">
             <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-4">
                 <template x-for="iconName in filteredIcons" :key="iconName">
-                    <button type="button" 
-                            class="btn btn-ghost h-auto py-4 flex flex-col gap-2 hover:bg-base-200 hover:text-primary transition-colors border border-transparent hover:border-base-300 rounded-xl group relative min-h-[100px]" 
+                    <button type="button"
+                            class="btn btn-ghost h-auto py-4 flex flex-col gap-2 hover:bg-base-200 hover:text-primary transition-colors border border-transparent hover:border-base-300 rounded-xl group relative min-h-[100px]"
                             :class="isSelected(iconName) ? 'bg-primary/10 text-primary border-primary/20' : ''"
                             @click="selectIcon(iconName)"
                             :title="iconName">
                         <span class="material-symbols-outlined text-3xl" x-text="iconName"></span>
-                        <span class="text-xs leading-tight opacity-70 w-full px-1 break-words whitespace-normal flex items-center justify-center" x-text="iconName"></span>
+                        <span class="text-xs leading-tight opacity-70 w-full px-1 break-words whitespace-normal flex items-center justify-center"
+                              x-text="iconName"></span>
                     </button>
                 </template>
-                
                 <!-- Empty State -->
-                <div x-show="filteredIcons.length === 0" class="col-span-full flex flex-col items-center justify-center py-12 text-base-content/50">
+                <div x-show="filteredIcons.length === 0"
+                     class="col-span-full flex flex-col items-center justify-center py-12 text-base-content/50">
                     <span class="material-symbols-outlined text-4xl mb-2">search_off</span>
                     <span>{% trans "未找到匹配图标" %}</span>
                 </div>
@@ -36,5 +41,4 @@
         </div>
     </div>
 </dialog>
-
 <!-- Scripts removed: moved to htmx-init.js global registry -->

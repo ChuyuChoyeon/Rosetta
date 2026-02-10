@@ -1,17 +1,15 @@
 {% load static tailwind_tags i18n %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'zh-Hans' }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "服务器错误" %} - 500</title>
-    <link rel="shortcut icon" href="{% static 'theme/img/favicon.ico' %}">
-    
-    <!-- Google 字体 -->
-    <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">
-    
-    <!-- Material Symbols -->
-    <style>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% trans "服务器错误" %} - 500</title>
+        <link rel="shortcut icon" href="{% static 'theme/img/favicon.ico' %}">
+        <!-- Google 字体 -->
+        <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">
+        <!-- Material Symbols -->
+        <style>
         @font-face {
             font-family: 'Material Symbols Outlined';
             font-style: normal;
@@ -34,39 +32,45 @@
             -webkit-font-feature-settings: 'liga';
             -webkit-font-smoothing: antialiased;
         }
-    </style>
-    
-    {% tailwind_css %}
-</head>
-<body class="min-h-screen flex flex-col font-sans text-base-content bg-base-200">
-    <div class="hero min-h-screen">
-      <div class="hero-content text-center py-20 px-4">
-        <div class="max-w-2xl">
-          <div class="mb-8 relative">
-              <div class="absolute inset-0 bg-error/20 blur-3xl rounded-full animate-pulse"></div>
-              <img src="{% static 'theme/img/logo.svg' %}" alt="Logo" class="w-24 h-24 relative grayscale opacity-50">
-          </div>
-
-          <h1 class="text-5xl font-bold mb-8 tracking-tight">{% trans "服务器出错了" %}</h1>
-          <p class="py-6 text-base-content/70 text-xl leading-relaxed max-w-lg mx-auto">
-            {% trans "抱歉，服务器遇到了一些问题。" %}
-            <br>
-            {% trans "我们的技术团队已收到自动通知，正在努力修复。" %}
-          </p>
-          
-          <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
-              <a href="/" class="btn btn-primary btn-lg px-10 min-h-12 shadow-lg hover:shadow-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">{% trans "返回首页" %}</a>
-              <button onclick="location.reload()" class="btn btn-outline btn-lg px-10 min-h-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-                  {% trans "刷新页面" %}
-              </button>
-          </div>
+        </style>
+        {% tailwind_css %}
+    </head>
+    <body class="min-h-screen flex flex-col font-sans text-base-content bg-base-200">
+        <div class="hero min-h-screen">
+            <div class="hero-content text-center py-20 px-4">
+                <div class="max-w-2xl">
+                    <div class="mb-8 relative">
+                        <div class="absolute inset-0 bg-error/20 blur-3xl rounded-full animate-pulse"></div>
+                        <img src="{% static 'theme/img/logo.svg' %}"
+                             alt="Logo"
+                             class="w-24 h-24 relative grayscale opacity-50">
+                    </div>
+                    <h1 class="text-5xl font-bold mb-8 tracking-tight">{% trans "服务器出错了" %}</h1>
+                    <p class="py-6 text-base-content/70 text-xl leading-relaxed max-w-lg mx-auto">
+                        {% trans "抱歉，服务器遇到了一些问题。" %}
+                        <br>
+                        {% trans "我们的技术团队已收到自动通知，正在努力修复。" %}
+                    </p>
+                    <div class="flex flex-col sm:flex-row justify-center gap-6 mt-8">
+                        <a href="/"
+                           class="btn btn-primary btn-lg px-10 min-h-12 shadow-lg hover:shadow-xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">{% trans "返回首页" %}</a>
+                        <button onclick="location.reload()"
+                                class="btn btn-outline btn-lg px-10 min-h-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">
+                            <svg xmlns="http://www.w3.org/2000/svg"
+                                 class="h-6 w-6 mr-2"
+                                 fill="none"
+                                 viewBox="0 0 24 24"
+                                 stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            {% trans "刷新页面" %}
+                        </button>
+                    </div>
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-    
-    <!-- Theme initialization script (simplified) -->
-    <script>
+        <!-- Theme initialization script (simplified) -->
+        <script>
         (function() {
             try {
                 var localTheme = localStorage.getItem('theme');
@@ -77,6 +81,6 @@
                 }
             } catch (e) {}
         })();
-    </script>
-</body>
+        </script>
+    </body>
 </html>

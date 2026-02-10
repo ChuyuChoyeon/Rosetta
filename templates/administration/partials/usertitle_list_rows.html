@@ -1,75 +1,79 @@
 {% load i18n %}
 {% for title in titles %}
-<tr class="hover">
-    <th class="pl-4">
-        <label>
-            <input type="checkbox" name="selected_ids" value="{{ title.pk }}" class="checkbox checkbox-xs rounded-sm row-checkbox" onchange="updateBulkToolbar()" />
-        </label>
-    </th>
-    <td>
-        <a href="{% url 'administration:usertitle_edit' title.pk %}" class="flex items-center gap-2 font-semibold text-sm hover:text-primary transition-colors">
-            {% if title.color|first == '#' %}
-            <span class="badge badge-sm gap-1 border-none shadow-sm text-white" style="background-color: {{ title.color }}">
-            {% else %}
-            <span class="badge badge-{{ title.color }} badge-sm gap-1 border-none shadow-sm">
-            {% endif %}
-                {% if title.icon %}
-                    <span class="w-3 h-3 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">
-                        {{ title.icon|safe }}
+    <tr class="hover">
+        <th class="pl-4">
+            <label>
+                <input type="checkbox"
+                       name="selected_ids"
+                       value="{{ title.pk }}"
+                       class="checkbox checkbox-xs rounded-sm row-checkbox"
+                       onchange="updateBulkToolbar()" />
+            </label>
+        </th>
+        <td>
+            <a href="{% url 'administration:usertitle_edit' title.pk %}"
+               class="flex items-center gap-2 font-semibold text-sm hover:text-primary transition-colors">
+                {% if title.color|first == '#' %}
+                    <span class="badge badge-sm gap-1 border-none shadow-sm text-white"
+                          style="background-color: {{ title.color }}">
+                    {% else %}
+                        <span class="badge badge-{{ title.color }} badge-sm gap-1 border-none shadow-sm">
+                        {% endif %}
+                        {% if title.icon %}
+                            <span class="w-3 h-3 flex items-center justify-center [&>svg]:w-full [&>svg]:h-full">{{ title.icon|safe }}</span>
+                        {% endif %}
+                        {{ title.name }}
                     </span>
-                {% endif %}
-                {{ title.name }}
-            </span>
-        </a>
-    </td>
-    <td class="hidden sm:table-cell">
-        <a href="{% url 'administration:usertitle_edit' title.pk %}" class="font-bold text-sm hover:text-primary transition-colors">
-            {{ title.name }}
-        </a>
-    </td>
-    <td class="hidden md:table-cell">
-        <div class="flex items-center gap-2">
-            {% if title.color|first == '#' %}
-            <span class="w-2.5 h-2.5 rounded-full ring-1 ring-base-content/10" style="background-color: {{ title.color }}"></span>
-            <span class="text-xs opacity-70">{{ title.color }}</span>
-            {% else %}
-            <span class="w-2.5 h-2.5 rounded-full bg-{{ title.color }} ring-1 ring-base-content/10"></span>
-            <span class="text-xs opacity-70">{{ title.get_color_display }}</span>
-            {% endif %}
-        </div>
-    </td>
-    <td class="hidden lg:table-cell text-sm opacity-70 max-w-xs truncate" title="{{ title.description }}">
-        {{ title.description|default:"-" }}
-    </td>
-    <td class="text-center">
-        <span class="badge badge-ghost badge-sm font-mono">{{ title.users.count }}</span>
-    </td>
-    <td class="text-center">
-        <div class="join">
-            <a href="{% url 'administration:usertitle_edit' title.pk %}" class="btn btn-xs btn-ghost join-item" title="{% trans '编辑' %}">
-                <span class="material-symbols-outlined text-base">edit</span>
-            </a>
-            <button type="button" 
-                    hx-post="{% url 'administration:usertitle_delete' title.pk %}"
-                    hx-trigger="confirmed"
-                    hx-target="closest tr"
-                    hx-swap="outerHTML swap:0.5s"
-                    onclick="confirmHtmx(this, '{% blocktrans with name=title.name|escapejs %}确定要删除称号“{{ name }}”吗？{% endblocktrans %}')"
-                    class="btn btn-xs btn-ghost text-error join-item" 
-                    title="{% trans '删除' %}">
-                <span class="material-symbols-outlined text-base">delete</span>
-            </button>
-        </div>
-    </td>
-</tr>
-{% empty %}
-<tr>
-    <td colspan="7" class="text-center py-8 text-base-content/60">
-        <div class="flex flex-col items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-4xl opacity-20">badge</span>
-            <p>{% trans "暂无称号" %}</p>
-        </div>
-    </td>
-</tr>
-{% endfor %}
-
+                </a>
+            </td>
+            <td class="hidden sm:table-cell">
+                <a href="{% url 'administration:usertitle_edit' title.pk %}"
+                   class="font-bold text-sm hover:text-primary transition-colors">{{ title.name }}</a>
+            </td>
+            <td class="hidden md:table-cell">
+                <div class="flex items-center gap-2">
+                    {% if title.color|first == '#' %}
+                        <span class="w-2.5 h-2.5 rounded-full ring-1 ring-base-content/10"
+                              style="background-color: {{ title.color }}"></span>
+                        <span class="text-xs opacity-70">{{ title.color }}</span>
+                    {% else %}
+                        <span class="w-2.5 h-2.5 rounded-full bg-{{ title.color }} ring-1 ring-base-content/10"></span>
+                        <span class="text-xs opacity-70">{{ title.get_color_display }}</span>
+                    {% endif %}
+                </div>
+            </td>
+            <td class="hidden lg:table-cell text-sm opacity-70 max-w-xs truncate"
+                title="{{ title.description }}">{{ title.description|default:"-" }}</td>
+            <td class="text-center">
+                <span class="badge badge-ghost badge-sm font-mono">{{ title.users.count }}</span>
+            </td>
+            <td class="text-center">
+                <div class="join">
+                    <a href="{% url 'administration:usertitle_edit' title.pk %}"
+                       class="btn btn-xs btn-ghost join-item"
+                       title="{% trans '编辑' %}">
+                        <span class="material-symbols-outlined text-base">edit</span>
+                    </a>
+                    <button type="button"
+                            hx-post="{% url 'administration:usertitle_delete' title.pk %}"
+                            hx-trigger="confirmed"
+                            hx-target="closest tr"
+                            hx-swap="outerHTML swap:0.5s"
+                            onclick="confirmHtmx(this, '{% blocktrans with name=title.name|escapejs %}确定要删除称号“{{ name }}”吗？{% endblocktrans %}')"
+                            class="btn btn-xs btn-ghost text-error join-item"
+                            title="{% trans '删除' %}">
+                        <span class="material-symbols-outlined text-base">delete</span>
+                    </button>
+                </div>
+            </td>
+        </tr>
+    {% empty %}
+        <tr>
+            <td colspan="7" class="text-center py-8 text-base-content/60">
+                <div class="flex flex-col items-center justify-center gap-2">
+                    <span class="material-symbols-outlined text-4xl opacity-20">badge</span>
+                    <p>{% trans "暂无称号" %}</p>
+                </div>
+            </td>
+        </tr>
+    {% endfor %}

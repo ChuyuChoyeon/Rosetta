@@ -1,41 +1,46 @@
 {% load static tailwind_tags i18n %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:'zh-Hans' }}">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% trans "系统维护中" %} - {{ config.SITE_NAME|default:"Rosetta" }}</title>
-    <link rel="shortcut icon" href="{{ config.SITE_FAVICON|default:'/static/theme/img/favicon.ico' }}">
-    <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">
-    {% tailwind_css %}
-</head>
-<body class="min-h-screen bg-base-200 text-base-content flex items-center justify-center font-sans">
-    <div class="w-full max-w-xl px-6">
-        <div class="card bg-base-100 shadow-xl border border-base-200">
-            <div class="card-body items-center text-center gap-6">
-                <div class="mb-8 relative">
-                    <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse"></div>
-                    <img src="{% static 'theme/img/logo.svg' %}" alt="Logo" class="w-24 h-24 relative animate-bounce-slow">
-                </div>
-                <div class="space-y-2">
-                    <h1 class="text-3xl font-bold">{% trans "系统维护中" %}</h1>
-                    <p class="text-base-content/70 leading-relaxed">
-                        {% trans "为了提供更好的服务，我们正在进行系统升级维护。" %}
-                        <br>
-                        {% trans "预计很快恢复，请稍后再试。" %}
-                    </p>
-                </div>
-                <div class="flex flex-col sm:flex-row gap-4">
-                    <button onclick="location.reload()" class="btn btn-primary btn-lg px-10 min-h-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">{% trans "刷新页面" %}</button>
-                    <a href="/" class="btn btn-outline btn-lg px-10 min-h-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">{% trans "返回首页" %}</a>
-                </div>
-                <div class="text-sm text-base-content/50">
-                    &copy; {% now "Y" %} {{ config.SITE_NAME|default:"Rosetta" }}
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{% trans "系统维护中" %} - {{ config.SITE_NAME|default:"Rosetta" }}</title>
+        <link rel="shortcut icon"
+              href="{{ config.SITE_FAVICON|default:'/static/theme/img/favicon.ico' }}">
+        <link href="{% static 'theme/css/fonts.css' %}" rel="stylesheet">
+        {% tailwind_css %}
+    </head>
+    <body class="min-h-screen bg-base-200 text-base-content flex items-center justify-center font-sans">
+        <div class="w-full max-w-xl px-6">
+            <div class="card bg-base-100 shadow-xl border border-base-200">
+                <div class="card-body items-center text-center gap-6">
+                    <div class="mb-8 relative">
+                        <div class="absolute inset-0 bg-primary/20 blur-3xl rounded-full animate-pulse"></div>
+                        <img src="{% static 'theme/img/logo.svg' %}"
+                             alt="Logo"
+                             class="w-24 h-24 relative animate-bounce-slow">
+                    </div>
+                    <div class="space-y-2">
+                        <h1 class="text-3xl font-bold">{% trans "系统维护中" %}</h1>
+                        <p class="text-base-content/70 leading-relaxed">
+                            {% trans "为了提供更好的服务，我们正在进行系统升级维护。" %}
+                            <br>
+                            {% trans "预计很快恢复，请稍后再试。" %}
+                        </p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-4">
+                        <button onclick="location.reload()"
+                                class="btn btn-primary btn-lg px-10 min-h-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">
+                            {% trans "刷新页面" %}
+                        </button>
+                        <a href="/"
+                           class="btn btn-outline btn-lg px-10 min-h-12 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-base-200">{% trans "返回首页" %}</a>
+                    </div>
+                    <div class="text-sm text-base-content/50">&copy; {% now "Y" %} {{ config.SITE_NAME|default:"Rosetta" }}</div>
                 </div>
             </div>
         </div>
-    </div>
-    <script>
+        <script>
         (function() {
             try {
                 var localTheme = localStorage.getItem('theme');
@@ -46,6 +51,6 @@
                 }
             } catch (e) {}
         })();
-    </script>
-</body>
+        </script>
+    </body>
 </html>

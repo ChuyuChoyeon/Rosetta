@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.conf import settings
-from django.urls import reverse
 from constance import config
 from django.core.cache import cache
 import time
@@ -71,7 +70,7 @@ class RateLimitMiddleware:
             window = int(rule.get("window", 60))
             limit = int(rule.get("limit", 10))
             bucket = now // window
-            key = f"ratelimit:{rule.get('name','default')}:{ip}:{bucket}"
+            key = f"ratelimit:{rule.get('name', 'default')}:{ip}:{bucket}"
             if cache.add(key, 0, window):
                 count = 1
                 cache.incr(key)

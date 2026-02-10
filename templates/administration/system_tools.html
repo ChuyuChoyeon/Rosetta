@@ -1,234 +1,314 @@
 {% extends "administration/base.html" %}
 {% load static capture_tags %}
 {% load i18n %}
-
-{% block title %}{% trans "系统工具" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
-
+{% block title %}
+    {% trans "系统工具" %}{% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock title %}
 {% block content %}
-<!-- Header -->
-{% captureas header_actions %}
+    <!-- Header -->
+    {% captureas header_actions %}
 {% endcaptureas %}
-
 {% trans "系统工具" as title_text %}
-{% trans "全站索引重建与图片处理服务" as subtitle_text %}
+{% trans "系统维护、监控与调试工具箱" as subtitle_text %}
 {% include "administration/components/header.html" with title=title_text subtitle=subtitle_text icon="build_circle" breadcrumbs=breadcrumbs actions=header_actions %}
 
-<!-- System Monitor (Full Width) -->
-<div class="card bg-base-100 shadow-sm border border-base-content/5 mb-6">
-    <div class="card-body gap-4">
-        <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <span class="material-symbols-outlined text-primary">monitor_heart</span>
-                <h2 class="card-title">{% trans "实时系统监控" %}</h2>
+<div x-data="{ activeTab: new URLSearchParams(window.location.search).get('tab') || (new URLSearchParams(window.location.search).get('username') ? 'permission' : 'maintenance') }"
+     x-init="$watch('activeTab', value => {
+        const url = new URL(window.location);
+        url.searchParams.set('tab', value);
+        history.pushState({}, '', url);
+     })">
+    <!-- Tabs -->
+    <div role="tablist" class="tabs tabs-bordered mb-6">
+        <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'maintenance' }" @click="activeTab = 'maintenance'">
+            <span class="material-symbols-outlined mr-2">cleaning_services</span>
+            {% trans "维护与监控" %}
+        </a>
+        <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'tools' }" @click="activeTab = 'tools'">
+            <span class="material-symbols-outlined mr-2">build</span>
+            {% trans "实用工具" %}
+        </a>
+        <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'permission' }" @click="activeTab = 'permission'">
+            <span class="material-symbols-outlined mr-2">verified_user</span>
+            {% trans "权限检查" %}
+        </a>
+        <a role="tab" class="tab" :class="{ 'tab-active': activeTab === 'debug' }" @click="activeTab = 'debug'">
+            <span class="material-symbols-outlined mr-2">bug_report</span>
+            {% trans "调试信息" %}
+        </a>
+    </div>
+
+    <!-- Tab Content: Maintenance -->
+    <div x-show="activeTab === 'maintenance'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0">
+    
+    <!-- System Monitor (Full Width) -->
+    <div class="card bg-base-100 shadow-sm border border-base-content/5 mb-6">
+        <div class="card-body gap-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary">monitor_heart</span>
+                    <h2 class="card-title">{% trans "实时系统监控" %}</h2>
+                </div>
+                <span class="loading loading-dots loading-xs text-primary htmx-indicator"
+                      id="monitor-loading"></span>
             </div>
-            <span class="loading loading-dots loading-xs text-primary htmx-indicator" id="monitor-loading"></span>
+            <div hx-get="{% url 'administration:system_monitor' %}"
+                 hx-trigger="load, every 2s"
+                 hx-swap="innerHTML"
+                 hx-indicator="#monitor-loading">
+                <!-- Initial Skeleton -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 animate-pulse">
+                    <div class="h-20 bg-base-200 rounded-lg"></div>
+                    <div class="h-20 bg-base-200 rounded-lg"></div>
+                    <div class="h-20 bg-base-200 rounded-lg"></div>
+                    <div class="h-20 bg-base-200 rounded-lg"></div>
+                </div>
+            </div>
         </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         
-        <div hx-get="{% url 'administration:system_monitor' %}" 
-             hx-trigger="load, every 2s" 
-             hx-swap="innerHTML"
-             hx-indicator="#monitor-loading">
-             <!-- Initial Skeleton -->
-             <div class="skeleton w-full h-32 rounded-xl"></div>
-        </div>
-    </div>
-</div>
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Privacy Policy Card -->
-    <div class="card bg-base-100 shadow-sm border border-base-content/5">
-        <div class="card-body gap-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">policy</span>
-                    <h2 class="card-title">{% trans "隐私政策初始化" %}</h2>
-                </div>
-                <span class="badge badge-outline font-mono
-                    {% if privacy_policy_exists %}badge-success{% else %}badge-warning{% endif %}">
-                    {% if privacy_policy_exists %}{% trans "已创建" %}{% else %}{% trans "未创建" %}{% endif %}
-                </span>
-            </div>
-            <p class="text-sm text-base-content/60">
-                {% trans "如果系统中缺少隐私政策页面（URL: privacy-policy），可以点击下方按钮自动创建默认的隐私政策页面。" %}
-            </p>
-            <form method="post" class="mt-2">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="init_privacy_policy">
-                <button type="submit" class="btn btn-primary btn-sm w-full sm:w-auto gap-2" {% if privacy_policy_exists %}disabled{% endif %}>
-                    <span class="material-symbols-outlined text-lg">add_circle</span>
-                    {% if privacy_policy_exists %}{% trans "页面已存在" %}{% else %}{% trans "初始化隐私政策" %}{% endif %}
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Watson Search Index Card -->
-    <div class="card bg-base-100 shadow-sm border border-base-content/5">
-        <div class="card-body gap-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-secondary">manage_search</span>
-                    <h2 class="card-title">{% trans "全站搜索索引" %}</h2>
-                </div>
-                <span class="badge badge-outline font-mono
-                    {% if watson_rebuild_status == 'success' %}badge-success
-                    {% elif watson_rebuild_status == 'running' %}badge-info
-                    {% elif watson_rebuild_status == 'error' %}badge-error{% endif %}">
-                    {{ watson_rebuild_status|default:'idle' }}
-                </span>
-            </div>
-            <p class="text-sm text-base-content/60">
-                {% trans "如果用户在前台搜索不到最新的文章或内容，请尝试重建索引。这通常在大量导入数据后需要手动执行。" %}
-            </p>
-            <div class="text-xs opacity-50 font-mono">
-                {% trans "无记录" as no_record %}
-                {% trans "上次任务" %}：{{ watson_rebuild_updated_at|date:"Y-m-d H:i:s"|default:no_record }}
-            </div>
-            <form method="post" class="mt-2">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="rebuild_watson">
-                <button type="submit" class="btn btn-secondary btn-sm w-full sm:w-auto gap-2">
-                    <span class="material-symbols-outlined text-lg">sync</span>
-                    {% trans "立即更新搜索数据" %}
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Image Processing Card -->
-    <div class="card bg-base-100 shadow-sm border border-base-content/5">
-        <div class="card-body gap-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-accent">imagesmode</span>
-                    <h2 class="card-title">{% trans "图片预处理服务" %}</h2>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="badge badge-outline font-mono">{{ image_queue_status }}</span>
-                </div>
-            </div>
-            <p class="text-sm text-base-content/60">
-                {% trans "后台自动生成文章封面图的缩略图，提升前台页面加载速度。建议在上传大量图片后执行。" %}
-            </p>
-            <div class="stats stats-vertical lg:stats-horizontal shadow-sm bg-base-200/30 border border-base-content/5 my-2">
-                <div class="stat py-2 px-4">
-                    <div class="stat-title text-xs">{% trans "待优化图片" %}</div>
-                    <div class="stat-value text-lg">{{ image_queue_queued }}</div>
-                </div>
-                <div class="stat py-2 px-4">
-                    <div class="stat-title text-xs">{% trans "处理进度" %}</div>
-                    <div class="stat-value text-lg flex items-baseline gap-1">
-                        <span>{{ image_queue_processed }}</span>
+        <!-- Media Scanner Card -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body gap-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">image_search</span>
+                        <h2 class="card-title">{% trans "媒体文件扫描" %}</h2>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="badge badge-outline font-mono text-xs">Status: {{ media_scan_status|default:'idle' }}</span>
+                        {% if media_scan_updated_at %}
+                            <span class="text-[10px] opacity-50">{{ media_scan_updated_at|date:"H:i:s" }}</span>
+                        {% endif %}
                     </div>
                 </div>
-            </div>
-            <div class="text-xs opacity-50 font-mono mb-1">
-                {% trans "无记录" as no_record %}
-                {% trans "上次任务" %}：{{ image_queue_updated_at|date:"Y-m-d H:i:s"|default:no_record }}
-            </div>
-            <form method="post" class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
-                {% csrf_token %}
-                <input type="hidden" name="action" value="queue_images">
-                <div class="join w-full sm:w-auto">
-                    <div class="tooltip" data-tip="{% trans '每次处理的数量' %}">
-                        <input type="number" name="limit" class="input input-bordered join-item input-sm w-full sm:w-24" placeholder="{% trans '数量' %}" min="1" value="20">
+                <div class="stats stats-vertical shadow-sm bg-base-200/50 border border-base-content/5">
+                    <div class="stat py-2">
+                        <div class="stat-title text-xs">{% trans "孤立文件数量" %}</div>
+                        <div class="stat-value text-lg">{{ media_scan_orphaned_count }}</div>
                     </div>
-                    <div class="tooltip" data-tip="{% trans '任务开始前的延迟(秒)' %}">
-                        <input type="number" name="delay" class="input input-bordered join-item input-sm w-full sm:w-24" placeholder="{% trans '延迟' %}" min="0" value="120">
+                    <div class="stat py-2">
+                        <div class="stat-title text-xs">{% trans "可释放空间" %}</div>
+                        <div class="stat-value text-lg text-secondary">{{ media_scan_orphaned_size|filesizeformat }}</div>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-accent btn-sm w-full sm:w-auto gap-2">
-                    <span class="material-symbols-outlined text-lg">play_circle</span>
-                    {% trans "启动处理任务" %}
-                </button>
-            </form>
+                <div class="card-actions justify-end mt-2">
+                    <form method="post" action="{% url 'administration:system_tools' %}" class="w-full">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="scan_media">
+                        <button type="submit"
+                                class="btn btn-secondary btn-sm w-full gap-2"
+                                {% if media_scan_status == 'running' %}disabled{% endif %}>
+                            {% if media_scan_status == 'running' %}
+                                <span class="loading loading-spinner loading-xs"></span>
+                                {% trans "扫描中..." %}
+                            {% else %}
+                                <span class="material-symbols-outlined text-lg">play_circle</span>
+                                {% trans "开始扫描" %}
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
-    </div>
-    <!-- Media Cleaner Card -->
-    <div class="card bg-base-100 shadow-sm border border-base-content/5">
-        <div class="card-body gap-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-warning">cleaning_services</span>
-                    <h2 class="card-title">{% trans "媒体文件清理" %}</h2>
-                </div>
-                <div class="flex flex-col items-end gap-1">
-                     <span class="badge badge-outline font-mono text-xs">Scan: {{ media_scan_status|default:'idle' }}</span>
-                     <span class="badge badge-outline font-mono text-xs">Clean: {{ media_clean_status|default:'idle' }}</span>
-                     {% if media_clean_error %}
-                     <div class="tooltip tooltip-left tooltip-error" data-tip="{{ media_clean_error }}">
-                         <span class="badge badge-error badge-xs animate-pulse">!</span>
-                     </div>
-                     {% endif %}
-                </div>
-            </div>
-            <p class="text-sm text-base-content/60">
-                {% trans "扫描并清理未被数据库引用的'孤儿'媒体文件，释放存储空间。请谨慎操作。" %}
-            </p>
-            
-            <div class="stats stats-vertical lg:stats-horizontal shadow-sm bg-base-200/30 border border-base-content/5 my-2">
-                <div class="stat py-2 px-4">
-                    <div class="stat-title text-xs">{% trans "孤儿文件" %}</div>
-                    <div class="stat-value text-lg text-warning">{{ media_scan_orphaned_count }}</div>
-                    <div class="stat-desc">{{ media_scan_orphaned_size|filesizeformat }}</div>
-                </div>
-                <div class="stat py-2 px-4">
-                    <div class="stat-title text-xs">{% trans "已清理" %}</div>
-                    <div class="stat-value text-lg text-success">{{ media_clean_cleaned_count }}</div>
-                    <div class="stat-desc">{{ media_clean_cleaned_size|filesizeformat }}</div>
-                </div>
-            </div>
 
-            <div class="text-xs opacity-50 font-mono">
-                {% trans "无记录" as no_record %}
-                {% trans "上次扫描" %}：{{ media_scan_updated_at|date:"Y-m-d H:i:s"|default:no_record }}
-            </div>
-
-            <div class="flex gap-2 mt-2">
-                <form method="post" class="flex-1">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="scan_media">
-                    <button type="submit" class="btn btn-warning btn-outline btn-sm w-full gap-2" {% if media_scan_status == 'running' %}disabled{% endif %}>
-                        <span class="material-symbols-outlined text-lg">search</span>
-                        {% trans "扫描文件" %}
-                    </button>
-                </form>
-                
-                <form method="post" class="flex-1" id="form-clean-media">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="clean_media">
-                    <button type="button" class="btn btn-error btn-sm w-full gap-2" 
-                        onclick="showConfirmModal('{% trans "确认清理"|escapejs %}', '{% trans "确定要永久删除这些文件吗？此操作不可撤销。"|escapejs %}', () => document.getElementById('form-clean-media').submit())"
-                        {% if media_scan_orphaned_count == 0 or media_clean_status == 'running' %}disabled{% endif %}>
+        <!-- Media Cleaner Card -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body gap-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-warning">cleaning_services</span>
+                        <h2 class="card-title">{% trans "媒体文件清理" %}</h2>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <span class="badge badge-outline font-mono text-xs">Status: {{ media_clean_status|default:'idle' }}</span>
+                    </div>
+                </div>
+                <div class="stats stats-vertical shadow-sm bg-base-200/50 border border-base-content/5">
+                    <div class="stat py-2">
+                        <div class="stat-title text-xs">{% trans "已清理文件" %}</div>
+                        <div class="stat-value text-lg">{{ media_clean_cleaned_count }}</div>
+                    </div>
+                    <div class="stat py-2">
+                        <div class="stat-title text-xs">{% trans "已释放空间" %}</div>
+                        <div class="stat-value text-lg text-warning">{{ media_clean_cleaned_size|filesizeformat }}</div>
+                    </div>
+                </div>
+                {% if media_clean_error %}
+                    <div class="alert alert-error text-xs py-2">
+                        <span class="material-symbols-outlined text-sm">error</span>
+                        {{ media_clean_error }}
+                    </div>
+                {% endif %}
+                <div class="card-actions justify-end mt-2">
+                    <button type="button"
+                            class="btn btn-warning btn-sm w-full gap-2"
+                            onclick="confirmAction('{% url 'administration:system_tools' %}', '{% trans "确定要清理所有孤立媒体文件吗？此操作不可撤销！" %}', '{% trans "确认清理" %}')"
+                            data-form-action="clean_media">
                         <span class="material-symbols-outlined text-lg">delete_forever</span>
-                        {% trans "立即清理" %}
+                        {% trans "执行清理" %}
                     </button>
-                </form>
+                    <!-- Hidden form for JS helper to submit -->
+                    <form id="clean_media_form" method="post" action="{% url 'administration:system_tools' %}" style="display:none;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="clean_media">
+                    </form>
+                    <script>
+                        // Override confirmAction for this specific case to submit the hidden form logic if needed, 
+                        // or just use standard approach. Standard confirmAction creates a form dynamically.
+                        // Let's rely on standard confirmAction which accepts a URL. 
+                        // But here we need to POST 'action=clean_media'.
+                        // Fix: The standard confirmAction creates a form with just CSRF. We need extra fields.
+                        // We'll reimplement inline for clarity or improve confirmAction later.
+                        // For now, let's use a specific onclick handler.
+                        function triggerCleanMedia() {
+                            showConfirmModal('{% trans "确认清理" %}', '{% trans "确定要清理所有孤立媒体文件吗？此操作不可撤销！" %}', () => {
+                                const form = document.createElement('form');
+                                form.method = 'POST';
+                                form.action = '{% url "administration:system_tools" %}';
+                                const csrf = document.querySelector('[name=csrfmiddlewaretoken]').value;
+                                form.innerHTML = `<input type="hidden" name="csrfmiddlewaretoken" value="${csrf}">
+                                                  <input type="hidden" name="action" value="clean_media">`;
+                                document.body.appendChild(form);
+                                form.submit();
+                            });
+                        }
+                        // Update button onclick
+                        document.currentScript.previousElementSibling.previousElementSibling.onclick = triggerCleanMedia;
+                    </script>
+                </div>
             </div>
         </div>
+
+        <!-- Watson Rebuild Card -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body gap-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-info">manage_search</span>
+                        <h2 class="card-title">{% trans "搜索索引重建" %}</h2>
+                    </div>
+                    <span class="badge badge-outline font-mono text-xs">Status: {{ watson_rebuild_status|default:'idle' }}</span>
+                </div>
+                <p class="text-xs opacity-70">
+                    {% trans "重建全站搜索索引。如果搜索结果不准确，请执行此操作。" %}
+                </p>
+                <div class="card-actions justify-end mt-auto">
+                    <form method="post" action="{% url 'administration:system_tools' %}" class="w-full">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="rebuild_watson">
+                        <button type="submit"
+                                class="btn btn-info btn-sm w-full gap-2"
+                                {% if watson_rebuild_status == 'running' %}disabled{% endif %}>
+                            {% if watson_rebuild_status == 'running' %}
+                                <span class="loading loading-spinner loading-xs"></span>
+                                {% trans "重建中..." %}
+                            {% else %}
+                                <span class="material-symbols-outlined text-lg">refresh</span>
+                                {% trans "开始重建" %}
+                            {% endif %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Processing Queue -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body gap-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-accent">imagesmode</span>
+                        <h2 class="card-title">{% trans "图片处理队列" %}</h2>
+                    </div>
+                    <span class="badge badge-outline font-mono text-xs">Status: {{ image_queue_status|default:'idle' }}</span>
+                </div>
+                <div class="stats stats-vertical shadow-sm bg-base-200/50 border border-base-content/5">
+                    <div class="stat py-2">
+                        <div class="stat-title text-xs">{% trans "待处理" %}</div>
+                        <div class="stat-value text-lg">{{ image_queue_queued }}</div>
+                    </div>
+                    <div class="stat py-2">
+                        <div class="stat-title text-xs">{% trans "本次已处理" %}</div>
+                        <div class="stat-value text-lg text-accent">{{ image_queue_processed }}</div>
+                    </div>
+                </div>
+                <div class="card-actions justify-end mt-2">
+                    <form method="post" action="{% url 'administration:system_tools' %}" class="w-full flex gap-2">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="queue_images">
+                        <div class="join w-full">
+                            <div class="tooltip w-full" data-tip="{% trans '批处理数量' %}">
+                                <input type="number"
+                                       name="limit"
+                                       class="input input-bordered join-item input-sm w-full"
+                                       placeholder="Limit"
+                                       min="1"
+                                       max="100"
+                                       value="20">
+                            </div>
+                            <button type="submit" class="btn btn-accent join-item btn-sm gap-2">
+                                <span class="material-symbols-outlined text-lg">play_circle</span>
+                                {% trans "处理" %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Policy Init -->
+        {% if not privacy_policy_exists %}
+            <div class="card bg-base-100 shadow-sm border border-base-content/5 border-l-4 border-l-primary">
+                <div class="card-body gap-4">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">policy</span>
+                        <h2 class="card-title">{% trans "初始化隐私政策" %}</h2>
+                    </div>
+                    <p class="text-xs opacity-70">
+                        {% trans "检测到系统缺少隐私政策页面。点击下方按钮自动创建包含多语言支持的标准隐私政策页面。" %}
+                    </p>
+                    <div class="card-actions justify-end mt-auto">
+                        <form method="post" action="{% url 'administration:system_tools' %}" class="w-full">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="init_privacy_policy">
+                            <button type="submit" class="btn btn-primary btn-sm w-full gap-2">
+                                <span class="material-symbols-outlined text-lg">add_task</span>
+                                {% trans "立即创建" %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
     </div>
 
-    <!-- Database Backup Card -->
-    <div class="card bg-base-100 shadow-sm border border-base-content/5 md:col-span-2">
-        <div class="card-body gap-4">
-            <div class="flex items-center justify-between">
+    <!-- Backup Section -->
+    <div class="divider text-xs opacity-50 mt-8 mb-8">{% trans "数据备份与恢复" %}</div>
+
+    <div class="card bg-base-100 shadow-sm border border-base-content/5">
+        <div class="card-body">
+            <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-info">database</span>
-                    <h2 class="card-title">{% trans "数据库备份与恢复" %}</h2>
+                    <span class="material-symbols-outlined text-primary">backup</span>
+                    <h2 class="card-title">{% trans "数据库备份" %}</h2>
                 </div>
-                <form method="post">
+                <form method="post" action="{% url 'administration:system_tools' %}">
                     {% csrf_token %}
                     <input type="hidden" name="action" value="create_backup">
-                    <button type="submit" class="btn btn-info btn-sm gap-2">
-                        <span class="material-symbols-outlined text-lg">save</span>
+                    <button type="submit" class="btn btn-primary btn-sm gap-2">
+                        <span class="material-symbols-outlined">add</span>
                         {% trans "创建新备份" %}
                     </button>
                 </form>
             </div>
             
             <div class="overflow-x-auto">
-                <table class="table table-sm table-zebra border border-base-content/5 rounded-lg">
-                    <thead class="bg-base-200">
+                <table class="table table-sm">
+                    <thead>
                         <tr>
                             <th>{% trans "文件名" %}</th>
                             <th>{% trans "大小" %}</th>
@@ -238,40 +318,48 @@
                     </thead>
                     <tbody>
                         {% for backup in backups %}
-                        <tr>
-                            <td class="font-mono text-xs">{{ backup.name }}</td>
-                            <td class="text-xs opacity-70">{{ backup.size|filesizeformat }}</td>
-                            <td class="text-xs opacity-70">{{ backup.mtime|date:"Y-m-d H:i:s" }}</td>
-                            <td class="flex justify-end gap-1">
-                                <a href="{% url 'administration:backup_download' backup.name %}" class="btn btn-xs btn-ghost btn-square tooltip" data-tip="{% trans '下载' %}">
-                                    <span class="material-symbols-outlined text-base">download</span>
-                                </a>
-                                <form method="post" id="form-restore-{{ forloop.counter }}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="restore_backup">
-                                    <input type="hidden" name="filename" value="{{ backup.name }}">
-                                    <button type="button" class="btn btn-xs btn-ghost btn-square text-warning tooltip" data-tip="{% trans '恢复' %}"
-                                        onclick="showConfirmModal('{% trans "确认恢复"|escapejs %}', '{% trans "警告：这将覆盖当前数据库所有数据！确定要恢复吗？"|escapejs %}', () => document.getElementById('form-restore-{{ forloop.counter }}').submit())">
-                                        <span class="material-symbols-outlined text-base">settings_backup_restore</span>
-                                    </button>
-                                </form>
-                                <form method="post" id="form-delete-{{ forloop.counter }}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="action" value="delete_backup">
-                                    <input type="hidden" name="filename" value="{{ backup.name }}">
-                                    <button type="button" class="btn btn-xs btn-ghost btn-square text-error tooltip" data-tip="{% trans '删除' %}"
-                                        onclick="showConfirmModal('{% trans "确认删除"|escapejs %}', '{% trans "确定要删除此备份吗？"|escapejs %}', () => document.getElementById('form-delete-{{ forloop.counter }}').submit())">
-                                        <span class="material-symbols-outlined text-base">delete</span>
-                                    </button>
-                                </form>
-                            </td>
-                        </tr>
+                            <tr class="hover">
+                                <td class="font-mono text-xs">{{ backup.name }}</td>
+                                <td>{{ backup.size|filesizeformat }}</td>
+                                <td class="text-xs opacity-70">{{ backup.mtime|date:"Y-m-d H:i:s" }}</td>
+                                <td class="text-right flex justify-end gap-2">
+                                    <a href="{% url 'administration:backup_download' backup.name %}" 
+                                       class="btn btn-ghost btn-xs btn-square text-primary tooltip"
+                                       data-tip="{% trans '下载' %}">
+                                        <span class="material-symbols-outlined text-base">download</span>
+                                    </a>
+                                    
+                                    <form method="post" action="{% url 'administration:system_tools' %}" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="restore_backup">
+                                        <input type="hidden" name="filename" value="{{ backup.name }}">
+                                        <button type="button" 
+                                                class="btn btn-ghost btn-xs btn-square text-warning tooltip"
+                                                data-tip="{% trans '恢复 (慎用)' %}"
+                                                onclick="showConfirmModal('{% trans "确认恢复" %}', '{% trans "确定要恢复此备份吗？当前数据将被覆盖！" %}', () => this.form.submit())">
+                                            <span class="material-symbols-outlined text-base">settings_backup_restore</span>
+                                        </button>
+                                    </form>
+
+                                    <form method="post" action="{% url 'administration:system_tools' %}" class="inline">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="delete_backup">
+                                        <input type="hidden" name="filename" value="{{ backup.name }}">
+                                        <button type="button" 
+                                                class="btn btn-ghost btn-xs btn-square text-error tooltip"
+                                                data-tip="{% trans '删除' %}"
+                                                onclick="showConfirmModal('{% trans "确认删除" %}', '{% trans "确定要删除此备份文件吗？" %}', () => this.form.submit())">
+                                            <span class="material-symbols-outlined text-base">delete</span>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
                         {% empty %}
-                        <tr>
-                            <td colspan="4" class="text-center py-8 opacity-50">
-                                {% trans "暂无备份文件" %}
-                            </td>
-                        </tr>
+                            <tr>
+                                <td colspan="4" class="text-center py-8 text-base-content/50">
+                                    {% trans "暂无备份文件" %}
+                                </td>
+                            </tr>
                         {% endfor %}
                     </tbody>
                 </table>
@@ -279,4 +367,256 @@
         </div>
     </div>
 </div>
-{% endblock %}
+
+<!-- Tab Content: Tools -->
+<div x-show="activeTab === 'tools'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Cache Control -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-warning">memory</span>
+                    <h2 class="card-title">{% trans "缓存管理" %}</h2>
+                </div>
+                <p class="text-xs opacity-70">{% trans "清理系统缓存以强制刷新数据。生产环境慎用。" %}</p>
+                <div class="flex flex-col gap-2 mt-auto">
+                    <form method="post" action="{% url 'administration:system_tools' %}" class="w-full">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="clear_cache">
+                        <input type="hidden" name="sub_action" value="clear_templates">
+                        <button type="button"
+                                class="btn btn-outline btn-sm w-full gap-2"
+                                onclick="showConfirmModal('{% trans "清理模板缓存" %}', '{% trans "确定要清理模板缓存吗？" %}', () => this.form.submit())">
+                            <span class="material-symbols-outlined text-lg">layers_clear</span>
+                            {% trans "仅清理模板缓存" %}
+                        </button>
+                    </form>
+                    <form method="post" action="{% url 'administration:system_tools' %}" class="w-full">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="clear_cache">
+                        <input type="hidden" name="sub_action" value="clear_all">
+                        <button type="button"
+                                class="btn btn-warning btn-sm w-full gap-2"
+                                onclick="showConfirmModal('{% trans "清理所有缓存" %}', '{% trans "确定要清理所有系统缓存吗？这将导致短暂的性能下降。" %}', () => this.form.submit())">
+                            <span class="material-symbols-outlined text-lg">delete_sweep</span>
+                            {% trans "清理所有缓存 (Redis/Memcached)" %}
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Log Viewer Link -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body gap-4">
+                <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-info">text_snippet</span>
+                    <h2 class="card-title">{% trans "系统日志" %}</h2>
+                </div>
+                <p class="text-xs opacity-70">{% trans "查看和下载 Django 及系统运行日志文件。" %}</p>
+                <div class="stats stats-vertical shadow-sm bg-base-200/50 border border-base-content/5">
+                    <div class="stat py-2">
+                        <div class="stat-title text-xs">{% trans "日志目录" %}</div>
+                        <div class="stat-value text-sm font-mono opacity-70">/logs/</div>
+                    </div>
+                </div>
+                <div class="card-actions justify-end mt-auto">
+                    <a href="{% url 'administration:logfile_list' %}" class="btn btn-info btn-sm w-full gap-2">
+                        <span class="material-symbols-outlined text-lg">visibility</span>
+                        {% trans "打开日志查看器" %}
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Email Test -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5 md:col-span-2">
+            <div class="card-body gap-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">mail</span>
+                        <h2 class="card-title">{% trans "邮件发送测试" %}</h2>
+                    </div>
+                    <div class="badge badge-outline gap-1">
+                        <span class="opacity-70">{% trans "SMTP Host:" %}</span>
+                        <span class="font-bold">{{ email_config.host }}</span>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'administration:system_tools' %}" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="test_email">
+                    
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">{% trans "收件人 (To)" %}</span></label>
+                        <input type="email" name="recipient" class="input input-bordered input-sm" placeholder="user@example.com" required value="{{ request.user.email }}">
+                    </div>
+                    <div class="form-control">
+                        <label class="label"><span class="label-text">{% trans "主题 (Subject)" %}</span></label>
+                        <input type="text" name="subject" class="input input-bordered input-sm" value="[{{ config.SITE_NAME|default:'Rosetta' }}] SMTP Test Email" required>
+                    </div>
+                    <div class="form-control md:col-span-2">
+                        <label class="label"><span class="label-text">{% trans "内容 (Message)" %}</span></label>
+                        <textarea name="message" class="textarea textarea-bordered h-24" required>This is a test email sent from {{ config.SITE_NAME|default:'Rosetta' }} Dashboard system tools.
+Time: {% now "Y-m-d H:i:s" %}</textarea>
+                    </div>
+                    <div class="md:col-span-2 flex justify-end">
+                        <button type="submit" class="btn btn-primary btn-sm gap-2">
+                            <span class="material-symbols-outlined text-lg">send</span>
+                            {% trans "发送测试邮件" %}
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Tab Content: Permission -->
+<div x-show="activeTab === 'permission'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+    <div id="permission-checker-content">
+        {% include "administration/partials/debug/permission.html" %}
+    </div>
+</div>
+
+<!-- Tab Content: Debug -->
+<div x-show="activeTab === 'debug'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
+    <div class="space-y-6">
+        
+        <!-- Status Indicators -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Database Status -->
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+                <div class="card-body flex flex-col justify-between">
+                    <h2 class="card-title text-base mb-4">
+                        <span class="material-symbols-outlined text-secondary">database</span>
+                        {% trans "数据库连接" %}
+                    </h2>
+                    <div class="flex items-center gap-4">
+                        {% if db_ok %}
+                            <div class="radial-progress text-success" style="--value:100; --size:3rem">100%</div>
+                            <div>
+                                <div class="font-bold text-success">{% trans "正常 (Connected)" %}</div>
+                                <div class="text-xs opacity-50">Latency: < 1ms</div>
+                            </div>
+                        {% else %}
+                            <div class="radial-progress text-error" style="--value:100; --size:3rem;">!</div>
+                            <div>
+                                <div class="font-bold text-error">{% trans "异常 (Error)" %}</div>
+                                <div class="text-xs opacity-50">Check settings</div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Info -->
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+                <div class="card-body flex flex-col justify-between">
+                    <h2 class="card-title text-base mb-4">
+                        <span class="material-symbols-outlined text-info">dns</span>
+                        {% trans "系统环境" %}
+                    </h2>
+                    <div class="flex flex-col gap-2 text-sm">
+                        <div class="flex justify-between items-center border-b border-base-content/5 pb-2">
+                            <span class="opacity-70">Python</span>
+                            <span class="font-mono font-bold">{{ system_info.python_version }}</span>
+                        </div>
+                        <div class="flex justify-between items-center border-b border-base-content/5 pb-2">
+                            <span class="opacity-70">Django</span>
+                            <span class="font-mono font-bold">{{ system_info.django_version }}</span>
+                        </div>
+                        <div class="flex justify-between items-center pt-1">
+                            <span class="opacity-70">OS</span>
+                            <span class="font-mono font-bold truncate max-w-[120px] text-xs" title="{{ system_info.platform }}">{{ system_info.platform }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Counts -->
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+                <div class="card-body flex flex-col">
+                    <h2 class="card-title text-base mb-4">
+                        <span class="material-symbols-outlined text-success">dataset</span>
+                        {% trans "数据统计" %}
+                    </h2>
+                    <div class="grid grid-cols-2 gap-4 flex-1">
+                        <div class="flex flex-col p-3 bg-base-200 rounded-lg justify-center">
+                            <span class="text-xs opacity-70">{% trans "用户" %}</span>
+                            <span class="text-xl font-bold">{{ counts.users }}</span>
+                        </div>
+                        <div class="flex flex-col p-3 bg-base-200 rounded-lg justify-center">
+                            <span class="text-xs opacity-70">{% trans "文章" %}</span>
+                            <span class="text-xl font-bold">{{ counts.posts }}</span>
+                        </div>
+                        <div class="flex flex-col p-3 bg-base-200 rounded-lg justify-center">
+                            <span class="text-xs opacity-70">{% trans "评论" %}</span>
+                            <span class="text-xl font-bold">{{ counts.comments }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- URL Patterns (Full Width) -->
+        <div class="card bg-base-100 shadow-sm border border-base-content/5">
+            <div class="card-body p-0 flex flex-col h-full">
+                <div class="p-6 pb-2 border-b border-base-200">
+                    <h2 class="card-title flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">link</span>
+                        {% trans "系统路由表" %}
+                    </h2>
+                    <p class="text-xs text-base-content/50 mt-1">{% trans "仅显示已命名路由，部分带参数路由不可点击" %}</p>
+                </div>
+                <div class="overflow-x-auto overflow-y-auto max-h-[600px] p-0 flex-grow scrollbar-thin scrollbar-thumb-base-300">
+                    <table class="table table-pin-rows table-sm w-full">
+                        <thead class="bg-base-200 z-30">
+                            <tr>
+                                <th class="w-5/12 pl-6 min-w-[200px]">{% trans "路由信息 (Route Info)" %}</th>
+                                <th class="w-4/12 min-w-[150px]">{% trans "功能描述 (Description)" %}</th>
+                                <th class="w-3/12 text-right pr-6 min-w-[100px]">{% trans "操作 (Action)" %}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pattern in url_patterns %}
+                                <tr class="hover group border-b border-base-200/50 last:border-none">
+                                    <td class="pl-6 py-3">
+                                        <div class="flex flex-col gap-1">
+                                            <div class="font-bold text-sm text-base-content select-all break-all" title="Route Name: {{ pattern.name }}">{{ pattern.name }}</div>
+                                            <div class="font-mono text-xs text-base-content/50 select-all break-all" title="Regex Pattern: {{ pattern.pattern }}">{{ pattern.display_pattern }}</div>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 align-middle">
+                                        {% if pattern.description %}
+                                            <div class="badge badge-ghost badge-sm font-medium h-auto py-1 text-center whitespace-normal">
+                                                {{ pattern.description }}
+                                            </div>
+                                        {% else %}
+                                            <span class="text-base-content/30">-</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="text-right pr-6 align-middle">
+                                        {% if not pattern.sample_url %}
+                                            <button class="btn btn-xs btn-disabled btn-ghost opacity-50" title="{% trans '带参数路由无法直接访问' %}">
+                                                <span class="material-symbols-outlined text-base">link_off</span>
+                                            </button>
+                                        {% else %}
+                                            <a href="{{ pattern.sample_url }}" target="_blank" class="btn btn-xs btn-ghost text-primary" title="{% trans '访问' %}">
+                                                <span class="material-symbols-outlined text-base">open_in_new</span>
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+{% endblock content %}

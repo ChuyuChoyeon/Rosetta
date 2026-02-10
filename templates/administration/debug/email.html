@@ -1,66 +1,94 @@
-{% extends "administration/debug/base_debug.html" %}
+{% extends "administration/base.html" %}
 {% load capture_tags %}
 {% load i18n %}
+{% block title %}
+    {% trans "邮件发送调试" %}{% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock title %}
+{% block content %}
+    <!-- Header -->
+    {% captureas header_actions %}
+        <a href="{% url 'administration:system_tools' %}" class="btn btn-sm btn-ghost gap-2">
+            <span class="material-symbols-outlined">arrow_back</span>
+            {% trans "返回系统工具" %}
+        </a>
+    {% endcaptureas %}
+    {% trans "邮件发送调试" as title_text %}
+    {% trans "测试系统邮件发送功能配置" as subtitle_text %}
+    {% include "administration/components/header.html" with title=title_text subtitle=subtitle_text icon="mail" actions=header_actions %}
 
-{% block debug_title %}{% trans "邮件测试" %}{% endblock %}
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Send Form -->
+        <div class="lg:col-span-2 p-6 bg-base-100 rounded-xl border border-base-content/10">
+            <h2 class="card-title mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-primary">send</span>
+                {% trans "发送测试邮件" %}
+            </h2>
+            <form method="post" class="space-y-4">
+                {% csrf_token %}
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">{% trans "收件人 (To)" %}</span>
+                    </label>
+                    <input type="email" name="recipient" class="input input-bordered w-full" placeholder="user@example.com" required />
+                </div>
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">{% trans "主题 (Subject)" %}</span>
+                    </label>
+                    <input type="text" name="subject" class="input input-bordered w-full" value="[{{ config.SITE_NAME|default:'Rosetta' }}] Test Email" required />
+                </div>
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">{% trans "内容 (Message)" %}</span>
+                    </label>
+                    <textarea name="message" class="textarea textarea-bordered h-32" required>This is a test email sent from {{ config.SITE_NAME|default:'Rosetta' }} Administration Dashboard.</textarea>
+                </div>
+                <div class="flex justify-end pt-4">
+                    <button type="submit" class="btn btn-primary gap-2">
+                        <span class="material-symbols-outlined">send</span>
+                        {% trans "发送邮件" %}
+                    </button>
+                </div>
+            </form>
+        </div>
 
-{% block debug_content %}
-{% captureas card_content %}
-<div class="p-6">
-    <h2 class="card-title mb-6 flex items-center gap-2">
-        <span class="material-symbols-outlined text-secondary">mail</span>
-        {% trans "邮件发送测试" %}
-    </h2>
-    
-    <div role="alert" class="alert border border-info/20 bg-info/5 text-info mb-6">
-        <span class="material-symbols-outlined">info</span>
-        <div>
-            <h3 class="font-bold">{% trans "SMTP 配置信息" %}</h3>
-            <div class="text-xs grid grid-cols-2 gap-x-8 gap-y-1 mt-2 opacity-90">
-                <span>Host: <span class="font-mono">{{ email_host }}</span></span>
-                <span>Port: <span class="font-mono">{{ email_port }}</span></span>
-                <span>User: <span class="font-mono">{{ email_host_user }}</span></span>
-                <span>Use TLS: <span class="font-mono">{{ email_use_tls }}</span></span>
+        <!-- Config Info -->
+        <div class="lg:col-span-1 p-6 bg-base-100 rounded-xl border border-base-content/10 h-fit">
+            <h2 class="card-title mb-4 flex items-center gap-2">
+                <span class="material-symbols-outlined text-info">settings</span>
+                {% trans "邮件配置" %}
+            </h2>
+            <div class="overflow-x-auto">
+                <table class="table w-full">
+                    <tbody>
+                        <tr>
+                            <td class="font-medium">EMAIL_HOST</td>
+                            <td class="font-mono text-sm opacity-70">{{ email_host }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium">EMAIL_PORT</td>
+                            <td class="font-mono text-sm opacity-70">{{ email_port }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium">EMAIL_HOST_USER</td>
+                            <td class="font-mono text-sm opacity-70">{{ email_host_user }}</td>
+                        </tr>
+                        <tr>
+                            <td class="font-medium">EMAIL_USE_TLS</td>
+                            <td class="font-mono text-sm opacity-70">
+                                {% if email_use_tls %}
+                                    <span class="badge badge-success badge-sm">True</span>
+                                {% else %}
+                                    <span class="badge badge-ghost badge-sm">False</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="mt-4 text-xs opacity-50">
+                <p>{% trans "* 仅显示部分非敏感配置信息" %}</p>
             </div>
         </div>
     </div>
-
-    <form method="post" class="max-w-md mx-auto w-full space-y-4">
-        {% csrf_token %}
-        
-        <div class="form-control w-full">
-            <label class="label">
-                <span class="label-text">{% trans "接收邮箱" %}</span>
-            </label>
-            <input type="email" name="recipient" value="{{ request.user.email }}" class="input input-bordered w-full" required />
-            <label class="label">
-                <span class="label-text-alt">{% trans "默认发送给当前登录用户" %}</span>
-            </label>
-        </div>
-
-        <div class="form-control w-full">
-            <label class="label">
-                <span class="label-text">{% trans "邮件主题" %}</span>
-            </label>
-            {% trans "Rosetta 邮件发送测试" as default_subject %}
-            <input type="text" name="subject" value="{{ default_subject }}" class="input input-bordered w-full" required />
-        </div>
-
-        <div class="form-control w-full">
-            <label class="label">
-                <span class="label-text">{% trans "邮件内容" %}</span>
-            </label>
-            <textarea name="message" class="textarea textarea-bordered h-24" required>{% trans "这是一条来自 Rosetta 管理后台的测试邮件。如果您收到这封邮件，说明系统的邮件发送功能配置正确。" %}</textarea>
-        </div>
-
-        <button type="submit" class="btn btn-primary w-full gap-2">
-            <span class="material-symbols-outlined">send</span>
-            {% trans "发送测试邮件" %}
-        </button>
-    </form>
-</div>
-{% endcaptureas %}
-<div class="p-0 overflow-hidden rounded-xl border-none shadow-none hover:shadow-none bg-base-100 border border-base-content/5">
-    {{ card_content }}
-</div>
-{% endblock %}
+{% endblock content %}

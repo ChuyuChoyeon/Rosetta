@@ -1,5 +1,3 @@
-
-import io
 import json
 import datetime
 import sys
@@ -7,7 +5,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.exceptions import ValidationError
-from django.template import Context, Template
 from django.utils import timezone
 from django.urls import reverse
 from django.contrib.contenttypes.models import ContentType
@@ -15,6 +12,7 @@ from django.contrib.contenttypes.models import ContentType
 from core.validators import FileValidator
 from core.templatetags.core_extras import time_ago, sanitize_svg, model_verbose_name
 from core.models import Page
+
 
 @pytest.mark.django_db
 class TestFileValidator:
@@ -36,10 +34,10 @@ class TestFileValidator:
     def test_invalid_mimetype_magic(self, mock_magic):
         # Mock magic to return text/plain
         mock_magic.from_buffer.return_value = "text/plain"
-        
+
         validator = FileValidator(allowed_mimetypes=["image/jpeg"])
         file = SimpleUploadedFile("test.jpg", b"not an image")
-        
+
         with pytest.raises(ValidationError) as excinfo:
             validator(file)
         assert "不支持的文件类型" in str(excinfo.value)
@@ -48,10 +46,10 @@ class TestFileValidator:
     def test_valid_mimetype_magic(self, mock_magic):
         # Mock magic to return image/jpeg
         mock_magic.from_buffer.return_value = "image/jpeg"
-        
+
         validator = FileValidator(allowed_mimetypes=["image/jpeg"])
         file = SimpleUploadedFile("test.jpg", b"image content")
-        
+
         # Should not raise exception
         validator(file)
 
@@ -62,12 +60,13 @@ class TestFileValidator:
         mock_img_instance = MagicMock()
         mock_img_instance.format = "JPEG"
         mock_image.open.return_value = mock_img_instance
-        
+
         validator = FileValidator(allowed_mimetypes=["image/jpeg"])
         file = SimpleUploadedFile("test.jpg", b"image content")
-        
+
         # Should not raise exception
         validator(file)
+
 
 class TestCoreExtras:
     def test_time_ago_future(self):
@@ -89,7 +88,7 @@ class TestCoreExtras:
     def test_time_ago_days(self):
         past = timezone.now() - datetime.timedelta(days=3)
         assert time_ago(past) == "3天前"
-        
+
     def test_time_ago_naive(self):
         # Create a naive datetime
         naive = datetime.datetime.now() - datetime.timedelta(minutes=10)
@@ -111,6 +110,7 @@ class TestCoreExtras:
 
     def test_model_verbose_name_none(self):
         assert model_verbose_name(None) == ""
+
 
 @pytest.mark.django_db
 class TestCoreViewsExtra:
@@ -155,7 +155,9 @@ class TestCoreViewsExtra:
 
     def test_translate_text_missing_params(self, admin_client):
         url = reverse("translate_text")
-        response = admin_client.post(url, json.dumps({}), content_type="application/json")
+        response = admin_client.post(
+            url, json.dumps({}), content_type="application/json"
+        )
         assert response.status_code == 400
         assert "Missing text or target languages" in response.json()["error"]
 
@@ -164,12 +166,11 @@ class TestCoreViewsExtra:
         mock_instance = MagicMock()
         mock_instance.translate.side_effect = Exception("Translation failed")
         mock_translator.return_value = mock_instance
-        
+
         url = reverse("translate_text")
-        data = {
-            "text": "Hello",
-            "target_langs": ["zh-cn"]
-        }
-        response = admin_client.post(url, json.dumps(data), content_type="application/json")
+        data = {"text": "Hello", "target_langs": ["zh-cn"]}
+        response = admin_client.post(
+            url, json.dumps(data), content_type="application/json"
+        )
         assert response.status_code == 200
         assert "Translation error" in response.json()["translations"]["zh-cn"]

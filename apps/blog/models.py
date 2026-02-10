@@ -1,5 +1,3 @@
-import core.validators
-import django.db.models.deletion
 from django.db import models
 from django.conf import settings
 from django.contrib.auth.hashers import make_password, check_password
@@ -27,7 +25,11 @@ class Category(models.Model):
     slug = models.SlugField(_("别名"), unique=True, blank=True)
     description = models.TextField(_("描述"), blank=True)
     icon = models.CharField(
-        _("图标"), max_length=50, blank=True, default="", help_text=_("Material Symbols 图标代码")
+        _("图标"),
+        max_length=50,
+        blank=True,
+        default="",
+        help_text=_("Material Symbols 图标代码"),
     )
     color = models.CharField(
         _("颜色"),
@@ -43,7 +45,7 @@ class Category(models.Model):
         validators=[validate_image_file],
     )
 
-    # ImageKit Thumbnails
+    # ImageKit 缩略图
     cover_thumbnail = ImageSpecField(
         source="cover_image",
         processors=[ResizeToFill(200, 50)],
@@ -57,7 +59,6 @@ class Category(models.Model):
         format="WEBP",
         options={"quality": 85},
     )
-
 
     class Meta:
         verbose_name = _("分类")
@@ -85,7 +86,11 @@ class Tag(models.Model):
     color = models.CharField(_("颜色"), max_length=20, default="#64748B")
     is_active = models.BooleanField(_("是否可见"), default=True)
     icon = models.CharField(
-        _("图标"), max_length=50, blank=True, default="", help_text=_("Material Symbols 图标代码")
+        _("图标"),
+        max_length=50,
+        blank=True,
+        default="",
+        help_text=_("Material Symbols 图标代码"),
     )
 
     class Meta:
@@ -102,7 +107,6 @@ class Tag(models.Model):
         return self.name
 
 
-from django.contrib.auth.hashers import make_password, check_password
 
 
 class Post(models.Model):
@@ -185,17 +189,25 @@ class Post(models.Model):
     )
     views = models.PositiveIntegerField(_("阅读量"), default=0)
     created_at = models.DateTimeField(_("创建时间"), auto_now_add=True, db_index=True)
-    published_at = models.DateTimeField(_("发布时间"), null=True, blank=True, db_index=True)
+    published_at = models.DateTimeField(
+        _("发布时间"), null=True, blank=True, db_index=True
+    )
     updated_at = models.DateTimeField(_("更新时间"), auto_now=True)
     is_pinned = models.BooleanField(_("置顶"), default=False)
     allow_comments = models.BooleanField(_("允许评论"), default=True)
 
     # SEO Fields
     meta_title = models.CharField(
-        _("Meta 标题"), max_length=200, blank=True, help_text=_("覆盖默认的标题，用于搜索引擎显示")
+        _("Meta 标题"),
+        max_length=200,
+        blank=True,
+        help_text=_("覆盖默认的标题，用于搜索引擎显示"),
     )
     meta_description = models.CharField(
-        _("Meta 描述"), max_length=200, blank=True, help_text=_("覆盖默认的描述，建议 160 字以内")
+        _("Meta 描述"),
+        max_length=200,
+        blank=True,
+        help_text=_("覆盖默认的描述，建议 160 字以内"),
     )
     meta_keywords = models.CharField(
         _("Meta 关键词"), max_length=200, blank=True, help_text=_("逗号分隔的关键词")
@@ -204,13 +216,13 @@ class Post(models.Model):
     @property
     def reading_time(self):
         """
-        计算阅读时长 (分钟)
-        
-        算法逻辑：
-        1. 移除 HTML 标签（如果内容包含）。
-        2. 统计中文字符数，按 300 字/分钟计算。
-        3. 统计英文单词数，按 150 词/分钟计算。
-        4. 两者相加向上取整，最少为 1 分钟。
+        估算文章的阅读时长（分钟）。
+
+        计算规则：
+        1. 假设内容为 Markdown 格式或纯文本。
+        2. 中文阅读速度按 300 字/分钟计算。
+        3. 英文阅读速度按 150 词/分钟计算。
+        4. 结果向上取整，最少显示 1 分钟。
         """
         # 移除 HTML 标签 (如果 content 已经是 Markdown 还没渲染 HTML，则直接计算)
         # 这里假设 content 是 Markdown 源码
@@ -317,7 +329,10 @@ class PostViewHistory(models.Model):
         verbose_name=_("用户"),
     )
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE, related_name="view_history", verbose_name=_("文章")
+        Post,
+        on_delete=models.CASCADE,
+        related_name="view_history",
+        verbose_name=_("文章"),
     )
     viewed_at = models.DateTimeField(_("浏览时间"), auto_now=True)
 
@@ -391,9 +406,9 @@ def _invalidate_post_tags_cache(sender, instance, action, **kwargs):
         cache.delete(f"post:{instance.id}:related")
         cache.delete(f"post:{instance.id}:meta_desc")
         cache.delete("sidebar:tags")
-        
+
         languages = [l[0] for l in settings.LANGUAGES]
         for lang in languages:
             cache.delete(make_template_fragment_key("sidebar_tags", [lang]))
-            
+
         _delete_pattern("post:*:related")

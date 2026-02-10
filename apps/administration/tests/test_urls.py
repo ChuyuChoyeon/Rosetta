@@ -39,7 +39,6 @@ def admin_data(
 
 @pytest.mark.django_db
 class TestAdministrationUrls:
-
     @pytest.mark.parametrize(
         "url_name, obj_key",
         [
@@ -83,6 +82,11 @@ class TestAdministrationUrls:
             ("administration:user_edit", "user"),
             # Settings
             ("administration:settings", None),
+            # Debug
+            ("administration:debug_ui_test", None),
+            ("administration:debug_permission", None),
+            ("administration:debug_cache", None),
+            ("administration:debug_email", None),
         ],
     )
     def test_url_access(self, client, admin_data, url_name, obj_key):
@@ -105,6 +109,6 @@ class TestAdministrationUrls:
             else:
                 print("No context available")
 
-        assert (
-            response.status_code == 200
-        ), f"Failed to access {url_name} with kwargs {kwargs}. Status: {response.status_code}"
+        assert response.status_code == 200, (
+            f"Failed to access {url_name} with kwargs {kwargs}. Status: {response.status_code}"
+        )

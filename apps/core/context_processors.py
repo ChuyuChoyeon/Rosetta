@@ -12,10 +12,11 @@ from django.utils.translation import gettext_lazy as _
 主要用于注入全站通用的配置、导航菜单、友情链接以及个性化设置（如主题）。
 """
 
+
 def site_settings(request):
     """
     注入全站通用的上下文变量。
-    
+
     该函数会被 Django 的模板引擎自动调用（需在 settings.TEMPLATES 中配置）。
     它负责加载并缓存导航菜单、友情链接、搜索框占位符等高频访问的数据，
     以减少数据库查询次数，提升页面渲染性能。
@@ -59,9 +60,10 @@ def site_settings(request):
         # 2. 回退方案：使用热门或随机标签
         try:
             from blog.models import Tag
+
             # 使用 order_by('?') 随机打乱，取前 5 个
             # 注意：数据量极大时 order_by('?') 可能会有性能问题，但对于标签表通常可以接受
-            tags = list(Tag.objects.filter(is_active=True).order_by('?')[:5])
+            tags = list(Tag.objects.filter(is_active=True).order_by("?")[:5])
             if tags:
                 return tags
         except ImportError:

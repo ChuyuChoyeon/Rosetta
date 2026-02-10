@@ -1,38 +1,28 @@
 <!-- Inspira UI: Color Picker (Alpine.js Port) -->
-<div x-data="colorPicker({ 
-        initialColor: '{{ value|default:"#000000" }}', 
-        name: '{{ name }}' 
-     })" 
+<div x-data="colorPicker({ initialColor: '{{ value|default:"#000000" }}', name: '{{ name }}' })"
      class="w-full max-w-xs flex flex-col gap-4 p-4 bg-base-100 rounded-xl border border-base-200 shadow-sm select-none"
      x-cloak>
-
     <!-- Hidden Input -->
     <input type="hidden" :name="name" :value="hexColor">
-
     <!-- Saturation/Brightness Area -->
     <div x-ref="satArea"
          @mousedown.prevent="startDragSat"
          @touchstart.prevent="startDragSat"
          class="relative w-full h-40 rounded-lg cursor-crosshair overflow-hidden"
          :style="`background-color: hsl(${hue}, 100%, 50%)`">
-        
         <!-- White Gradient (Left to Right) -->
         <div class="absolute inset-0 bg-gradient-to-r from-white to-transparent"></div>
         <!-- Black Gradient (Top to Bottom) -->
         <div class="absolute inset-0 bg-gradient-to-t from-black to-transparent"></div>
-
         <!-- Thumb -->
         <div class="absolute w-4 h-4 rounded-full border-2 border-white shadow-sm -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-             :style="`left: ${satX}%; top: ${satY}%; background-color: ${hexColor}`">
-        </div>
+             :style="`left: ${satX}%; top: ${satY}%; background-color: ${hexColor}`"></div>
     </div>
-
     <!-- Controls Row -->
     <div class="flex items-center gap-3">
         <!-- Current Color Preview -->
         <div class="w-10 h-10 rounded-full border border-base-200 shadow-sm shrink-0"
              :style="`background-color: ${hexColor}`"></div>
-
         <!-- Sliders Column -->
         <div class="flex-1 flex flex-col gap-3">
             <!-- Hue Slider -->
@@ -45,15 +35,16 @@
                 <div class="absolute w-4 h-4 bg-white rounded-full border border-base-300 shadow-sm -translate-x-1/2 top-1/2 -translate-y-1/2 pointer-events-none"
                      :style="`left: ${huePercentage}%`"></div>
             </div>
-            
             <!-- Alpha Slider -->
             <div x-ref="alphaSlider"
                  @mousedown.prevent="startDragAlpha"
                  @touchstart.prevent="startDragAlpha"
                  class="relative w-full h-3 rounded-full cursor-pointer shadow-inner"
-                 style="background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 10px 10px; background-position: 0 0, 0 5px, 5px -5px, -5px 0px;">
+                 style="background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%);
+                        background-size: 10px 10px;
+                        background-position: 0 0, 0 5px, 5px -5px, -5px 0px">
                 <!-- Gradient Overlay -->
-                <div class="absolute inset-0 rounded-full" 
+                <div class="absolute inset-0 rounded-full"
                      :style="`background: linear-gradient(to right, transparent, ${hexColor})`"></div>
                 <!-- Alpha Thumb -->
                 <div class="absolute w-4 h-4 bg-white rounded-full border border-base-300 shadow-sm -translate-x-1/2 top-1/2 -translate-y-1/2 pointer-events-none"
@@ -61,50 +52,58 @@
             </div>
         </div>
     </div>
-
     <!-- Inputs Row -->
     <div class="flex gap-2">
         <div class="flex-1 form-control">
             <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">HEX</label>
-            <input type="text" 
+            <input type="text"
                    x-model.debounce.500ms="hexInput"
                    @blur="updateFromHexInput"
-                   class="input input-sm input-bordered w-full font-mono uppercase text-center" 
+                   class="input input-sm input-bordered w-full font-mono uppercase text-center"
                    maxlength="9">
         </div>
         <div class="w-16 form-control">
-             <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">R</label>
-             <input type="number" x-model="rgb.r" class="input input-sm input-bordered w-full text-center px-1" readonly>
+            <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">R</label>
+            <input type="number"
+                   x-model="rgb.r"
+                   class="input input-sm input-bordered w-full text-center px-1"
+                   readonly>
         </div>
         <div class="w-16 form-control">
-             <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">G</label>
-             <input type="number" x-model="rgb.g" class="input input-sm input-bordered w-full text-center px-1" readonly>
+            <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">G</label>
+            <input type="number"
+                   x-model="rgb.g"
+                   class="input input-sm input-bordered w-full text-center px-1"
+                   readonly>
         </div>
         <div class="w-16 form-control">
-             <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">B</label>
-             <input type="number" x-model="rgb.b" class="input input-sm input-bordered w-full text-center px-1" readonly>
+            <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">B</label>
+            <input type="number"
+                   x-model="rgb.b"
+                   class="input input-sm input-bordered w-full text-center px-1"
+                   readonly>
         </div>
         <div class="w-16 form-control">
-             <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">A</label>
-             <input type="text" :value="Math.round(alpha * 100) + '%'" class="input input-sm input-bordered w-full text-center px-1" readonly>
+            <label class="label text-xs font-bold text-base-content/50 pb-1 pt-0">A</label>
+            <input type="text"
+                   :value="Math.round(alpha * 100) + '%'"
+                   class="input input-sm input-bordered w-full text-center px-1"
+                   readonly>
         </div>
     </div>
-    
     <!-- Recommended Swatches -->
     <div>
         <label class="label text-xs font-bold text-base-content/50 pb-2 pt-0">RECOMMENDED</label>
         <div class="flex flex-wrap gap-2">
             <template x-for="color in swatches" :key="color">
-                <button type="button" 
+                <button type="button"
                         class="w-6 h-6 rounded-full border border-base-200 shadow-sm transition-transform hover:scale-110 active:scale-95 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1"
                         :style="`background-color: ${color}`"
                         @click="setColor(color)"></button>
             </template>
         </div>
     </div>
-
 </div>
-
 <script>
 (() => {
     const register = () => {

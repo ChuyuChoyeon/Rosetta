@@ -1,136 +1,128 @@
 {% extends "administration/base.html" %}
 {% load i18n capture_tags %}
-
-{% block title %}{% trans "定时任务" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
-
+{% block title %}
+    {% trans "定时任务" %}{% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock %}
 {% block content %}
     <!-- 1. Header -->
     {% url 'administration:periodic_task_create' as create_url %}
     {% captureas actions_block %}
-        <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-2 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105">
-            <span class="material-symbols-outlined text-lg">add_circle</span>
-            {% trans "新建任务" %}
-        </a>
-    {% endcaptureas %}
-
-    {% include "administration/components/header.html" with title=_("定时任务") subtitle=_("管理系统后台的周期性任务") breadcrumbs=None actions=actions_block %}
-
-    <!-- 2. Main List Container -->
-    {% captureas table_content %}
-        <table class="table table-pin-rows w-full">
-            <!-- Head -->
-            <thead class="bg-base-200/50 text-base-content/60 font-medium text-xs uppercase tracking-wider">
-                <tr>
-                    <th class="w-12 font-mono">ID</th>
-                    <th class="w-1/4">{% trans "任务信息" %}</th>
-                    <th>{% trans "调度规则" %}</th>
-                    <th class="max-w-xs">{% trans "参数" %}</th>
-                    <th class="w-24 text-center">{% trans "状态" %}</th>
-                    <th class="w-32">{% trans "最后运行" %}</th>
-                    <th class="w-32 text-center pr-6">{% trans "操作" %}</th>
-                </tr>
-            </thead>
-            <!-- Body -->
-            <tbody class="divide-y divide-base-content/5">
-                {% for task in tasks %}
-                <tr class="hover:bg-base-200/40 transition-colors group">
-                    <td class="font-mono text-xs opacity-50">{{ task.id }}</td>
-                    <td>
-                        <div class="flex flex-col">
-                            <span class="font-bold text-base-content flex items-center gap-2">
-                                {{ task.name }}
-                                {% if task.one_off %}
-                                <span class="badge badge-xs badge-warning" title="{% trans '仅运行一次' %}">One-off</span>
-                                {% endif %}
-                            </span>
-                            <span class="text-xs text-base-content/60 font-mono mt-0.5 break-all">{{ task.task }}</span>
-                            {% if task.description %}
-                            <span class="text-xs text-base-content/40 mt-1 line-clamp-1">{{ task.description }}</span>
+    <a href="{{ create_url }}"
+       class="btn btn-sm btn-primary gap-2 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105">
+        <span class="material-symbols-outlined text-lg">add_circle</span>
+        {% trans "新建任务" %}
+    </a>
+{% endcaptureas %}
+{% trans "定时任务" as t_title %}
+{% trans "管理系统后台的周期性任务" as t_subtitle %}
+{% include "administration/components/header.html" with title=_("定时任务") title=t_title breadcrumbs=None actions=actions_block %}
+<!-- 2. Main List Container -->
+{% captureas table_content %}
+<table class="table table-pin-rows w-full">
+    <!-- Head -->
+    <thead class="bg-base-200/50 text-base-content/60 font-medium text-xs uppercase tracking-wider">
+        <tr>
+            <th class="w-12 font-mono">{% trans "ID" %}</th>
+            <th class="w-1/4">{% trans "任务信息" %}</th>
+            <th>{% trans "调度规则" %}</th>
+            <th class="max-w-xs">{% trans "参数" %}</th>
+            <th class="w-24 text-center">{% trans "状态" %}</th>
+            <th class="w-32">{% trans "最后运行" %}</th>
+            <th class="w-32 text-center pr-6">{% trans "操作" %}</th>
+        </tr>
+    </thead>
+    <!-- Body -->
+    <tbody class="divide-y divide-base-content/5">
+        {% for task in tasks %}
+            <tr class="hover:bg-base-200/40 transition-colors group">
+                <td class="font-mono text-xs opacity-50">{{ task.id }}</td>
+                <td>
+                    <div class="flex flex-col">
+                        <span class="font-bold text-base-content flex items-center gap-2">
+                            {{ task.name }}
+                            {% if task.one_off %}
+                                <span class="badge badge-xs badge-warning" title="{% trans '仅运行一次' %}">{% trans "一次性" %}</span>
                             {% endif %}
-                        </div>
-                    </td>
-                    <td>
-                        {% if task.interval %}
-                            <div class="badge badge-sm badge-ghost gap-1 font-mono">
-                                <span class="material-symbols-outlined text-xs">timer</span>
-                                {{ task.interval }}
-                            </div>
-                        {% elif task.crontab %}
-                            <div class="tooltip" data-tip="{{ task.crontab.human_readable }}">
-                                <div class="badge badge-sm badge-info badge-outline gap-1 font-mono cursor-help">
-                                    <span class="material-symbols-outlined text-xs">calendar_month</span>
-                                    {{ task.crontab }}
-                                </div>
-                            </div>
-                        {% else %}
-                            <span class="text-xs opacity-50">Other</span>
+                        </span>
+                        <span class="text-xs text-base-content/60 font-mono mt-0.5 break-all">{{ task.task }}</span>
+                        {% if task.description %}
+                            <span class="text-xs text-base-content/40 mt-1 line-clamp-1">{{ task.description }}</span>
                         {% endif %}
-                        
-                        {% if task.queue %}
+                    </div>
+                </td>
+                <td>
+                    {% if task.interval %}
+                        <div class="badge badge-sm badge-ghost gap-1 font-mono">
+                            <span class="material-symbols-outlined text-xs">timer</span>
+                            {{ task.interval }}
+                        </div>
+                    {% elif task.crontab %}
+                        <div class="tooltip" data-tip="{{ task.crontab.human_readable }}">
+                            <div class="badge badge-sm badge-info badge-outline gap-1 font-mono cursor-help">
+                                <span class="material-symbols-outlined text-xs">calendar_month</span>
+                                {{ task.crontab }}
+                            </div>
+                        </div>
+                    {% else %}
+                        <span class="text-xs opacity-50">{% trans "其他" %}</span>
+                    {% endif %}
+                    {% if task.queue %}
                         <div class="mt-1">
                             <span class="text-[10px] uppercase tracking-wider border border-base-content/10 px-1 rounded text-base-content/50">
                                 {{ task.queue }}
                             </span>
                         </div>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="flex flex-col gap-1 max-w-xs overflow-hidden">
-                            {% if task.args and task.args != "[]" %}
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="flex flex-col gap-1 max-w-xs overflow-hidden">
+                        {% if task.args and task.args != "[]" %}
                             <div class="tooltip tooltip-bottom" data-tip="{{ task.args }}">
                                 <code class="text-[10px] bg-base-200 px-1 py-0.5 rounded text-base-content/70 block truncate max-w-[200px]">args: {{ task.args }}</code>
                             </div>
-                            {% endif %}
-                            {% if task.kwargs and task.kwargs != "{}" %}
+                        {% endif %}
+                        {% if task.kwargs and task.kwargs != "{}" %}
                             <div class="tooltip tooltip-bottom" data-tip="{{ task.kwargs }}">
                                 <code class="text-[10px] bg-base-200 px-1 py-0.5 rounded text-base-content/70 block truncate max-w-[200px]">kwargs: {{ task.kwargs }}</code>
                             </div>
-                            {% endif %}
-                        </div>
-                    </td>
-                    <td class="text-center">
-                        {% include "administration/partials/task_toggle.html" %}
-                    </td>
-                    <td>
-                        <div class="flex flex-col">
-                            {% if task.last_run_at %}
-                                <span class="text-sm font-medium" title="{{ task.last_run_at }}">
-                                    {{ task.last_run_at|date:"m-d H:i" }}
-                                </span>
-                                <span class="text-xs text-base-content/50">{{ task.last_run_at|timesince }} {% trans "前" %}</span>
-                            {% else %}
-                                <span class="text-xs text-base-content/30">{% trans "从未运行" %}</span>
-                            {% endif %}
-                        </div>
-                    </td>
-                    <td class="text-right pr-6">
-                        <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button hx-post="{% url 'administration:periodic_task_run' task.pk %}"
-                                    hx-swap="none"
-                                    class="btn btn-ghost btn-xs btn-square text-success tooltip tooltip-left"
-                                    data-tip="{% trans '立即运行' %}">
-                                <span class="material-symbols-outlined text-base">play_arrow</span>
-                            </button>
-                            
-                            <a href="{% url 'administration:periodic_task_edit' task.pk %}" 
-                               class="btn btn-ghost btn-xs btn-square text-primary tooltip tooltip-left"
-                               data-tip="{% trans '编辑' %}">
-                                <span class="material-symbols-outlined text-base">edit</span>
-                            </a>
-                            
-                            <a href="{% url 'administration:periodic_task_delete' task.pk %}" 
-                               class="btn btn-ghost btn-xs btn-square text-error tooltip tooltip-left"
-                               data-tip="{% trans '删除' %}">
-                                <span class="material-symbols-outlined text-base">delete</span>
-                            </a>
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    {% endcaptureas %}
-
-    {% include "administration/components/list_container.html" with content=table_content %}
-
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="text-center">{% include "administration/partials/task_toggle.html" %}</td>
+                <td>
+                    <div class="flex flex-col">
+                        {% if task.last_run_at %}
+                            <span class="text-sm font-medium" title="{{ task.last_run_at }}">{{ task.last_run_at|date:"m-d H:i" }}</span>
+                            <span class="text-xs text-base-content/50">{{ task.last_run_at|timesince }} {% trans "前" %}</span>
+                        {% else %}
+                            <span class="text-xs text-base-content/30">{% trans "从未运行" %}</span>
+                        {% endif %}
+                    </div>
+                </td>
+                <td class="text-right pr-6">
+                    <div class="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button hx-post="{% url 'administration:periodic_task_run' task.pk %}"
+                                hx-swap="none"
+                                class="btn btn-ghost btn-xs btn-square text-success tooltip tooltip-left"
+                                data-tip="{% trans '立即运行' %}">
+                            <span class="material-symbols-outlined text-base">play_arrow</span>
+                        </button>
+                        <a href="{% url 'administration:periodic_task_edit' task.pk %}"
+                           class="btn btn-ghost btn-xs btn-square text-primary tooltip tooltip-left"
+                           data-tip="{% trans '编辑' %}">
+                            <span class="material-symbols-outlined text-base">edit</span>
+                        </a>
+                        <a href="{% url 'administration:periodic_task_delete' task.pk %}"
+                           class="btn btn-ghost btn-xs btn-square text-error tooltip tooltip-left"
+                           data-tip="{% trans '删除' %}">
+                            <span class="material-symbols-outlined text-base">delete</span>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endcaptureas %}
+{% include "administration/components/list_container.html" with content=table_content %}
 {% endblock %}

@@ -1,17 +1,20 @@
 {% extends "administration/base.html" %}
 {% load capture_tags i18n %}
-
-{% block title %}{% trans "页面管理" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
-
+{% block title %}
+    {% trans "页面管理" %}{% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock %}
 {% block content %}
-<!-- Header Actions -->
-{% captureas header_actions %}
+    <!-- Header Actions -->
+    {% captureas header_actions %}
     <div class="dropdown dropdown-end">
-        <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-300 gap-2">
+        <div tabindex="0"
+             role="button"
+             class="btn btn-sm btn-ghost border-base-300 gap-2">
             <span class="material-symbols-outlined text-lg">more_vert</span>
             {% trans "更多" %}
         </div>
-        <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-content/5">
+        <ul tabindex="0"
+            class="dropdown-content z-[50] menu p-2 shadow bg-base-100 rounded-box w-52 border border-base-content/5">
             <li>
                 <a href="{% url 'administration:export_all' 'Page' %}" target="_blank">
                     <span class="material-symbols-outlined">file_download</span>
@@ -29,96 +32,107 @@
     {% url 'administration:page_create' as create_url %}
     {% captureas btn_text %}{% trans "新建页面" %}{% endcaptureas %}
     {% with slot_content='<span class="material-symbols-outlined text-lg mr-1">add</span>'|add:btn_text extra_classes='px-4 !h-8 text-xs' href=create_url %}
-        {% include 'components/inspira/rainbow_button.html' %}
-    {% endwith %}
+    {% include 'components/inspira/rainbow_button.html' %}
+{% endwith %}
 {% endcaptureas %}
-
 <!-- Header -->
-{% include "administration/components/header.html" with title=_("页面管理") icon="description" breadcrumbs=breadcrumbs actions=header_actions %}
-
+{% trans "页面管理" as t_title %}
+{% include "administration/components/header.html" with title=t_title icon="description" breadcrumbs=breadcrumbs actions=header_actions %}
 <!-- Filter Tabs -->
 {% captureas filter_tabs %}
-    <a href="?{% if request.GET.q %}q={{ request.GET.q }}{% endif %}" 
-       class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if not request.GET.status %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
-       {% trans "全部" %}
-    </a>
-    <a href="?status=published{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
-       class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if request.GET.status == 'published' %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
-       {% trans "已发布" %}
-    </a>
-    <a href="?status=draft{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}" 
-       class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if request.GET.status == 'draft' %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
-       {% trans "草稿" %}
-    </a>
+<a href="?{% if request.GET.q %}q={{ request.GET.q }}{% endif %}"
+   class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if not request.GET.status %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
+    {% trans "全部" %}
+</a>
+<a href="?status=published{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+   class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if request.GET.status == 'published' %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
+    {% trans "已发布" %}
+</a>
+<a href="?status=draft{% if request.GET.q %}&q={{ request.GET.q }}{% endif %}"
+   class="tab tab-sm whitespace-nowrap shrink-0 rounded-lg {% if request.GET.status == 'draft' %}tab-active bg-primary text-primary-content shadow-sm{% else %}hover:bg-base-content/5{% endif %}">
+    {% trans "草稿" %}
+</a>
 {% endcaptureas %}
-
 <!-- Bulk Actions -->
 {% captureas bulk_actions %}
-    <button type="button" onclick="submitBulkAction('published')" class="btn btn-sm btn-primary gap-2">
-        <span class="material-symbols-outlined text-[18px]">check_circle</span> {% trans "修改成发布" %}
-    </button>
-    <button type="button" onclick="submitBulkAction('draft')" class="btn btn-sm btn-neutral gap-2">
-        <span class="material-symbols-outlined text-[18px]">drafts</span> {% trans "修改成草稿" %}
-    </button>
-    <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error/10 gap-1">
-        <span class="material-symbols-outlined text-[16px]">delete</span> {% trans "删除" %}
-    </button>
+<button type="button"
+        onclick="submitBulkAction('published')"
+        class="btn btn-sm btn-primary gap-2">
+    <span class="material-symbols-outlined text-[18px]">check_circle</span> {% trans "修改成发布" %}
+</button>
+<button type="button"
+        onclick="submitBulkAction('draft')"
+        class="btn btn-sm btn-neutral gap-2">
+    <span class="material-symbols-outlined text-[18px]">drafts</span> {% trans "修改成草稿" %}
+</button>
+<button type="button"
+        onclick="submitBulkAction('delete')"
+        class="btn btn-sm btn-error hover:bg-error/10 gap-1">
+    <span class="material-symbols-outlined text-[16px]">delete</span> {% trans "删除" %}
+</button>
 {% endcaptureas %}
-
 <!-- Main Content -->
 {% captureas list_content %}
-    <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='page' %}">
-        {% csrf_token %}
-        <table class="table table-zebra table-pin-rows table-hover w-full">
-            <!-- Head -->
-            <thead class="bg-base-200/30 text-base-content/60 font-medium">
-                <tr>
-                    <th class="w-10 pl-6">
-                        <label>
-                            <input type="checkbox" class="checkbox checkbox-sm rounded-sm" onclick="toggleAll(this)" />
-                        </label>
-                    </th>
-                    <th class="w-16 font-mono hidden md:table-cell">ID</th>
-                    <th>{% trans "标题" %}</th>
-                    <th class="hidden lg:table-cell">Slug</th>
-                    <th class="w-32 text-center hidden sm:table-cell whitespace-nowrap">{% trans "状态" %}</th>
-                    <th class="w-32 hidden lg:table-cell">{% trans "创建时间" %}</th>
-                    <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
-                </tr>
-            </thead>
-            <!-- Body (HTMX Target) -->
-            <tbody id="page-list-body">
-                {% include "administration/partials/page_list_rows.html" %}
-            </tbody>
-        </table>
-    </form>
+<form id="bulk-form"
+      method="post"
+      action="{% url 'administration:bulk_action' model='page' %}">
+    {% csrf_token %}
+    <table class="table table-zebra table-pin-rows table-hover w-full">
+        <!-- Head -->
+        <thead class="bg-base-200/30 text-base-content/60 font-medium">
+            <tr>
+                <th class="w-10 pl-6">
+                    <label>
+                        <input type="checkbox"
+                               class="checkbox checkbox-sm rounded-sm"
+                               onclick="toggleAll(this)" />
+                    </label>
+                </th>
+                <th class="w-16 font-mono hidden md:table-cell">{% trans "ID" %}</th>
+                <th>{% trans "标题" %}</th>
+                <th class="hidden lg:table-cell">{% trans "Slug" %}</th>
+                <th class="w-32 text-center hidden sm:table-cell whitespace-nowrap">{% trans "状态" %}</th>
+                <th class="w-32 hidden lg:table-cell">{% trans "创建时间" %}</th>
+                <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
+            </tr>
+        </thead>
+        <!-- Body (HTMX Target) -->
+        <tbody id="page-list-body">
+            {% include "administration/partials/page_list_rows.html" %}
+        </tbody>
+    </table>
+</form>
 {% endcaptureas %}
-
 <!-- List Container -->
-{% include "administration/components/list_container.html" with title=_("页面列表") icon="list" search_url="." filter_tabs=filter_tabs bulk_actions=bulk_actions content=list_content %}
-
+{% trans "页面列表" as t_title %}
+{% include "administration/components/list_container.html" with title=t_title icon="list" search_url="." filter_tabs=filter_tabs bulk_actions=bulk_actions content=list_content %}
 <!-- Import Modal -->
 <dialog id="import_modal" class="modal">
-  <div class="modal-box rounded-2xl">
-    <h3 class="font-bold text-lg flex items-center gap-2">
-        <span class="material-symbols-outlined text-primary">file_upload</span>
-        {% trans "导入数据 (JSON)" %}
-    </h3>
-    <p class="py-4 text-sm opacity-70">{% trans "请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。" %}</p>
-    <form action="{% url 'administration:import_json' 'Page' %}" method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="file" name="json_file" class="file-input file-input-bordered w-full file-input-sm" accept=".json" required />
-        <div class="modal-action">
-            <button type="button" class="btn btn-sm" onclick="import_modal.close()">{% trans "取消" %}</button>
-            <button type="submit" class="btn btn-sm btn-primary">{% trans "开始导入" %}</button>
-        </div>
+    <div class="modal-box rounded-2xl">
+        <h3 class="font-bold text-lg flex items-center gap-2">
+            <span class="material-symbols-outlined text-primary">file_upload</span>
+            {% trans "导入数据 (JSON)" %}
+        </h3>
+        <p class="py-4 text-sm opacity-70">{% trans "请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。" %}</p>
+        <form action="{% url 'administration:import_json' 'Page' %}"
+              method="post"
+              enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file"
+                   name="json_file"
+                   class="file-input file-input-bordered w-full file-input-sm"
+                   accept=".json"
+                   required />
+            <div class="modal-action">
+                <button type="button" class="btn btn-sm" onclick="import_modal.close()">{% trans "取消" %}</button>
+                <button type="submit" class="btn btn-sm btn-primary">{% trans "开始导入" %}</button>
+            </div>
+        </form>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>{% trans "关闭" %}</button>
     </form>
-  </div>
-  <form method="dialog" class="modal-backdrop">
-    <button>close</button>
-  </form>
 </dialog>
-
 <script>
     function submitBulkAction(action) {
         const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
@@ -149,5 +163,4 @@
         );
     }
 </script>
-
 {% endblock %}

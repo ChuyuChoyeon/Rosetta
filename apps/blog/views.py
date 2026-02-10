@@ -3,18 +3,15 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 from django.views.generic import ListView, DetailView
-from django.db import models
 from django.db.models import Q, Count
 from django.db.models.functions import Coalesce
 from django.contrib import messages
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from .models import Post, Category, Tag, Comment, PostViewHistory
-from core.models import Page
 from .forms import CommentForm
-from users.models import Notification, User
+from users.models import User
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-import re
 from meta.views import Meta
 from .services import create_comment
 from .schemas import CommentCreateSchema
@@ -22,6 +19,7 @@ from constance import config
 
 
 from django.utils.translation import gettext as _
+
 
 def _parse_keywords(value):
     if not value:
@@ -92,11 +90,19 @@ class SidebarContextMixin:
                 Category.objects.annotate(count=Count("posts")).order_by("-count")[:10]
             ),
         )
-        
-        # Dynamic search placeholders
+
+        # 动态搜索占位符
         context["search_placeholders"] = load_cached(
             "sidebar:search_placeholders",
-            lambda: [f"搜索 {tag.name}..." for tag in Tag.objects.annotate(count=Count("posts")).order_by("-count")[:5]] or ["搜索文章...", "Python", "Django", "Tailwind"]
+            lambda: (
+                [
+                    f"搜索 {tag.name}..."
+                    for tag in Tag.objects.annotate(count=Count("posts")).order_by(
+                        "-count"
+                    )[:5]
+                ]
+                or ["搜索文章...", "Python", "Django", "Tailwind"]
+            ),
         )
         return context
 
@@ -114,6 +120,7 @@ class HomeView(SidebarContextMixin, ListView):
 
     def get_paginate_by(self, queryset):
         return getattr(config, "PAGINATION_PAGE_SIZE", 12)
+
     def get_queryset(self):
         """
         获取文章列表
@@ -128,96 +135,144 @@ class HomeView(SidebarContextMixin, ListView):
         )
 
         filter_type = self.request.GET.get("filter", "latest")
-        
+
         if filter_type == "recommended":
             if self.request.user.is_authenticated:
-                # 混合推荐算法 (Hybrid Recommendation) - Inspired by X (Twitter) Algorithm
-                # 核心四大要素：
-                # 1. 关联性 (Relevance): 标签匹配、分类匹配
-                # 2. 互动性 (Engagement): 阅读量、点赞数、评论数
-                # 3. 社交性 (Social): 作者互动亲密度 (TODO: 暂以分类/标签模拟)
-                # 4. 时效性 (Recency): 时间衰减因子
-                
-                from django.db.models import Case, When, Value, FloatField, IntegerField, F, ExpressionWrapper, Q, Count
-                from django.db.models.functions import ExtractYear, Extract, Ln, Coalesce
-                
-                # 1. 获取用户画像 (User Profile Construction)
-                # 基于最近浏览记录提取偏好
-                viewed_posts = PostViewHistory.objects.filter(user=self.request.user).select_related('post').order_by("-viewed_at")[:50]
+                # 混合推荐算法 (Hybrid Recommendation)
+                # 灵感来源于主流社交媒体的推荐逻辑，包含四大核心要素：
+                # 1. 关联性 (Relevance): 标签匹配、分类匹配，确保内容符合用户兴趣。
+                # 2. 互动性 (Engagement): 综合阅读量、点赞数、评论数，反映内容质量。
+                # 3. 社交性 (Social): 作者互动亲密度 (待办: 暂以分类/标签模拟)。
+                # 4. 时效性 (Recency): 时间衰减因子，优先展示新鲜内容。
+
+                from django.db.models import (
+                    Case,
+                    When,
+                    Value,
+                    FloatField,
+                    IntegerField,
+                    F,
+                    ExpressionWrapper,
+                    Q,
+                    Count,
+                )
+                from django.db.models.functions import (
+                    Ln,
+                )
+
+                # 1. 构建用户画像 (User Profile Construction)
+                # 基于用户最近浏览的 50 篇文章提取兴趣偏好
+                viewed_posts = (
+                    PostViewHistory.objects.filter(user=self.request.user)
+                    .select_related("post")
+                    .order_by("-viewed_at")[:50]
+                )
                 viewed_post_ids = [vp.post_id for vp in viewed_posts]
-                
-                # 提取偏好标签和分类
-                viewed_tag_ids = Tag.objects.filter(posts__id__in=viewed_post_ids).values_list("id", flat=True)
-                viewed_category_ids = Post.objects.filter(id__in=viewed_post_ids).values_list("category_id", flat=True).distinct()
-                
+
+                # 提取用户偏好的标签 ID 和分类 ID
+                viewed_tag_ids = Tag.objects.filter(
+                    posts__id__in=viewed_post_ids
+                ).values_list("id", flat=True)
+                viewed_category_ids = (
+                    Post.objects.filter(id__in=viewed_post_ids)
+                    .values_list("category_id", flat=True)
+                    .distinct()
+                )
+
                 if viewed_tag_ids or viewed_category_ids:
                     now = timezone.now()
                     week_ago = now - timezone.timedelta(days=7)
                     month_ago = now - timezone.timedelta(days=30)
-                    
+
                     # 2. 多维度打分 (Multi-factor Scoring)
-                    queryset = queryset.annotate(
-                        # A. 关联性 (Relevance)
-                        tag_match_count=Count("tags", filter=Q(tags__id__in=viewed_tag_ids), distinct=True),
-                        category_match=Case(
-                            When(category_id__in=viewed_category_ids, then=Value(1)),
-                            default=Value(0),
-                            output_field=IntegerField()
-                        ),
-                        
-                        # B. 互动性 (Engagement)
-                        # 使用 distinct=True 避免多对多查询的数量膨胀
-                        likes_count=Count("likes", distinct=True),
-                        comments_count=Count("comments", distinct=True),
-                        
-                        # C. 时效性 (Recency) - Step Function Approximation
-                        # SQLite friendly freshness bonus
-                        freshness_score=Case(
-                            When(published_at__gte=week_ago, then=Value(50.0)),
-                            When(published_at__gte=month_ago, then=Value(20.0)),
-                            default=Value(0.0),
-                            output_field=FloatField()
-                        ),
-                    ).annotate(
-                        # 计算各维度子分数
-                        relevance_score=ExpressionWrapper(
-                            (F('tag_match_count') * 50.0) + (F('category_match') * 100.0),
-                            output_field=FloatField()
-                        ),
-                        engagement_score=ExpressionWrapper(
-                            (Ln(F('views') + 1) * 4.0) +        # Log(views) * 4 (approx Log10 * 10)
-                            (F('likes_count') * 5.0) +          # 点赞权重
-                            (F('comments_count') * 10.0),       # 评论权重 (高互动)
-                            output_field=FloatField()
-                        ),
-                    ).annotate(
-                        # 3. 最终加权得分 (Final Weighted Score)
-                        # Score = Relevance + Engagement + Recency
-                        final_score=ExpressionWrapper(
-                            F('relevance_score') + F('engagement_score') + F('freshness_score'),
-                            output_field=FloatField()
+                    queryset = (
+                        queryset.annotate(
+                            # A. 关联性得分 (Relevance)
+                            # 统计文章包含多少个用户感兴趣的标签
+                            tag_match_count=Count(
+                                "tags",
+                                filter=Q(tags__id__in=viewed_tag_ids),
+                                distinct=True,
+                            ),
+                            # 判断文章是否属于用户感兴趣的分类
+                            category_match=Case(
+                                When(
+                                    category_id__in=viewed_category_ids, then=Value(1)
+                                ),
+                                default=Value(0),
+                                output_field=IntegerField(),
+                            ),
+                            # B. 互动性得分 (Engagement)
+                            # 使用 distinct=True 避免多对多关联查询导致数量统计错误
+                            likes_count=Count("likes", distinct=True),
+                            comments_count=Count("comments", distinct=True),
+                            # C. 时效性得分 (Recency) - 阶梯式新鲜度加成
+                            # 兼容 SQLite 的写法，给予近期文章额外的分数加成
+                            freshness_score=Case(
+                                When(published_at__gte=week_ago, then=Value(50.0)),
+                                When(published_at__gte=month_ago, then=Value(20.0)),
+                                default=Value(0.0),
+                                output_field=FloatField(),
+                            ),
                         )
-                    ).order_by("-final_score", "-published_at")
+                        .annotate(
+                            # 计算各维度子分数
+                            # 关联性权重：标签匹配 * 50 + 分类匹配 * 100
+                            relevance_score=ExpressionWrapper(
+                                (F("tag_match_count") * 50.0)
+                                + (F("category_match") * 100.0),
+                                output_field=FloatField(),
+                            ),
+                            # 互动性权重：
+                            # 阅读量取对数 * 4 (平滑处理，防止长尾效应)
+                            # 点赞数 * 5
+                            # 评论数 * 10 (评论代表更高程度的参与)
+                            engagement_score=ExpressionWrapper(
+                                (
+                                    Ln(F("views") + 1) * 4.0
+                                )
+                                + (F("likes_count") * 5.0)  # 点赞权重
+                                + (F("comments_count") * 10.0),  # 评论权重
+                                output_field=FloatField(),
+                            ),
+                        )
+                        .annotate(
+                            # 3. 最终加权总分 (Final Weighted Score)
+                            # 总分 = 关联性得分 + 互动性得分 + 新鲜度加成
+                            final_score=ExpressionWrapper(
+                                F("relevance_score")
+                                + F("engagement_score")
+                                + F("freshness_score"),
+                                output_field=FloatField(),
+                            )
+                        )
+                        .order_by("-final_score", "-published_at")
+                    )
                 else:
-                    # 冷启动：基于热度和时效的全局推荐
+                    # 冷启动策略：基于全局热度和时效进行推荐
+                    # 当用户没有足够的浏览记录时使用
                     month_ago = timezone.now() - timezone.timedelta(days=30)
-                    queryset = queryset.annotate(
-                        likes_count=Count("likes", distinct=True),
-                        comments_count=Count("comments", distinct=True),
-                        freshness_score=Case(
-                            When(published_at__gte=month_ago, then=Value(20.0)),
-                            default=Value(0.0),
-                            output_field=FloatField()
-                        ),
-                    ).annotate(
-                         engagement_score=ExpressionWrapper(
-                            (Ln(F('views') + 1) * 4.0) + 
-                            (F('likes_count') * 5.0) + 
-                            (F('comments_count') * 10.0) +
-                            F('freshness_score'),
-                            output_field=FloatField()
+                    queryset = (
+                        queryset.annotate(
+                            likes_count=Count("likes", distinct=True),
+                            comments_count=Count("comments", distinct=True),
+                            freshness_score=Case(
+                                When(published_at__gte=month_ago, then=Value(20.0)),
+                                default=Value(0.0),
+                                output_field=FloatField(),
+                            ),
                         )
-                    ).order_by("-engagement_score", "-published_at")
+                        .annotate(
+                            engagement_score=ExpressionWrapper(
+                                (Ln(F("views") + 1) * 4.0)
+                                + (F("likes_count") * 5.0)
+                                + (F("comments_count") * 10.0)
+                                + F("freshness_score"),
+                                output_field=FloatField(),
+                            )
+                        )
+                        .order_by("-engagement_score", "-published_at")
+                    )
 
             else:
                 # 未登录用户：热门 + 置顶
@@ -225,7 +280,7 @@ class HomeView(SidebarContextMixin, ListView):
         else:
             # 默认：最新发布 (保留置顶在最前)
             queryset = queryset.order_by("-is_pinned", "-published_at", "-created_at")
-            
+
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -234,12 +289,15 @@ class HomeView(SidebarContextMixin, ListView):
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
-        
+
         # 使用配置的默认封面图
-        default_image = getattr(config, "DEFAULT_PREVIEW_IMAGE", "/static/theme/img/default_cover.jpg")
-        
+        default_image = getattr(
+            config, "DEFAULT_PREVIEW_IMAGE", "/static/theme/img/default_cover.jpg"
+        )
+
         # Add WebSite JSON-LD
         import json
+
         website_schema = {
             "@context": "https://schema.org",
             "@type": "WebSite",
@@ -249,12 +307,13 @@ class HomeView(SidebarContextMixin, ListView):
             "image": self.request.build_absolute_uri(default_image),
             "potentialAction": {
                 "@type": "SearchAction",
-                "target": self.request.build_absolute_uri("/") + "search/?q={search_term_string}",
-                "query-input": "required name=search_term_string"
-            }
+                "target": self.request.build_absolute_uri("/")
+                + "search/?q={search_term_string}",
+                "query-input": "required name=search_term_string",
+            },
         }
         context["website_schema"] = json.dumps(website_schema)
-        
+
         site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
         context["meta"] = _build_meta(
             f"首页{site_suffix}", self.request, site_desc, site_keywords
@@ -289,15 +348,18 @@ class ArchiveView(SidebarContextMixin, ListView):
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
         site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
-        
+
         # Enhanced SEO for Archive
-        post_count = self.object_list.count() if hasattr(self, 'object_list') else 0
+        post_count = self.object_list.count() if hasattr(self, "object_list") else 0
         archive_desc = f"{site_name}文章归档。共收录 {post_count} 篇文章，记录了从建站至今的所有技术分享与生活感悟。"
         if site_desc:
             archive_desc = f"{archive_desc} {site_desc}"
-            
+
         context["meta"] = _build_meta(
-            f"归档{site_suffix}", self.request, archive_desc, site_keywords + ["文章归档", "历史文章", "全站索引"]
+            f"归档{site_suffix}",
+            self.request,
+            archive_desc,
+            site_keywords + ["文章归档", "历史文章", "全站索引"],
         )
         return context
 
@@ -327,9 +389,11 @@ class PostDetailView(DetailView):
             return Post.objects.select_related("author", "category").prefetch_related(
                 "tags", "polls", "polls__choices"
             )
-        return Post.objects.filter(status="published").select_related(
-            "author", "category"
-        ).prefetch_related("tags", "polls", "polls__choices")
+        return (
+            Post.objects.filter(status="published")
+            .select_related("author", "category")
+            .prefetch_related("tags", "polls", "polls__choices")
+        )
 
     def get_context_data(self, **kwargs):
         """添加评论、评论表单和 Meta 信息到上下文"""
@@ -399,22 +463,30 @@ class PostDetailView(DetailView):
         # 仅获取已发布的文章，且按时间排序
         context["previous_post"] = load_cached(
             f"post:{self.object.id}:previous",
-            lambda: Post.objects.filter(
-                status="published",
-                published_at__lt=(self.object.published_at or self.object.created_at),
-            )
-            .order_by("-published_at", "-created_at")
-            .first(),
+            lambda: (
+                Post.objects.filter(
+                    status="published",
+                    published_at__lt=(
+                        self.object.published_at or self.object.created_at
+                    ),
+                )
+                .order_by("-published_at", "-created_at")
+                .first()
+            ),
         )
 
         context["next_post"] = load_cached(
             f"post:{self.object.id}:next",
-            lambda: Post.objects.filter(
-                status="published",
-                published_at__gt=(self.object.published_at or self.object.created_at),
-            )
-            .order_by("published_at", "created_at")
-            .first(),
+            lambda: (
+                Post.objects.filter(
+                    status="published",
+                    published_at__gt=(
+                        self.object.published_at or self.object.created_at
+                    ),
+                )
+                .order_by("published_at", "created_at")
+                .first()
+            ),
         )
 
         return context
@@ -511,10 +583,12 @@ class PostDetailView(DetailView):
             # 如果密码字段是哈希值（以 pbkdf2_sha256 等开头），使用 check_password
             # 否则直接比较明文（为了兼容旧数据或简单设置）
             is_valid = False
-            if self.object.password.startswith('pbkdf2_sha256$') or self.object.password.startswith('argon2'):
-                 is_valid = self.object.check_password(password)
+            if self.object.password.startswith(
+                "pbkdf2_sha256$"
+            ) or self.object.password.startswith("argon2"):
+                is_valid = self.object.check_password(password)
             else:
-                 is_valid = self.object.password == password
+                is_valid = self.object.password == password
 
             if is_valid:
                 request.session[f"post_unlocked_{self.object.pk}"] = True
@@ -553,7 +627,9 @@ class PostDetailView(DetailView):
                     ),
                 )
 
-                comment = create_comment(post=self.object, user=request.user, data=comment_data)
+                comment = create_comment(
+                    post=self.object, user=request.user, data=comment_data
+                )
 
                 if comment.active:
                     messages.success(request, _("您的评论已发布！"))
@@ -583,7 +659,7 @@ class CategoryListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
         site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
@@ -613,7 +689,7 @@ class TagListView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
         site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
@@ -650,7 +726,7 @@ class PostByCategoryView(SidebarContextMixin, ListView):
         context = super().get_context_data(**kwargs)
         context["title"] = f"分类: {self.category.name}"
         context["category"] = self.category
-        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
         site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
@@ -702,8 +778,6 @@ class PostByTagView(SidebarContextMixin, ListView):
         return context
 
 
-from django.http import HttpResponse, JsonResponse
-
 class SearchView(SidebarContextMixin, ListView):
     """
     全站搜索视图
@@ -712,7 +786,7 @@ class SearchView(SidebarContextMixin, ListView):
     1. Django Watson (全文搜索引擎，优先使用)。
     2. 数据库模糊查询 (icontains，作为降级方案)。
     3. 拼音搜索 (支持首字母和全拼，针对 ASCII 查询)。
-    
+
     支持按内容类型 (Type) 过滤：
     - all: 全部
     - post: 文章
@@ -728,11 +802,11 @@ class SearchView(SidebarContextMixin, ListView):
 
     def get(self, request, *args, **kwargs):
         # 处理搜索建议请求 (AJAX)
-        if request.GET.get('type') == 'suggest':
+        if request.GET.get("type") == "suggest":
             return self.get_suggestions(request)
 
         # 处理空查询 -> 返回搜索首页
-        if not request.GET.get('q'):
+        if not request.GET.get("q"):
             self.template_name = "blog/search_index.html"
             # 手动触发 get_context_data 并传入空列表
             self.object_list = []
@@ -744,46 +818,67 @@ class SearchView(SidebarContextMixin, ListView):
     def get_suggestions(self, request):
         """
         获取搜索建议
-        
+
         用于前端搜索框的自动补全功能。
         返回包含文本、URL 和类型的 JSON 列表。
         优先使用 Watson 全文搜索，其次拼音匹配，最后数据库模糊匹配。
         """
-        query = request.GET.get('q', '').strip()
+        query = request.GET.get("q", "").strip()
         if not query:
-            return JsonResponse({'results': []})
-        
+            return JsonResponse({"results": []})
+
         results = []
         seen = set()
-        
+
         # 辅助函数：添加唯一结果
         def add_result(text, url, type_code, type_label):
             if text not in seen:
                 seen.add(text)
-                results.append({'text': text, 'url': url, 'type': type_code, 'type_label': type_label})
+                results.append(
+                    {
+                        "text": text,
+                        "url": url,
+                        "type": type_code,
+                        "type_label": type_label,
+                    }
+                )
 
         # 0. Watson Search (First Priority)
         try:
             from watson import search as watson
             from voting.models import Poll
-            
+
             # Watson search for relevant models
             # We search a bit more to filter out later if needed
-            watson_results = watson.filter([Post, Tag, Category, User], query)[:10]
-            
+            watson_results = watson.filter([Post, Tag, Category, User, Poll], query)[:10]
+
             for res in watson_results:
                 obj = res.object
-                if isinstance(obj, Post) and obj.status == 'published':
+                if isinstance(obj, Post) and obj.status == "published":
                     add_result(obj.title, obj.get_absolute_url(), "post", _("文章"))
                 elif isinstance(obj, Tag):
-                    add_result(obj.name, f"{request.path}?q={obj.name}&type=tag", "tag", _("标签"))
+                    add_result(
+                        obj.name,
+                        f"{request.path}?q={obj.name}&type=tag",
+                        "tag",
+                        _("标签"),
+                    )
                 elif isinstance(obj, Category):
-                    add_result(obj.name, f"{request.path}?q={obj.name}&type=category", "category", _("分类"))
+                    add_result(
+                        obj.name,
+                        f"{request.path}?q={obj.name}&type=category",
+                        "category",
+                        _("分类"),
+                    )
                 elif isinstance(obj, User):
-                     name = obj.nickname or obj.username
-                     add_result(name, f"{request.path}?q={name}&type=user", "user", _("用户"))
-                
-                if len(results) >= 8: # Keep some space for other methods if Watson returns few
+                    name = obj.nickname or obj.username
+                    add_result(
+                        name, f"{request.path}?q={name}&type=user", "user", _("用户")
+                    )
+
+                if (
+                    len(results) >= 8
+                ):  # Keep some space for other methods if Watson returns few
                     break
         except ImportError:
             pass
@@ -795,50 +890,68 @@ class SearchView(SidebarContextMixin, ListView):
         if len(results) < 10 and all(ord(c) < 128 for c in query):
             try:
                 from xpinyin import Pinyin
+
                 p = Pinyin()
-                
+
                 def match_pinyin(text, q):
-                    if not text: return False
+                    if not text:
+                        return False
                     try:
                         # 转换为无分隔符的拼音: "测试" -> "ceshi"
                         py_full = p.get_pinyin(text, "")
                         # 转换为首字母: "测试" -> "cs"
                         py_initials = p.get_initials(text, "")
-                        
+
                         q_lower = q.lower()
-                        return q_lower in py_full.lower() or q_lower in py_initials.lower()
+                        return (
+                            q_lower in py_full.lower() or q_lower in py_initials.lower()
+                        )
                     except Exception:
                         return False
 
                 # 搜索标签
                 for tag in Tag.objects.all():
                     if match_pinyin(tag.name, query):
-                        add_result(tag.name, f"{request.path}?q={tag.name}&type=tag", "tag", _("标签"))
-                        if len(results) >= 5: break
-                
+                        add_result(
+                            tag.name,
+                            f"{request.path}?q={tag.name}&type=tag",
+                            "tag",
+                            _("标签"),
+                        )
+                        if len(results) >= 5:
+                            break
+
                 # 搜索文章
-                for post in Post.objects.filter(status='published'):
+                for post in Post.objects.filter(status="published"):
                     if match_pinyin(post.title, query):
-                        add_result(post.title, post.get_absolute_url(), "post", _("文章"))
-                        if len(results) >= 10: break
-                        
+                        add_result(
+                            post.title, post.get_absolute_url(), "post", _("文章")
+                        )
+                        if len(results) >= 10:
+                            break
+
             except ImportError:
                 pass
-        
+
         # 2. 标准数据库搜索 (降级/补充)
         if len(results) < 10:
             # Tags
             for tag in Tag.objects.filter(name__icontains=query)[:5]:
-                add_result(tag.name, f"{request.path}?q={tag.name}&type=tag", "tag", _("标签"))
-            
+                add_result(
+                    tag.name, f"{request.path}?q={tag.name}&type=tag", "tag", _("标签")
+                )
+
             # Posts
-            for post in Post.objects.filter(title__icontains=query, status='published')[:5]:
+            for post in Post.objects.filter(title__icontains=query, status="published")[
+                :5
+            ]:
                 add_result(post.title, post.get_absolute_url(), "post", _("文章"))
 
-        return JsonResponse({'results': results[:10]})
+        return JsonResponse({"results": results[:10]})
 
     def get_queryset(self):
         from voting.models import Poll
+
         try:
             from watson import search as watson
         except ImportError:
@@ -870,45 +983,61 @@ class SearchView(SidebarContextMixin, ListView):
                 return watson.filter(models, query)
             except Exception:
                 pass
-        
+
         # Fallback if watson is not set up or fails
         # Fallback search for specific models if watson fails
         fallback_results = []
-        
+
         # 1. Standard DB Search (icontains)
         if search_type in ["all", "post"]:
-            fallback_results.extend(Post.objects.filter(Q(title__icontains=query) | Q(content__icontains=query)))
+            fallback_results.extend(
+                Post.objects.filter(
+                    Q(title__icontains=query) | Q(content__icontains=query)
+                )
+            )
         if search_type in ["all", "category"]:
             fallback_results.extend(Category.objects.filter(name__icontains=query))
         if search_type in ["all", "tag"]:
             fallback_results.extend(Tag.objects.filter(name__icontains=query))
         if search_type in ["all", "user"]:
-            fallback_results.extend(User.objects.filter(Q(username__icontains=query) | Q(nickname__icontains=query)))
+            fallback_results.extend(
+                User.objects.filter(
+                    Q(username__icontains=query) | Q(nickname__icontains=query)
+                )
+            )
         if search_type in ["all", "poll"]:
-            fallback_results.extend(Poll.objects.filter(Q(title__icontains=query) | Q(description__icontains=query)))
-            
+            fallback_results.extend(
+                Poll.objects.filter(
+                    Q(title__icontains=query) | Q(description__icontains=query)
+                )
+            )
+
         # 2. Pinyin Search (if query is ASCII)
         # Supports matching "cs" -> "测试" (Initials) or "ceshi" -> "测试" (Full Pinyin)
         if query and all(ord(c) < 128 for c in query):
             try:
                 from xpinyin import Pinyin
+
                 p = Pinyin()
-                
+
                 def match_pinyin(text, q):
-                    if not text: return False
+                    if not text:
+                        return False
                     try:
                         # Convert to pinyin without separator: "测试" -> "ceshi"
                         py_full = p.get_pinyin(text, "")
                         # Convert to initials: "测试" -> "cs"
                         py_initials = p.get_initials(text, "")
-                        
+
                         q_lower = q.lower()
-                        return q_lower in py_full.lower() or q_lower in py_initials.lower()
+                        return (
+                            q_lower in py_full.lower() or q_lower in py_initials.lower()
+                        )
                     except Exception:
                         return False
 
                 # Track existing IDs to avoid duplicates
-                existing_ids = { (type(r), r.pk) for r in fallback_results }
+                existing_ids = {(type(r), r.pk) for r in fallback_results}
 
                 def check_and_add(queryset, field_names):
                     # Iterate over all objects - Note: This is O(N) and may be slow for large datasets
@@ -916,29 +1045,29 @@ class SearchView(SidebarContextMixin, ListView):
                     for obj in queryset:
                         if (type(obj), obj.pk) in existing_ids:
                             continue
-                        
+
                         matched = False
                         for field in field_names:
                             val = getattr(obj, field, "")
                             if match_pinyin(val, query):
                                 matched = True
                                 break
-                        
+
                         if matched:
                             fallback_results.append(obj)
                             existing_ids.add((type(obj), obj.pk))
 
                 if search_type in ["all", "post"]:
-                    check_and_add(Post.objects.all(), ['title'])
+                    check_and_add(Post.objects.all(), ["title"])
                 if search_type in ["all", "category"]:
-                    check_and_add(Category.objects.all(), ['name'])
+                    check_and_add(Category.objects.all(), ["name"])
                 if search_type in ["all", "tag"]:
-                    check_and_add(Tag.objects.all(), ['name'])
+                    check_and_add(Tag.objects.all(), ["name"])
                 if search_type in ["all", "user"]:
-                    check_and_add(User.objects.all(), ['nickname', 'username'])
+                    check_and_add(User.objects.all(), ["nickname", "username"])
                 if search_type in ["all", "poll"]:
-                    check_and_add(Poll.objects.all(), ['title'])
-                    
+                    check_and_add(Poll.objects.all(), ["title"])
+
             except ImportError:
                 pass
             except Exception as e:
@@ -949,20 +1078,23 @@ class SearchView(SidebarContextMixin, ListView):
 
     def get_context_data(self, **kwargs):
         from django.contrib.contenttypes.models import ContentType
+
         context = super().get_context_data(**kwargs)
         context["query"] = self.request.GET.get("q", "")
         context["search_type"] = self.request.GET.get("type", "all")
         context["post_content_type_id"] = ContentType.objects.get_for_model(Post).id
-        
+
         # Preserve SEO meta
-        site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
+        getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
         site_keywords = _parse_keywords(getattr(config, "SITE_KEYWORDS", ""))
         site_suffix = getattr(config, "SITE_TITLE_SUFFIX", " - Rosetta Blog")
         description = site_desc
         query = context["query"]
         if query:
-            description = f"{site_desc} 搜索：{query}" if site_desc else f"搜索：{query}"
+            description = (
+                f"{site_desc} 搜索：{query}" if site_desc else f"搜索：{query}"
+            )
         context["meta"] = _build_meta(
             f"搜索{site_suffix}", self.request, description, site_keywords
         )
@@ -989,7 +1121,7 @@ def delete_comment(request, pk):
     comment.delete()
 
     # HTMX 支持：返回空响应或触发前端事件
-    if request.headers.get("HX-Request"):
+    if request.htmx:
         return HttpResponse("")
 
     messages.success(request, _("评论已删除"))

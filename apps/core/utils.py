@@ -2,7 +2,7 @@ from django.utils.text import slugify
 from django.conf import settings
 from django.core.cache import cache
 from django.core.management import call_command
-from datetime import datetime, timedelta
+from datetime import datetime
 from django.utils import timezone
 from celery import shared_task
 import uuid
@@ -28,7 +28,7 @@ def generate_unique_slug(
 ):
     """
     为模型实例生成唯一的 Slug。
-    
+
     策略：
     1. 尝试使用 Django 的 slugify (默认仅支持 ASCII)。
     2. 如果结果为空（例如纯中文且 allow_unicode=False），则尝试转为拼音。
@@ -48,16 +48,17 @@ def generate_unique_slug(
         # 尝试使用 xpinyin 将中文转换为拼音
         try:
             from xpinyin import Pinyin
+
             p = Pinyin()
             # source_text 可能包含特殊字符，先转拼音再 slugify
             origin_slug = slugify(p.get_pinyin(source_text, ""))
         except ImportError:
             pass
-            
+
         # 如果依然为空（极其罕见），使用随机 UUID
         if not origin_slug:
             origin_slug = str(uuid.uuid4())[:8]
-    
+
     # 统一转换为小写
     origin_slug = origin_slug.lower()
 
@@ -76,19 +77,29 @@ def generate_unique_slug(
 class ConstanceRedisConnection:
     """
     Constance Redis 连接辅助类。
-    
+
     django-constance 需要一个能返回 Redis 客户端的类。
     这里复用 django-redis 的连接池，避免创建额外的连接。
     """
 
     def __new__(cls):
         from django_redis import get_redis_connection
+
         return get_redis_connection("default")
 
 
 def _set_task_status(task_key, status, detail=None, ttl=86400):
     """
     更新单个异步任务的状态到 Redis。
+
+    Args:
+        task_key: Redis 键名。
+        status: 任务状态 (如 "running", "success", "error")。
+        detail: 可选的详细信息或错误消息。
+        ttl: 状态在 Redis 中的过期时间 (秒)，默认 24 小时。
+
+    Returns:
+        dict: 写入 Redis 的数据字典。
     """
     payload = {"status": status, "updated_at": timezone.now().isoformat()}
     if detail:
@@ -100,11 +111,16 @@ def _set_task_status(task_key, status, detail=None, ttl=86400):
 def _set_queue_status(task_key, status, ttl=86400, **extra):
     """
     更新批量队列任务的状态到 Redis (包含进度信息)。
+
+    Args:
+        task_key: Redis 键名。
+        status: 任务状态。
+        ttl: 过期时间。
+        **extra: 额外的进度信息 (queued, processed, failed, skipped 等)。
+
+    Returns:
+        dict: 写入 Redis 的数据字典。
     """
-    payload = {"status": status, "updated_at": timezone.now().isoformat()}
-    payload.update(extra)
-    cache.set(task_key, payload, ttl)
-    return payload
 
 
 def _process_post_cover_image(post_id):
@@ -116,7 +132,7 @@ def _process_post_cover_image(post_id):
     post = Post.objects.filter(id=post_id).first()
     if not post or not post.cover_image:
         return "skipped"
-    
+
     # 依次处理缩略图 (thumbnail) 和优化图 (optimized)
     specs = [post.cover_thumbnail, post.cover_optimized]
     for spec in specs:
@@ -140,6 +156,7 @@ def _run_watson_rebuild(task_key, lock_key, status_ttl):
         _set_task_status(task_key, "success", ttl=status_ttl)
     except Exception as exc:
         import traceback
+
         traceback.print_exc()
         _set_task_status(task_key, "error", str(exc), ttl=status_ttl)
     finally:
@@ -165,7 +182,7 @@ def trigger_watson_rebuild_async():
 
     _set_task_status(task_key, "queued", ttl=status_ttl)
     cache.set("watson:rebuild:latest", task_key, status_ttl)
-    
+
     # 发送 Celery 任务
     _run_watson_rebuild.delay(task_key, lock_key, status_ttl)
     return {"accepted": True, "task_key": task_key}
@@ -336,25 +353,30 @@ def _run_media_scan(task_key, lock_key, status_ttl):
         from django.apps import apps
         from django.db import models
         import os
-        
+
         media_root = settings.MEDIA_ROOT
-        
+
         # 1. 扫描数据库引用 (优先构建白名单，减少内存占用)
         db_files = set()
         for model in apps.get_models():
             # 找出所有文件字段
-            file_fields = [f for f in model._meta.get_fields() if isinstance(f, (models.FileField, models.ImageField))]
+            file_fields = [
+                f
+                for f in model._meta.get_fields()
+                if isinstance(f, (models.FileField, models.ImageField))
+            ]
             if not file_fields:
                 continue
-            
+
             for field in file_fields:
                 # 优化：使用 iterator() 减少大表查询的内存占用
-                paths = model.objects.exclude(
-                    **{f"{field.name}__isnull": True}
-                ).exclude(
-                    **{f"{field.name}": ""}
-                ).values_list(field.name, flat=True).iterator()
-                
+                paths = (
+                    model.objects.exclude(**{f"{field.name}__isnull": True})
+                    .exclude(**{f"{field.name}": ""})
+                    .values_list(field.name, flat=True)
+                    .iterator()
+                )
+
                 for path in paths:
                     if path:
                         # 归一化路径分隔符
@@ -366,31 +388,33 @@ def _run_media_scan(task_key, lock_key, status_ttl):
         orphaned_size = 0
         scan_count = 0
         scan_size = 0
-        
+
         for root, dirs, files in os.walk(media_root):
             for file in files:
                 full_path = os.path.join(root, file)
                 rel_path = os.path.relpath(full_path, media_root).replace("\\", "/")
-                
+
                 # 忽略隐藏文件、缓存目录和数据库备份
                 if file.startswith(".") or "__pycache__" in root:
                     continue
                 if rel_path.startswith("backups/"):
                     continue
-                if rel_path.startswith("CACHE/"): # ImageKit 缓存目录
+                if rel_path.startswith("CACHE/"):  # ImageKit 缓存目录
                     continue
-                    
+
                 size = os.path.getsize(full_path)
                 scan_count += 1
                 scan_size += size
-                
+
                 # 核心比对逻辑：直接检查是否在白名单中
                 if rel_path not in db_files:
-                    orphaned.append({
-                        "path": rel_path,
-                        "size": size,
-                        "mtime": os.path.getmtime(full_path)
-                    })
+                    orphaned.append(
+                        {
+                            "path": rel_path,
+                            "size": size,
+                            "mtime": os.path.getmtime(full_path),
+                        }
+                    )
                     orphaned_size += size
 
         result = {
@@ -401,16 +425,17 @@ def _run_media_scan(task_key, lock_key, status_ttl):
             "orphaned_count": len(orphaned),
             "orphaned_size": orphaned_size,
             "orphaned_files": orphaned[:100],  # 预览前100个文件
-            "orphaned_files_all_key": f"{task_key}:files"
+            "orphaned_files_all_key": f"{task_key}:files",
         }
         cache.set(task_key, result, status_ttl)
-        
+
         # 将完整列表单独存一个 key，防止主 key 值过大
         if orphaned:
-             cache.set(f"{task_key}:files", orphaned, status_ttl)
+            cache.set(f"{task_key}:files", orphaned, status_ttl)
 
     except Exception as exc:
         import traceback
+
         traceback.print_exc()
         _set_task_status(task_key, "error", str(exc), ttl=status_ttl)
     finally:
@@ -424,8 +449,8 @@ def trigger_media_scan_async():
     task_id = uuid.uuid4().hex
     task_key = f"media:scan:{task_id}"
     lock_key = "media:scan:lock"
-    status_ttl = 3600 # 1 hour
-    
+    status_ttl = 3600  # 1 hour
+
     if not cache.add(lock_key, task_id, 300):
         latest_key = cache.get("media:scan:latest")
         return {"accepted": False, "task_key": latest_key}
@@ -449,20 +474,22 @@ def _run_media_clean(task_key, scan_task_key, lock_key, status_ttl):
             # 尝试从主结果取
             scan_result = cache.get(scan_task_key)
             if scan_result and "orphaned_files" in scan_result:
-                 orphaned_files = scan_result["orphaned_files"]
-        
+                orphaned_files = scan_result["orphaned_files"]
+
         if not orphaned_files:
-            _set_task_status(task_key, "success", "No files to clean or scan expired", ttl=status_ttl)
+            _set_task_status(
+                task_key, "success", "No files to clean or scan expired", ttl=status_ttl
+            )
             return
 
         cleaned_count = 0
         cleaned_size = 0
         media_root = settings.MEDIA_ROOT
-        
+
         for f in orphaned_files:
             path = f["path"]
             full_path = os.path.join(media_root, path)
-            
+
             # 使用更安全的删除逻辑
             try:
                 if os.path.exists(full_path):
@@ -470,28 +497,33 @@ def _run_media_clean(task_key, scan_task_key, lock_key, status_ttl):
                         os.remove(full_path)
                         cleaned_count += 1
                         cleaned_size += f["size"]
-                    
+
                     # 尝试删除空目录 (清理垃圾后留下的空文件夹)
                     directory = os.path.dirname(full_path)
                     if os.path.exists(directory) and not os.listdir(directory):
                         os.rmdir(directory)
-            except OSError as e:
+            except OSError:
                 # 记录错误但不中断循环，除非是致命错误
                 pass
 
-        cache.set(task_key, {
-            "status": "success", 
-            "updated_at": timezone.now().isoformat(),
-            "cleaned_count": cleaned_count,
-            "cleaned_size": cleaned_size
-        }, status_ttl)
-        
+        cache.set(
+            task_key,
+            {
+                "status": "success",
+                "updated_at": timezone.now().isoformat(),
+                "cleaned_count": cleaned_count,
+                "cleaned_size": cleaned_size,
+            },
+            status_ttl,
+        )
+
         # 清除扫描结果，避免重复清理
         cache.delete(scan_task_key)
         cache.delete(f"{scan_task_key}:files")
 
     except Exception as exc:
         import traceback
+
         traceback.print_exc()
         _set_task_status(task_key, "error", str(exc), ttl=status_ttl)
     finally:
@@ -506,7 +538,7 @@ def trigger_media_clean_async():
     scan_key = cache.get("media:scan:latest")
     if not scan_key:
         return {"accepted": False, "error": "No scan record"}
-    
+
     scan_result = cache.get(scan_key)
     if not scan_result or scan_result.get("status") != "success":
         return {"accepted": False, "error": "No successful scan result"}
@@ -515,7 +547,7 @@ def trigger_media_clean_async():
     task_key = f"media:clean:{task_id}"
     lock_key = "media:clean:lock"
     status_ttl = 3600
-    
+
     if not cache.add(lock_key, task_id, 300):
         latest_key = cache.get("media:clean:latest")
         return {"accepted": False, "task_key": latest_key}
@@ -534,19 +566,22 @@ def list_backups():
     backup_dir = settings.BASE_DIR / "backups"
     if not backup_dir.exists():
         return []
-        
+
     backups = []
     for f in backup_dir.iterdir():
         if f.is_file() and (f.suffix == ".json" or f.suffix == ".zip"):
             stat = f.stat()
-            backups.append({
-                "name": f.name,
-                "size": stat.st_size,
-                "mtime": datetime.fromtimestamp(stat.st_mtime),
-                "path": str(f)
-            })
+            backups.append(
+                {
+                    "name": f.name,
+                    "size": stat.st_size,
+                    "mtime": datetime.fromtimestamp(stat.st_mtime),
+                    "path": str(f),
+                }
+            )
     backups.sort(key=lambda x: x["mtime"], reverse=True)
     return backups
+
 
 def create_backup(filename=None):
     """
@@ -560,40 +595,46 @@ def create_backup(filename=None):
 
     backup_dir = settings.BASE_DIR / "backups"
     backup_dir.mkdir(exist_ok=True)
-    
-    db_conf = settings.DATABASES['default']
-    engine = db_conf['ENGINE']
+
+    db_conf = settings.DATABASES["default"]
+    engine = db_conf["ENGINE"]
     timestamp = timezone.now().strftime("%Y%m%d_%H%M%S")
 
     # SQLite 二进制备份
-    if 'sqlite3' in engine:
+    if "sqlite3" in engine:
         if not filename:
             filename = f"db_backup_{timestamp}.sqlite3"
-        
-        db_path = Path(db_conf['NAME'])
-        
+
+        db_path = Path(db_conf["NAME"])
+
         # 确保源文件存在
         if not db_path.exists():
-             raise FileNotFoundError(f"Database file not found at {db_path}")
-            
+            raise FileNotFoundError(f"Database file not found at {db_path}")
+
         shutil.copy(db_path, backup_dir / filename)
         return filename
 
     # 其他数据库使用 dumpdata
     if not filename:
         filename = f"backup_{timestamp}.json"
-    
+
     file_path = backup_dir / filename
-    
+
     with open(file_path, "w", encoding="utf-8") as f:
         # 排除 contenttypes 和 auth.permission 等元数据表，以及 session 日志
         call_command(
-            "dumpdata", 
-            exclude=["contenttypes", "auth.permission", "admin.logentry", "sessions.session"],
-            indent=2, 
-            stdout=f
+            "dumpdata",
+            exclude=[
+                "contenttypes",
+                "auth.permission",
+                "admin.logentry",
+                "sessions.session",
+            ],
+            indent=2,
+            stdout=f,
         )
     return filename
+
 
 def delete_backup(filename):
     """
@@ -601,15 +642,16 @@ def delete_backup(filename):
     """
     backup_dir = settings.BASE_DIR / "backups"
     file_path = backup_dir / filename
-    
+
     # 安全检查：防止路径遍历攻击
     if not file_path.resolve().is_relative_to(backup_dir.resolve()):
         raise ValueError("Invalid path")
-        
+
     if file_path.exists():
         os.remove(file_path)
         return True
     return False
+
 
 def restore_backup(filename):
     """
@@ -623,25 +665,25 @@ def restore_backup(filename):
 
     backup_dir = settings.BASE_DIR / "backups"
     file_path = backup_dir / filename
-    
+
     if not file_path.resolve().is_relative_to(backup_dir.resolve()):
-         raise ValueError("Invalid path")
-         
+        raise ValueError("Invalid path")
+
     if not file_path.exists():
         raise FileNotFoundError("Backup file not found")
 
     # SQLite 二进制恢复
     if filename.endswith(".sqlite3"):
-        db_conf = settings.DATABASES['default']
-        if 'sqlite3' not in db_conf['ENGINE']:
-             raise ValueError("Cannot restore SQLite backup to non-SQLite database")
-        
-        db_path = Path(db_conf['NAME'])
-        
+        db_conf = settings.DATABASES["default"]
+        if "sqlite3" not in db_conf["ENGINE"]:
+            raise ValueError("Cannot restore SQLite backup to non-SQLite database")
+
+        db_path = Path(db_conf["NAME"])
+
         # Create a temp backup of current state just in case
         if db_path.exists():
             shutil.copy(db_path, f"{db_path}.pre_restore")
-            
+
         # Restore
         shutil.copy(file_path, db_path)
         return True
@@ -650,7 +692,7 @@ def restore_backup(filename):
     if filename.endswith(".json") or filename.endswith(".json.gz"):
         call_command("loaddata", str(file_path))
         return True
-        
+
     raise ValueError(f"Unsupported backup format: {filename}")
 
 
@@ -664,11 +706,11 @@ def schedule_post_image_processing(post_id, delay_seconds=None):
         delay = int(getattr(settings, "IMAGE_PROCESSING_DELAY", 120))
     status_ttl = int(getattr(settings, "IMAGE_QUEUE_STATUS_TTL", 86400))
     queue_key = f"image:post:{post_id}"
-    
+
     # 如果已经在队列中，则不重复添加
     if not cache.add(queue_key, "queued", delay + status_ttl):
         return False
-    
+
     _process_post_image.apply_async(
         args=[post_id, queue_key, status_ttl], countdown=delay
     )

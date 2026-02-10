@@ -5,7 +5,7 @@ from .models import Comment
 class CommentForm(forms.ModelForm):
     """
     评论表单
-    
+
     用于前台用户提交评论。
     包含前端样式类 (Tailwind CSS) 和基本的长度验证。
     """

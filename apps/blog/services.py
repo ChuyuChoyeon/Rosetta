@@ -5,34 +5,35 @@ from users.models import Notification, User
 from .schemas import CommentCreateSchema, PostCreateSchema
 from constance import config
 import re
-from typing import Optional
 
 
 def create_comment(post: Post, user: User, data: CommentCreateSchema) -> Comment:
     """
-    创建评论并处理相关通知 (使用 Pydantic Schema)
+    创建评论并处理相关通知。
+
+    使用 Pydantic Schema 进行数据验证。如果配置了评论审核，非管理员用户的评论默认为非激活状态。
 
     Args:
-        post: 评论所属的文章对象
-        user: 评论发布者
-        data: 包含评论内容和父评论 ID 的 Pydantic Schema
+        post: 评论所属的文章对象。
+        user: 评论的发布者用户对象。
+        data: 包含评论内容和父评论 ID 的数据对象 (Pydantic Schema)。
 
     Returns:
-        Comment: 创建的评论对象
+        Comment: 创建并保存的评论模型实例。
     """
     with transaction.atomic():
-        # Determine if comment should be active immediately
+        # 检查是否需要审核
         require_approval = getattr(config, "COMMENT_REQUIRE_APPROVAL", False)
         is_active = True
         if require_approval:
-            # Staff and superusers bypass approval
+            # 管理员和超级用户免审核
             if not (user.is_staff or user.is_superuser):
                 is_active = False
 
         comment = Comment(post=post, user=user, content=data.content, active=is_active)
 
         parent_comment = None
-        # 处理父评论（回复）
+        # 处理父评论（回复逻辑）
         if data.parent_id:
             try:
                 parent_comment = Comment.objects.get(id=data.parent_id, post=post)
@@ -71,14 +72,19 @@ def create_comment(post: Post, user: User, data: CommentCreateSchema) -> Comment
 
 def create_post_service(user: User, data: PostCreateSchema) -> Post:
     """
-    创建文章服务
+    创建文章的核心服务逻辑。
+
+    负责创建文章对象、处理分类关联以及标签的自动创建和绑定。
 
     Args:
-        user: 文章作者
-        data: 包含文章信息的 Pydantic Schema
+        user: 文章的作者用户对象。
+        data: 包含文章标题、内容、状态、分类和标签的数据对象 (Pydantic Schema)。
 
     Returns:
-        Post: 创建的文章对象
+        Post: 创建并保存的文章模型实例。
+
+    Raises:
+        ValidationError: 当指定的分类 ID 不存在时抛出。
     """
     with transaction.atomic():
         category = None

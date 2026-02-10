@@ -1,5 +1,6 @@
 from django.contrib import sitemaps
-from django.urls import reverse
+from django.contrib.sitemaps.views import sitemap
+from django.urls import reverse, path
 from blog.models import Post, Category, Tag
 from core.models import Page
 
@@ -75,8 +76,6 @@ class StaticViewSitemap(sitemaps.Sitemap):
 
 
 # URL patterns for sitemap
-from django.contrib.sitemaps.views import sitemap
-from django.urls import path
 
 sitemaps = {
     "posts": PostSitemap,

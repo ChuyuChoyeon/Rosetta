@@ -1,58 +1,64 @@
 {% load i18n %}
 {% for group in groups %}
-<tr class="hover">
-    <th class="pl-4">
-        <label>
-            <input type="checkbox" name="selected_ids" value="{{ group.pk }}" class="checkbox checkbox-xs rounded-sm row-checkbox" onchange="updateBulkToolbar()" />
-        </label>
-    </th>
-    <td>
-        <a href="{% url 'administration:group_edit' group.pk %}" class="font-semibold text-sm hover:text-primary transition-colors flex items-center gap-2">
-            <span class="material-symbols-outlined text-lg opacity-70">group</span>
-            {{ group.name }}
-        </a>
-    </td>
-    <td class="hidden sm:table-cell">
-        <div class="badge badge-sm badge-ghost">{{ group.user_set.count }} {% trans "成员" %}</div>
-    </td>
-    <td class="hidden md:table-cell">
-        <div class="flex flex-wrap gap-1">
-            {% for permission in group.permissions.all|slice:":3" %}
-            <span class="badge badge-xs badge-outline opacity-70">{{ permission.name }}</span>
-            {% empty %}
-            <span class="text-xs text-base-content/40 italic">{% trans "无特定权限" %}</span>
-            {% endfor %}
-            {% if group.permissions.count > 3 %}
-            <span class="badge badge-xs badge-ghost opacity-50">+{{ group.permissions.count|add:"-3" }}</span>
-            {% endif %}
-        </div>
-    </td>
-    <td class="text-center">
-        <div class="join">
-            <a href="{% url 'administration:group_edit' group.pk %}" class="btn btn-xs btn-ghost join-item" title="{% trans '编辑' %}">
-                <span class="material-symbols-outlined text-base">edit</span>
+    <tr class="hover">
+        <th class="pl-4">
+            <label>
+                <input type="checkbox"
+                       name="selected_ids"
+                       value="{{ group.pk }}"
+                       class="checkbox checkbox-xs rounded-sm row-checkbox"
+                       onchange="updateBulkToolbar()" />
+            </label>
+        </th>
+        <td>
+            <a href="{% url 'administration:group_edit' group.pk %}"
+               class="font-semibold text-sm hover:text-primary transition-colors flex items-center gap-2">
+                <span class="material-symbols-outlined text-lg opacity-70">group</span>
+                {{ group.name }}
             </a>
-            <button type="button" 
-                    hx-post="{% url 'administration:group_delete' group.pk %}"
-                    hx-trigger="confirmed"
-                    hx-target="closest tr"
-                    hx-swap="outerHTML swap:0.5s"
-                    onclick="confirmHtmx(this, '{% blocktrans with name=group.name|escapejs %}确定要删除用户组“{{ name }}”吗？{% endblocktrans %}')"
-                    class="btn btn-xs btn-ghost text-error join-item" 
-                    title="{% trans '删除' %}">
-                <span class="material-symbols-outlined text-base">delete</span>
-            </button>
-        </div>
-    </td>
-</tr>
+        </td>
+        <td class="hidden sm:table-cell">
+            <div class="badge badge-sm badge-ghost">{{ group.user_set.count }} {% trans "成员" %}</div>
+        </td>
+        <td class="hidden md:table-cell">
+            <div class="flex flex-wrap gap-1">
+                {% for permission in group.permissions.all|slice:":3" %}
+                    <span class="badge badge-xs badge-outline opacity-70">{{ permission.name }}</span>
+                {% empty %}
+                    <span class="text-xs text-base-content/40 italic">{% trans "无特定权限" %}</span>
+                {% endfor %}
+                {% if group.permissions.count > 3 %}
+                    <span class="badge badge-xs badge-ghost opacity-50">+{{ group.permissions.count|add:"-3" }}</span>
+                {% endif %}
+            </div>
+        </td>
+        <td class="text-center">
+            <div class="join">
+                <a href="{% url 'administration:group_edit' group.pk %}"
+                   class="btn btn-xs btn-ghost join-item"
+                   title="{% trans '编辑' %}">
+                    <span class="material-symbols-outlined text-base">edit</span>
+                </a>
+                <button type="button"
+                        hx-post="{% url 'administration:group_delete' group.pk %}"
+                        hx-trigger="confirmed"
+                        hx-target="closest tr"
+                        hx-swap="outerHTML swap:0.5s"
+                        onclick="confirmHtmx(this, '{% blocktrans with name=group.name|escapejs %}确定要删除用户组“{{ name }}”吗？{% endblocktrans %}')"
+                        class="btn btn-xs btn-ghost text-error join-item"
+                        title="{% trans '删除' %}">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+            </div>
+        </td>
+    </tr>
 {% empty %}
-<tr>
-    <td colspan="5" class="text-center py-8 text-base-content/60">
-        <div class="flex flex-col items-center justify-center gap-2">
-            <span class="material-symbols-outlined text-4xl opacity-20">groups</span>
-            <p>{% trans "暂无用户组" %}</p>
-        </div>
-    </td>
-</tr>
+    <tr>
+        <td colspan="5" class="text-center py-8 text-base-content/60">
+            <div class="flex flex-col items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-4xl opacity-20">groups</span>
+                <p>{% trans "暂无用户组" %}</p>
+            </div>
+        </td>
+    </tr>
 {% endfor %}
-

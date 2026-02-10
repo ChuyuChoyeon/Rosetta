@@ -2,7 +2,6 @@ import logging
 import uuid
 import threading
 from loguru import logger
-from django.conf import settings
 
 # Thread-local storage for request ID
 _thread_locals = threading.local()

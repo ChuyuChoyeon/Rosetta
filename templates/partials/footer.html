@@ -1,149 +1,219 @@
 {% load blog_extras i18n static %}
 <footer class="footer p-10 bg-base-100/50 text-base-content border-t border-base-content/5 relative overflow-hidden">
-  <!-- Decorative background elements -->
-  <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50"></div>
-  <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
-  <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
-
-  {% load blog_extras %}
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-12 w-full max-w-7xl mx-auto relative z-10">
-    <!-- Branding -->
-    <div class="md:col-span-1 flex flex-col gap-4">
-        <a href="{% url 'home' %}" class="flex items-center gap-2">
-            {% if config.SHOW_SITE_LOGO and config.SITE_LOGO %}
-            <img src="{{ config.SITE_LOGO }}" alt="Logo" class="h-8 w-auto object-contain">
-            {% endif %}
-            <span class="text-2xl font-heading font-bold text-primary">{{ config.SITE_NAME|default:"Rosetta" }}</span>
-        </a>
-        <p class="opacity-70 text-sm leading-relaxed">
-            {{ config.FOOTER_SLOGAN|default:"分享代码，记录生活。<br/>构建属于你的知识花园。"|safe }}
-        </p>
-        
-        <div class="flex gap-2 mt-2">
-            {% if config.ENABLE_RSS_FEED %}
-            <a href="{% url 'post_feed' %}" target="_blank" class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all" title="{% trans 'RSS 订阅' %}">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="fill-current opacity-70 hover:opacity-100"><path d="M19 20.001C19 11.729 12.271 5 4 5v2c7.168 0 13 5.832 13 13.001h2zM4 11v2c3.859 0 7 3.14 7 7h2c0-4.962-4.038-9-9-9zm4 8.333c0 .921-.746 1.667-1.667 1.667-.92 0-1.667-.746-1.667-1.667s.747-1.667 1.667-1.667c.921 0 1.667.746 1.667 1.667z"/></svg>
-            </a>
-            {% endif %}
-            {% if config.GITHUB_URL %}
-            <a href="{{ config.GITHUB_URL }}" target="_blank" class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all" title="GitHub">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="fill-current opacity-70 hover:opacity-100"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            </a>
-            {% endif %}
-            {% if config.X_URL %}
-            <a href="{{ config.X_URL }}" target="_blank" class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all" title="X">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="fill-current opacity-70 hover:opacity-100"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-            {% endif %}
-            {% if config.BILIBILI_URL %}
-            <a href="{{ config.BILIBILI_URL }}" target="_blank" class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all" title="Bilibili">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="fill-current opacity-70 hover:opacity-100"><path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.87.001 17.36V13.73h-.001v-3.743c.035-1.511.556-2.765 1.559-3.76 1.004-.996 2.262-1.52 3.773-1.574h.854l-2.07-2.071.699-.698 2.07 2.069h10.23l2.07-2.069.698.698-2.07 2.071zM5.333 15.384l5.203-3.469-.958 3.469H5.333zm13.334 0v-3.469l-4.245 3.469h4.245z"/></svg>
-            </a>
-            {% endif %}
-            {% if config.CONTACT_EMAIL %}
-            <a href="mailto:{{ config.CONTACT_EMAIL }}" class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all" title="Email">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="fill-current opacity-70 hover:opacity-100"><path d="M0 3v18h24V3H0zm6.623 7.929l-4.623 5.712V8.164l4.623 2.765zm2.253 2.545l3.124 2.124 3.124-2.124 5.297 6.526H3.579l5.297-6.526zm6.623-2.545l4.623-2.765v6.477l-4.623-5.712zM21.61 5.628l-9.61 5.744L2.39 5.628h19.22z"/></svg>
-            </a>
-            {% endif %}
-        </div>
+    <!-- Decorative background elements -->
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/50 to-transparent opacity-50">
     </div>
-
-    <!-- Quick Links -->
-    <div class="md:col-span-1 flex flex-col gap-4">
-        <span class="footer-title opacity-100 text-base font-bold text-primary">{% trans "导航" %}</span>
-        <div class="flex flex-col gap-2">
-            <a href="{% url 'home' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                {% trans "首页" %}
+    <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-secondary/5 rounded-full blur-3xl pointer-events-none"></div>
+    {% load blog_extras %}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-12 w-full max-w-7xl mx-auto relative z-10">
+        <!-- Branding -->
+        <div class="md:col-span-1 flex flex-col gap-4">
+            <a href="{% url 'home' %}" class="flex items-center gap-2">
+                {% if config.SHOW_SITE_LOGO and config.SITE_LOGO %}
+                    <img src="{{ config.SITE_LOGO }}"
+                         alt="Logo"
+                         class="h-8 w-auto object-contain">
+                {% endif %}
+                <span class="text-2xl font-heading font-bold text-primary">{{ config.SITE_NAME|default:"Rosetta" }}</span>
             </a>
-            <a href="{% url 'post_list' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                {% trans "文章" %}
-            </a>
-            <a href="{% url 'category_list' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                {% trans "分类" %}
-            </a>
-            <a href="{% url 'tag_list' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                {% trans "标签" %}
-            </a>
-            <a href="{% url 'archive' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                {% trans "归档" %}
-            </a>
-            <a href="{% url 'guestbook:index' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                {% trans "留言板" %}
-            </a>
-            <a href="{% url 'about' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                {% trans "关于" %}
-            </a>
-            <a href="{% url 'contact' %}" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                {% trans "联系" %}
-            </a>
-            <a href="/sitemap.xml" target="_blank" class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
-                <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
-                {% trans "网站地图" %}
-            </a>
-        </div>
-    </div>
-
-    <!-- Subscribe -->
-    <div class="md:col-span-2 flex flex-col gap-4">
-        {% if friend_links %}
-        <div>
-            <span class="footer-title opacity-100 text-base mb-3 block">{% trans "友情链接" %}</span>
-            <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm opacity-70">
-                {% for link in friend_links %}
-                    <a href="{{ link.url }}" target="_blank" class="link link-hover hover:text-primary transition-colors inline-flex items-center gap-1">
-                        {% if link.logo %}
-                        <img src="{{ link.logo.url }}" alt="{{ link.name }}" class="w-4 h-4 object-contain">
-                        {% else %}
-                        <img src="{% if link.url|last == '/' %}{{ link.url }}favicon.ico{% else %}{{ link.url }}/favicon.ico{% endif %}" alt="{{ link.name }}" class="w-4 h-4 object-contain">
-                        {% endif %}
-                        {{ link.name }}
+            <p class="opacity-70 text-sm leading-relaxed">
+                {% trans "分享代码，记录生活。<br />构建属于你的知识花园。" as default_slogan %}
+                {{ config.FOOTER_SLOGAN|default:default_slogan|safe }}
+            </p>
+            <div class="flex gap-2 mt-2">
+                {% if config.ENABLE_RSS_FEED %}
+                    <a href="{% url 'post_feed' %}"
+                       target="_blank"
+                       class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
+                       title="{% trans 'RSS 订阅' %}">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             width="20"
+                             height="20"
+                             viewBox="0 0 24 24"
+                             class="fill-current opacity-70 hover:opacity-100">
+                            <path d="M19 20.001C19 11.729 12.271 5 4 5v2c7.168 0 13 5.832 13 13.001h2zM4 11v2c3.859 0 7 3.14 7 7h2c0-4.962-4.038-9-9-9zm4 8.333c0 .921-.746 1.667-1.667 1.667-.92 0-1.667-.746-1.667-1.667s.747-1.667 1.667-1.667c.921 0 1.667.746 1.667 1.667z" />
+                        </svg>
                     </a>
-                {% endfor %}
+                {% endif %}
+                {% if config.GITHUB_URL %}
+                    <a href="{{ config.GITHUB_URL }}"
+                       target="_blank"
+                       class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
+                       title="GitHub">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             width="20"
+                             height="20"
+                             viewBox="0 0 24 24"
+                             class="fill-current opacity-70 hover:opacity-100">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                        </svg>
+                    </a>
+                {% endif %}
+                {% if config.X_URL %}
+                    <a href="{{ config.X_URL }}"
+                       target="_blank"
+                       class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
+                       title="X">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             width="20"
+                             height="20"
+                             viewBox="0 0 24 24"
+                             class="fill-current opacity-70 hover:opacity-100">
+                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                        </svg>
+                    </a>
+                {% endif %}
+                {% if config.BILIBILI_URL %}
+                    <a href="{{ config.BILIBILI_URL }}"
+                       target="_blank"
+                       class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
+                       title="Bilibili">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             width="20"
+                             height="20"
+                             viewBox="0 0 24 24"
+                             class="fill-current opacity-70 hover:opacity-100">
+                            <path d="M17.813 4.653h.854c1.51.054 2.769.578 3.773 1.574 1.004.995 1.524 2.249 1.56 3.76v7.36c-.036 1.51-.556 2.769-1.56 3.773s-2.262 1.524-3.773 1.56H5.333c-1.51-.036-2.769-.556-3.773-1.56S.036 18.87.001 17.36V13.73h-.001v-3.743c.035-1.511.556-2.765 1.559-3.76 1.004-.996 2.262-1.52 3.773-1.574h.854l-2.07-2.071.699-.698 2.07 2.069h10.23l2.07-2.069.698.698-2.07 2.071zM5.333 15.384l5.203-3.469-.958 3.469H5.333zm13.334 0v-3.469l-4.245 3.469h4.245z" />
+                        </svg>
+                    </a>
+                {% endif %}
+                {% if config.CONTACT_EMAIL %}
+                    <a href="mailto:{{ config.CONTACT_EMAIL }}"
+                       class="btn btn-ghost btn-sm btn-circle hover:bg-base-200 transition-all"
+                       title="Email">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             width="20"
+                             height="20"
+                             viewBox="0 0 24 24"
+                             class="fill-current opacity-70 hover:opacity-100">
+                            <path d="M0 3v18h24V3H0zm6.623 7.929l-4.623 5.712V8.164l4.623 2.765zm2.253 2.545l3.124 2.124 3.124-2.124 5.297 6.526H3.579l5.297-6.526zm6.623-2.545l4.623-2.765v6.477l-4.623-5.712zM21.61 5.628l-9.61 5.744L2.39 5.628h19.22z" />
+                        </svg>
+                    </a>
+                {% endif %}
             </div>
         </div>
-        {% endif %}
+        <!-- Quick Links -->
+        <div class="md:col-span-1 flex flex-col gap-4">
+            <span class="footer-title opacity-100 text-base font-bold text-primary">{% trans "导航" %}</span>
+            <div class="flex flex-col gap-2">
+                <a href="{% url 'home' %}"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    {% trans "首页" %}
+                </a>
+                <a href="{% url 'post_list' %}"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    {% trans "文章" %}
+                </a>
+                <a href="{% url 'category_list' %}"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    {% trans "分类" %}
+                </a>
+                <a href="{% url 'tag_list' %}"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    {% trans "标签" %}
+                </a>
+                <a href="{% url 'archive' %}"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    {% trans "归档" %}
+                </a>
+                <a href="{% url 'guestbook:index' %}"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    {% trans "留言板" %}
+                </a>
+                <a href="{% url 'about' %}"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    {% trans "关于" %}
+                </a>
+                <a href="{% url 'contact' %}"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    {% trans "联系" %}
+                </a>
+                <a href="/sitemap.xml"
+                   target="_blank"
+                   class="link link-hover opacity-70 hover:opacity-100 hover:text-primary transition-all hover:translate-x-1 inline-flex items-center gap-1">
+                    <span class="w-1 h-1 rounded-full bg-primary opacity-0 hover:opacity-100 transition-opacity"></span>
+                    {% trans "网站地图" %}
+                </a>
+            </div>
+        </div>
+        <!-- Subscribe -->
+        <div class="md:col-span-2 flex flex-col gap-4">
+            {% if friend_links %}
+                <div>
+                    <span class="footer-title opacity-100 text-base mb-3 block">{% trans "友情链接" %}</span>
+                    <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm opacity-70">
+                        {% for link in friend_links %}
+                            <a href="{{ link.url }}"
+                               target="_blank"
+                               class="link link-hover hover:text-primary transition-colors inline-flex items-center gap-1">
+                                {% if link.logo %}
+                                    <img src="{{ link.logo.url }}"
+                                         alt="{{ link.name }}"
+                                         class="w-4 h-4 object-contain">
+                                {% else %}
+                                    <img src="{% if link.url|last == '/' %}{{ link.url }}favicon.ico{% else %}{{ link.url }}/favicon.ico{% endif %}"
+                                         alt="{{ link.name }}"
+                                         class="w-4 h-4 object-contain"
+                                         onerror="this.style.display='none'">
+                                {% endif %}
+                                {{ link.name }}
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
     </div>
-  </div>
-  
-  <div class="w-full max-w-7xl mx-auto border-t border-base-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs opacity-60">
-    <div class="flex flex-col md:flex-row gap-4 items-center">
-        <p>&copy; {% if config.SITE_SINCE_YEAR %}{{ config.SITE_SINCE_YEAR }}-{% endif %}{% now "Y" %} {{ config.SITE_NAME|default:"Rosetta" }}. {% trans "All rights reserved." %}</p>
-        {% if config.BEIAN_CODE %}
-        <a href="https://beian.miit.gov.cn/" target="_blank" class="link link-hover">{{ config.BEIAN_CODE }}</a>
-        {% endif %}
-        {% if config.ICP_GOV_CODE %}
-        <a href="{{ config.ICP_GOV_URL|default:'#' }}" target="_blank" class="link link-hover flex items-center gap-1">
-            <img src="{% static 'theme/img/gongan.png' %}" alt="" class="w-4 h-4 object-contain" onerror="this.style.display='none'">
-            {{ config.ICP_GOV_CODE }}
-        </a>
-        {% endif %}
-        {% if config.FOOTER_TEXT %}
-        <span class="hidden md:inline">|</span>
-        <p>{{ config.FOOTER_TEXT|safe }}</p>
-        {% endif %}
-        {% if config.PRIVACY_POLICY_URL %}
-        <span class="hidden md:inline">|</span>
-        <a href="{{ config.PRIVACY_POLICY_URL }}" class="link link-hover">{% trans "隐私政策" %}</a>
-        {% endif %}
-        {% if config.TOS_URL %}
-        <span class="hidden md:inline">|</span>
-        <a href="{{ config.TOS_URL }}" class="link link-hover">{% trans "服务条款" %}</a>
-        {% endif %}
+    <div class="w-full max-w-7xl mx-auto border-t border-base-200 mt-8 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-xs opacity-60">
+        <div class="flex flex-col md:flex-row gap-4 items-center">
+            <p>
+                &copy;
+                {% if config.SITE_SINCE_YEAR %}{{ config.SITE_SINCE_YEAR }}-{% endif %}
+                {% now "Y" %} {{ config.SITE_NAME|default:"Rosetta" }}. {% trans "All rights reserved." %}
+            </p>
+            {% if config.BEIAN_CODE %}
+                <a href="https://beian.miit.gov.cn/"
+                   target="_blank"
+                   class="link link-hover">{{ config.BEIAN_CODE }}</a>
+            {% endif %}
+            {% if config.ICP_GOV_CODE %}
+                <a href="{{ config.ICP_GOV_URL|default:'#' }}"
+                   target="_blank"
+                   class="link link-hover flex items-center gap-1">
+                    <img src="{% static 'theme/img/gongan.png' %}"
+                         alt=""
+                         class="w-4 h-4 object-contain"
+                         onerror="this.style.display='none'">
+                    {{ config.ICP_GOV_CODE }}
+                </a>
+            {% endif %}
+            {% if config.FOOTER_TEXT %}
+                <span class="hidden md:inline">|</span>
+                <p>{{ config.FOOTER_TEXT|safe }}</p>
+            {% endif %}
+            {% if config.PRIVACY_POLICY_URL %}
+                <span class="hidden md:inline">|</span>
+                <a href="{{ config.PRIVACY_POLICY_URL }}" class="link link-hover">{% trans "隐私政策" %}</a>
+            {% endif %}
+            {% if config.TOS_URL %}
+                <span class="hidden md:inline">|</span>
+                <a href="{{ config.TOS_URL }}" class="link link-hover">{% trans "服务条款" %}</a>
+            {% endif %}
+        </div>
+        <div class="flex items-center gap-2">
+            <span>{% trans "Powered by" %} <a href="https://github.com/ChuyuChoyeon/Rosetta"
+    target="_blank"
+    class="link link-hover font-bold text-primary hover:underline">Rosetta</a></span>
+            {% if config.EXTRA_FOOTER_CODE %}{{ config.EXTRA_FOOTER_CODE|safe }}{% endif %}
+        </div>
     </div>
-    
-    <div class="flex items-center gap-2">
-        <span>{% trans "Powered by" %} <a href="https://github.com/ChuyuChoyeon/Rosetta" target="_blank" class="link link-hover font-bold text-primary hover:underline">Rosetta</a></span>
-        {% if config.EXTRA_FOOTER_CODE %}
-        {{ config.EXTRA_FOOTER_CODE|safe }}
-        {% endif %}
-    </div>
-  </div>
 </footer>

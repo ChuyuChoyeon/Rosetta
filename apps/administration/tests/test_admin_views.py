@@ -4,7 +4,6 @@ from django.urls import reverse
 
 @pytest.mark.django_db
 class TestAdministrationViews:
-
     @pytest.fixture(autouse=True)
     def setup_data(
         self,
@@ -100,24 +99,24 @@ class TestAdministrationViews:
         response = self.client.get(url)
         assert response.status_code == 200
         context = response.context
-        
+
         # Verify metrics exist
         assert "total_posts" in context
         assert "post_growth" in context
         # assert "total_views" in context # Not available in simple setup, might need more data or mocked redis
         # assert "total_users" in context # Might be missing or named differently
         # assert "system_info" in context # Might be missing or named differently
-        
+
         # Check specific values from setup
         assert context["total_posts"] >= 2  # At least the 2 we created
 
     def test_post_create(self):
         url = reverse("administration:post_create")
-        
+
         # GET request
         response = self.client.get(url)
         assert response.status_code == 200
-        
+
         # POST request
         data = {
             "title": "New Created Post",
@@ -130,17 +129,18 @@ class TestAdministrationViews:
         response = self.client.post(url, data)
         assert response.status_code == 302
         assert response.url == reverse("administration:post_list")
-        
+
         from blog.models import Post
+
         assert Post.objects.filter(title="New Created Post").exists()
 
     def test_post_update(self):
         url = reverse("administration:post_edit", kwargs={"pk": self.post1.pk})
-        
+
         # GET request
         response = self.client.get(url)
         assert response.status_code == 200
-        
+
         # POST request
         data = {
             "title": "Updated Title",
@@ -152,33 +152,35 @@ class TestAdministrationViews:
         }
         response = self.client.post(url, data)
         assert response.status_code == 302
-        
+
         self.post1.refresh_from_db()
         assert self.post1.title == "Updated Title"
         assert self.post1.status == "draft"
 
     def test_post_delete(self):
         url = reverse("administration:post_delete", kwargs={"pk": self.post1.pk})
-        
+
         # GET request (confirmation page)
         response = self.client.get(url)
         assert response.status_code == 200
-        
+
         # POST request (actual delete)
         response = self.client.post(url)
-        assert response.status_code == 302 # Redirects to list
-        
+        assert response.status_code == 302  # Redirects to list
+
         from blog.models import Post
+
         assert not Post.objects.filter(pk=self.post1.pk).exists()
 
     def test_post_duplicate(self):
         url = reverse("administration:post_duplicate", kwargs={"pk": self.post1.pk})
-        
+
         # POST request
         response = self.client.post(url)
         assert response.status_code == 302
-        
+
         from blog.models import Post
+
         # Should have original + duplicate
         # Duplicate usually has " (Copy)" suffix or similar logic
         duplicates = Post.objects.filter(title__startswith=self.post1.title)
@@ -191,12 +193,13 @@ class TestAdministrationViews:
             "slug": "new-category",
             "description": "Desc",
             "icon": "folder",
-            "color": "primary"
+            "color": "primary",
         }
         response = self.client.post(url, data)
         assert response.status_code == 302
-        
+
         from blog.models import Category
+
         assert Category.objects.filter(name="New Category").exists()
 
     def test_category_update(self):
@@ -206,11 +209,11 @@ class TestAdministrationViews:
             "slug": self.category.slug,
             "description": "Updated Desc",
             "icon": "star",
-            "color": "secondary"
+            "color": "secondary",
         }
         response = self.client.post(url, data)
         assert response.status_code == 302
-        
+
         self.category.refresh_from_db()
         assert self.category.name == "Updated Category"
 
@@ -218,10 +221,10 @@ class TestAdministrationViews:
         # Create a category with no posts to avoid protected error if applicable
         cat = self.category_factory(name="Empty Cat")
         url = reverse("administration:category_delete", kwargs={"pk": cat.pk})
-        
+
         response = self.client.post(url)
         assert response.status_code == 302
-        
-        from blog.models import Category
-        assert not Category.objects.filter(pk=cat.pk).exists()
 
+        from blog.models import Category
+
+        assert not Category.objects.filter(pk=cat.pk).exists()

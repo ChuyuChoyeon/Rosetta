@@ -1,9 +1,9 @@
-
 try:
     import magic
+
     print(f"magic module: {magic}")
     print(f"dir(magic): {dir(magic)}")
-    if hasattr(magic, 'from_buffer'):
+    if hasattr(magic, "from_buffer"):
         print("magic.from_buffer exists")
     else:
         print("magic.from_buffer DOES NOT exist")

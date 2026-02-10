@@ -7,17 +7,31 @@ from .mixins import StyleFormMixin
 
 User = get_user_model()
 
+
 class UserTitleForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = UserTitle
         fields = [
-            "name", "name_zh_hans", "name_en", "name_ja", "name_zh_hant",
-            "color", "icon",
-            "description", "description_zh_hans", "description_en", "description_ja", "description_zh_hant",
+            "name",
+            "name_zh_hans",
+            "name_en",
+            "name_ja",
+            "name_zh_hant",
+            "color",
+            "icon",
+            "description",
+            "description_zh_hans",
+            "description_en",
+            "description_ja",
+            "description_zh_hant",
         ]
         widgets = {
-            "color": forms.TextInput(attrs={"type": "color", "class": "h-10 p-1 cursor-pointer"}),
-            "icon": forms.Textarea(attrs={"class": "h-24 font-mono text-xs", "placeholder": "<svg...>"}),
+            "color": forms.TextInput(
+                attrs={"type": "color", "class": "h-10 p-1 cursor-pointer"}
+            ),
+            "icon": forms.Textarea(
+                attrs={"class": "h-24 font-mono text-xs", "placeholder": "<svg...>"}
+            ),
         }
 
     def __init__(self, *args, **kwargs):
@@ -46,10 +60,21 @@ class UserForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = User
         fields = [
-            "username", "nickname", "email", "avatar", "cover_image",
-            "bio", "website", "github", "title",
-            "is_active", "is_banned", "is_staff", "is_superuser",
-            "groups", "user_permissions",
+            "username",
+            "nickname",
+            "email",
+            "avatar",
+            "cover_image",
+            "bio",
+            "website",
+            "github",
+            "title",
+            "is_active",
+            "is_banned",
+            "is_staff",
+            "is_superuser",
+            "groups",
+            "user_permissions",
         ]
         widgets = {
             "bio": forms.Textarea(attrs={"rows": 3}),

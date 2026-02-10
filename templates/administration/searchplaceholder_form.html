@@ -1,8 +1,8 @@
 {% extends "administration/base.html" %}
 {% load capture_tags widget_tweaks i18n %}
-
-{% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
-
+{% block title %}
+    {% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock %}
 {% block extra_js %}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -18,222 +18,236 @@
         });
     </script>
 {% endblock %}
-
 {% block content %}
-<form method="post" enctype="multipart/form-data" class="grid grid-cols-1 lg:grid-cols-3 gap-6" novalidate>
-    {% csrf_token %}
-    
-    <!-- Left Column: Main Content -->
-    <div class="lg:col-span-2 space-y-6">
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-6">
-                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">manage_search</span>
-                    {% trans "基本信息" %}
-                </h2>
-                
-                {% if form.non_field_errors %}
-                <div role="alert" class="alert border border-error/20 bg-error/5 text-error mb-4 shadow-sm">
-                    <div class="flex items-start gap-4">
-                        <span class="material-symbols-outlined pt-1">error</span>
-                        <div class="w-full">
-                            <span class="font-bold block mb-1">{% trans "表单错误" %}</span>
-                            <ul class="list-disc list-inside text-sm opacity-90">
-                                {% for error in form.non_field_errors %}
-                                    <li>{{ error }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                {% endif %}
-
-                <!-- Multi-language Tabs -->
-                <div x-data="translationForm" class="bg-base-100 border border-base-300 rounded-box overflow-hidden">
-                    <!-- Tab Header -->
-                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 bg-base-50/50 px-4 pt-2">
-                        <div role="tablist" class="tabs tabs-bordered -mb-[1px]">
-                            <a role="tab" class="tab h-10 px-4 transition-all duration-200"
-                               :class="activeTab === 'zh-hans' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
-                               @click="activeTab = 'zh-hans'">
-                                <span class="mr-2 text-lg">🇨🇳</span>
-                                {% trans "中文" %}
-                            </a>
-                            <a role="tab" class="tab h-10 px-4 transition-all duration-200"
-                               :class="activeTab === 'en' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
-                               @click="activeTab = 'en'">
-                                <span class="mr-2 text-lg">🇺🇸</span>
-                                English
-                            </a>
-                            <a role="tab" class="tab h-10 px-4 transition-all duration-200"
-                               :class="activeTab === 'ja' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
-                               @click="activeTab = 'ja'">
-                                <span class="mr-2 text-lg">🇯🇵</span>
-                                日本語
-                            </a>
-                            <a role="tab" class="tab h-10 px-4 transition-all duration-200"
-                               :class="activeTab === 'zh-hant' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
-                               @click="activeTab = 'zh-hant'">
-                                <span class="mr-2 text-lg">🇭🇰</span>
-                                繁體中文
-                            </a>
-                        </div>
-
-                        <!-- One-click Translate Button -->
-                        <div class="mb-1">
-                            <button type="button" 
-                                    class="btn btn-sm btn-ghost gap-1.5 text-primary hover:bg-primary/10 transition-colors"
-                                    @click="translate('id_text_zh_hans', {
-                                        'en': 'id_text_en',
-                                        'ja': 'id_text_ja',
-                                        'zh-hant': 'id_text_zh_hant'
-                                    })"
-                                    :class="{'loading': isLoading}"
-                                    title="{% trans '自动翻译到其他语言' %}">
-                                <span class="material-symbols-outlined text-[18px]" x-show="!isLoading">translate</span>
-                                <span class="hidden sm:inline font-medium">{% trans "一键翻译" %}</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Tab Content -->
-                    <div class="p-6">
-                        <!-- Zh-Hans Tab -->
-                        <div x-show="activeTab === 'zh-hans'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0">
-                            <div class="form-control w-full">
-                                <label class="label">
-                                    <span class="label-text font-bold text-base">{% trans "关键词内容 (中文)" %} <span class="text-error">*</span></span>
-                                </label>
-                                {% trans "输入搜索框提示文字 (中文)" as ph_zh %}
-                                {% render_field form.text_zh_hans class="input input-bordered w-full focus:input-primary transition-all" placeholder=ph_zh %}
-                                {% if form.text_zh_hans.errors %}
-                                <label class="label">
-                                    <span class="label-text-alt text-error">{{ form.text_zh_hans.errors.0 }}</span>
-                                </label>
-                                {% endif %}
+    <form method="post"
+          enctype="multipart/form-data"
+          class="grid grid-cols-1 lg:grid-cols-3 gap-6"
+          novalidate>
+        {% csrf_token %}
+        <!-- Left Column: Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+                <div class="card-body p-6">
+                    <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">manage_search</span>
+                        {% trans "基本信息" %}
+                    </h2>
+                    {% if form.non_field_errors %}
+                        <div role="alert"
+                             class="alert border border-error/20 bg-error/5 text-error mb-4 shadow-sm">
+                            <div class="flex items-start gap-4">
+                                <span class="material-symbols-outlined pt-1">error</span>
+                                <div class="w-full">
+                                    <span class="font-bold block mb-1">{% trans "表单错误" %}</span>
+                                    <ul class="list-disc list-inside text-sm opacity-90">
+                                        {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                                    </ul>
+                                </div>
                             </div>
                         </div>
-
-                        <!-- English Tab -->
-                        <div x-show="activeTab === 'en'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
-                            <div class="form-control w-full">
-                                <label class="label">
-                                    <span class="label-text font-bold text-base">Placeholder Text (English)</span>
-                                </label>
-                                {% trans "Enter placeholder text (English)" as ph_en %}
-                                {% render_field form.text_en class="input input-bordered w-full focus:input-primary transition-all" placeholder=ph_en %}
-                                {% if form.text_en.errors %}
-                                <label class="label">
-                                    <span class="label-text-alt text-error">{{ form.text_en.errors.0 }}</span>
-                                </label>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Japanese Tab -->
-                        <div x-show="activeTab === 'ja'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
-                            <div class="form-control w-full">
-                                <label class="label">
-                                    <span class="label-text font-bold text-base">プレースホルダーテキスト (Japanese)</span>
-                                </label>
-                                {% trans "プレースホルダーテキストを入力 (Japanese)" as ph_ja %}
-                                {% render_field form.text_ja class="input input-bordered w-full focus:input-primary transition-all" placeholder=ph_ja %}
-                                {% if form.text_ja.errors %}
-                                <label class="label">
-                                    <span class="label-text-alt text-error">{{ form.text_ja.errors.0 }}</span>
-                                </label>
-                                {% endif %}
-                            </div>
-                        </div>
-
-                        <!-- Zh-Hant Tab -->
-                        <div x-show="activeTab === 'zh-hant'" x-transition:enter="transition ease-out duration-200" x-transition:enter-start="opacity-0 translate-y-1" x-transition:enter-end="opacity-100 translate-y-0" style="display: none;">
-                            <div class="form-control w-full">
-                                <label class="label">
-                                    <span class="label-text font-bold text-base">關鍵詞內容 (Traditional Chinese)</span>
-                                </label>
-                                {% trans "輸入搜索框提示文字 (繁體中文)" as ph_tw %}
-                                {% render_field form.text_zh_hant class="input input-bordered w-full focus:input-primary transition-all" placeholder=ph_tw %}
-                                {% if form.text_zh_hant.errors %}
-                                <label class="label">
-                                    <span class="label-text-alt text-error">{{ form.text_zh_hant.errors.0 }}</span>
-                                </label>
-                                {% endif %}
-                                <label class="label">
-                                    <span class="label-text-alt text-base-content/60">{% trans "这将作为搜索框的 placeholder 属性显示。" %}</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- Hidden inputs for content and base fields -->
-                <div class="hidden">
-                    {{ form.text }} <!-- Base text -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Right Column: Sidebar -->
-    <div class="lg:col-span-1 space-y-6">
-        <!-- Publish Box -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">{% trans "发布" %}</h3>
-                
-                <div class="flex flex-col gap-3">
-                    <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
-                        <span class="material-symbols-outlined">save</span>
-                        {% trans "保存更改" %}
-                    </button>
-                    
-                    <div class="grid grid-cols-2 gap-2">
-                        <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">{% trans "保存并新增" %}</button>
-                        <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">{% trans "保存并继续" %}</button>
-                    </div>
-
-                    {% if object %}
-                    <div class="divider my-1"></div>
-                    <div class="flex justify-between items-center">
-                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">{% trans "取消" %}</a>
-                        {% blocktrans asvar delete_msg %}确定要删除关键词《{{ object.text|escapejs }}》吗？{% endblocktrans %}
-                        <button type="button" onclick="confirmDelete('{% url 'administration:searchplaceholder_delete' object.pk %}', '{{ delete_msg|escapejs }}')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
-                            {% trans "删除" %}
-                        </button>
-                    </div>
-                    {% else %}
-                    <div class="divider my-1"></div>
-                    <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">{% trans "取消" %}</a>
                     {% endif %}
+                    <!-- Multi-language Tabs -->
+                    <div x-data="translationForm"
+                         class="bg-base-100 border border-base-300 rounded-box overflow-hidden">
+                        <!-- Tab Header -->
+                        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 bg-base-50/50 px-4 pt-2">
+                            <div role="tablist" class="tabs tabs-bordered -mb-[1px]">
+                                <a role="tab"
+                                   class="tab h-10 px-4 transition-all duration-200"
+                                   :class="activeTab === 'zh-hans' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                                   @click="activeTab = 'zh-hans'">
+                                    <span class="mr-2 text-lg">🇨🇳</span>
+                                    {% trans "中文" %}
+                                </a>
+                                <a role="tab"
+                                   class="tab h-10 px-4 transition-all duration-200"
+                                   :class="activeTab === 'en' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                                   @click="activeTab = 'en'">
+                                    <span class="mr-2 text-lg">🇺🇸</span>
+                                    {% trans "English" %}
+                                </a>
+                                <a role="tab"
+                                   class="tab h-10 px-4 transition-all duration-200"
+                                   :class="activeTab === 'ja' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                                   @click="activeTab = 'ja'">
+                                    <span class="mr-2 text-lg">🇯🇵</span>
+                                    {% trans "日本語" %}
+                                </a>
+                                <a role="tab"
+                                   class="tab h-10 px-4 transition-all duration-200"
+                                   :class="activeTab === 'zh-hant' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                                   @click="activeTab = 'zh-hant'">
+                                    <span class="mr-2 text-lg">🇭🇰</span>
+                                    {% trans "繁體中文" %}
+                                </a>
+                            </div>
+                            <!-- One-click Translate Button -->
+                            <div class="mb-1">
+                                <button type="button"
+                                        class="btn btn-sm btn-ghost gap-1.5 text-primary hover:bg-primary/10 transition-colors"
+                                        @click="translate('id_text_zh_hans', { 'en': 'id_text_en', 'ja': 'id_text_ja', 'zh-hant': 'id_text_zh_hant' })"
+                                        :class="{'loading': isLoading}"
+                                        title="{% trans '自动翻译到其他语言' %}">
+                                    <span class="material-symbols-outlined text-[18px]" x-show="!isLoading">translate</span>
+                                    <span class="hidden sm:inline font-medium">{% trans "一键翻译" %}</span>
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Tab Content -->
+                        <div class="p-6">
+                            <!-- Zh-Hans Tab -->
+                            <div x-show="activeTab === 'zh-hans'"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0">
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold text-base">{% trans "关键词内容 (中文)" %} <span class="text-error">*</span></span>
+                                    </label>
+                                    {% trans "输入搜索框提示文字 (中文)" as ph_zh %}
+                                    {% render_field form.text_zh_hans class="input input-bordered w-full focus:input-primary transition-all" placeholder=ph_zh %}
+                                    {% if form.text_zh_hans.errors %}
+                                        <label class="label">
+                                            <span class="label-text-alt text-error">{{ form.text_zh_hans.errors.0 }}</span>
+                                        </label>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- English Tab -->
+                            <div x-show="activeTab === 'en'"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 style="display: none">
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold text-base">{% trans "Placeholder Text (English)" %}</span>
+                                    </label>
+                                    {% trans "Enter placeholder text (English)" as ph_en %}
+                                    {% render_field form.text_en class="input input-bordered w-full focus:input-primary transition-all" placeholder=ph_en %}
+                                    {% if form.text_en.errors %}
+                                        <label class="label">
+                                            <span class="label-text-alt text-error">{{ form.text_en.errors.0 }}</span>
+                                        </label>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- Japanese Tab -->
+                            <div x-show="activeTab === 'ja'"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 style="display: none">
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold text-base">{% trans "プレースホルダーテキスト (Japanese)" %}</span>
+                                    </label>
+                                    {% trans "プレースホルダーテキストを入力 (Japanese)" as ph_ja %}
+                                    {% render_field form.text_ja class="input input-bordered w-full focus:input-primary transition-all" placeholder=ph_ja %}
+                                    {% if form.text_ja.errors %}
+                                        <label class="label">
+                                            <span class="label-text-alt text-error">{{ form.text_ja.errors.0 }}</span>
+                                        </label>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <!-- Zh-Hant Tab -->
+                            <div x-show="activeTab === 'zh-hant'"
+                                 x-transition:enter="transition ease-out duration-200"
+                                 x-transition:enter-start="opacity-0 translate-y-1"
+                                 x-transition:enter-end="opacity-100 translate-y-0"
+                                 style="display: none">
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold text-base">{% trans "关键词内容 (繁体中文)" %}</span>
+                                    </label>
+                                    {% trans "輸入搜索框提示文字 ({% trans "繁體中文" %})" as ph_tw %}
+                                    {% render_field form.text_zh_hant class="input input-bordered w-full focus:input-primary transition-all" placeholder=ph_tw %}
+                                    {% if form.text_zh_hant.errors %}
+                                        <label class="label">
+                                            <span class="label-text-alt text-error">{{ form.text_zh_hant.errors.0 }}</span>
+                                        </label>
+                                    {% endif %}
+                                    <label class="label">
+                                        <span class="label-text-alt text-base-content/60">{% trans "这将作为搜索框的 placeholder 属性显示。" %}</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Hidden inputs for content and base fields -->
+                    <div class="hidden">
+                        {{ form.text }} <!-- Base text -->
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Status Box -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">{% trans "状态设置" %}</h3>
-                
-                <div class="form-control">
-                    <label class="label cursor-pointer justify-between">
-                        <span class="label-text font-medium">{% trans "启用显示" %}</span>
-                        {% render_field form.is_active class="toggle toggle-success" %}
-                    </label>
+        <!-- Right Column: Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Publish Box -->
+            <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
+                <div class="card-body p-4">
+                    <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">
+                        {% trans "发布" %}
+                    </h3>
+                    <div class="flex flex-col gap-3">
+                        <button type="submit"
+                                class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                            <span class="material-symbols-outlined">save</span>
+                            {% trans "保存更改" %}
+                        </button>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="submit"
+                                    name="_addanother"
+                                    class="btn btn-sm btn-ghost border-base-300">{% trans "保存并新增" %}</button>
+                            <button type="submit"
+                                    name="_continue"
+                                    class="btn btn-sm btn-ghost border-base-300">{% trans "保存并继续" %}</button>
+                        </div>
+                        {% if object %}
+                            <div class="divider my-1"></div>
+                            <div class="flex justify-between items-center">
+                                <a href="javascript:history.back()"
+                                   class="btn btn-sm btn-ghost text-base-content/60">{% trans "取消" %}</a>
+                                {% blocktrans asvar delete_msg %}确定要删除关键词《{{ object.text|escapejs }}》吗？{% endblocktrans %}
+                                <button type="button"
+                                        onclick="confirmDelete('{% url 'administration:searchplaceholder_delete' object.pk %}', '{{ delete_msg|escapejs }}')"
+                                        class="btn btn-sm btn-ghost text-error hover:bg-error/10">
+                                    {% trans "删除" %}
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="divider my-1"></div>
+                            <a href="javascript:history.back()"
+                               class="btn btn-sm btn-ghost text-base-content/60 w-full">{% trans "取消" %}</a>
+                        {% endif %}
+                    </div>
                 </div>
-
-                <div class="divider my-2"></div>
-
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-medium">{% trans "排序权重" %}</span>
-                    </label>
-                    {% render_field form.order class="input input-bordered w-full focus:input-primary transition-all" type="number" %}
-                    <label class="label">
-                        <span class="label-text-alt text-base-content/60">{% trans "数字越小越靠前 (默认 0)" %}</span>
-                    </label>
+            </div>
+            <!-- Status Box -->
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+                <div class="card-body p-4">
+                    <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">
+                        {% trans "状态设置" %}
+                    </h3>
+                    <div class="form-control">
+                        <label class="label cursor-pointer justify-between">
+                            <span class="label-text font-medium">{% trans "启用显示" %}</span>
+                            {% render_field form.is_active class="toggle toggle-success" %}
+                        </label>
+                    </div>
+                    <div class="divider my-2"></div>
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text font-medium">{% trans "排序权重" %}</span>
+                        </label>
+                        {% render_field form.order class="input input-bordered w-full focus:input-primary transition-all" type="number" %}
+                        <label class="label">
+                            <span class="label-text-alt text-base-content/60">{% trans "数字越小越靠前 (默认 0)" %}</span>
+                        </label>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
 {% endblock %}

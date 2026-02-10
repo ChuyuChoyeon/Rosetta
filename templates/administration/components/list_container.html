@@ -1,71 +1,56 @@
 {% load capture_tags %}
 {% load i18n %}
-
 <div class="bg-base-100 rounded-2xl border border-base-content/5 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-300">
     <!-- Toolbar: Title & Search -->
     <div class="p-4 border-b border-base-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-base-100/50 backdrop-blur-sm">
         <div class="flex items-center gap-3">
             {% if icon %}
-            <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
-                <span class="material-symbols-outlined text-xl">{{ icon }}</span>
-            </div>
+                <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shadow-inner">
+                    <span class="material-symbols-outlined text-xl">{{ icon }}</span>
+                </div>
             {% endif %}
             <div>
                 <h2 class="font-bold text-base">{{ title }}</h2>
-                {% if subtitle %}
-                <p class="text-xs text-base-content/50">{{ subtitle }}</p>
-                {% endif %}
+                {% if subtitle %}<p class="text-xs text-base-content/50">{{ subtitle }}</p>{% endif %}
             </div>
         </div>
-
         <!-- Search Form -->
         {% if search_url %}
-        <form action="{{ search_url }}" method="get" class="w-full sm:w-auto relative group">
-            <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors text-lg">search</span>
-            {% for key, value in request.GET.items %}
-                {% if key != 'q' and key != 'page' %}
-                <input type="hidden" name="{{ key }}" value="{{ value }}">
-                {% endif %}
-            {% endfor %}
-            <input type="text" 
-                   name="q" 
-                   value="{{ request.GET.q }}" 
-                   placeholder="{% trans '搜索...' %}" 
-                   class="input input-sm input-bordered w-full sm:w-64 pl-10 focus:input-primary transition-all rounded-lg bg-base-200/50 focus:bg-base-100" 
-            />
-        </form>
+            <form action="{{ search_url }}"
+                  method="get"
+                  class="w-full sm:w-auto relative group">
+                <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40 group-focus-within:text-primary transition-colors text-lg">search</span>
+                {% for key, value in request.GET.items %}
+                    {% if key != 'q' and key != 'page' %}<input type="hidden" name="{{ key }}" value="{{ value }}">{% endif %}
+                {% endfor %}
+                <input type="text"
+                       name="q"
+                       value="{{ request.GET.q }}"
+                       placeholder="{% trans '搜索...' %}"
+                       class="input input-sm input-bordered w-full sm:w-64 pl-10 focus:input-primary transition-all rounded-lg bg-base-200/50 focus:bg-base-100" />
+            </form>
         {% endif %}
     </div>
-
     <!-- Filter Tabs (Optional) -->
     {% if filter_tabs %}
-    <div class="px-4 py-3 border-b border-base-200 bg-base-100/30 overflow-x-auto">
-        <div class="tabs tabs-boxed bg-base-200/50 p-1 gap-1 inline-flex rounded-xl">
-            {{ filter_tabs }}
+        <div class="px-4 py-3 border-b border-base-200 bg-base-100/30 overflow-x-auto">
+            <div class="tabs tabs-boxed bg-base-200/50 p-1 gap-1 inline-flex rounded-xl">{{ filter_tabs }}</div>
         </div>
-    </div>
     {% endif %}
-
     <!-- Bulk Actions (Optional) -->
-    <div id="bulk-actions" class="hidden bg-primary/5 p-3 px-4 flex justify-between items-center border-b border-primary/10 animate-in slide-in-from-top-2 duration-200">
+    <div id="bulk-actions"
+         class="hidden bg-primary/5 p-3 px-4 flex justify-between items-center border-b border-primary/10 animate-in slide-in-from-top-2 duration-200">
         <div class="flex items-center gap-2">
             <div class="w-1 h-4 rounded-full bg-primary"></div>
             <span class="text-sm font-medium text-primary"><span id="selected-count" class="font-bold text-lg">0</span> {% trans "项已选择" %}</span>
         </div>
-        <div class="flex gap-2">
-            {{ bulk_actions }}
-        </div>
+        <div class="flex gap-2">{{ bulk_actions }}</div>
     </div>
-
     <!-- Main Content (Table) -->
-    <div class="overflow-x-auto min-h-[400px]">
-        {{ content }}
-    </div>
-
+    <div class="overflow-x-auto min-h-[400px]">{{ content }}</div>
     <!-- Pagination -->
     {% include "administration/components/pagination.html" %}
 </div>
-
 <script>
     // Common Bulk Action Scripts
     function toggleAll(source) {

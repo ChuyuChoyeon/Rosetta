@@ -6,29 +6,21 @@ from io import StringIO
 
 import django
 import psutil
-from faker import Faker
 from django.conf import settings
-from django.contrib import messages
 from django.contrib.auth import get_user_model
-from django.contrib.auth.decorators import login_required, user_passes_test
-from django.core.cache import cache
+from django.contrib.auth.decorators import user_passes_test
 from django.core.files.storage import default_storage
-from django.core.mail import send_mail
 from django.core.management import call_command
 from django.db import connection
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect, render
-from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 from django.views.generic import DetailView
 from deep_translator import GoogleTranslator
 
 from blog.models import Category, Comment, Post
-from core.services import generate_mock_data
 from .models import Page
 from constance import config
-from meta.views import Meta
 
 
 """
@@ -47,7 +39,7 @@ from meta.views import Meta
 def health_check(request):
     """
     健康检查 API。
-    
+
     用于负载均衡器或监控系统检查应用是否存活。
     返回当前的服务器时间戳。
     """
@@ -58,21 +50,21 @@ def health_check(request):
 def robots_txt(request):
     """
     动态生成 robots.txt 文件。
-    
+
     优先使用后台配置的内容，如果没有配置则使用默认规则。
     """
     from constance import config
-    
+
     # 获取后台配置
     custom_robots = getattr(config, "SEO_ROBOTS_TXT", "")
-    
+
     if custom_robots and custom_robots.strip():
         content = custom_robots
         # 确保 Sitemap 存在 (如果用户没写，自动追加吗？还是完全信任用户？)
         # 既然是自定义，通常完全信任用户。但为了便利，如果没写 Sitemap 且我们有，可以考虑提示。
         # 这里我们简单处理：如果用户没写 Sitemap，我们自动追加 Sitemap 地址
         if "Sitemap:" not in content:
-             content += f"\nSitemap: {request.scheme}://{request.get_host()}/sitemap.xml"
+            content += f"\nSitemap: {request.scheme}://{request.get_host()}/sitemap.xml"
     else:
         # 默认规则
         lines = [
@@ -83,7 +75,7 @@ def robots_txt(request):
             f"Sitemap: {request.scheme}://{request.get_host()}/sitemap.xml",
         ]
         content = "\n".join(lines)
-        
+
     return HttpResponse(content, content_type="text/plain")
 
 
@@ -91,13 +83,13 @@ def robots_txt(request):
 def upload_image(request):
     """
     通用图片上传 API。
-    
+
     接收一个名为 'image' 的文件，将其保存到默认存储后端，并返回访问 URL。
     通常用于 Markdown 编辑器或富文本编辑器的图片上传功能。
-    
+
     权限：
         仅限已登录用户。
-    
+
     返回:
         JSON: {"url": "..."} 或错误信息
     """
@@ -107,9 +99,9 @@ def upload_image(request):
         return JsonResponse({"error": "No image provided"}, status=400)
 
     image = request.FILES["image"]
-    
+
     # 1. 检查扩展名白名单
-    allowed_extensions = {'.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp'}
+    allowed_extensions = {".jpg", ".jpeg", ".png", ".gif", ".webp", ".bmp"}
     ext = os.path.splitext(image.name)[1].lower()
     if ext not in allowed_extensions:
         return JsonResponse({"error": "Unsupported file extension"}, status=400)
@@ -117,18 +109,23 @@ def upload_image(request):
     # 2. 检查文件头 (Magic Bytes) 防止伪造
     try:
         import magic
+
         # 读取前 2KB 用于检测
         first_chunk = image.read(2048)
-        image.seek(0) # 重置指针
-        
+        image.seek(0)  # 重置指针
+
         mime_type = magic.from_buffer(first_chunk, mime=True)
         if not mime_type.startswith("image/"):
-             return JsonResponse({"error": "Invalid file content (not an image)"}, status=400)
-             
+            return JsonResponse(
+                {"error": "Invalid file content (not an image)"}, status=400
+            )
+
         # 额外检查：排除 SVG (XSS 风险)
         if "svg" in mime_type:
-             return JsonResponse({"error": "SVG images are not allowed for security reasons"}, status=400)
-             
+            return JsonResponse(
+                {"error": "SVG images are not allowed for security reasons"}, status=400
+            )
+
     except (ImportError, AttributeError):
         # 如果没有安装 python-magic，回退到简单的 Content-Type 检查，但记录警告
         # 生产环境强烈建议安装 python-magic
@@ -150,13 +147,13 @@ def upload_image(request):
 def translate_text(request):
     """
     文本翻译 API。
-    
+
     使用 deep_translator 调用 Google 翻译接口，将文本翻译为指定语言。
     主要用于后台自动填充多语言字段。
-    
+
     权限：
         仅限管理员 (Staff) 用户。
-        
+
     参数 (JSON):
         text: 待翻译的文本
         target_langs: 目标语言代码列表 (例如 ['en', 'zh-hant'])
@@ -165,27 +162,31 @@ def translate_text(request):
         data = json.loads(request.body)
         text = data.get("text", "")
         target_langs = data.get("target_langs", [])
-        
+
         if not text or not target_langs:
-            return JsonResponse({"error": "Missing text or target languages"}, status=400)
-        
+            return JsonResponse(
+                {"error": "Missing text or target languages"}, status=400
+            )
+
         translations = {}
-        
+
         for lang in target_langs:
             try:
                 # 映射 Django 语言代码到 Google 翻译支持的代码
                 dest_lang = lang
-                if lang == 'zh-hant':
-                    dest_lang = 'zh-TW'
-                elif lang == 'zh-hans':
-                    dest_lang = 'zh-CN'
-                
+                if lang == "zh-hant":
+                    dest_lang = "zh-TW"
+                elif lang == "zh-hans":
+                    dest_lang = "zh-CN"
+
                 # 强制源语言为中文 (zh-CN)，因为目前需求主要是从中文翻译到其他语言
-                translated_text = GoogleTranslator(source='zh-CN', target=dest_lang).translate(text)
+                translated_text = GoogleTranslator(
+                    source="zh-CN", target=dest_lang
+                ).translate(text)
                 translations[lang] = translated_text
             except Exception as e:
                 translations[lang] = f"Translation error: {str(e)}"
-        
+
         return JsonResponse({"translations": translations})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)
@@ -209,7 +210,7 @@ class PageView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        
+
         # 获取全站 SEO 配置信息
         site_name = getattr(config, "SITE_NAME", "Rosetta Blog")
         site_desc = getattr(config, "SITE_DESCRIPTION", "")
@@ -218,22 +219,23 @@ class PageView(DetailView):
             item.strip() for item in str(site_keywords).split(",") if item.strip()
         ]
         page = self.object
-        
+
         # 尝试将页面内容作为模板进行渲染
         # 这样管理员在后台编辑页面内容时，可以插入 {{ config.SITE_NAME }} 等变量
         if page and page.content:
             from django.template import Template, Context
+
             try:
                 # 创建一个包含 config 的简单上下文
                 # 注意：这里不会包含 request 等其他上下文变量，仅用于简单的变量替换
                 t = Template(page.content)
-                c = Context({'config': config})
-                context['rendered_content'] = t.render(c)
+                c = Context({"config": config})
+                context["rendered_content"] = t.render(c)
             except Exception:
                 # 如果渲染出错（例如语法错误），则回退到原始内容
-                context['rendered_content'] = page.content
+                context["rendered_content"] = page.content
         else:
-             context['rendered_content'] = ""
+            context["rendered_content"] = ""
 
         context.update(
             {
@@ -250,7 +252,7 @@ class PageView(DetailView):
 def debug_api_migrations(request):
     """
     调试 API：查看待应用的数据库迁移。
-    
+
     仅超级用户可用。用于在前端面板快速查看数据库状态。
     """
     if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
@@ -264,10 +266,10 @@ def debug_api_migrations(request):
         connection.prepare_database()
         executor = MigrationExecutor(connection)
         targets = executor.loader.graph.leaf_nodes()
-        
+
         # 计算迁移计划
         plan = executor.migration_plan(targets)
-        
+
         pending = [
             {"app": migration.app_label, "name": migration.name}
             for migration, backwards in plan
@@ -282,7 +284,7 @@ def debug_api_migrations(request):
 def debug_api_stats(request):
     """
     调试 API：获取系统核心统计数据。
-    
+
     仅超级用户可用。返回用户、分类、文章、评论的总数，以及数据库连接状态。
     """
     if not getattr(settings, "DEBUG_TOOL_ENABLED", False):
@@ -312,7 +314,7 @@ def debug_api_stats(request):
 def debug_api_system(request):
     """
     调试 API：获取服务器系统环境信息。
-    
+
     仅超级用户可用。返回 Python/Django 版本、已安装的第三方应用列表、
     以及服务器的 CPU、内存、磁盘使用情况（依赖 psutil 库）。
     """
@@ -373,7 +375,7 @@ def debug_api_system(request):
 def debug_execute_command(request):
     """
     调试 API：执行受限的 Django 管理命令。
-    
+
     仅超级用户可用。出于安全考虑，仅支持白名单内的无害或只读命令。
     用于在前端面板快速执行一些维护操作（如检查配置、清除 Session）。
     """

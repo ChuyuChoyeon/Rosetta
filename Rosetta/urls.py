@@ -5,7 +5,6 @@ Rosetta 全局 URL 路由配置。
 包含管理后台、用户认证、核心业务逻辑及开发环境辅助工具的路由定义。
 """
 
-from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
@@ -16,7 +15,7 @@ from django.conf.urls.i18n import i18n_patterns
 # ------------------------------------------------------------------------------
 # 非多语言路由 (Non-i18n URLs)
 urlpatterns = [
-    path("i18n/", include("django.conf.urls.i18n")), # 语言切换 endpoint
+    path("i18n/", include("django.conf.urls.i18n")),  # 语言切换 endpoint
 ]
 
 # 多语言路由 (i18n URLs)
@@ -38,7 +37,6 @@ urlpatterns += i18n_patterns(
     # 注意：core 和 blog 的路由包含空路径 ""，应放在特定前缀路由之后
     path("", include("core.urls")),  # 首页、静态页、通用功能
     path("", include("blog.urls")),  # 博客文章、分类、标签检索
-    
     prefix_default_language=False,
 )
 

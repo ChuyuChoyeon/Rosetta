@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import UserPassesTestMixin
-from django.contrib.admin.models import LogEntry, ADDITION, CHANGE, DELETION
+from django.contrib.admin.models import LogEntry
 from django.contrib.contenttypes.models import ContentType
 from django.utils.encoding import force_str
 from django.conf import settings
@@ -7,6 +7,7 @@ from django.http import Http404
 import logging
 
 logger = logging.getLogger(__name__)
+
 
 class AuditLogMixin:
     """

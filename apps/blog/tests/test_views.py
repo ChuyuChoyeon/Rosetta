@@ -9,7 +9,7 @@ User = get_user_model()
 
 class BlogPostTests(TestCase):
     def setUp(self):
-        translation.activate('zh-hans')
+        translation.activate("zh-hans")
         self.client = Client()
         self.user = User.objects.create_user(username="author", password="password")
         self.other_user = User.objects.create_user(
@@ -127,7 +127,7 @@ class BlogPostTests(TestCase):
         self.assertContains(response, "您没有权限删除此评论")
 
     def test_delete_comment_staff(self):
-        staff_user = User.objects.create_user(
+        User.objects.create_user(
             username="staff", password="password", is_staff=True
         )
         self.client.login(username="staff", password="password")
@@ -135,7 +135,7 @@ class BlogPostTests(TestCase):
             post=self.public_post, user=self.user, content="User comment"
         )
         delete_url = reverse("delete_comment", kwargs={"pk": comment.pk})
-        response = self.client.post(delete_url, follow=True)
+        self.client.post(delete_url, follow=True)
         self.assertFalse(Comment.objects.filter(pk=comment.pk).exists())
 
     def test_comment_mentions_notification(self):

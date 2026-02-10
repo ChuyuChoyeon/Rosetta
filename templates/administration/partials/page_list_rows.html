@@ -1,73 +1,86 @@
 {% load i18n %}
 {% for page in pages %}
-<tr class="hover">
-    <th class="pl-6">
-        <label>
-            <input type="checkbox" name="selected_ids" value="{{ page.id }}" class="checkbox checkbox-xs rounded-sm row-checkbox" onclick="updateBulkToolbar()" />
-        </label>
-    </th>
-    <th class="font-mono text-xs opacity-50 hidden md:table-cell">{{ page.id }}</th>
-    <td>
-        <div class="min-w-0">
-            <a href="{% url 'administration:page_edit' page.pk %}" class="font-bold text-base hover:text-primary transition-colors block truncate max-w-md" title="{{ page.title }}">
-                {{ page.title }}
-            </a>
-            <div class="text-xs text-base-content/50 font-mono truncate lg:hidden">{{ page.slug }}</div>
-            <div class="text-xs text-base-content/50 mt-1 lg:hidden">{{ page.created_at|date:"Y-m-d" }}</div>
-        </div>
-    </td>
-    <td class="font-mono text-sm opacity-70 hidden lg:table-cell">{{ page.slug }}</td>
-    <td class="hidden sm:table-cell whitespace-nowrap">
-        <div class="flex justify-center">
-            {% if page.status == 'published' %}
-            <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/5 border-success/30">
-                <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
-                {% trans "已发布" %}
+    <tr class="hover">
+        <th class="pl-6">
+            <label>
+                <input type="checkbox"
+                       name="selected_ids"
+                       value="{{ page.id }}"
+                       class="checkbox checkbox-xs rounded-sm row-checkbox"
+                       onclick="updateBulkToolbar()" />
+            </label>
+        </th>
+        <th class="font-mono text-xs opacity-50 hidden md:table-cell">{{ page.id }}</th>
+        <td>
+            <div class="min-w-0">
+                <a href="{% url 'administration:page_edit' page.pk %}"
+                   class="font-bold text-base hover:text-primary transition-colors block truncate max-w-md"
+                   title="{{ page.title }}">{{ page.title }}</a>
+                <div class="text-xs text-base-content/50 font-mono truncate lg:hidden">{{ page.slug }}</div>
+                <div class="text-xs text-base-content/50 mt-1 lg:hidden">{{ page.created_at|date:"Y-m-d" }}</div>
             </div>
-            {% else %}
-            <div class="badge badge-warning badge-sm gap-1 badge-outline bg-warning/5 border-warning/30">
-                <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
-                {% trans "草稿" %}
+        </td>
+        <td class="font-mono text-sm opacity-70 hidden lg:table-cell">{{ page.slug }}</td>
+        <td class="hidden sm:table-cell whitespace-nowrap">
+            <div class="flex justify-center">
+                {% if page.status == 'published' %}
+                    <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/5 border-success/30">
+                        <span class="w-1.5 h-1.5 rounded-full bg-success"></span>
+                        {% trans "已发布" %}
+                    </div>
+                {% else %}
+                    <div class="badge badge-warning badge-sm gap-1 badge-outline bg-warning/5 border-warning/30">
+                        <span class="w-1.5 h-1.5 rounded-full bg-warning"></span>
+                        {% trans "草稿" %}
+                    </div>
+                {% endif %}
             </div>
-            {% endif %}
-        </div>
-    </td>
-    <td class="text-sm opacity-70 hidden lg:table-cell">{{ page.created_at|date:"Y-m-d" }}</td>
-    <td class="text-right pr-4">
-        <div class="join">
-            <a href="/{{ page.slug }}/" target="_blank" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '查看' %}">
-                <span class="material-symbols-outlined text-base">visibility</span>
-            </a>
-            <a href="{% url 'administration:page_edit' page.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '编辑' %}">
-                <span class="material-symbols-outlined text-base">edit</span>
-            </a>
-            <form action="{% url 'administration:page_duplicate' page.pk %}" method="post" class="inline">
-                {% csrf_token %}
-                <button type="button" onclick="const btn = this; showConfirmModal('{% trans "复制页面"|escapejs %}', '{% trans "确定要复制这个页面吗？"|escapejs %}', () => btn.closest('form').submit())" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '复制' %}">
-                    <span class="material-symbols-outlined text-base">content_copy</span>
+        </td>
+        <td class="text-sm opacity-70 hidden lg:table-cell">{{ page.created_at|date:"Y-m-d" }}</td>
+        <td class="text-right pr-4">
+            <div class="join">
+                <a href="/{{ page.slug }}/"
+                   target="_blank"
+                   class="btn btn-ghost btn-xs join-item tooltip tooltip-left"
+                   data-tip="{% trans '查看' %}">
+                    <span class="material-symbols-outlined text-base">visibility</span>
+                </a>
+                <a href="{% url 'administration:page_edit' page.pk %}"
+                   class="btn btn-ghost btn-xs join-item tooltip tooltip-left"
+                   data-tip="{% trans '编辑' %}">
+                    <span class="material-symbols-outlined text-base">edit</span>
+                </a>
+                <form action="{% url 'administration:page_duplicate' page.pk %}"
+                      method="post"
+                      class="inline">
+                    {% csrf_token %}
+                    <button type="button"
+                            onclick="const btn = this; showConfirmModal('{% trans "复制页面"|escapejs %}', '{% trans "确定要复制这个页面吗？"|escapejs %}', () => btn.closest('form').submit())"
+                            class="btn btn-ghost btn-xs join-item tooltip tooltip-left"
+                            data-tip="{% trans '复制' %}">
+                        <span class="material-symbols-outlined text-base">content_copy</span>
+                    </button>
+                </form>
+                <button type="button"
+                        hx-post="{% url 'administration:page_delete' page.pk %}"
+                        hx-trigger="confirmed"
+                        hx-target="closest tr"
+                        hx-swap="outerHTML swap:0.5s"
+                        onclick="confirmHtmx(this, '{% blocktrans with title=page.title|escapejs %}确定要删除页面“{{ title }}”吗？{% endblocktrans %}')"
+                        class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left"
+                        data-tip="{% trans '删除' %}">
+                    <span class="material-symbols-outlined text-base">delete</span>
                 </button>
-            </form>
-            <button type="button" 
-                    hx-post="{% url 'administration:page_delete' page.pk %}"
-                    hx-trigger="confirmed"
-                    hx-target="closest tr"
-                    hx-swap="outerHTML swap:0.5s"
-                    onclick="confirmHtmx(this, '{% blocktrans with title=page.title|escapejs %}确定要删除页面“{{ title }}”吗？{% endblocktrans %}')"
-                    class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" 
-                    data-tip="{% trans '删除' %}">
-                <span class="material-symbols-outlined text-base">delete</span>
-            </button>
-        </div>
-    </td>
-</tr>
+            </div>
+        </td>
+    </tr>
 {% empty %}
-<tr>
-    <td colspan="7" class="text-center py-10 text-base-content/50">
-        <div class="flex flex-col items-center gap-2">
-            <span class="material-symbols-outlined text-4xl opacity-20">description</span>
-            <span>{% trans "暂无页面" %}</span>
-        </div>
-    </td>
-</tr>
+    <tr>
+        <td colspan="7" class="text-center py-10 text-base-content/50">
+            <div class="flex flex-col items-center gap-2">
+                <span class="material-symbols-outlined text-4xl opacity-20">description</span>
+                <span>{% trans "暂无页面" %}</span>
+            </div>
+        </td>
+    </tr>
 {% endfor %}
-

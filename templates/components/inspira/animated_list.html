@@ -1,10 +1,6 @@
 <!-- Inspira UI: Animated List -->
-<div class="space-y-4 {{ extra_classes }}" 
-     x-data 
-     x-init="$el.querySelectorAll(':scope > *').forEach((el, i) => {
-         el.classList.add('animate-in', 'slide-in-from-bottom', 'fade-in', 'duration-500', 'fill-mode-both');
-         el.style.animationDelay = `${i * 100}ms`;
-         el.style.animationFillMode = 'both';
-     })">
+<div class="space-y-4 {{ extra_classes }}"
+     x-data
+     x-init="$el.querySelectorAll(':scope > *').forEach((el, i) => { el.classList.add('animate-in', 'slide-in-from-bottom', 'fade-in', 'duration-500', 'fill-mode-both'); el.style.animationDelay = `${i * 100}ms`; el.style.animationFillMode = 'both'; })">
     {{ slot_content }}
 </div>

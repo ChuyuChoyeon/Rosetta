@@ -1,185 +1,152 @@
 {% extends "administration/base.html" %}
 {% load capture_tags static i18n %}
-
 {% block title %}
-{% trans "编辑页面" as default_title %}
-{{ title|default:default_title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}
+    {% trans "编辑页面" as default_title %}
+    {% trans " - Rosetta Dashboard" as admin_suffix_default %}
+    {{ title|default:default_title }}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
 {% endblock %}
-
-{% block extra_head %}
-<!-- ByteMD 样式由 js/editor.js 动态注入和管理 -->
-{% endblock %}
-
+{% block extra_head %}<!-- ByteMD 样式由 js/editor.js 动态注入和管理 -->{% endblock %}
 {% block content %}
     <!-- Header -->
     {% trans "编辑页面" as default_title %}
     {% trans "编辑页面内容和设置" as default_subtitle %}
     {% include "administration/components/header.html" with title=title|default:default_title subtitle=default_subtitle breadcrumbs=None %}
-
-    <form method="post" enctype="multipart/form-data" class="w-full" x-data="translationForm" novalidate>
+    <form method="post"
+          enctype="multipart/form-data"
+          class="w-full"
+          x-data="translationForm"
+          novalidate>
         {% csrf_token %}
-        
         {% if form.errors %}
-        <div role="alert" class="alert border border-error/20 bg-error/5 text-error mb-6">
-            <div class="flex items-start gap-4">
-                <span class="material-symbols-outlined pt-1">error</span>
-                <div class="w-full">
-                    <h3 class="font-bold">{% trans "请修正以下错误" %}</h3>
-                    <ul class="mt-2 list-disc list-inside text-sm opacity-90">
-                        {% for field in form %}
-                            {% for error in field.errors %}
-                                <li>{{ field.label }}: {{ error }}</li>
+            <div role="alert"
+                 class="alert border border-error/20 bg-error/5 text-error mb-6">
+                <div class="flex items-start gap-4">
+                    <span class="material-symbols-outlined pt-1">error</span>
+                    <div class="w-full">
+                        <h3 class="font-bold">{% trans "请修正以下错误" %}</h3>
+                        <ul class="mt-2 list-disc list-inside text-sm opacity-90">
+                            {% for field in form %}
+                                {% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}
                             {% endfor %}
-                        {% endfor %}
-                        {% for error in form.non_field_errors %}
-                            <li>{{ error }}</li>
-                        {% endfor %}
-                    </ul>
+                            {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                        </ul>
+                    </div>
                 </div>
             </div>
-        </div>
         {% endif %}
-
         <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
             <!-- Main Content (Left Column - 75%) -->
             <div class="lg:col-span-3 space-y-6">
-                
                 <!-- Main Info Card -->
                 {% captureas main_card_content %}
-                        <!-- Multi-language Tabs -->
-                        <div class="bg-base-100 border border-base-300 rounded-box overflow-hidden mb-6">
-                            <!-- Tab Header -->
-                            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 bg-base-50/50 px-4 pt-2">
-                                <div role="tablist" class="tabs tabs-bordered -mb-[1px]">
-                                    <a role="tab" class="tab h-10 px-4 transition-all duration-200"
-                                       :class="activeTab === 'zh-hans' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
-                                       @click="activeTab = 'zh-hans'">
-                                        <span class="mr-2 text-lg">🇨🇳</span>
-                                        {% trans "中文" %}
-                                    </a>
-                                    <a role="tab" class="tab h-10 px-4 transition-all duration-200"
-                                       :class="activeTab === 'en' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
-                                       @click="activeTab = 'en'">
-                                        <span class="mr-2 text-lg">🇺🇸</span>
-                                        English
-                                    </a>
-                                    <a role="tab" class="tab h-10 px-4 transition-all duration-200"
-                                       :class="activeTab === 'ja' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
-                                       @click="activeTab = 'ja'">
-                                        <span class="mr-2 text-lg">🇯🇵</span>
-                                        日本語
-                                    </a>
-                                    <a role="tab" class="tab h-10 px-4 transition-all duration-200"
-                                       :class="activeTab === 'zh-hant' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
-                                       @click="activeTab = 'zh-hant'">
-                                        <span class="mr-2 text-lg">🇭🇰</span>
-                                        繁體中文
-                                    </a>
-                                </div>
-
-                                <!-- One-click Translate Button -->
-                                <div class="mb-1">
-                                    <button type="button" 
-                                            class="btn btn-sm btn-ghost gap-1.5 text-primary hover:bg-primary/10 transition-colors"
-                                            @click="translate('id_title_zh_hans', {
-                                                'en': 'id_title_en',
-                                                'ja': 'id_title_ja',
-                                                'zh-hant': 'id_title_zh_hant'
-                                            });
-                                            translate('id_content_zh_hans', {
-                                                'en': 'id_content_en',
-                                                'ja': 'id_content_ja',
-                                                'zh-hant': 'id_content_zh_hant'
-                                            })"
-                                            :class="{'loading': isLoading}"
-                                            title="{% trans '自动翻译到其他语言' %}">
-                                        <span class="material-symbols-outlined text-[18px]" x-show="!isLoading">translate</span>
-                                        <span class="hidden sm:inline font-medium">{% trans "一键翻译" %}</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <!-- Tab Content -->
-                            <div class="p-6">
-                                <!-- Zh-Hans Tab -->
-                                <div x-show="activeTab === 'zh-hans'">
-                                    <div class="form-control w-full">
-                                        <label class="label">
-                                            <span class="label-text font-bold text-lg">{% trans "页面标题 (中文)" %}</span>
-                                        </label>
-                                        {{ form.title_zh_hans }}
-                                        {% if form.title_zh_hans.errors %}
-                                        <label class="label">
-                                            <span class="label-text-alt text-error">{{ form.title_zh_hans.errors.0 }}</span>
-                                        </label>
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <!-- English Tab -->
-                                <div x-show="activeTab === 'en'" style="display: none;">
-                                    <div class="form-control w-full">
-                                        <label class="label">
-                                            <span class="label-text font-bold text-lg">{% trans "Page Title (English)" %}</span>
-                                        </label>
-                                        {{ form.title_en }}
-                                        {% if form.title_en.errors %}
-                                        <label class="label">
-                                            <span class="label-text-alt text-error">{{ form.title_en.errors.0 }}</span>
-                                        </label>
-                                        {% endif %}
-                                    </div>
-                                </div>
-
-                                <!-- Japanese Tab -->
-                                <div x-show="activeTab === 'ja'" style="display: none;">
-                                    <div class="form-control w-full">
-                                        <label class="label">
-                                            <span class="label-text font-bold text-lg">{% trans "ページタイトル (Japanese)" %}</span>
-                                        </label>
-                                        {{ form.title_ja }}
-                                    </div>
-                                </div>
-
-                                <!-- Zh-Hant Tab -->
-                                <div x-show="activeTab === 'zh-hant'" style="display: none;">
-                                    <div class="form-control w-full">
-                                        <label class="label">
-                                            <span class="label-text font-bold text-lg">{% trans "頁面標題 (Traditional Chinese)" %}</span>
-                                        </label>
-                                        {{ form.title_zh_hant }}
-                                    </div>
-                                </div>
+                <!-- Multi-language Tabs -->
+                <div class="bg-base-100 border border-base-300 rounded-box overflow-hidden mb-6">
+                    <!-- Tab Header -->
+                    <div class="flex flex-wrap items-center justify-between gap-2 border-b border-base-200 bg-base-50/50 px-4 pt-2">
+                        <div role="tablist" class="tabs tabs-bordered -mb-[1px]">
+                            <a role="tab"
+                               class="tab h-10 px-4 transition-all duration-200"
+                               :class="activeTab === 'zh-hans' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                               @click="activeTab = 'zh-hans'">
+                                <span class="mr-2 text-lg">🇨🇳</span>
+                                {% trans "中文" %}
+                            </a>
+                            <a role="tab"
+                               class="tab h-10 px-4 transition-all duration-200"
+                               :class="activeTab === 'en' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                               @click="activeTab = 'en'">
+                                <span class="mr-2 text-lg">🇺🇸</span>
+                                {% trans "English" %}
+                            </a>
+                            <a role="tab"
+                               class="tab h-10 px-4 transition-all duration-200"
+                               :class="activeTab === 'ja' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                               @click="activeTab = 'ja'">
+                                <span class="mr-2 text-lg">🇯🇵</span>
+                                {% trans "日本語" %}
+                            </a>
+                            <a role="tab"
+                               class="tab h-10 px-4 transition-all duration-200"
+                               :class="activeTab === 'zh-hant' ? 'tab-active border-primary text-primary font-bold bg-base-100' : 'hover:text-base-content/80'"
+                               @click="activeTab = 'zh-hant'">
+                                <span class="mr-2 text-lg">🇭🇰</span>
+                                {% trans "繁體中文" %}
+                            </a>
+                        </div>
+                        <!-- One-click Translate Button -->
+                        <div class="mb-1">
+                            <button type="button"
+                                    class="btn btn-sm btn-ghost gap-1.5 text-primary hover:bg-primary/10 transition-colors"
+                                    @click="translate('id_title_zh_hans', { 'en': 'id_title_en', 'ja': 'id_title_ja', 'zh-hant': 'id_title_zh_hant' }); translate('id_content_zh_hans', { 'en': 'id_content_en', 'ja': 'id_content_ja', 'zh-hant': 'id_content_zh_hant' })"
+                                    :class="{'loading': isLoading}"
+                                    title="{% trans '自动翻译到其他语言' %}">
+                                <span class="material-symbols-outlined text-[18px]" x-show="!isLoading">translate</span>
+                                <span class="hidden sm:inline font-medium">{% trans "一键翻译" %}</span>
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Tab Content -->
+                    <div class="p-6">
+                        <!-- Zh-Hans Tab -->
+                        <div x-show="activeTab === 'zh-hans'">
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold text-lg">{% trans "页面标题 (中文)" %}</span>
+                                </label>
+                                {{ form.title_zh_hans }}
+                                {% if form.title_zh_hans.errors %}
+                                    <label class="label">
+                                        <span class="label-text-alt text-error">{{ form.title_zh_hans.errors.0 }}</span>
+                                    </label>
+                                {% endif %}
                             </div>
                         </div>
-
-                        <!-- Editor (Content) -->
-                        <div class="form-control w-full mt-6"
-                             x-init="$watch('activeTab', (value, oldValue) => {
-                                 // Load new content
-                                 if (window.bytemdEditor && value) {
-                                     const newInputId = 'id_content_' + value.replace('-', '_');
-                                     const newInput = document.getElementById(newInputId);
-                                     if (newInput) {
-                                         // Update the target input for real-time syncing FIRST
-                                         if (window.bytemdEditor.setTargetInput) {
-                                             window.bytemdEditor.setTargetInput(newInputId);
-                                         }
-                                         // Update editor content
-                                         window.bytemdEditor.$set({ value: newInput.value });
-                                     }
-                                 }
-                             })">
-                            <label class="label flex justify-between items-center">
-                                <span class="label-text font-bold text-lg">
-                                    <span x-text="{'zh-hans': '{% trans "内容 (中文)" %}', 'en': '{% trans "Content (English)" %}', 'ja': '{% trans "内容 (Japanese)" %}', 'zh-hant': '{% trans "內容 (Traditional Chinese)" %}'}[activeTab]"></span>
-                                </span>
-                            </label>
-                            
-                            <div id="editor" class="bg-base-100 border border-base-200 rounded-lg overflow-hidden min-h-[500px]"></div>
-                            
-                            <!-- Initialize Editor -->
-                            <script>
+                        <!-- English Tab -->
+                        <div x-show="activeTab === 'en'" style="display: none;">
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold text-lg">{% trans "Page Title (English)" %}</span>
+                                </label>
+                                {{ form.title_en }}
+                                {% if form.title_en.errors %}
+                                    <label class="label">
+                                        <span class="label-text-alt text-error">{{ form.title_en.errors.0 }}</span>
+                                    </label>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <!-- Japanese Tab -->
+                        <div x-show="activeTab === 'ja'" style="display: none;">
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold text-lg">{% trans "ページタイトル (Japanese)" %}</span>
+                                </label>
+                                {{ form.title_ja }}
+                            </div>
+                        </div>
+                        <!-- Zh-Hant Tab -->
+                        <div x-show="activeTab === 'zh-hant'" style="display: none;">
+                            <div class="form-control w-full">
+                                <label class="label">
+                                    <span class="label-text font-bold text-lg">{% trans "頁面標題 (Traditional Chinese)" %}</span>
+                                </label>
+                                {{ form.title_zh_hant }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Editor (Content) -->
+                <div class="form-control w-full mt-6"
+                     x-init="$watch('activeTab', (value, oldValue) => { // Load new content if (window.bytemdEditor && value) { const newInputId = 'id_content_' + value.replace('-', '_'); const newInput = document.getElementById(newInputId); if (newInput) { // Update the target input for real-time syncing FIRST if (window.bytemdEditor.setTargetInput) { window.bytemdEditor.setTargetInput(newInputId); } // Update editor content window.bytemdEditor.$set({ value: newInput.value }); } } })">
+                    <label class="label flex justify-between items-center">
+                        <span class="label-text font-bold text-lg">
+                            <span x-text="{'zh-hans': '{% trans "内容 (中文)" %}', 'en': '{% trans "Content (English)" %}', 'ja': '{% trans "内容 (Japanese)" %}', 'zh-hant': '{% trans "內容 (Traditional Chinese)" %}'}[activeTab]"></span>
+                        </span>
+                    </label>
+                    <div id="editor"
+                         class="bg-base-100 border border-base-200 rounded-lg overflow-hidden min-h-[500px]"></div>
+                    <!-- Initialize Editor -->
+                    <script>
                                 (function() {
                                     const initEditor = () => {
                                         // If editor.js is loaded and ByteMD is available
@@ -196,180 +163,197 @@
                                         }
                                     };
 
-                                    // Try to initialize immediately (handles HTMX swaps where DOMContentLoaded already fired)
-                                    initEditor();
-
-                                    // Fallback: also try on DOMContentLoaded for fresh page loads if script execution order varies
-                                    if (document.readyState === 'loading') {
+                                    // Initialize using Rosetta Standard
+                                    if (window.Rosetta) {
+                                        window.Rosetta.onLoad(initEditor);
+                                    } else {
+                                        initEditor();
                                         document.addEventListener('DOMContentLoaded', initEditor);
                                     }
                                 })();
-                            </script>
-                            
-                            <!-- Hidden inputs for content and base title -->
-                            <div class="hidden">
-                                {{ form.title }} <!-- Base title -->
-                                {{ form.content }} <!-- Base content -->
-                                {{ form.content_zh_hans }}
-                                {{ form.content_en }}
-                                {{ form.content_ja }}
-                                {{ form.content_zh_hant }}
-                            </div>
-                        </div>
-                {% endcaptureas %}
-                {% include "administration/components/form_card.html" with content=main_card_content %}
-            </div>
-
-            <!-- Sidebar (Right Column - 25%) -->
-            <div class="lg:col-span-1 space-y-6">
-                <!-- Publish Box -->
-                {% captureas publish_content %}
-                    <div class="flex flex-col gap-3">
-                        <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
-                            <span class="material-symbols-outlined">save</span>
-                            {% trans "保存页面" %}
-                        </button>
-                        
-                        <div class="grid grid-cols-2 gap-2">
-                            <button type="submit" name="_addanother" class="btn btn-sm btn-ghost border-base-300">{% trans "保存并新增" %}</button>
-                            <button type="submit" name="_continue" class="btn btn-sm btn-ghost border-base-300">{% trans "保存并继续" %}</button>
-                        </div>
-
-                        {% if object %}
-                        <div class="divider my-1"></div>
-                        <div class="flex justify-between items-center">
-                            <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">{% trans "取消" %}</a>
-                            <button type="button" onclick="confirmDelete('{% url 'administration:page_delete' object.pk %}', '{% blocktrans with title=object.title|escapejs %}确定要删除页面《{{ title }}》吗？{% endblocktrans %}')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
-                                {% trans "删除页面" %}
-                            </button>
-                        </div>
-                        {% else %}
-                        <div class="divider my-1"></div>
-                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60 w-full">{% trans "取消" %}</a>
-                        {% endif %}
+                    </script>
+                    <!-- Hidden inputs for content and base title -->
+                    <div class="hidden">
+                        {{ form.title }} <!-- Base title -->
+                        {{ form.content }} <!-- Base content -->
+                        {{ form.content_zh_hans }}
+                        {{ form.content_en }}
+                        {{ form.content_ja }}
+                        {{ form.content_zh_hant }}
                     </div>
-                {% endcaptureas %}
-                {% trans "发布" as pub_title %}
-                {% include "administration/components/form_card.html" with title=pub_title icon="publish" content=publish_content %}
-
-                <!-- Settings Box -->
-                {% captureas settings_content %}
-                    <!-- Slug Field -->
-                    <div class="form-control w-full">
-                        <label class="label">
-                            <span class="label-text font-bold text-lg">{% trans "URL 别名 (Slug)" %}</span>
-                        </label>
-                        {{ form.slug }}
-                        {% if form.slug.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                        <label class="label">
-                            <span class="label-text-alt text-base-content/60">{% trans "“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。" %}</span>
-                        </label>
-                    </div>
-
-                    <!-- Status Field -->
-                    <div class="form-control w-full mt-4">
-                        <label class="label">
-                            <span class="label-text font-medium">{% trans "状态" %}</span>
-                        </label>
-                        {{ form.status }}
-                        {% if form.status.errors %}
-                        <label class="label">
-                            <span class="label-text-alt text-error">{{ form.status.errors.0 }}</span>
-                        </label>
-                        {% endif %}
-                    </div>
-                {% endcaptureas %}
-                {% trans "设置" as settings_title %}
-                {% include "administration/components/form_card.html" with title=settings_title icon="settings" content=settings_content %}
-                
+                </div>
+            {% endcaptureas %}
+            {% include "administration/components/form_card.html" with content=main_card_content %}
+        </div>
+        <!-- Sidebar (Right Column - 25%) -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Publish Box -->
+            {% captureas publish_content %}
+            <div class="flex flex-col gap-3">
+                <button type="submit"
+                        class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                    <span class="material-symbols-outlined">save</span>
+                    {% trans "保存页面" %}
+                </button>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="submit"
+                            name="_addanother"
+                            class="btn btn-sm btn-ghost border-base-300">{% trans "保存并新增" %}</button>
+                    <button type="submit"
+                            name="_continue"
+                            class="btn btn-sm btn-ghost border-base-300">{% trans "保存并继续" %}</button>
+                </div>
                 {% if object %}
-                    {% captureas info_content %}
-                        <div class="text-xs space-y-2 opacity-70">
-                            <div class="flex justify-between">
-                                <span>{% trans "创建于:" %}</span>
-                                <span class="font-mono">{{ object.created_at|date:"Y-m-d H:i" }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span>{% trans "更新于:" %}</span>
-                                <span class="font-mono">{{ object.updated_at|date:"Y-m-d H:i" }}</span>
-                            </div>
-                            <div class="pt-2 text-center">
-                                <a href="/{{ object.slug }}/" target="_blank" class="link link-primary no-underline hover:underline flex items-center justify-center gap-1">
-                                    <span class="material-symbols-outlined text-xs">open_in_new</span>
-                                    {% trans "查看页面" %}
-                                </a>
-                            </div>
-                        </div>
-                    {% endcaptureas %}
-                    {% trans "信息" as info_title %}
-                    {% include "administration/components/form_card.html" with title=info_title icon="info" content=info_content %}
+                    <div class="divider my-1"></div>
+                    <div class="flex justify-between items-center">
+                        <a href="javascript:history.back()"
+                           class="btn btn-sm btn-ghost text-base-content/60">{% trans "取消" %}</a>
+                        <button type="button"
+                                onclick="confirmDelete('{% url 'administration:page_delete' object.pk %}', '{% blocktrans with title=object.title|escapejs %}确定要删除页面《{{ title }}》吗？{% endblocktrans %}')"
+                                class="btn btn-sm btn-ghost text-error hover:bg-error/10">{% trans "删除页面" %}</button>
+                    </div>
+                {% else %}
+                    <div class="divider my-1"></div>
+                    <a href="javascript:history.back()"
+                       class="btn btn-sm btn-ghost text-base-content/60 w-full">{% trans "取消" %}</a>
                 {% endif %}
             </div>
+        {% endcaptureas %}
+        {% trans "发布" as pub_title %}
+        {% include "administration/components/form_card.html" with title=pub_title icon="publish" content=publish_content %}
+        <!-- Settings Box -->
+        {% captureas settings_content %}
+        <!-- Slug Field -->
+        <div class="form-control w-full">
+            <label class="label">
+                <span class="label-text font-bold text-lg">{% trans "URL 别名 (Slug)" %}</span>
+            </label>
+            {{ form.slug }}
+            {% if form.slug.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.slug.errors.0 }}</span>
+                </label>
+            {% endif %}
+            <label class="label">
+                <span class="label-text-alt text-base-content/60">{% trans "“别名”是在URL中使用的别称，通常使用小写，只能包含字母，数字和连字符（-）。" %}</span>
+            </label>
         </div>
-    </form>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
-            const languages = ['zh_hans', 'en', 'ja', 'zh_hant'];
+        <!-- Status Field -->
+        <div class="form-control w-full mt-4">
+            <label class="label">
+                <span class="label-text font-medium">{% trans "状态" %}</span>
+            </label>
+            {{ form.status }}
+            {% if form.status.errors %}
+                <label class="label">
+                    <span class="label-text-alt text-error">{{ form.status.errors.0 }}</span>
+                </label>
+            {% endif %}
+        </div>
+    {% endcaptureas %}
+    {% trans "设置" as settings_title %}
+    {% include "administration/components/form_card.html" with title=settings_title icon="settings" content=settings_content %}
+    {% if object %}
+        {% captureas info_content %}
+        <div class="text-xs space-y-2 opacity-70">
+            <div class="flex justify-between">
+                <span>{% trans "创建于:" %}</span>
+                <span class="font-mono">{{ object.created_at|date:"Y-m-d H:i" }}</span>
+            </div>
+            <div class="flex justify-between">
+                <span>{% trans "更新于:" %}</span>
+                <span class="font-mono">{{ object.updated_at|date:"Y-m-d H:i" }}</span>
+            </div>
+            <div class="pt-2 text-center">
+                <a href="/{{ object.slug }}/"
+                   target="_blank"
+                   class="link link-primary no-underline hover:underline flex items-center justify-center gap-1">
+                    <span class="material-symbols-outlined text-xs">open_in_new</span>
+                    {% trans "查看页面" %}
+                </a>
+            </div>
+        </div>
+    {% endcaptureas %}
+    {% trans "信息" as info_title %}
+    {% include "administration/components/form_card.html" with title=info_title icon="info" content=info_content %}
+{% endif %}
+</div>
+</div>
+</form>
+<script>
+        (function() {
+            const initForm = function() {
+                const form = document.querySelector('form');
+                if (!form) return;
+                
+                const languages = ['zh_hans', 'en', 'ja', 'zh_hant'];
 
-            // Helper to sync multiple language fields to a base field
-            function setupSync(baseId, fieldName) {
-                const baseInput = document.getElementById(baseId);
-                if (!baseInput) return;
-
-                languages.forEach(lang => {
-                    const inputId = `id_${fieldName}_${lang}`;
-                    const input = document.getElementById(inputId);
-                    if (input) {
-                        // Sync on input
-                        input.addEventListener('input', function() {
-                            if (this.value) {
-                                baseInput.value = this.value;
-                            } else {
-                                let foundValue = '';
-                                for (const otherLang of languages) {
-                                    const otherInput = document.getElementById(`id_${fieldName}_${otherLang}`);
-                                    if (otherInput && otherInput.value) {
-                                        foundValue = otherInput.value;
-                                        break;
-                                    }
-                                }
-                                baseInput.value = foundValue;
-                            }
-                        });
-                        
-                        // Initial sync
-                        if (input.value && !baseInput.value) {
-                            baseInput.value = input.value;
-                        }
-                    }
-                });
-            }
-
-            setupSync('id_title', 'title');
-
-            form.addEventListener('submit', function(e) {
-                // Final check for base fields
-                function ensureValue(baseId, fieldName) {
+                // Helper to sync multiple language fields to a base field
+                function setupSync(baseId, fieldName) {
                     const baseInput = document.getElementById(baseId);
-                    if (baseInput && !baseInput.value) {
-                        for (const lang of languages) {
-                            const input = document.getElementById(`id_${fieldName}_${lang}`);
-                            if (input && input.value) {
+                    if (!baseInput) return;
+
+                    languages.forEach(lang => {
+                        const inputId = `id_${fieldName}_${lang}`;
+                        const input = document.getElementById(inputId);
+                        if (input) {
+                            // Sync on input
+                            input.addEventListener('input', function() {
+                                if (this.value) {
+                                    baseInput.value = this.value;
+                                } else {
+                                    let foundValue = '';
+                                    for (const otherLang of languages) {
+                                        const otherInput = document.getElementById(`id_${fieldName}_${otherLang}`);
+                                        if (otherInput && otherInput.value) {
+                                            foundValue = otherInput.value;
+                                            break;
+                                        }
+                                    }
+                                    baseInput.value = foundValue;
+                                }
+                            });
+                            
+                            // Initial sync
+                            if (input.value && !baseInput.value) {
                                 baseInput.value = input.value;
-                                break;
+                            }
+                        }
+                    });
+                }
+
+                setupSync('id_title', 'title');
+
+                // Remove existing listener to prevent duplicates if re-initialized
+                form.removeEventListener('submit', handleFormSubmit);
+                form.addEventListener('submit', handleFormSubmit);
+                
+                function handleFormSubmit(e) {
+                    // Final check for base fields
+                    function ensureValue(baseId, fieldName) {
+                        const baseInput = document.getElementById(baseId);
+                        if (baseInput && !baseInput.value) {
+                            for (const lang of languages) {
+                                const input = document.getElementById(`id_${fieldName}_${lang}`);
+                                if (input && input.value) {
+                                    baseInput.value = input.value;
+                                    break;
+                                }
                             }
                         }
                     }
+                    ensureValue('id_title', 'title');
+                    ensureValue('id_content', 'content');
                 }
-                ensureValue('id_title', 'title');
-                ensureValue('id_content', 'content');
-            });
-        });
-    </script>
+            };
+
+            if (window.Rosetta) {
+                window.Rosetta.onLoad(initForm);
+            } else {
+                document.addEventListener('DOMContentLoaded', initForm);
+            }
+        })();
+</script>
+<!-- Media Selector Modal -->
+{% include "administration/components/media_selector_modal.html" %}
 {% endblock %}

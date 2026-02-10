@@ -16,6 +16,7 @@ from ..generics import (
     BaseImportView,
 )
 
+
 # --- Category Views ---
 class CategoryListView(BaseListView):
     model = Category
@@ -29,44 +30,50 @@ class CategoryListView(BaseListView):
             qs = qs.filter(name__icontains=query)
         return qs
 
+
 class CategoryCreateView(BaseCreateView):
     model = Category
     form_class = CategoryForm
     success_url = reverse_lazy("administration:category_list")
+
 
 class CategoryQuickCreateView(View):
     def post(self, request, *args, **kwargs):
         form = CategoryForm(request.POST, request.FILES)
         if form.is_valid():
             category = form.save()
-            return JsonResponse({
-                "status": "success",
-                "id": category.id,
-                "name": category.name,
-                "icon": category.icon,
-                "color": category.color,
-            })
+            return JsonResponse(
+                {
+                    "status": "success",
+                    "id": category.id,
+                    "name": category.name,
+                    "icon": category.icon,
+                    "color": category.color,
+                }
+            )
         else:
-            return JsonResponse({
-                "status": "error",
-                "errors": form.errors
-            }, status=400)
+            return JsonResponse({"status": "error", "errors": form.errors}, status=400)
+
 
 class CategoryUpdateView(BaseUpdateView):
     model = Category
     form_class = CategoryForm
     success_url = reverse_lazy("administration:category_list")
 
+
 class CategoryDeleteView(BaseDeleteView):
     model = Category
     success_url = reverse_lazy("administration:category_list")
 
+
 class CategoryExportView(BaseExportView):
     model = Category
+
 
 class CategoryImportView(BaseImportView):
     model = Category
     success_url = reverse_lazy("administration:category_list")
+
 
 # --- Tag Views ---
 class TagListView(BaseListView):
@@ -89,26 +96,32 @@ class TagListView(BaseListView):
 
         return qs
 
+
 class TagCreateView(BaseCreateView):
     model = Tag
     form_class = TagForm
     success_url = reverse_lazy("administration:tag_list")
+
 
 class TagUpdateView(BaseUpdateView):
     model = Tag
     form_class = TagForm
     success_url = reverse_lazy("administration:tag_list")
 
+
 class TagDeleteView(BaseDeleteView):
     model = Tag
     success_url = reverse_lazy("administration:tag_list")
 
+
 class TagExportView(BaseExportView):
     model = Tag
+
 
 class TagImportView(BaseImportView):
     model = Tag
     success_url = reverse_lazy("administration:tag_list")
+
 
 class TagAutocompleteView(LoginRequiredMixin, StaffRequiredMixin, View):
     def get(self, request):
@@ -116,5 +129,7 @@ class TagAutocompleteView(LoginRequiredMixin, StaffRequiredMixin, View):
         if len(query) < 1:
             return JsonResponse({"results": []})
 
-        tags = Tag.objects.filter(name__icontains=query).values_list("name", flat=True)[:10]
+        tags = Tag.objects.filter(name__icontains=query).values_list("name", flat=True)[
+            :10
+        ]
         return JsonResponse({"results": list(tags)})

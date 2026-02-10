@@ -1,80 +1,76 @@
 {% extends "administration/base.html" %}
 {% load capture_tags i18n %}
-
-{% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
-
+{% block title %}
+    {% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock %}
 {% block content %}
-<!-- Header -->
-{% captureas header_actions %}
+    <!-- Header -->
+    {% captureas header_actions %}
 {% endcaptureas %}
-
 <div class="max-w-4xl mx-auto">
     {% trans "编辑" as default_title %}
     {% include "administration/components/header.html" with title=title|default:default_title icon="edit" breadcrumbs=breadcrumbs actions=header_actions %}
-
     {% captureas form_content %}
     <form method="post" class="space-y-6" enctype="multipart/form-data">
         {% csrf_token %}
-        
         {% if form.non_field_errors %}
-        <div class="alert alert-error mb-4 shadow-sm">
-            <span class="material-symbols-outlined">error</span>
-            <div class="flex flex-col">
-                <span class="font-bold">{% trans "表单错误" %}</span>
-                {% for error in form.non_field_errors %}
-                <span class="text-sm">{{ error }}</span>
-                {% endfor %}
+            <div class="alert alert-error mb-4 shadow-sm">
+                <span class="material-symbols-outlined">error</span>
+                <div class="flex flex-col">
+                    <span class="font-bold">{% trans "表单错误" %}</span>
+                    {% for error in form.non_field_errors %}<span class="text-sm">{{ error }}</span>{% endfor %}
+                </div>
             </div>
-        </div>
         {% endif %}
-
         {% for field in form %}
-        <div class="form-control w-full group">
-            {% if field.field.widget.input_type == 'checkbox' %}
-            <label class="label cursor-pointer justify-start gap-3 p-4 border border-base-200 rounded-xl hover:border-primary/50 hover:bg-base-200/50 transition-all">
-                {{ field }}
-                <span class="label-text font-medium">{{ field.label }}</span>
-            </label>
-            {% else %}
-            <label class="label">
-                <span class="label-text font-medium flex items-center gap-1 text-base">
-                    {{ field.label }}
-                    {% if field.field.required %}<span class="text-error">*</span>{% endif %}
-                </span>
-            </label>
-            {{ field }}
-            {% endif %}
-            
-            {% if field.help_text %}
-            <label class="label">
-                <span class="label-text-alt text-base-content/60">{{ field.help_text }}</span>
-            </label>
-            {% endif %}
-            {% if field.errors %}
-            <label class="label">
-                <span class="label-text-alt text-error flex items-center gap-1">
-                    <span class="material-symbols-outlined text-xs">error</span>
-                    {{ field.errors.0 }}
-                </span>
-            </label>
-            {% endif %}
-        </div>
+            <div class="form-control w-full group">
+                {% if field.field.widget.input_type == 'checkbox' %}
+                    <label class="label cursor-pointer justify-start gap-3 p-4 border border-base-200 rounded-xl hover:border-primary/50 hover:bg-base-200/50 transition-all">
+                        {{ field }}
+                        <span class="label-text font-medium">{{ field.label }}</span>
+                    </label>
+                {% else %}
+                    <label class="label">
+                        <span class="label-text font-medium flex items-center gap-1 text-base">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="text-error">*</span>{% endif %}
+                        </span>
+                    </label>
+                    {{ field }}
+                {% endif %}
+                {% if field.help_text %}
+                    <label class="label">
+                        <span class="label-text-alt text-base-content/60">{{ field.help_text }}</span>
+                    </label>
+                {% endif %}
+                {% if field.errors %}
+                    <label class="label">
+                        <span class="label-text-alt text-error flex items-center gap-1">
+                            <span class="material-symbols-outlined text-xs">error</span>
+                            {{ field.errors.0 }}
+                        </span>
+                    </label>
+                {% endif %}
+            </div>
         {% endfor %}
-        
         <div class="divider my-4"></div>
-        
-        <div class="flex items-center justify-end gap-3">
-            <a href="javascript:history.back()" class="btn btn-ghost hover:bg-base-200">{% trans "取消" %}</a>
-            <button type="submit" name="_addanother" class="btn btn-ghost hover:bg-base-200">{% trans "保存并新增" %}</button>
-            <button type="submit" name="_continue" class="btn btn-ghost hover:bg-base-200">{% trans "保存并继续编辑" %}</button>
-            <button type="submit" class="btn btn-primary gap-2 shadow-lg shadow-primary/20">
+        <div class="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 sm:gap-3">
+            <a href="javascript:history.back()"
+               class="btn btn-ghost hover:bg-base-200 w-full sm:w-auto">{% trans "取消" %}</a>
+            <button type="submit"
+                    name="_addanother"
+                    class="btn btn-ghost hover:bg-base-200 w-full sm:w-auto">{% trans "保存并新增" %}</button>
+            <button type="submit"
+                    name="_continue"
+                    class="btn btn-ghost hover:bg-base-200 w-full sm:w-auto">{% trans "保存并继续编辑" %}</button>
+            <button type="submit"
+                    class="btn btn-primary gap-2 shadow-lg shadow-primary/20 w-full sm:w-auto">
                 <span class="material-symbols-outlined">save</span>
                 {% trans "保存" %}
             </button>
         </div>
     </form>
-    {% endcaptureas %}
-
-    {% include "administration/components/form_card.html" with content=form_content %}
+{% endcaptureas %}
+{% include "administration/components/form_card.html" with content=form_content %}
 </div>
 {% endblock %}

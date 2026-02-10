@@ -2,6 +2,8 @@
 @import "tailwindcss";
 
 @plugin "tailwindcss-animated";
+@plugin "tailwindcss-animate";
+@plugin "tailwind-scrollbar";
 
 @plugin "tailwindcss-debug-screens";
 
@@ -11,146 +13,171 @@
 @plugin "@tailwindcss/typography";
 @plugin "@tailwindcss/forms";
 @plugin "@tailwindcss/aspect-ratio";
+/* @tailwindcss/container-queries is built-in in v4, no need to import */
 
 html {
-    overflow-y: scroll;
-    /* Compatibility & Accessibility */
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
+  overflow-y: scroll;
+  /* Compatibility & Accessibility */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 /* Global Scrollbar Styling */
 /* Firefox */
 * {
-    scrollbar-color: oklch(var(--p)) oklch(var(--b2));
-    scrollbar-width: thin;
+  scrollbar-color: oklch(var(--p)) oklch(var(--b2));
+  scrollbar-width: thin;
 }
 
 /* Table Optimization (DaisyUI Adaptation) */
-.prose table, .markdown-body table {
-    @apply table table-zebra w-full my-6 rounded-lg overflow-hidden border border-base-200 shadow-sm;
+.prose table,
+.markdown-body table {
+  @apply table table-zebra w-full my-6 rounded-lg overflow-hidden border border-base-200 shadow-sm;
 }
-.prose thead, .markdown-body thead {
-    @apply bg-base-200/50 text-base-content font-bold border-b border-base-200;
+.prose thead,
+.markdown-body thead {
+  @apply bg-base-200/50 text-base-content font-bold border-b border-base-200;
 }
-.prose th, .markdown-body th {
-    @apply px-4 py-3 text-left text-sm font-bold uppercase tracking-wider;
+.prose th,
+.markdown-body th {
+  @apply px-4 py-3 text-left text-sm font-bold uppercase tracking-wider;
 }
-.prose td, .markdown-body td {
-    @apply px-4 py-3 align-top border-b border-base-200/50;
+.prose td,
+.markdown-body td {
+  @apply px-4 py-3 align-top border-b border-base-200/50;
 }
-.prose tr:last-child td, .markdown-body tr:last-child td {
-    @apply border-b-0;
+.prose tr:last-child td,
+.markdown-body tr:last-child td {
+  @apply border-b-0;
 }
 
 /* Global Code Block Styling (DaisyUI Mockup Code) */
 /* Server-side rendered code blocks (Pygments) */
 .codehilite {
-    @apply mockup-code bg-neutral text-neutral-content my-6 min-w-0;
-    padding-top: 1.25rem; /* Ensure space for dots */
+  @apply mockup-code bg-neutral text-neutral-content my-6 min-w-0;
+  padding-top: 1.25rem; /* Ensure space for dots */
 }
 
 .codehilite pre {
-    @apply bg-transparent p-5 overflow-x-auto text-sm font-mono leading-relaxed;
-    margin: 0 !important;
+  @apply bg-transparent p-5 overflow-x-auto text-sm font-mono leading-relaxed;
+  margin: 0 !important;
 }
 
 /* Client-side rendered code blocks (ByteMD / Viewer.js) */
 /* Override viewer.css styles */
 .markdown-body pre {
-    @apply mockup-code my-6 min-w-0;
-    background-color: oklch(var(--n)) !important;
-    color: oklch(var(--nc)) !important;
-    padding-top: 1.25rem !important;
-    border: none !important; /* Remove black border if present */
+  @apply mockup-code my-6 min-w-0;
+  background-color: oklch(var(--n)) !important;
+  color: oklch(var(--nc)) !important;
+  padding-top: 1.25rem !important;
+  border: none !important; /* Remove black border if present */
 }
 
 .markdown-body pre code {
-    @apply p-5 text-sm font-mono leading-relaxed block;
-    background-color: transparent !important;
-    color: inherit !important;
+  @apply p-5 text-sm font-mono leading-relaxed block;
+  background-color: transparent !important;
+  color: inherit !important;
 }
 
 /* Ensure the dots are visible and styled correctly */
-.codehilite::before, .markdown-body pre::before {
-     opacity: 0.5;
+.codehilite::before,
+.markdown-body pre::before {
+  opacity: 0.5;
 }
 
 /* Fix Shell/Bash prompt contrast */
-.codehilite .gp, .markdown-body .gp { 
-    @apply text-secondary font-bold select-none;
+.codehilite .gp,
+.markdown-body .gp {
+  @apply text-secondary font-bold select-none;
 }
 
 /* Mermaid Diagram Centering */
 .mermaid {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 2rem;
-    background: transparent !important;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 2rem;
+  background: transparent !important;
 }
 
 /* Mermaid Dark Mode Overrides */
-[data-theme='dark'] .mermaid svg,
+[data-theme="dark"] .mermaid svg,
 .dark .mermaid svg {
-    filter: invert(1) hue-rotate(180deg);
+  filter: invert(1) hue-rotate(180deg);
 }
 
 /* Reset specific colors if needed */
-[data-theme='dark'] .mermaid .label,
+[data-theme="dark"] .mermaid .label,
 .dark .mermaid .label {
-    color: #fff !important;
+  color: #fff !important;
 }
 
 /* Webkit (Chrome, Safari, Edge) - Apply to ALL elements */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
-    background-color: transparent;
+  width: 8px;
+  height: 8px;
+  background-color: transparent;
 }
 
 ::-webkit-scrollbar-track {
-    background-color: transparent;
-    border-radius: 9999px;
+  background-color: transparent;
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: oklch(var(--p) / 0.5);
-    border-radius: 9999px;
-    border: 2px solid transparent;
-    background-clip: content-box;
-    transition: background-color 0.2s;
+  background-color: oklch(var(--p) / 0.5);
+  border-radius: 9999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+  transition: background-color 0.2s;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: oklch(var(--p));
+  background-color: oklch(var(--p));
 }
 
 ::-webkit-scrollbar-corner {
-    background-color: transparent;
+  background-color: transparent;
 }
 
 /* Custom NProgress Colors to match theme */
-#nprogress { pointer-events: none; }
-#nprogress .bar { 
-    background: oklch(var(--p, 0.4 0.1 260)) !important; /* Fallback to a blue-ish color if var missing */
-    height: 4px !important; 
-    z-index: 99999 !important;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    box-shadow: 0 0 10px oklch(var(--p, 0.4 0.1 260));
+#nprogress {
+  pointer-events: none;
 }
-#nprogress .peg { box-shadow: 0 0 10px oklch(var(--p, 0.4 0.1 260)), 0 0 5px oklch(var(--p, 0.4 0.1 260)) !important; }
-#nprogress .spinner-icon { border-top-color: oklch(var(--p, 0.4 0.1 260)) !important; border-left-color: oklch(var(--p, 0.4 0.1 260)) !important; }
+#nprogress .bar {
+  background: oklch(
+    var(--p, 0.4 0.1 260)
+  ) !important; /* Fallback to a blue-ish color if var missing */
+  height: 4px !important;
+  z-index: 99999 !important;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-shadow: 0 0 10px oklch(var(--p, 0.4 0.1 260));
+}
+#nprogress .peg {
+  box-shadow:
+    0 0 10px oklch(var(--p, 0.4 0.1 260)),
+    0 0 5px oklch(var(--p, 0.4 0.1 260)) !important;
+}
+#nprogress .spinner-icon {
+  border-top-color: oklch(var(--p, 0.4 0.1 260)) !important;
+  border-left-color: oklch(var(--p, 0.4 0.1 260)) !important;
+}
 
 /* Page Transition */
 main {
-    animation: fadeIn 0.5s ease-out;
+  animation: fadeIn 0.5s ease-out;
 }
 @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /**

@@ -1,15 +1,34 @@
 from django import forms
-from core.models import Page, Navigation, FriendLink, SearchPlaceholder
+from core.models import Page, Navigation, FriendLink, SearchPlaceholder, Media
 from .mixins import StyleFormMixin
 import bleach
 from bleach.css_sanitizer import CSSSanitizer
+
+
+class MediaForm(StyleFormMixin, forms.ModelForm):
+    class Meta:
+        model = Media
+        fields = ["file", "title", "alt_text", "description"]
+        widgets = {
+            "description": forms.Textarea(attrs={"rows": 3}),
+        }
+
 
 class PageForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = Page
         fields = [
-            "title", "title_zh_hans", "title_en", "title_ja", "title_zh_hant",
-            "slug", "content", "content_zh_hans", "content_en", "content_ja", "content_zh_hant",
+            "title",
+            "title_zh_hans",
+            "title_en",
+            "title_ja",
+            "title_zh_hant",
+            "slug",
+            "content",
+            "content_zh_hans",
+            "content_en",
+            "content_ja",
+            "content_zh_hant",
             "status",
         ]
         widgets = {
@@ -27,31 +46,94 @@ class PageForm(StyleFormMixin, forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        for lang in ['zh_hans', 'en', 'ja', 'zh_hant']:
-            field_name = f'content_{lang}'
+        for lang in ["zh_hans", "en", "ja", "zh_hant"]:
+            field_name = f"content_{lang}"
             content = cleaned_data.get(field_name)
             if content:
                 allowed_tags = list(bleach.sanitizer.ALLOWED_TAGS) + [
-                    "h1", "h2", "h3", "h4", "h5", "h6", "p", "div", "span", "br", "hr",
-                    "ul", "ol", "li", "dl", "dt", "dd", "img", "pre", "code", "blockquote",
-                    "table", "thead", "tbody", "tr", "th", "td", "strong", "em", "b", "i",
-                    "u", "s", "strike", "iframe", "figure", "figcaption", "video", "audio", "source",
+                    "h1",
+                    "h2",
+                    "h3",
+                    "h4",
+                    "h5",
+                    "h6",
+                    "p",
+                    "div",
+                    "span",
+                    "br",
+                    "hr",
+                    "ul",
+                    "ol",
+                    "li",
+                    "dl",
+                    "dt",
+                    "dd",
+                    "img",
+                    "pre",
+                    "code",
+                    "blockquote",
+                    "table",
+                    "thead",
+                    "tbody",
+                    "tr",
+                    "th",
+                    "td",
+                    "strong",
+                    "em",
+                    "b",
+                    "i",
+                    "u",
+                    "s",
+                    "strike",
+                    "iframe",
+                    "figure",
+                    "figcaption",
+                    "video",
+                    "audio",
+                    "source",
                 ]
                 allowed_attrs = {
                     "*": ["class", "id", "style", "title", "data-theme"],
                     "a": ["href", "target", "rel"],
                     "img": ["src", "alt", "width", "height"],
-                    "iframe": ["src", "width", "height", "frameborder", "allow", "allowfullscreen"],
-                    "video": ["src", "controls", "width", "height", "poster", "autoplay", "loop", "muted", "playsinline"],
+                    "iframe": [
+                        "src",
+                        "width",
+                        "height",
+                        "frameborder",
+                        "allow",
+                        "allowfullscreen",
+                    ],
+                    "video": [
+                        "src",
+                        "controls",
+                        "width",
+                        "height",
+                        "poster",
+                        "autoplay",
+                        "loop",
+                        "muted",
+                        "playsinline",
+                    ],
                     "audio": ["src", "controls", "autoplay", "loop", "muted"],
                     "source": ["src", "type"],
                 }
                 allowed_styles = [
-                    "color", "background-color", "text-align", "font-size", "font-weight",
-                    "text-decoration", "width", "height", "display", "margin", "padding",
-                    "border", "border-radius",
+                    "color",
+                    "background-color",
+                    "text-align",
+                    "font-size",
+                    "font-weight",
+                    "text-decoration",
+                    "width",
+                    "height",
+                    "display",
+                    "margin",
+                    "padding",
+                    "border",
+                    "border-radius",
                 ]
-                
+
                 css_sanitizer = CSSSanitizer(allowed_css_properties=allowed_styles)
 
                 content = bleach.clean(
@@ -62,7 +144,7 @@ class PageForm(StyleFormMixin, forms.ModelForm):
                     strip=True,
                 )
                 cleaned_data[field_name] = content
-        
+
         return cleaned_data
 
 
@@ -70,8 +152,16 @@ class NavigationForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = Navigation
         fields = [
-            "title", "title_zh_hans", "title_en", "title_ja", "title_zh_hant",
-            "url", "location", "order", "is_active", "target_blank",
+            "title",
+            "title_zh_hans",
+            "title_en",
+            "title_ja",
+            "title_zh_hant",
+            "url",
+            "location",
+            "order",
+            "is_active",
+            "target_blank",
         ]
         widgets = {
             "title": forms.HiddenInput(),
@@ -86,8 +176,13 @@ class SearchPlaceholderForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = SearchPlaceholder
         fields = [
-            "text", "text_zh_hans", "text_en", "text_ja", "text_zh_hant",
-            "order", "is_active",
+            "text",
+            "text_zh_hans",
+            "text_en",
+            "text_ja",
+            "text_zh_hant",
+            "order",
+            "is_active",
         ]
         widgets = {
             "text": forms.HiddenInput(),
@@ -102,9 +197,20 @@ class FriendLinkForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = FriendLink
         fields = [
-            "name", "name_zh_hans", "name_en", "name_ja", "name_zh_hant",
-            "url", "description", "description_zh_hans", "description_en", "description_ja", "description_zh_hant",
-            "logo", "order", "is_active",
+            "name",
+            "name_zh_hans",
+            "name_en",
+            "name_ja",
+            "name_zh_hant",
+            "url",
+            "description",
+            "description_zh_hans",
+            "description_en",
+            "description_ja",
+            "description_zh_hant",
+            "logo",
+            "order",
+            "is_active",
         ]
         widgets = {
             "name": forms.HiddenInput(),

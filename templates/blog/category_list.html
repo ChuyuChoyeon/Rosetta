@@ -1,121 +1,96 @@
 {% extends 'base.html' %}
 {% load static i18n %}
-
 {% block content %}
-<div class="min-h-[80vh] px-4 py-16 md:py-24 bg-base-100 relative overflow-hidden" x-data="{ searchQuery: '' }">
-    
-    <!-- Background Decoration -->
-    <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none select-none">
-        <div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-primary/5 rounded-full blur-3xl opacity-50"></div>
-        <div class="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-secondary/5 rounded-full blur-3xl opacity-50"></div>
-    </div>
-
-    <div class="max-w-7xl mx-auto relative z-10">
-        <div class="text-center mb-20 space-y-6">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-200/50 border border-base-content/5 text-xs font-medium text-base-content/60 mb-4 backdrop-blur-sm">
-                <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
-                <span>{% trans "探索知识库" %}</span>
-            </div>
-            
-            <h1 class="text-4xl md:text-6xl font-bold font-heading tracking-tight">
-                {% trans "内容分类" %}
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">.</span>
-            </h1>
-            
-            <p class="text-lg md:text-xl text-base-content/60 max-w-2xl mx-auto leading-relaxed">
-                {% blocktrans count counter=categories|length %}
+    <div class="min-h-[80vh] px-4 py-16 md:py-24 bg-base-100 relative overflow-hidden"
+         x-data="{ searchQuery: '' }"
+         @keydown.escape.window="searchQuery = ''">
+        <!-- Background Decoration -->
+        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none select-none">
+            <div class="absolute top-[-10%] right-[-5%] w-96 h-96 bg-primary/5 rounded-full blur-3xl opacity-50"></div>
+            <div class="absolute bottom-[-10%] left-[-5%] w-96 h-96 bg-secondary/5 rounded-full blur-3xl opacity-50"></div>
+        </div>
+        <div class="max-w-7xl mx-auto relative z-10">
+            <div class="text-center mb-20 space-y-6">
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-base-200/50 border border-base-content/5 text-xs font-medium text-base-content/60 mb-4 backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-primary animate-pulse"></span>
+                    <span>{% trans "探索知识库" %}</span>
+                </div>
+                <h1 class="text-4xl md:text-6xl font-bold font-heading tracking-tight">
+                    {% trans "内容分类" %}
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-secondary">.</span>
+                </h1>
+                <p class="text-lg md:text-xl text-base-content/60 max-w-2xl mx-auto leading-relaxed">
+                    {% blocktrans count counter=categories|length %}
                 按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span class="font-bold text-base-content">{{ counter }}</span> 个分类。
                 {% plural %}
                 按照主题探索文章，发现感兴趣的领域。我们为您精心整理了 <span class="font-bold text-base-content">{{ counter }}</span> 个分类。
                 {% endblocktrans %}
-            </p>
-
-            <!-- Search Bar -->
-            <div class="max-w-md mx-auto mt-8 relative group">
-                <div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                <div class="relative bg-base-100/80 backdrop-blur-xl rounded-2xl shadow-lg border border-base-content/10 flex items-center p-2 transition-all group-focus-within:shadow-primary/20 group-focus-within:border-primary/50 group-focus-within:ring-4 group-focus-within:ring-primary/10">
-                    <span class="material-symbols-outlined text-base-content/40 ml-3">search</span>
-                    <input type="text" 
-                           placeholder="{% trans '搜索感兴趣的分类...' %}" 
-                           class="w-full bg-transparent border-none focus:ring-0 text-base-content placeholder:text-base-content/40 h-10 px-3"
-                           x-model="searchQuery">
-                    <kbd class="kbd kbd-sm font-mono text-xs hidden md:inline-flex bg-base-200/50 border-base-content/10">ESC</kbd>
-                </div>
-            </div>
-        </div>
-
-        <!-- Bento Grid -->
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-12 auto-rows-[minmax(180px,auto)]">
-            {% for category in categories %}
-            <a href="{% url 'post_by_category' category.slug %}" 
-               class="group relative flex flex-col justify-between p-6 rounded-3xl bg-base-100 border border-base-content/5 hover:border-primary/20 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden"
-               x-show="!searchQuery || '{{ category.name }}'.toLowerCase().includes(searchQuery.toLowerCase())"
-               x-transition:enter="transition ease-out duration-300"
-               x-transition:enter-start="opacity-0 scale-95"
-               x-transition:enter-end="opacity-100 scale-100">
-                
-                <!-- Hover Gradient -->
-                <div class="absolute inset-0 bg-gradient-to-br from-base-100 to-base-200/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0"></div>
-                
-                <!-- Icon & Count -->
-                <div class="relative z-10 flex items-start justify-between mb-4">
-                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-300 shadow-sm group-hover:shadow-md
-                        {% if category.color and category.color|first != '#' %}bg-{{ category.color }}/10{% else %}bg-base-200/50{% endif %}"
-                        {% if category.color and category.color|first == '#' %}style="background-color: {{ category.color }}1a"{% endif %}>
-                        <!-- Use category.color for text color if it matches standard tailwind colors, else fallback to primary -->
-                        <span class="material-symbols-outlined text-2xl transition-transform duration-300 group-hover:scale-110
-                            {% if category.color and category.color|first != '#' %}text-{{ category.color }}{% elif not category.color %}text-primary{% endif %}"
-                            {% if category.color and category.color|first == '#' %}style="color: {{ category.color }}"{% endif %}>
-                            {{ category.icon|default:'category' }}
-                        </span>
-                    </div>
-                    <span class="badge badge-sm font-mono bg-base-200/50 border-transparent group-hover:bg-base-content group-hover:text-base-100 transition-colors duration-300">
-                        {{ category.posts.count }}
-                    </span>
-                </div>
-
-                <!-- Content -->
-                <div class="relative z-10">
-                    <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-1">
-                        {{ category.name }}
-                    </h3>
-                    {% trans "探索该分类下的所有精彩文章，发现更多有趣内容。" as default_description %}
-                    <p class="text-sm text-base-content/60 line-clamp-2 mb-4 min-h-[2.5em] group-hover:text-base-content/80 transition-colors">
-                        {{ category.description|default:default_description }}
-                    </p>
-                    
-                    <div class="flex items-center text-xs font-bold text-base-content/40 uppercase tracking-wider group-hover:text-primary transition-colors duration-300">
-                        <span>{% trans "Explore" %}</span>
-                        <span class="material-symbols-outlined text-sm ml-1 transform transition-transform duration-300 group-hover:translate-x-1">arrow_forward</span>
-                    </div>
-                </div>
-            </a>
-            {% empty %}
-            <div class="col-span-full flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-base-content/10 rounded-3xl bg-base-50/50">
-                <div class="w-20 h-20 bg-base-200 rounded-full flex items-center justify-center mb-6 animate-bounce">
-                    <span class="material-symbols-outlined text-4xl text-base-content/20">search_off</span>
-                </div>
-                <h3 class="text-xl font-bold text-base-content/70 mb-2">{% trans "暂无分类" %}</h3>
-                <p class="text-base-content/40 max-w-sm">
-                    {% trans "还没有添加任何分类，或者没有找到匹配的结果。" %}
                 </p>
+                <!-- Search Bar -->
+                <div class="max-w-md mx-auto mt-8 relative group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-primary/20 to-secondary/20 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    </div>
+                    <div class="relative bg-base-100/80 backdrop-blur-xl rounded-2xl shadow-lg border border-base-content/10 flex items-center p-2 transition-all group-focus-within:shadow-primary/20 group-focus-within:border-primary/50 group-focus-within:ring-4 group-focus-within:ring-primary/10">
+                        <span class="material-symbols-outlined text-base-content/40 ml-3">search</span>
+                        <input type="text"
+                               placeholder="{% trans '搜索感兴趣的分类...' %}"
+                               class="w-full bg-transparent border-none focus:ring-0 text-base-content placeholder:text-base-content/40 h-10 px-3"
+                               x-model="searchQuery">
+                        <kbd class="kbd kbd-sm font-mono text-xs hidden md:inline-flex bg-base-200/50 border-base-content/10">ESC</kbd>
+                    </div>
+                </div>
             </div>
-            {% endfor %}
+            <!-- Bento Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 pt-12 auto-rows-[minmax(180px,auto)]">
+                {% for category in categories %}
+                    <a href="{% url 'post_by_category' category.slug %}"
+                       class="group relative flex flex-col justify-between p-6 rounded-3xl bg-base-100 border border-base-content/5 hover:border-primary/20 transition-all duration-300 hover:shadow-2xl hover:shadow-primary/5 hover:-translate-y-1 overflow-hidden"
+                       x-show="!searchQuery || '{{ category.name }}'.toLowerCase().includes(searchQuery.toLowerCase())"
+                       x-transition:enter="transition ease-out duration-300"
+                       x-transition:enter-start="opacity-0 scale-95"
+                       x-transition:enter-end="opacity-100 scale-100">
+                        <!-- Hover Gradient -->
+                        <div class="absolute inset-0 bg-gradient-to-br from-base-100 to-base-200/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0">
+                        </div>
+                        <!-- Icon & Count -->
+                        <div class="relative z-10 flex items-start justify-between mb-4">
+                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-300 shadow-sm group-hover:shadow-md {% if category.color and category.color|first != '#' %}bg-{{ category.color }}/10{% else %}bg-base-200/50{% endif %}"
+                                 {% if category.color and category.color|first == '#' %}style="background-color: {{ category.color }}1a"{% endif %}>
+                                <!-- Use category.color for text color if it matches standard tailwind colors, else fallback to primary -->
+                                <span class="material-symbols-outlined text-2xl transition-transform duration-300 group-hover:scale-110 {% if category.color and category.color|first != '#' %}text-{{ category.color }}{% elif not category.color %}text-primary{% endif %}"
+                                      {% if category.color and category.color|first == '#' %}style="color: {{ category.color }}"{% endif %}>
+                                    {{ category.icon|default:'category' }}
+                                </span>
+                            </div>
+                            <span class="badge badge-sm font-mono bg-base-200/50 border-transparent group-hover:bg-base-content group-hover:text-base-100 transition-colors duration-300">
+                                {{ category.posts.count }}
+                            </span>
+                        </div>
+                        <!-- Content -->
+                        <div class="relative z-10">
+                            <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-colors duration-300 line-clamp-1">
+                                {{ category.name }}
+                            </h3>
+                            {% trans "探索该分类下的所有精彩文章，发现更多有趣内容。" as default_description %}
+                            <p class="text-sm text-base-content/60 line-clamp-2 mb-4 min-h-[2.5em] group-hover:text-base-content/80 transition-colors">
+                                {{ category.description|default:default_description }}
+                            </p>
+                            <div class="flex items-center text-xs font-bold text-base-content/40 uppercase tracking-wider group-hover:text-primary transition-colors duration-300">
+                                <span>{% trans "Explore" %}</span>
+                                <span class="material-symbols-outlined text-sm ml-1 transform transition-transform duration-300 group-hover:translate-x-1">arrow_forward</span>
+                            </div>
+                        </div>
+                    </a>
+                {% empty %}
+                    <div class="col-span-full flex flex-col items-center justify-center py-24 text-center border-2 border-dashed border-base-content/10 rounded-3xl bg-base-50/50">
+                        <div class="w-20 h-20 bg-base-200 rounded-full flex items-center justify-center mb-6 animate-bounce">
+                            <span class="material-symbols-outlined text-4xl text-base-content/20">search_off</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-base-content/70 mb-2">{% trans "暂无分类" %}</h3>
+                        <p class="text-base-content/40 max-w-sm">{% trans "还没有添加任何分类，或者没有找到匹配的结果。" %}</p>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
     </div>
-</div>
-
-<script>
-    // Optional: Add simple keyboard shortcut for search
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-            const searchInput = document.querySelector('[x-model="searchQuery"]');
-            if (searchInput) {
-                searchInput.value = '';
-                searchInput.dispatchEvent(new Event('input'));
-                searchInput.blur();
-            }
-        }
-    });
-</script>
 {% endblock %}

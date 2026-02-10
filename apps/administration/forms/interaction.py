@@ -5,6 +5,7 @@ from django.forms import inlineformset_factory
 from voting.models import Poll, Choice
 from .mixins import StyleFormMixin
 
+
 class PollForm(StyleFormMixin, forms.ModelForm):
     end_date = forms.DateTimeField(
         required=False,
@@ -16,9 +17,20 @@ class PollForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = Poll
         fields = [
-            "title", "title_zh_hans", "title_en", "title_ja", "title_zh_hant",
-            "description", "description_zh_hans", "description_en", "description_ja", "description_zh_hant",
-            "is_active", "allow_multiple_choices", "end_date", "related_post",
+            "title",
+            "title_zh_hans",
+            "title_en",
+            "title_ja",
+            "title_zh_hant",
+            "description",
+            "description_zh_hans",
+            "description_en",
+            "description_ja",
+            "description_zh_hant",
+            "is_active",
+            "allow_multiple_choices",
+            "end_date",
+            "related_post",
         ]
         widgets = {
             "title": forms.HiddenInput(),
@@ -44,15 +56,23 @@ class ChoiceForm(StyleFormMixin, forms.ModelForm):
     class Meta:
         model = Choice
         fields = [
-            "text", "text_zh_hans", "text_en", "text_ja", "text_zh_hant",
+            "text",
+            "text_zh_hans",
+            "text_en",
+            "text_ja",
+            "text_zh_hant",
             "votes_count",
         ]
         widgets = {
             "text": forms.HiddenInput(),
-            "text_zh_hans": forms.TextInput(attrs={"placeholder": _("选项文本 (简中)")}),
+            "text_zh_hans": forms.TextInput(
+                attrs={"placeholder": _("选项文本 (简中)")}
+            ),
             "text_en": forms.TextInput(attrs={"placeholder": _("选项文本 (英文)")}),
             "text_ja": forms.TextInput(attrs={"placeholder": _("选项文本 (日文)")}),
-            "text_zh_hant": forms.TextInput(attrs={"placeholder": _("选项文本 (繁中)")}),
+            "text_zh_hant": forms.TextInput(
+                attrs={"placeholder": _("选项文本 (繁中)")}
+            ),
         }
 
     def __init__(self, *args, **kwargs):

@@ -14,7 +14,7 @@ User = get_user_model()
 @override_settings(CAPTCHA_TEST_MODE=True)
 class UserTests(TestCase):
     def setUp(self):
-        translation.activate('zh-hans')
+        translation.activate("zh-hans")
         self.client = Client()
         self.register_url = reverse("users:register")
         self.login_url = reverse("users:login")
@@ -107,14 +107,12 @@ class UserTests(TestCase):
 @override_settings(CAPTCHA_TEST_MODE=True)
 class AdditionalUserViewTests(TestCase):
     def setUp(self):
-        translation.activate('zh-hans')
+        translation.activate("zh-hans")
         self.client = Client()
         self.existing_user = User.objects.create_user(
-            username="testuser",
-            email="test@example.com",
-            password="Password123!"
+            username="testuser", email="test@example.com", password="Password123!"
         )
-        self.user = self.existing_user # Alias for compatibility if needed
+        self.user = self.existing_user  # Alias for compatibility if needed
         self.login_url = reverse("users:login")
         self.update_theme_url = reverse("users:update_theme")
         self.profile_url = reverse("users:profile")
@@ -125,35 +123,36 @@ class AdditionalUserViewTests(TestCase):
         self.existing_user.save()
 
         response = self.client.post(
-            self.login_url,
-            {"username": "testuser", "password": "Password123!"}
+            self.login_url, {"username": "testuser", "password": "Password123!"}
         )
-        
+
         # Should stay on login page with error, not redirect
         self.assertEqual(response.status_code, 200)
-        form = response.context["form"]
-        self.assertIn("您的账号已被封禁", str(list(messages.get_messages(response.wsgi_request))))
+        response.context["form"]
+        self.assertIn(
+            "您的账号已被封禁", str(list(messages.get_messages(response.wsgi_request)))
+        )
 
     @override_settings(CONSTANCE_CONFIG={"ENABLE_REGISTRATION": False})
     def test_registration_disabled(self):
-        # We need to mock constance config. 
+        # We need to mock constance config.
         # Since override_settings might not work directly for constance depending on backend,
         # let's try to mock the config attribute if possible, or use the fixture.
         # But simpler way is to check if constance allows override via settings or if we need a specialized test.
         # Assuming override_settings might not affect constance config object directly if it's already loaded.
         # Let's use the patterns from python-testing-patterns skill if needed, but first try patching.
-        pass # implemented in separate method with patching
+        pass  # implemented in separate method with patching
 
     def test_update_theme_view(self):
         self.client.force_login(self.user)
         response = self.client.post(
             self.update_theme_url,
             data={"theme": "dark"},
-            content_type="application/json"
+            content_type="application/json",
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json(), {"status": "success"})
-        
+
         # Verify preference updated
         pref = UserPreference.objects.get(user=self.user)
         self.assertEqual(pref.theme, "dark")
@@ -161,9 +160,7 @@ class AdditionalUserViewTests(TestCase):
     def test_update_theme_view_invalid_json(self):
         self.client.force_login(self.user)
         response = self.client.post(
-            self.update_theme_url,
-            data="invalid json",
-            content_type="application/json"
+            self.update_theme_url, data="invalid json", content_type="application/json"
         )
         self.assertEqual(response.status_code, 400)
 
@@ -176,12 +173,14 @@ class AdditionalUserViewTests(TestCase):
             actor=other_user,
             verb="tested",
             content_type=ContentType.objects.get_for_model(User),
-            object_id=other_user.id
+            object_id=other_user.id,
         )
 
         # Test Mark Read
-        mark_read_url = reverse("users:mark_notification_read", kwargs={"pk": notification.pk})
-        
+        mark_read_url = reverse(
+            "users:mark_notification_read", kwargs={"pk": notification.pk}
+        )
+
         # HTMX request
         response = self.client.post(mark_read_url, HTTP_HX_REQUEST="true")
         self.assertEqual(response.status_code, 200)
@@ -189,8 +188,10 @@ class AdditionalUserViewTests(TestCase):
         self.assertTrue(notification.is_read)
 
         # Test Delete
-        delete_url = reverse("users:delete_notification", kwargs={"pk": notification.pk})
-        
+        delete_url = reverse(
+            "users:delete_notification", kwargs={"pk": notification.pk}
+        )
+
         # HTMX request
         response = self.client.delete(delete_url, HTTP_HX_REQUEST="true")
         self.assertEqual(response.status_code, 200)

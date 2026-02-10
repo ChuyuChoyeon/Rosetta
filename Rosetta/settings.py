@@ -174,6 +174,9 @@ INSTALLED_APPS = [
     "guestbook.apps.GuestbookConfig",
 ]
 
+# Django HTMX
+DJANGO_HTMX_SCRIPT_URL = "/static/theme/js/htmx.min.js"
+
 # ------------------------------------------------------------------------------
 # 中间件配置 (Middleware)
 # ------------------------------------------------------------------------------
@@ -284,9 +287,9 @@ LANGUAGES = [
 LOCALE_PATHS = [BASE_DIR / "locale"]
 
 # ModelTranslation
-MODELTRANSLATION_DEFAULT_LANGUAGE = 'zh-hans'
-MODELTRANSLATION_LANGUAGES = ('zh-hans', 'en', 'zh-hant', 'ja')
-MODELTRANSLATION_FALLBACK_LANGUAGES = ('zh-hans', 'en')
+MODELTRANSLATION_DEFAULT_LANGUAGE = "zh-hans"
+MODELTRANSLATION_LANGUAGES = ("zh-hans", "en", "zh-hant", "ja")
+MODELTRANSLATION_FALLBACK_LANGUAGES = ("zh-hans", "en")
 
 # ------------------------------------------------------------------------------
 # 静态资源与媒体 (Static & Media)
@@ -393,9 +396,7 @@ META_USE_TWITTER_PROPERTIES = True
 # ------------------------------------------------------------------------------
 import pygments.styles
 
-CONSTANCE_ADDITIONAL_FIELDS = {
-    'image_field': ['django.forms.ImageField', {}]
-}
+CONSTANCE_ADDITIONAL_FIELDS = {"image_field": ["django.forms.ImageField", {}]}
 
 CONSTANCE_CONFIG = {
     "SITE_NAME": ("Rosetta Blog", "站点名称"),
@@ -439,7 +440,10 @@ CONSTANCE_CONFIG = {
     "GLOBAL_ANNOUNCEMENT": ("", "全局公告内容 (支持 HTML)"),
     "SIDEBAR_ABOUT_WIDGET_ENABLED": (True, "开启侧边栏关于模块"),
     "SIDEBAR_ABOUT_TITLE": ("About Me", "侧边栏关于标题"),
-    "SIDEBAR_ABOUT_CONTENT": ("Hello! I'm a Django developer.", "侧边栏关于内容 (支持 HTML)"),
+    "SIDEBAR_ABOUT_CONTENT": (
+        "Hello! I'm a Django developer.",
+        "侧边栏关于内容 (支持 HTML)",
+    ),
     "SIDEBAR_ABOUT_AVATAR": ("", "侧边栏头像", "image_field"),
     "ENABLE_COMMENTS": (True, "开启评论功能"),
     "COMMENT_REQUIRE_APPROVAL": (False, "评论需要审核"),
@@ -449,10 +453,17 @@ CONSTANCE_CONFIG = {
     "ENABLE_EMAIL_NOTIFICATIONS": (False, "开启邮件通知"),
     "EXTRA_HEAD_CODE": ("", "自定义 Head 代码 (CSS/JS)"),
     "EXTRA_FOOTER_CODE": ("", "自定义 Footer 代码 (JS)"),
-    "CODE_HIGHLIGHT_STYLE": ("default", "代码高亮风格 (Pygments)", list(pygments.styles.get_all_styles())),
+    "CODE_HIGHLIGHT_STYLE": (
+        "default",
+        "代码高亮风格 (Pygments)",
+        list(pygments.styles.get_all_styles()),
+    ),
     "BLOG_DEFAULT_VIEW_MODE": ("list", "博客文章列表默认视图 (list/grid)"),
     "PAGINATION_PAGE_SIZE": (12, "文章列表每页显示数量"),
-    "DEFAULT_PREVIEW_IMAGE": ("/static/theme/img/default_cover.jpg", "默认文章封面图 (SEO)"),
+    "DEFAULT_PREVIEW_IMAGE": (
+        "/static/theme/img/default_cover.jpg",
+        "默认文章封面图 (SEO)",
+    ),
     "SITE_SINCE_YEAR": ("2024", "站点建站年份 (用于版权显示)"),
     "ICP_GOV_CODE": ("", "公安备案号"),
     "ICP_GOV_URL": ("", "公安备案链接"),

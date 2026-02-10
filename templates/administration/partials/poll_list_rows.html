@@ -1,101 +1,107 @@
 {% load i18n %}
 {% for poll in object_list %}
-<tr class="hover">
-    <th class="pl-6">
-        <label>
-            <input type="checkbox" name="selected_ids" value="{{ poll.pk }}" class="checkbox checkbox-xs rounded-sm row-checkbox" onchange="updateBulkToolbar()" />
-        </label>
-    </th>
-    <th class="font-mono text-xs opacity-50 hidden md:table-cell">{{ poll.id }}</th>
-    <td>
-        <div class="flex flex-col min-w-0">
-            <a href="{% url 'administration:poll_edit' poll.pk %}" class="font-bold hover:text-primary transition-colors truncate" title="{{ poll.title }}">
-                {{ poll.title }}
-            </a>
-            {% if poll.description %}
-            <div class="text-xs text-base-content/50 truncate max-w-xs">{{ poll.description }}</div>
-            {% endif %}
-            <div class="flex gap-2 mt-1">
-                <span class="badge badge-xs badge-ghost">{{ poll.choices.count }} {% trans "选项" %}</span>
-                {% if poll.allow_multiple_choices %}
-                <span class="badge badge-xs badge-info badge-outline">{% trans "多选" %}</span>
-                {% else %}
-                <span class="badge badge-xs badge-ghost badge-outline">{% trans "单选" %}</span>
+    <tr class="hover">
+        <th class="pl-6">
+            <label>
+                <input type="checkbox"
+                       name="selected_ids"
+                       value="{{ poll.pk }}"
+                       class="checkbox checkbox-xs rounded-sm row-checkbox"
+                       onchange="updateBulkToolbar()" />
+            </label>
+        </th>
+        <th class="font-mono text-xs opacity-50 hidden md:table-cell">{{ poll.id }}</th>
+        <td>
+            <div class="flex flex-col min-w-0">
+                <a href="{% url 'administration:poll_edit' poll.pk %}"
+                   class="font-bold hover:text-primary transition-colors truncate"
+                   title="{{ poll.title }}">{{ poll.title }}</a>
+                {% if poll.description %}
+                    <div class="text-xs text-base-content/50 truncate max-w-xs">{{ poll.description }}</div>
                 {% endif %}
+                <div class="flex gap-2 mt-1">
+                    <span class="badge badge-xs badge-ghost">{{ poll.choices.count }} {% trans "选项" %}</span>
+                    {% if poll.allow_multiple_choices %}
+                        <span class="badge badge-xs badge-info badge-outline">{% trans "多选" %}</span>
+                    {% else %}
+                        <span class="badge badge-xs badge-ghost badge-outline">{% trans "单选" %}</span>
+                    {% endif %}
+                </div>
             </div>
-        </div>
-    </td>
-    <td class="hidden lg:table-cell">
-        {% if poll.related_post %}
-        <a href="{% url 'administration:post_edit' poll.related_post.pk %}" class="link link-hover text-sm flex items-center gap-1">
-            <span class="material-symbols-outlined text-xs">article</span>
-            {{ poll.related_post.title }}
-        </a>
-        {% else %}
-        <span class="text-base-content/30 text-sm">-</span>
-        {% endif %}
-    </td>
-    <td class="text-center hidden sm:table-cell">
-        {% if poll.is_active %}
-        <div class="flex items-center justify-center">
-            <span class="badge badge-sm badge-success gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-                {% trans "启用" %}
-            </span>
-        </div>
-        {% else %}
-        <div class="flex items-center justify-center">
-            <span class="badge badge-sm badge-ghost gap-1">
-                <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
-                {% trans "停用" %}
-            </span>
-        </div>
-        {% endif %}
-    </td>
-    <td class="text-center hidden lg:table-cell font-mono text-xs">
-        {% if poll.end_date %}
-            {% if poll.is_ended %}
-            <div class="flex flex-col items-center justify-center">
-                <span class="text-error" title="{{ poll.end_date }}">{% trans "已结束" %}</span>
-            </div>
+        </td>
+        <td class="hidden lg:table-cell">
+            {% if poll.related_post %}
+                <a href="{% url 'administration:post_edit' poll.related_post.pk %}"
+                   class="link link-hover text-sm flex items-center gap-1">
+                    <span class="material-symbols-outlined text-xs">article</span>
+                    {{ poll.related_post.title }}
+                </a>
             {% else %}
-            <div class="flex flex-col items-center justify-center">
-                <span class="text-success" title="{{ poll.end_date }}">{% trans "进行中" %}</span>
-                <div class="text-base-content/40 scale-90">{{ poll.end_date|date:"Y-m-d H:i" }}</div>
-            </div>
+                <span class="text-base-content/30 text-sm">-</span>
             {% endif %}
-        {% else %}
-            <div class="flex flex-col items-center justify-center">
-                <span class="text-base-content/40">{% trans "永久有效" %}</span>
+        </td>
+        <td class="text-center hidden sm:table-cell">
+            {% if poll.is_active %}
+                <div class="flex items-center justify-center">
+                    <span class="badge badge-sm badge-success gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                        {% trans "启用" %}
+                    </span>
+                </div>
+            {% else %}
+                <div class="flex items-center justify-center">
+                    <span class="badge badge-sm badge-ghost gap-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-current"></span>
+                        {% trans "停用" %}
+                    </span>
+                </div>
+            {% endif %}
+        </td>
+        <td class="text-center hidden lg:table-cell font-mono text-xs">
+            {% if poll.end_date %}
+                {% if poll.is_ended %}
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="text-error" title="{{ poll.end_date }}">{% trans "已结束" %}</span>
+                    </div>
+                {% else %}
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="text-success" title="{{ poll.end_date }}">{% trans "进行中" %}</span>
+                        <div class="text-base-content/40 scale-90">{{ poll.end_date|date:"Y-m-d H:i" }}</div>
+                    </div>
+                {% endif %}
+            {% else %}
+                <div class="flex flex-col items-center justify-center">
+                    <span class="text-base-content/40">{% trans "永久有效" %}</span>
+                </div>
+            {% endif %}
+        </td>
+        <td class="text-right pr-6">
+            <div class="join flex justify-end">
+                <a href="{% url 'administration:poll_edit' poll.pk %}"
+                   class="btn btn-ghost btn-xs join-item tooltip tooltip-left"
+                   data-tip="{% trans '编辑' %}">
+                    <span class="material-symbols-outlined text-base">edit</span>
+                </a>
+                <button type="button"
+                        hx-post="{% url 'administration:poll_delete' poll.pk %}"
+                        hx-trigger="confirmed"
+                        hx-target="closest tr"
+                        hx-swap="outerHTML swap:0.5s"
+                        onclick="confirmHtmx(this, '{% blocktrans with title=poll.title|escapejs %}确定要删除投票“{{ title }}”吗？{% endblocktrans %}')"
+                        class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left"
+                        data-tip="{% trans '删除' %}">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                </button>
             </div>
-        {% endif %}
-    </td>
-    <td class="text-right pr-6">
-        <div class="join flex justify-end">
-            <a href="{% url 'administration:poll_edit' poll.pk %}" class="btn btn-ghost btn-xs join-item tooltip tooltip-left" data-tip="{% trans '编辑' %}">
-                <span class="material-symbols-outlined text-base">edit</span>
-            </a>
-            <button type="button" 
-                    hx-post="{% url 'administration:poll_delete' poll.pk %}"
-                    hx-trigger="confirmed"
-                    hx-target="closest tr"
-                    hx-swap="outerHTML swap:0.5s"
-                    onclick="confirmHtmx(this, '{% blocktrans with title=poll.title|escapejs %}确定要删除投票“{{ title }}”吗？{% endblocktrans %}')"
-                    class="btn btn-ghost btn-xs join-item text-error tooltip tooltip-left" 
-                    data-tip="{% trans '删除' %}">
-                <span class="material-symbols-outlined text-base">delete</span>
-            </button>
-        </div>
-    </td>
-</tr>
+        </td>
+    </tr>
 {% empty %}
-<tr>
-    <td colspan="7" class="text-center py-10 text-base-content/50">
-        <div class="flex flex-col items-center gap-2">
-            <span class="material-symbols-outlined text-4xl opacity-20">poll</span>
-            <span>{% trans "暂无投票" %}</span>
-        </div>
-    </td>
-</tr>
+    <tr>
+        <td colspan="7" class="text-center py-10 text-base-content/50">
+            <div class="flex flex-col items-center gap-2">
+                <span class="material-symbols-outlined text-4xl opacity-20">poll</span>
+                <span>{% trans "暂无投票" %}</span>
+            </div>
+        </td>
+    </tr>
 {% endfor %}
-

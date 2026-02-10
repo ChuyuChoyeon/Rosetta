@@ -2,6 +2,7 @@ import pytest
 from constance import config
 from core.backends import ConstanceEmailBackend
 
+
 @pytest.mark.django_db
 class TestConstanceEmailBackend:
     def test_init_defaults(self):
@@ -14,7 +15,7 @@ class TestConstanceEmailBackend:
         config.SMTP_USE_TLS = True
 
         backend = ConstanceEmailBackend()
-        
+
         assert backend.host == "smtp.example.com"
         assert backend.port == 587
         assert backend.username == "user"
@@ -28,9 +29,9 @@ class TestConstanceEmailBackend:
             port=25,
             username="custom",
             password="custom_password",
-            use_tls=False
+            use_tls=False,
         )
-        
+
         assert backend.host == "custom.example.com"
         assert backend.port == 25
         assert backend.username == "custom"
@@ -39,7 +40,7 @@ class TestConstanceEmailBackend:
 
     def test_ssl_auto_config(self):
         config.SMTP_USE_TLS = True
-        
+
         # Port 465 should force SSL
         backend = ConstanceEmailBackend(port=465)
         assert backend.use_ssl is True

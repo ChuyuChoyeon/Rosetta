@@ -1,184 +1,221 @@
 {% extends "administration/base.html" %}
 {% load capture_tags %}
 {% load i18n %}
-
-{% block title %}{% trans "站点设置" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
-
+{% block title %}
+    {% trans "站点设置" %}{% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock %}
 {% block content %}
-<!-- Header -->
-{% captureas header_actions %}
+    <!-- Header -->
+    {% captureas header_actions %}
 {% endcaptureas %}
-
-{% include "administration/components/header.html" with title=_("站点设置") subtitle=_("管理网站的全局配置参数") breadcrumbs=breadcrumbs actions=header_actions %}
-
-<div class="w-full" x-data="{ activeTab: 'general' }">
+{% trans "站点设置" as t_title %}
+{% trans "管理网站的全局配置参数" as t_subtitle %}
+{% include "administration/components/header.html" with title=_("站点设置") title=t_title breadcrumbs=breadcrumbs actions=header_actions %}
+<div class="w-full"
+     x-data="{ activeTab: new URLSearchParams(window.location.search).get('tab') || 'general' }"
+     x-init="$watch('activeTab', value => {
+        const url = new URL(window.location);
+        url.searchParams.set('tab', value);
+        history.pushState({}, '', url);
+     })">
     <!-- Tabs Navigation -->
     <div class="overflow-x-auto -mx-4 px-4 pb-2 sm:mx-0 sm:px-0 sm:pb-0 scrollbar-hide">
-        <div role="tablist" class="tabs tabs-lifted tabs-lg w-max min-w-full sm:w-auto">
+        <div role="tablist"
+             class="tabs tabs-lifted tabs-lg w-max min-w-full sm:w-auto">
             {% for group in fieldsets %}
-            <a role="tab" 
-               class="tab h-12 whitespace-nowrap" 
-               :class="{ 'tab-active [--tab-bg:theme(colors.base-100)] font-bold text-primary': activeTab === '{{ group.slug }}' }"
-               @click="activeTab = '{{ group.slug }}'">
-                <span class="material-symbols-outlined text-lg mr-2" :class="{ 'text-primary': activeTab === '{{ group.slug }}' }">{{ group.icon }}</span> 
-                {% trans group.title %}
-            </a>
+                <a role="tab"
+                   class="tab h-12 whitespace-nowrap"
+                   :class="{ 'tab-active [--tab-bg:theme(colors.base-100)] font-bold text-primary': activeTab === '{{ group.slug }}' }"
+                   @click="activeTab = '{{ group.slug }}'">
+                    <span class="material-symbols-outlined text-lg mr-2"
+                          :class="{ 'text-primary': activeTab === '{{ group.slug }}' }">{{ group.icon }}</span>
+                    {% trans group.title %}
+                </a>
             {% endfor %}
             <!-- Filler tab to extend the border -->
             <a role="tab" class="tab flex-1 cursor-default hidden sm:block"></a>
         </div>
     </div>
-
     <!-- Settings Content -->
     <div class="bg-base-100 border-base-content/5 rounded-b-box rounded-tr-box border p-0 -mt-px min-h-[600px] relative z-10">
         <form method="post" class="p-4 md:p-8 max-w-5xl mx-auto">
             {% csrf_token %}
-            
             <!-- General Tab (with Site Settings) -->
-            <div x-show="activeTab === 'general'" 
-                 x-transition:enter="transition ease-out duration-300" 
-                 x-transition:enter-start="opacity-0 translate-y-4" 
+            <div x-show="activeTab === 'general'"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4"
                  x-transition:enter-end="opacity-100 translate-y-0"
                  class="space-y-8 py-4">
                 {% if current_site %}
-                <div class="card bg-base-200/50 border border-base-content/5">
-                    <div class="card-body p-6">
-                        <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
-                            <span class="material-symbols-outlined text-primary">public</span>
-                            {% trans "站点识别 (Sites Framework)" %}
-                        </h3>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="form-control w-full">
-                                <label class="label">
-                                    <span class="label-text font-bold">{% trans "域名 (Domain)" %}</span>
-                                </label>
-                                <input type="text" name="site_domain" value="{{ current_site.domain }}" class="input input-bordered w-full focus:input-primary" placeholder="example.com" />
-                                <label class="label">
-                                    <span class="label-text-alt text-base-content/60">{% trans "用于生成 Sitemap 和邮件链接。" %}</span>
-                                </label>
-                            </div>
-                            <div class="form-control w-full">
-                                <label class="label">
-                                    <span class="label-text font-bold">{% trans "显示名称 (Display Name)" %}</span>
-                                </label>
-                                <input type="text" name="site_name" value="{{ current_site.name }}" class="input input-bordered w-full focus:input-primary" placeholder="My Site" />
+                    <div class="card bg-base-200/50 border border-base-content/5">
+                        <div class="card-body p-6">
+                            <h3 class="font-bold text-lg mb-4 flex items-center gap-2">
+                                <span class="material-symbols-outlined text-primary">public</span>
+                                {% trans "站点识别 (Sites Framework)" %}
+                            </h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold">{% trans "域名 (Domain)" %}</span>
+                                    </label>
+                                    <input type="text"
+                                           name="site_domain"
+                                           value="{{ current_site.domain }}"
+                                           class="input input-bordered w-full focus:input-primary"
+                                           placeholder="example.com" />
+                                    <label class="label">
+                                        <span class="label-text-alt text-base-content/60">{% trans "用于生成 Sitemap 和邮件链接。" %}</span>
+                                    </label>
+                                </div>
+                                <div class="form-control w-full">
+                                    <label class="label">
+                                        <span class="label-text font-bold">{% trans "显示名称 (Display Name)" %}</span>
+                                    </label>
+                                    <input type="text"
+                                           name="site_name"
+                                           value="{{ current_site.name }}"
+                                           class="input input-bordered w-full focus:input-primary"
+                                           placeholder="My Site" />
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
                 {% endif %}
             </div>
-
             {% for group in fieldsets %}
-            <div x-show="activeTab === '{{ group.slug }}'" 
-                 x-transition:enter="transition ease-out duration-300" 
-                 x-transition:enter-start="opacity-0 translate-y-4" 
-                 x-transition:enter-end="opacity-100 translate-y-0"
-                 class="space-y-8 py-4">
-                
-                <div class="mb-8 pb-4 border-b border-base-200">
-                    <h2 class="text-xl md:text-2xl font-bold flex items-center gap-3">
-                        <div class="p-2 bg-primary/10 rounded-lg text-primary">
-                            <span class="material-symbols-outlined text-2xl">{{ group.icon }}</span>
-                        </div>
-                        {% trans group.title %}
-                    </h2>
-                    <p class="text-base-content/60 mt-2 text-sm ml-1">{% blocktrans with title=group.title %}配置 {{ title }} 相关的系统参数{% endblocktrans %}</p>
-                </div>
-
-                <div class="grid grid-cols-1 gap-6">
-                    {% for item in group.items %}
-                    <div class="form-control w-full group p-4 rounded-xl hover:bg-base-200/30 transition-colors border border-transparent hover:border-base-200">
-                        <div class="flex flex-col gap-2">
-                            <label class="label p-0 justify-start gap-2 mb-1">
-                                <span class="label-text font-bold text-lg">{% trans item.help_text|default:item.key %}</span>
-                                {% if item.type == 'bool' %}
-                                    <span class="badge badge-sm badge-ghost font-mono text-xs opacity-50">Boolean</span>
-                                {% endif %}
-                            </label>
-                            
-                            <div class="mt-1">
-                                {% if item.type == 'bool' %}
-                                    <div x-data="{ enabled: {{ item.value|yesno:'true,false' }} }">
-                                        <label class="cursor-pointer label justify-start gap-4 p-0">
-                                            <input type="checkbox" name="{{ item.key }}" class="toggle toggle-primary toggle-lg" x-model="enabled">
-                                            <span class="label-text text-base-content/60" x-text="enabled ? '{% trans "已启用" %}' : '{% trans "已禁用" %}'"></span>
-                                        </label>
-                                    </div>
-                                {% elif item.type == 'int' %}
-                                    <input type="number" name="{{ item.key }}" value="{{ item.value }}" class="input input-bordered w-full max-w-md focus:input-primary transition-all">
-                                {% elif item.type == 'select' %}
-                                    <select name="{{ item.key }}" class="select select-bordered w-full max-w-md focus:select-primary transition-all">
-                                        {% for value, label in item.choices %}
-                                            <option value="{{ value }}" {% if item.value == value %}selected{% endif %}>{{ label }}</option>
-                                        {% endfor %}
-                                    </select>
-                                {% else %}
-                                    {% if 'WORDS' in item.key %}
-                                        <!-- Flip Words Editor -->
-                                        <div x-data="{ 
-                                            words: {{ item.value|default:'[]' }},
-                                            newWord: ''
-                                        }">
-                                            <input type="hidden" name="{{ item.key }}" :value="JSON.stringify(words).replace(/&quot;/g, '\'')">
-                                            
-                                            <div class="flex flex-wrap gap-2 mb-2">
-                                                <template x-for="(word, index) in words" :key="index">
-                                                    <div class="badge badge-lg badge-primary gap-2 p-3">
-                                                        <span x-text="word"></span>
-                                                        <button type="button" @click="words.splice(index, 1)" class="btn btn-ghost btn-xs btn-circle text-primary-content/70 hover:text-white min-h-0 h-5 w-5">
-                                                            <span class="material-symbols-outlined text-sm">close</span>
+                <div x-show="activeTab === '{{ group.slug }}'"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0 translate-y-4"
+                     x-transition:enter-end="opacity-100 translate-y-0"
+                     class="space-y-8 py-4">
+                    <div class="mb-8 pb-4 border-b border-base-200">
+                        <h2 class="text-xl md:text-2xl font-bold flex items-center gap-3">
+                            <div class="p-2 bg-primary/10 rounded-lg text-primary">
+                                <span class="material-symbols-outlined text-2xl">{{ group.icon }}</span>
+                            </div>
+                            {% trans group.title %}
+                        </h2>
+                        <p class="text-base-content/60 mt-2 text-sm ml-1">
+                            {% blocktrans with title=group.title %}配置 {{ title }} 相关的系统参数{% endblocktrans %}
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-1 gap-6">
+                        {% for item in group.items %}
+                            <div class="form-control w-full group p-4 rounded-xl hover:bg-base-200/30 transition-colors border border-transparent hover:border-base-200">
+                                <div class="flex flex-col gap-2">
+                                    <label class="label p-0 justify-start gap-2 mb-1">
+                                        <span class="label-text font-bold text-lg">{% trans item.help_text|default:item.key %}</span>
+                                        {% if item.type == 'bool' %}
+                                            <span class="badge badge-sm badge-ghost font-mono text-xs opacity-50">Boolean</span>
+                                        {% endif %}
+                                    </label>
+                                    <div class="mt-1">
+                                        {% if item.type == 'bool' %}
+                                            <div x-data="{ enabled: {{ item.value|yesno:'true,false' }} }">
+                                                <label class="cursor-pointer label justify-start gap-4 p-0">
+                                                    <input type="checkbox"
+                                                           name="{{ item.key }}"
+                                                           class="toggle toggle-primary toggle-lg"
+                                                           x-model="enabled">
+                                                    <span class="label-text text-base-content/60"
+                                                          x-text="enabled ? '{% trans "已启用" %}' : '{% trans "已禁用" %}'"></span>
+                                                </label>
+                                            </div>
+                                        {% elif item.type == 'int' %}
+                                            <input type="number"
+                                                   name="{{ item.key }}"
+                                                   value="{{ item.value }}"
+                                                   class="input input-bordered w-full max-w-md focus:input-primary transition-all">
+                                        {% elif item.type == 'select' %}
+                                            <select name="{{ item.key }}"
+                                                    class="select select-bordered w-full max-w-md focus:select-primary transition-all">
+                                                {% for value, label in item.choices %}
+                                                    <option value="{{ value }}" {% if item.value == value %}selected{% endif %}>{{ label }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        {% else %}
+                                            {% if 'WORDS' in item.key %}
+                                                <!-- Flip Words Editor -->
+                                                <div x-data="{ words: {{ item.value|default:'[]' }}, newWord: '' }">
+                                                    <input type="hidden"
+                                                           name="{{ item.key }}"
+                                                           :value="JSON.stringify(words).replace(/&quot;/g, '\'')">
+                                                    <div class="flex flex-wrap gap-2 mb-2">
+                                                        <template x-for="(word, index) in words" :key="index">
+                                                            <div class="badge badge-lg badge-primary gap-2 p-3">
+                                                                <span x-text="word"></span>
+                                                                <button type="button"
+                                                                        @click="words.splice(index, 1)"
+                                                                        class="btn btn-ghost btn-xs btn-circle text-primary-content/70 hover:text-white min-h-0 h-5 w-5">
+                                                                    <span class="material-symbols-outlined text-sm">close</span>
+                                                                </button>
+                                                            </div>
+                                                        </template>
+                                                    </div>
+                                                    <div class="join w-full max-w-md">
+                                                        <input type="text"
+                                                               x-model="newWord"
+                                                               @keydown.enter.prevent="if(newWord.trim()) { words.push(newWord.trim()); newWord = ''; }"
+                                                               class="input input-bordered join-item w-full focus:input-primary"
+                                                               placeholder="{% trans '输入欢迎词后按回车添加...' %}">
+                                                        <button type="button"
+                                                                @click="if(newWord.trim()) { words.push(newWord.trim()); newWord = ''; }"
+                                                                class="btn btn-primary join-item">
+                                                            <span class="material-symbols-outlined">add</span>
                                                         </button>
                                                     </div>
-                                                </template>
-                                            </div>
-                                            
-                                            <div class="join w-full max-w-md">
-                                                <input type="text" x-model="newWord" @keydown.enter.prevent="if(newWord.trim()) { words.push(newWord.trim()); newWord = ''; }" class="input input-bordered join-item w-full focus:input-primary" placeholder="{% trans '输入欢迎词后按回车添加...' %}">
-                                                <button type="button" @click="if(newWord.trim()) { words.push(newWord.trim()); newWord = ''; }" class="btn btn-primary join-item">
-                                                    <span class="material-symbols-outlined">add</span>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    {% elif 'color' in item.key|lower or 'colour' in item.key|lower %}
-                                        <!-- Color Picker -->
-                                        <div class="flex items-center gap-3">
-                                            <input type="color" name="{{ item.key }}" value="{{ item.value }}" class="h-10 w-20 p-1 bg-base-100 border border-base-300 rounded cursor-pointer">
-                                            <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="input input-bordered w-full max-w-xs focus:input-primary font-mono">
-                                        </div>
-                                    {% elif 'image' in item.key|lower or 'avatar' in item.key|lower or 'logo' in item.key|lower %}
-                                        <!-- Image URL input with preview -->
-                                        <div x-data="{ imgUrl: '{{ item.value|escapejs }}' }" class="flex flex-col gap-3">
-                                            <input type="text" name="{{ item.key }}" x-model="imgUrl" class="input input-bordered w-full focus:input-primary transition-all font-mono text-sm">
-                                            <div class="w-full h-32 bg-base-200/50 rounded-lg border border-dashed border-base-content/20 flex items-center justify-center overflow-hidden relative group">
-                                                <template x-if="imgUrl">
-                                                    <img :src="imgUrl" class="max-h-full max-w-full object-contain" @error="$el.style.display='none'">
-                                                </template>
-                                                <div class="absolute inset-0 flex items-center justify-center text-base-content/30 pointer-events-none" x-show="!imgUrl">
-                                                    <span>{% trans "图片预览" %}</span>
                                                 </div>
-                                            </div>
-                                        </div>
-                                    {% else %}
-                                        <textarea name="{{ item.key }}" class="textarea textarea-bordered w-full h-24 focus:textarea-primary transition-all font-mono text-sm leading-relaxed">{{ item.value }}</textarea>
-                                    {% endif %}
-                                {% endif %}
-                                
-                                <label class="label">
-                                    <span class="label-text-alt text-base-content/50 font-mono text-xs">{{ item.key }}</span>
-                                </label>
+                                            {% elif 'color' in item.key|lower or 'colour' in item.key|lower %}
+                                                <!-- Color Picker -->
+                                                <div class="flex items-center gap-3">
+                                                    <input type="color"
+                                                           name="{{ item.key }}"
+                                                           value="{{ item.value }}"
+                                                           class="h-10 w-20 p-1 bg-base-100 border border-base-300 rounded cursor-pointer">
+                                                    <input type="text"
+                                                           name="{{ item.key }}"
+                                                           value="{{ item.value }}"
+                                                           class="input input-bordered w-full max-w-xs focus:input-primary font-mono">
+                                                </div>
+                                            {% elif 'image' in item.key|lower or 'avatar' in item.key|lower or 'logo' in item.key|lower %}
+                                                <!-- Image URL input with preview -->
+                                                <div x-data="{ imgUrl: '{{ item.value|escapejs }}' }"
+                                                     class="flex flex-col gap-3">
+                                                    <input type="text"
+                                                           name="{{ item.key }}"
+                                                           x-model="imgUrl"
+                                                           class="input input-bordered w-full focus:input-primary transition-all font-mono text-sm">
+                                                    <div class="w-full h-32 bg-base-200/50 rounded-lg border border-dashed border-base-content/20 flex items-center justify-center overflow-hidden relative group">
+                                                        <template x-if="imgUrl">
+                                                            <img :src="imgUrl"
+                                                                 class="max-h-full max-w-full object-contain"
+                                                                 @error="$el.style.display='none'">
+                                                        </template>
+                                                        <div class="absolute inset-0 flex items-center justify-center text-base-content/30 pointer-events-none"
+                                                             x-show="!imgUrl">
+                                                            <span>{% trans "图片预览" %}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            {% else %}
+                                                <textarea name="{{ item.key }}"
+                                                          class="textarea textarea-bordered w-full h-24 focus:textarea-primary transition-all font-mono text-sm leading-relaxed">{{ item.value }}</textarea>
+                                            {% endif %}
+                                        {% endif %}
+                                        <label class="label">
+                                            <span class="label-text-alt text-base-content/50 font-mono text-xs">{{ item.key }}</span>
+                                        </label>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
+                        {% endfor %}
                     </div>
-                    {% endfor %}
                 </div>
-            </div>
             {% endfor %}
-
             <div class="divider"></div>
-
             <div class="flex justify-end sticky bottom-6 z-20">
-                <button type="submit" class="btn btn-primary btn-lg shadow-xl shadow-primary/20 gap-3">
+                <button type="submit"
+                        class="btn btn-primary btn-lg shadow-xl shadow-primary/20 gap-3">
                     <span class="material-symbols-outlined">save</span>
                     {% trans "保存所有设置" %}
                 </button>
@@ -187,4 +224,3 @@
     </div>
 </div>
 {% endblock %}
-

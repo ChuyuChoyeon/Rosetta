@@ -1,109 +1,118 @@
 {% extends 'base.html' %}
 {% load i18n %}
-
-{% block title %}{% trans "登录" %}{% endblock %}
-
+{% block title %}
+    {% trans "登录" %}
+{% endblock %}
 {% block content %}
-<div class="min-h-[calc(100vh-16rem)] flex items-center justify-center px-4 py-12 bg-base-200/30">
-    <section class="w-full max-w-md animate-fade-in-up">
-        <div class="card bg-base-100 shadow-2xl border border-base-content/5 rounded-3xl overflow-hidden relative">
-            <!-- Decorative Top Gradient -->
-            <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary via-secondary to-accent"></div>
-            
-            <div class="card-body p-8 sm:p-10">
-                <header class="text-center mb-8">
-                    <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4 shadow-sm">
-                        <span class="material-symbols-outlined text-3xl">login</span>
-                    </div>
-                    <h2 class="text-3xl font-heading font-extrabold text-base-content">{% trans "欢迎回来" %}</h2>
-                    <p class="text-base-content/60 mt-2 font-medium">{% trans "登录" %}{{ config.SITE_NAME|default:"Rosetta" }}。</p>
-                </header>
-
-                {% if form.non_field_errors %}
-                <div class="alert alert-error text-sm mb-6 rounded-2xl shadow-sm">
-                    <span class="material-symbols-outlined">error</span>
-                    <span>{{ form.non_field_errors.0 }}</span>
-                </div>
-                {% endif %}
-
-                <form method="post" class="space-y-6">
-                    {% csrf_token %}
-
-                    <div class="form-control">
-                        <label for="id_username" class="label">
-                            <span class="label-text font-bold">{% trans "用户名" %}</span>
-                        </label>
-                        <div class="relative group">
-                            <input id="id_username" type="text" name="username" placeholder="{% trans '请输入用户名' %}" autocomplete="username" 
-                                   class="input input-bordered w-full pl-11 focus:input-primary transition-all duration-300 rounded-xl bg-base-200/30 focus:bg-base-100 {% if form.errors.username %}input-error{% endif %}" required autofocus>
-                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40 group-focus-within:text-primary transition-colors">
-                                <span class="material-symbols-outlined text-[20px]">person</span>
-                            </div>
+    <div class="min-h-[calc(100vh-16rem)] flex items-center justify-center px-4 py-12 bg-base-200/30">
+        <section class="w-full max-w-md animate-fade-in-up">
+            <div class="card bg-base-100 shadow-2xl border border-base-content/5 rounded-3xl overflow-hidden relative">
+                <!-- Decorative Top Gradient -->
+                <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-primary via-secondary to-accent"></div>
+                <div class="card-body p-8 sm:p-10">
+                    <header class="text-center mb-8">
+                        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-primary/10 text-primary mb-4 shadow-sm">
+                            <span class="material-symbols-outlined text-3xl">login</span>
                         </div>
-                        {% if form.errors.username %}
-                        <label class="label pt-1">
-                            <span class="label-text-alt text-error flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">error</span>
-                                {{ form.errors.username.0 }}
-                            </span>
-                        </label>
-                        {% endif %}
-                    </div>
-
-                    <div class="form-control" x-data="{ showPassword: false }">
-                        <label for="id_password" class="label">
-                            <span class="label-text font-bold">{% trans "密码" %}</span>
-                        </label>
-                        <div class="relative group">
-                            <input id="id_password" :type="showPassword ? 'text' : 'password'" name="password" placeholder="{% trans '请输入密码' %}" autocomplete="current-password" 
-                                   class="input input-bordered w-full pl-11 pr-12 focus:input-primary transition-all duration-300 rounded-xl bg-base-200/30 focus:bg-base-100 {% if form.errors.password %}input-error{% endif %}" required>
-                            <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40 group-focus-within:text-primary transition-colors">
-                                <span class="material-symbols-outlined text-[20px]">lock</span>
+                        <h2 class="text-3xl font-heading font-extrabold text-base-content">{% trans "欢迎回来" %}</h2>
+                        <p class="text-base-content/60 mt-2 font-medium">{% trans "登录" %}{{ config.SITE_NAME|default:"Rosetta" }}。</p>
+                    </header>
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-error text-sm mb-6 rounded-2xl shadow-sm">
+                            <span class="material-symbols-outlined">error</span>
+                            <span>{{ form.non_field_errors.0 }}</span>
+                        </div>
+                    {% endif %}
+                    <form method="post" class="space-y-6">
+                        {% csrf_token %}
+                        <div class="form-control">
+                            <label for="id_username" class="label">
+                                <span class="label-text font-bold">{% trans "用户名" %}</span>
+                            </label>
+                            <div class="relative group">
+                                <input id="id_username"
+                                       type="text"
+                                       name="username"
+                                       placeholder="{% trans '请输入用户名' %}"
+                                       autocomplete="username"
+                                       class="input input-bordered w-full pl-11 focus:input-primary transition-all duration-300 rounded-xl bg-base-200/30 focus:bg-base-100 {% if form.errors.username %}input-error{% endif %}"
+                                       required
+                                       autofocus>
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40 group-focus-within:text-primary transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">person</span>
+                                </div>
                             </div>
-                            <button type="button" class="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/40 hover:text-primary cursor-pointer transition-colors" @click="showPassword = !showPassword">
-                                <span class="material-symbols-outlined text-[20px]" x-text="showPassword ? 'visibility_off' : 'visibility'">visibility</span>
+                            {% if form.errors.username %}
+                                <label class="label pt-1">
+                                    <span class="label-text-alt text-error flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">error</span>
+                                        {{ form.errors.username.0 }}
+                                    </span>
+                                </label>
+                            {% endif %}
+                        </div>
+                        <div class="form-control" x-data="{ showPassword: false, toggle() { this.showPassword = !this.showPassword } }">
+                            <label for="id_password" class="label">
+                                <span class="label-text font-bold">{% trans "密码" %}</span>
+                            </label>
+                            <div class="relative group">
+                                <input id="id_password"
+                                       :type="showPassword ? 'text' : 'password'"
+                                       name="password"
+                                       placeholder="{% trans '请输入密码' %}"
+                                       autocomplete="current-password"
+                                       class="input input-bordered w-full pl-11 pr-12 focus:input-primary transition-all duration-300 rounded-xl bg-base-200/30 focus:bg-base-100 {% if form.errors.password %}input-error{% endif %}"
+                                       required>
+                                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-base-content/40 group-focus-within:text-primary transition-colors">
+                                    <span class="material-symbols-outlined text-[20px]">lock</span>
+                                </div>
+                                <button type="button"
+                                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-base-content/40 hover:text-primary cursor-pointer transition-colors"
+                                        @click="toggle()">
+                                    <span class="material-symbols-outlined text-[20px]"
+                                          x-text="showPassword ? 'visibility_off' : 'visibility'">visibility</span>
+                                </button>
+                            </div>
+                            {% if form.errors.password %}
+                                <label class="label pt-1">
+                                    <span class="label-text-alt text-error flex items-center gap-1">
+                                        <span class="material-symbols-outlined text-[14px]">error</span>
+                                        {{ form.errors.password.0 }}
+                                    </span>
+                                </label>
+                            {% endif %}
+                            <label class="label pb-0">
+                                <span class="label-text-alt"></span>
+                                <a href="#"
+                                   class="label-text-alt link link-primary font-medium hover:text-primary-focus transition-colors">{% trans "忘记密码？" %}</a>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between pt-2">
+                            <label class="cursor-pointer flex items-center gap-2.5 group">
+                                <input type="checkbox"
+                                       class="checkbox checkbox-sm checkbox-primary rounded-md"
+                                       name="remember">
+                                <span class="text-sm text-base-content/70 group-hover:text-base-content transition-colors font-medium">{% trans "记住我" %}</span>
+                            </label>
+                        </div>
+                        <div class="pt-4">
+                            <button type="submit"
+                                    class="btn btn-primary w-full text-lg font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 hover:scale-[1.02]">
+                                {% trans "登录" %}
+                                <span class="material-symbols-outlined">arrow_forward</span>
                             </button>
                         </div>
-                        {% if form.errors.password %}
-                        <label class="label pt-1">
-                            <span class="label-text-alt text-error flex items-center gap-1">
-                                <span class="material-symbols-outlined text-[14px]">error</span>
-                                {{ form.errors.password.0 }}
-                            </span>
-                        </label>
-                        {% endif %}
-                        <label class="label pb-0">
-                            <span class="label-text-alt"></span>
-                            <a href="#" class="label-text-alt link link-primary font-medium hover:text-primary-focus transition-colors">{% trans "忘记密码？" %}</a>
-                        </label>
+                    </form>
+                    <div class="divider text-xs text-base-content/40 my-8 font-medium">{% trans "或" %}</div>
+                    <div class="text-center text-sm">
+                        <p class="text-base-content/70">
+                            {% trans "还没有账号？" %} <a href="{% url 'users:register' %}"
+    class="link link-primary font-bold hover:text-primary-focus transition-colors">{% trans "立即注册" %}</a>
+                        </p>
                     </div>
-
-                    <div class="flex items-center justify-between pt-2">
-                        <label class="cursor-pointer flex items-center gap-2.5 group">
-                            <input type="checkbox" class="checkbox checkbox-sm checkbox-primary rounded-md" name="remember">
-                            <span class="text-sm text-base-content/70 group-hover:text-base-content transition-colors font-medium">{% trans "记住我" %}</span>
-                        </label>
-                    </div>
-
-                    <div class="pt-4">
-                        <button type="submit" class="btn btn-primary w-full text-lg font-bold rounded-xl shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all duration-300 hover:scale-[1.02]">
-                            {% trans "登录" %}
-                            <span class="material-symbols-outlined">arrow_forward</span>
-                        </button>
-                    </div>
-                </form>
-
-                <div class="divider text-xs text-base-content/40 my-8 font-medium">{% trans "或" %}</div>
-
-                <div class="text-center text-sm">
-                    <p class="text-base-content/70">{% trans "还没有账号？" %} <a href="{% url 'users:register' %}" class="link link-primary font-bold hover:text-primary-focus transition-colors">{% trans "立即注册" %}</a></p>
                 </div>
             </div>
-        </div>
-    </section>
-</div>
-
-<script>
-    // Legacy script removed in favor of Alpine.js
-</script>
+        </section>
+    </div>
+    <script>// Legacy script removed in favor of Alpine.js</script>
 {% endblock %}

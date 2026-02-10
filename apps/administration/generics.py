@@ -1,10 +1,10 @@
-from typing import List, Dict, Any
+from typing import List
 from django.views.generic import ListView, CreateView, UpdateView, DeleteView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.utils.translation import gettext as _
-from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core.serializers.json import DjangoJSONEncoder
 from django.shortcuts import redirect
 from django.utils import timezone
@@ -12,6 +12,7 @@ from django.contrib.admin.models import ADDITION, CHANGE, DELETION
 import json
 
 from .mixins import AuditLogMixin, StaffRequiredMixin
+
 
 class BaseListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
     """
@@ -42,9 +43,7 @@ class BaseListView(LoginRequiredMixin, StaffRequiredMixin, ListView):
     def get_template_names(self) -> List[str]:
         # HTMX 局部刷新支持
         # 如果是 HTMX 请求且非 Boosted 请求（全页导航），则仅返回局部模板
-        if self.request.headers.get("HX-Request") and not self.request.headers.get(
-            "HX-Boosted"
-        ):
+        if self.request.htmx and not self.request.htmx.boosted:
             return [
                 f"administration/partials/{self.model._meta.model_name}_list_rows.html"
             ]
@@ -93,7 +92,10 @@ class BaseCreateView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Crea
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _("{name} 创建成功").format(name=self.model._meta.verbose_name))
+        messages.success(
+            self.request,
+            _("{name} 创建成功").format(name=self.model._meta.verbose_name),
+        )
         self.log_action(ADDITION, change_message=_("通过管理后台创建"))
         return response
 
@@ -132,14 +134,17 @@ class BaseUpdateView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Upda
 
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, _("{name} 更新成功").format(name=self.model._meta.verbose_name))
-        
+        messages.success(
+            self.request,
+            _("{name} 更新成功").format(name=self.model._meta.verbose_name),
+        )
+
         # 尝试检测变更字段 (简单的实现)
         changed_data = form.changed_data
         msg = _("通过管理后台更新")
         if changed_data:
-            msg = _("更新字段: {fields}").format(fields=', '.join(changed_data))
-        
+            msg = _("更新字段: {fields}").format(fields=", ".join(changed_data))
+
         self.log_action(CHANGE, change_message=msg)
         return response
 
@@ -194,7 +199,7 @@ class BaseImportView(LoginRequiredMixin, StaffRequiredMixin, View):
             messages.error(request, _("请上传 JSON 文件"))
             if self.success_url:
                 return redirect(self.success_url)
-            return redirect("administration:index") # Fallback
+            return redirect("administration:index")  # Fallback
 
         json_file = request.FILES["json_file"]
         try:
@@ -227,7 +232,9 @@ class BaseImportView(LoginRequiredMixin, StaffRequiredMixin, View):
                     self.model.objects.create(**item)
                     success_count += 1
 
-            messages.success(request, _("成功导入 {count} 条数据").format(count=success_count))
+            messages.success(
+                request, _("成功导入 {count} 条数据").format(count=success_count)
+            )
 
         except Exception as e:
             messages.error(request, _("导入失败: {error}").format(error=str(e)))
@@ -249,7 +256,7 @@ class BaseDeleteView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Dele
 
     def form_valid(self, form):
         success_url = self.get_success_url()
-        
+
         # 在删除前记录日志
         try:
             self.object = self.get_object()
@@ -260,18 +267,23 @@ class BaseDeleteView(AuditLogMixin, LoginRequiredMixin, StaffRequiredMixin, Dele
         self.object.delete()
 
         # HTMX Support
-        if self.request.headers.get("HX-Request"):
+        if self.request.htmx:
             # 返回空内容以移除行，并触发 Toast 消息
             response = HttpResponse("")
             response["HX-Trigger"] = json.dumps(
                 {
                     "show-toast": {
-                        "message": _("{name} 删除成功").format(name=self.model._meta.verbose_name),
+                        "message": _("{name} 删除成功").format(
+                            name=self.model._meta.verbose_name
+                        ),
                         "type": "success",
                     }
                 }
             )
             return response
 
-        messages.success(self.request, _("{name} 删除成功").format(name=self.model._meta.verbose_name))
+        messages.success(
+            self.request,
+            _("{name} 删除成功").format(name=self.model._meta.verbose_name),
+        )
         return HttpResponseRedirect(success_url)

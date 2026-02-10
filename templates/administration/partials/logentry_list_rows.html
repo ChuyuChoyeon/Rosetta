@@ -1,80 +1,81 @@
 {% load core_extras %}
 {% load i18n %}
 {% for log in logentries %}
-<tr class="hover">
-    <td class="font-mono text-xs whitespace-nowrap text-base-content/60 pl-4">
-        {{ log.action_time|date:"Y-m-d" }}
-        <span class="block text-base-content/40 text-[10px]">{{ log.action_time|date:"H:i:s" }}</span>
-    </td>
-    <td>
-        <div class="flex items-center gap-3">
-            <div class="avatar">
-                <div class="w-8 h-8 rounded-full ring-2 ring-base-100 shadow-sm overflow-hidden">
-                    <img src="{{ log.user.get_avatar_url }}" alt="{{ log.user.username }}" class="object-cover w-full h-full" loading="lazy" />
+    <tr class="hover">
+        <td class="font-mono text-xs whitespace-nowrap text-base-content/60 pl-4">
+            {{ log.action_time|date:"Y-m-d" }}
+            <span class="block text-base-content/40 text-[10px]">{{ log.action_time|date:"H:i:s" }}</span>
+        </td>
+        <td>
+            <div class="flex items-center gap-3">
+                <div class="avatar">
+                    <div class="w-8 h-8 rounded-full ring-2 ring-base-100 shadow-sm overflow-hidden">
+                        <img src="{{ log.user.get_avatar_url }}"
+                             alt="{{ log.user.username }}"
+                             class="object-cover w-full h-full"
+                             loading="lazy" />
+                    </div>
+                </div>
+                <div class="flex flex-col">
+                    <span class="font-semibold text-sm text-base-content">{{ log.user.nickname|default:log.user.username }}</span>
                 </div>
             </div>
-            <div class="flex flex-col">
-                <span class="font-semibold text-sm text-base-content">{{ log.user.nickname|default:log.user.username }}</span>
+        </td>
+        <td>
+            {% if log.action_flag == 1 %}
+                <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/10 font-bold h-auto py-1">
+                    <span class="material-symbols-outlined text-[14px]">add_circle</span>
+                    <span class="hidden sm:inline">{% trans "新增" %}</span>
+                </div>
+            {% elif log.action_flag == 2 %}
+                <div class="badge badge-warning badge-sm gap-1 badge-outline bg-warning/10 font-bold h-auto py-1">
+                    <span class="material-symbols-outlined text-[14px]">edit</span>
+                    <span class="hidden sm:inline">{% trans "修改" %}</span>
+                </div>
+            {% elif log.action_flag == 3 %}
+                <div class="badge badge-error badge-sm gap-1 badge-outline bg-error/10 font-bold h-auto py-1">
+                    <span class="material-symbols-outlined text-[14px]">delete</span>
+                    <span class="hidden sm:inline">{% trans "删除" %}</span>
+                </div>
+            {% endif %}
+        </td>
+        <td class="hidden md:table-cell">
+            <div class="flex items-center gap-2"
+                 title="{{ log.content_type|model_verbose_name }}">
+                <div class="w-1.5 h-1.5 rounded-full bg-primary/40"></div>
+                <span class="text-xs font-medium text-base-content/70">{{ log.content_type|model_verbose_name }}</span>
             </div>
-        </div>
-    </td>
-    <td>
-        {% if log.action_flag == 1 %}
-        <div class="badge badge-success badge-sm gap-1 badge-outline bg-success/10 font-bold h-auto py-1">
-            <span class="material-symbols-outlined text-[14px]">add_circle</span>
-            <span class="hidden sm:inline">{% trans "新增" %}</span>
-        </div>
-        {% elif log.action_flag == 2 %}
-        <div class="badge badge-warning badge-sm gap-1 badge-outline bg-warning/10 font-bold h-auto py-1">
-            <span class="material-symbols-outlined text-[14px]">edit</span>
-            <span class="hidden sm:inline">{% trans "修改" %}</span>
-        </div>
-        {% elif log.action_flag == 3 %}
-        <div class="badge badge-error badge-sm gap-1 badge-outline bg-error/10 font-bold h-auto py-1">
-            <span class="material-symbols-outlined text-[14px]">delete</span>
-            <span class="hidden sm:inline">{% trans "删除" %}</span>
-        </div>
-        {% endif %}
-    </td>
-    <td class="hidden md:table-cell">
-        <div class="flex items-center gap-2" title="{{ log.content_type|model_verbose_name }}">
-            <div class="w-1.5 h-1.5 rounded-full bg-primary/40"></div>
-            <span class="text-xs font-medium text-base-content/70">{{ log.content_type|model_verbose_name }}</span>
-        </div>
-    </td>
-    <td class="hidden lg:table-cell">
-        <div class="font-mono text-xs text-primary/80 bg-primary/5 px-2 py-1 rounded border border-primary/10 max-w-[150px] truncate" title="{{ log.object_repr }}">
-            {{ log.object_repr }}
-        </div>
-    </td>
-    <td class="max-w-xs hidden sm:table-cell">
-        <p class="text-xs text-base-content/60 truncate" title="{{ log.change_message }}">
-            {{ log.change_message|default:"-" }}
-        </p>
-    </td>
-    <td class="text-center">
-        <div class="join">
-            <button type="button" 
-                    hx-post="{% url 'administration:logentry_delete' log.pk %}"
-                    hx-trigger="confirmed"
-                    hx-target="closest tr"
-                    hx-swap="outerHTML swap:0.5s"
-                    onclick="confirmHtmx(this, '{% trans "确定要删除这条日志吗？"|escapejs %}')"
-                    class="btn btn-ghost btn-xs join-item text-error" 
-                    title="{% trans '删除' %}">
-                <span class="material-symbols-outlined text-base">delete</span>
-            </button>
-        </div>
-    </td>
-</tr>
+        </td>
+        <td class="hidden lg:table-cell">
+            <div class="font-mono text-xs text-primary/80 bg-primary/5 px-2 py-1 rounded border border-primary/10 max-w-[150px] truncate"
+                 title="{{ log.object_repr }}">{{ log.object_repr }}</div>
+        </td>
+        <td class="max-w-xs hidden sm:table-cell">
+            <p class="text-xs text-base-content/60 truncate"
+               title="{{ log.change_message }}">{{ log.change_message|default:"-" }}</p>
+        </td>
+        <td class="text-center">
+            <div class="join">
+                <button type="button"
+                        hx-post="{% url 'administration:logentry_delete' log.pk %}"
+                        hx-trigger="confirmed"
+                        hx-target="closest tr"
+                        hx-swap="outerHTML swap:0.5s"
+                        onclick="confirmHtmx(this, '{% trans "确定要删除这条日志吗？"|escapejs %}')"
+                        class="btn btn-ghost btn-xs join-item text-error"
+                        title="{% trans '删除' %}">
+                    <span class="material-symbols-outlined text-base">delete</span>
+                </button>
+            </div>
+        </td>
+    </tr>
 {% empty %}
-<tr>
-    <td colspan="7">
-        <div class="flex flex-col items-center justify-center py-12 text-base-content/40">
-            <span class="material-symbols-outlined text-4xl mb-2">history_toggle_off</span>
-            <p class="text-sm">{% trans "暂无日志记录" %}</p>
-        </div>
-    </td>
-</tr>
+    <tr>
+        <td colspan="7">
+            <div class="flex flex-col items-center justify-center py-12 text-base-content/40">
+                <span class="material-symbols-outlined text-4xl mb-2">history_toggle_off</span>
+                <p class="text-sm">{% trans "暂无日志记录" %}</p>
+            </div>
+        </td>
+    </tr>
 {% endfor %}
-

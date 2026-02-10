@@ -4,18 +4,80 @@ from django.db.models import Count, Q
 from django.db.models.functions import TruncDate
 from django.utils.translation import gettext as _
 from datetime import timedelta
-import psutil
 import platform
 import django
 import json
 
+try:
+    import psutil
+except ImportError:
+    psutil = None
+
 from blog.models import Post, Comment, Category, Tag
 from users.models import User
+from django.contrib.auth import get_user_model
 
 class DashboardService:
     """
     Service for gathering dashboard statistics and charts data.
     """
+
+    @staticmethod
+    def get_system_info() -> Dict[str, Any]:
+        """
+        Get system hardware and software information efficiently.
+        Returns a dictionary with cpu, memory, disk, and platform info.
+        """
+        try:
+            if psutil is None:
+                raise ImportError("psutil module not installed")
+
+            cpu_usage = psutil.cpu_percent(interval=0.1)
+            memory = psutil.virtual_memory()
+            disk = psutil.disk_usage("/")
+
+            p = psutil.Process()
+            uptime_seconds = timezone.now().timestamp() - p.create_time()
+            uptime = timedelta(seconds=int(uptime_seconds))
+
+            uptime_str = f"{uptime.days}{_('天')} " if uptime.days > 0 else ""
+            hours, remainder = divmod(uptime.seconds, 3600)
+            minutes, seconds = divmod(remainder, 60)
+            uptime_str += f"{hours}{_('小时')} {minutes}{_('分钟')}"
+
+            return {
+                "cpu_percent": cpu_usage,
+                "memory_percent": memory.percent,
+                "memory_used": memory.used,
+                "memory_total": memory.total,
+                "disk_percent": disk.percent,
+                "disk_free": disk.free,
+                "disk_total": disk.total,
+                "python_version": platform.python_version(),
+                "django_version": django.get_version(),
+                "platform_system": platform.system(),
+                "platform_release": platform.release(),
+                "server_time": timezone.now(),
+                "uptime": uptime_str,
+            }
+        except Exception as e:
+            # Fallback for dev environments without psutil access or other errors
+            return {
+                "cpu_percent": 0,
+                "memory_percent": 0,
+                "memory_used": 0,
+                "memory_total": 0,
+                "disk_percent": 0,
+                "disk_free": 0,
+                "disk_total": 0,
+                "python_version": platform.python_version(),
+                "django_version": django.get_version(),
+                "platform_system": platform.system(),
+                "platform_release": platform.release(),
+                "server_time": timezone.now(),
+                "uptime": "N/A",
+                "error": str(e)
+            }
 
     @staticmethod
     def get_dashboard_context() -> Dict[str, Any]:
@@ -54,7 +116,7 @@ class DashboardService:
         total_comments = comment_counts["total"] or 0
         pending_comments = comment_counts["pending"] or 0
         active_comments = comment_counts["active"] or 0
-        
+
         context["total_comments"] = total_comments
         context["pending_comments"] = pending_comments
 
@@ -62,7 +124,8 @@ class DashboardService:
         context["comment_status_data"] = json.dumps([active_comments, pending_comments])
 
         # 用户角色分布
-        user_counts = User.objects.aggregate(
+        UserModel = get_user_model()
+        user_counts = UserModel.objects.aggregate(
             superusers=Count("id", filter=Q(is_superuser=True)),
             staff=Count("id", filter=Q(is_staff=True, is_superuser=False)),
             normal=Count("id", filter=Q(is_staff=False)),
@@ -81,10 +144,10 @@ class DashboardService:
             .annotate(count=Count("id"))
             .order_by("date")
         )
-        
+
         # 用户注册趋势
         user_trend = (
-            User.objects.filter(date_joined__gte=trend_start_date)
+            UserModel.objects.filter(date_joined__gte=trend_start_date)
             .annotate(date=TruncDate("date_joined"))
             .values("date")
             .annotate(count=Count("id"))
@@ -93,11 +156,11 @@ class DashboardService:
 
         date_map = {item["date"]: item["count"] for item in trend_data}
         user_date_map = {item["date"]: item["count"] for item in user_trend}
-        
+
         dates = []
         counts = []
         user_counts_list = []
-        
+
         for i in range(7):
             d = (trend_start_date + timedelta(days=i)).date()
             dates.append(d.strftime("%m-%d"))
@@ -109,7 +172,9 @@ class DashboardService:
         context["user_trend_counts"] = json.dumps(user_counts_list)
 
         # 热门文章
-        top_posts = list(Post.objects.only("id", "title", "views").order_by("-views")[:5])
+        top_posts = list(
+            Post.objects.only("id", "title", "views").order_by("-views")[:5]
+        )
         context["top_posts"] = top_posts
         context["top_posts_labels"] = [
             p.title[:10] + "..." if len(p.title) > 10 else p.title for p in top_posts
@@ -121,7 +186,9 @@ class DashboardService:
             .values("name", "count")
             .order_by("-count")
         )
-        context["category_labels"] = json.dumps([c["name"] for c in category_counts], ensure_ascii=False)
+        context["category_labels"] = json.dumps(
+            [c["name"] for c in category_counts], ensure_ascii=False
+        )
         context["category_data"] = json.dumps([c["count"] for c in category_counts])
 
         # 标签分布
@@ -130,42 +197,22 @@ class DashboardService:
             .values("name", "count")
             .order_by("-count")[:10]
         )
-        context["tag_labels"] = json.dumps([t["name"] for t in tag_counts], ensure_ascii=False)
+        context["tag_labels"] = json.dumps(
+            [t["name"] for t in tag_counts], ensure_ascii=False
+        )
         context["tag_data"] = json.dumps([t["count"] for t in tag_counts])
 
         # 系统信息
+        system_info = DashboardService.get_system_info()
+        context["system_info"] = system_info
+        
+        # Calculate health score safely
         try:
-            cpu_usage = psutil.cpu_percent(interval=0.1)
-            memory = psutil.virtual_memory()
-            disk = psutil.disk_usage("/")
-            
-            p = psutil.Process()
-            uptime_seconds = timezone.now().timestamp() - p.create_time()
-            uptime = timedelta(seconds=int(uptime_seconds))
-            
-            uptime_str = f"{uptime.days}{_('天')} " if uptime.days > 0 else ""
-            hours, remainder = divmod(uptime.seconds, 3600)
-            minutes, seconds = divmod(remainder, 60)
-            uptime_str += f"{hours}{_('小时')} {minutes}{_('分钟')}"
-
-            context["system_info"] = {
-                "cpu_percent": cpu_usage,
-                "memory_percent": memory.percent,
-                "memory_used": memory.used,
-                "memory_total": memory.total,
-                "disk_percent": disk.percent,
-                "disk_free": disk.free,
-                "disk_total": disk.total,
-                "python_version": platform.python_version(),
-                "django_version": django.get_version(),
-                "platform_system": platform.system(),
-                "platform_release": platform.release(),
-                "server_time": timezone.now(),
-                "uptime": uptime_str,
-            }
-            context["system_health"] = int(max(0, 100 - max(cpu_usage, memory.percent, disk.percent)))
-        except Exception:
-            context["system_info"] = {}
+            cpu = system_info.get("cpu_percent", 0)
+            mem = system_info.get("memory_percent", 0)
+            disk = system_info.get("disk_percent", 0)
+            context["system_health"] = int(max(0, 100 - max(cpu, mem, disk)))
+        except (ValueError, TypeError):
             context["system_health"] = 85
 
         # 最近动态

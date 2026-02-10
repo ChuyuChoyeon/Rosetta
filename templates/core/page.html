@@ -1,42 +1,38 @@
 {% extends 'base.html' %}
 {% load markdown_extras i18n static %}
-
 {# 单页面详情模板：用于展示“关于”、“联系我们”等静态页面内容 #}
-
 {% block extra_css %}
-<!-- ByteMD Viewer CSS -->
-<link rel="stylesheet" href="{% static 'js/viewer.css' %}?v=4.4.0">
+    <!-- ByteMD Viewer CSS -->
+    <link rel="stylesheet" href="{% static 'js/viewer.css' %}?v=4.4.0">
 {% endblock %}
-
 {% block title %}{{ page.title }}{% endblock %}
-
 {% block content %}
-<div class="container mx-auto px-4 py-12 max-w-5xl">
-    <div class="bg-base-100 rounded-3xl shadow-sm border border-base-content/5 p-8 md:p-12 relative overflow-hidden">
-        <!-- 背景装饰效果 (Background Decoration) -->
-        <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32"></div>
-        <div class="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-3xl pointer-events-none -ml-32 -mb-32"></div>
-
-        <header class="mb-12 text-center relative z-10">
-            <h1 class="text-4xl md:text-5xl font-heading font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-base-content to-base-content/70">{{ page.title }}</h1>
-            <div class="h-1 w-24 bg-gradient-to-r from-primary to-secondary rounded-full mx-auto"></div>
-        </header>
-
-        <!-- 文章内容区：应用 Markdown 渲染和排版样式 -->
-        <article class="prose prose-lg md:prose-xl mx-auto dark:prose-invert relative z-10">
-            <!-- Server-side Rendered Content (SEO & NoJS) -->
-            <div id="server-content" class="markdown-body min-h-[200px] {% if request.GET.nojs %}block{% else %}hidden{% endif %}">
-                {{ rendered_content|default:page.content|markdown }}
+    <div class="container mx-auto px-4 py-12 max-w-5xl">
+        <div class="bg-base-100 rounded-3xl shadow-sm border border-base-content/5 p-8 md:p-12 relative overflow-hidden">
+            <!-- 背景装饰效果 (Background Decoration) -->
+            <div class="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl pointer-events-none -mr-32 -mt-32">
             </div>
-
-            <!-- Client-side Viewer (ByteMD with Mermaid) -->
-            <div id="page-content" class="min-h-[200px] markdown-body"></div>
-            
-            {{ page.content|json_script:"page-content-data" }}
-            
-            <!-- Viewer Initialization -->
-            <script src="{% static 'js/viewer.js' %}?v=4.4.0"></script>
-            <script>
+            <div class="absolute bottom-0 left-0 w-64 h-64 bg-secondary/5 rounded-full blur-3xl pointer-events-none -ml-32 -mb-32">
+            </div>
+            <header class="mb-12 text-center relative z-10">
+                <h1 class="text-4xl md:text-5xl font-heading font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-base-content to-base-content/70">
+                    {{ page.title }}
+                </h1>
+                <div class="h-1 w-24 bg-gradient-to-r from-primary to-secondary rounded-full mx-auto"></div>
+            </header>
+            <!-- 文章内容区：应用 Markdown 渲染和排版样式 -->
+            <article class="prose prose-lg md:prose-xl mx-auto dark:prose-invert relative z-10">
+                <!-- Server-side Rendered Content (SEO & NoJS) -->
+                <div id="server-content"
+                     class="markdown-body min-h-[200px] {% if request.GET.nojs %}block{% else %}hidden{% endif %}">
+                    {{ rendered_content|default:page.content|markdown }}
+                </div>
+                <!-- Client-side Viewer (ByteMD with Mermaid) -->
+                <div id="page-content" class="min-h-[200px] markdown-body"></div>
+                {{ page.content|json_script:"page-content-data" }}
+                <!-- Viewer Initialization -->
+                <script src="{% static 'js/viewer.js' %}?v=4.4.0"></script>
+                <script>
                 document.addEventListener('DOMContentLoaded', function() {
                     const content = JSON.parse(document.getElementById('page-content-data').textContent);
                     if (window.initByteMDViewer) {
@@ -47,8 +43,8 @@
                         document.getElementById('page-content').classList.add('hidden');
                     }
                 });
-            </script>
-        </article>
+                </script>
+            </article>
+        </div>
     </div>
-</div>
 {% endblock %}

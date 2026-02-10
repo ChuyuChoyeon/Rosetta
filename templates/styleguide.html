@@ -1,195 +1,176 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block title %}Nexus Design System Styleguide{% endblock %}
-
 {% block content %}
-<div class="container mx-auto px-4 py-12 space-y-16">
-    <!-- Header -->
-    <div class="text-center space-y-4">
-        <h1 class="text-5xl font-bold font-heading bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
-            Nexus Design System
-        </h1>
-        <p class="text-xl text-base-content/70 max-w-2xl mx-auto">
-            A production-ready UI kit optimized for Django, Tailwind, and DaisyUI.
-        </p>
-    </div>
-
-    <!-- 1. Buttons & States -->
-    <section class="space-y-6">
-        <h2 class="text-3xl font-bold border-b border-base-300 pb-2">Buttons & Interactions</h2>
-        <div class="flex flex-wrap gap-4 items-center p-8 border border-base-300 rounded-box bg-base-100 shadow-sm">
-            <!-- Primary -->
-            <button class="btn btn-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all duration-300">
-                Primary Action
-            </button>
-            
-            <!-- Secondary -->
-            <button class="btn btn-secondary">
-                Secondary
-            </button>
-            
-            <!-- Ghost -->
-            <button class="btn btn-ghost">
-                Ghost Button
-            </button>
-            
-            <!-- Link -->
-            <button class="btn btn-link">
-                Link Button
-            </button>
-
-            <!-- Loading State -->
-            <button class="btn btn-primary" x-data="{ loading: false }" @click="loading = true; setTimeout(() => loading = false, 2000)">
-                <span x-show="loading" class="loading loading-spinner"></span>
-                <span x-show="!loading">Click to Load</span>
-                <span x-show="loading">Processing...</span>
-            </button>
+    <div class="container mx-auto px-4 py-12 space-y-16">
+        <!-- Header -->
+        <div class="text-center space-y-4">
+            <h1 class="text-5xl font-bold font-heading bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+                Nexus Design System
+            </h1>
+            <p class="text-xl text-base-content/70 max-w-2xl mx-auto">
+                A production-ready UI kit optimized for Django, Tailwind, and DaisyUI.
+            </p>
         </div>
-    </section>
-
-    <!-- 2. Modals -->
-    <section class="space-y-6">
-        <h2 class="text-3xl font-bold border-b border-base-300 pb-2">Interactive Modals</h2>
-        <div class="p-8 border border-base-300 rounded-box bg-base-100 shadow-sm" x-data="{ open: false }">
-            <button @click="open = true" class="btn btn-accent text-white shadow-lg shadow-accent/30">
-                Open Modal
-            </button>
-
-            <!-- Modal Backdrop -->
-            <div 
-                x-show="open" 
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0"
-                x-transition:enter-end="opacity-100"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100"
-                x-transition:leave-end="opacity-0"
-                class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-                @click.self="open = false"
-                style="display: none;"
-            >
-                <!-- Modal Box -->
-                <div 
-                    x-show="open"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 scale-90 translate-y-4"
-                    x-transition:enter-end="opacity-100 scale-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100 scale-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 scale-90 translate-y-4"
-                    class="modal-box relative bg-base-100 shadow-2xl border border-white/10"
-                >
-                    <h3 class="font-bold text-lg text-primary">Confirm Action</h3>
-                    <p class="py-4 text-base-content/80">
-                        This is a deeply optimized modal with backdrop blur and zoom animations. 
-                        Click outside or the button to close.
-                    </p>
-                    <div class="modal-action">
-                        <button @click="open = false" class="btn btn-ghost">Cancel</button>
-                        <button @click="open = false" class="btn btn-primary">Confirm</button>
+        <!-- 1. Buttons & States -->
+        <section class="space-y-6">
+            <h2 class="text-3xl font-bold border-b border-base-300 pb-2">Buttons & Interactions</h2>
+            <div class="flex flex-wrap gap-4 items-center p-8 border border-base-300 rounded-box bg-base-100 shadow-sm">
+                <!-- Primary -->
+                <button class="btn btn-primary shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all duration-300">
+                    Primary Action
+                </button>
+                <!-- Secondary -->
+                <button class="btn btn-secondary">Secondary</button>
+                <!-- Ghost -->
+                <button class="btn btn-ghost">Ghost Button</button>
+                <!-- Link -->
+                <button class="btn btn-link">Link Button</button>
+                <!-- Loading State -->
+                <button class="btn btn-primary"
+                        x-data="{ loading: false }"
+                        @click="loading = true; setTimeout(() => loading = false, 2000)">
+                    <span x-show="loading" class="loading loading-spinner"></span>
+                    <span x-show="!loading">Click to Load</span>
+                    <span x-show="loading">Processing...</span>
+                </button>
+            </div>
+        </section>
+        <!-- 2. Modals -->
+        <section class="space-y-6">
+            <h2 class="text-3xl font-bold border-b border-base-300 pb-2">Interactive Modals</h2>
+            <div class="p-8 border border-base-300 rounded-box bg-base-100 shadow-sm"
+                 x-data="{ open: false }">
+                <button @click="open = true"
+                        class="btn btn-accent text-white shadow-lg shadow-accent/30">Open Modal</button>
+                <!-- Modal Backdrop -->
+                <div x-show="open"
+                     x-transition:enter="transition ease-out duration-300"
+                     x-transition:enter-start="opacity-0"
+                     x-transition:enter-end="opacity-100"
+                     x-transition:leave="transition ease-in duration-200"
+                     x-transition:leave-start="opacity-100"
+                     x-transition:leave-end="opacity-0"
+                     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+                     @click.self="open = false"
+                     style="display: none">
+                    <!-- Modal Box -->
+                    <div x-show="open"
+                         x-transition:enter="transition ease-out duration-300"
+                         x-transition:enter-start="opacity-0 scale-90 translate-y-4"
+                         x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave="transition ease-in duration-200"
+                         x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+                         x-transition:leave-end="opacity-0 scale-90 translate-y-4"
+                         class="modal-box relative bg-base-100 shadow-2xl border border-white/10">
+                        <h3 class="font-bold text-lg text-primary">Confirm Action</h3>
+                        <p class="py-4 text-base-content/80">
+                            This is a deeply optimized modal with backdrop blur and zoom animations.
+                            Click outside or the button to close.
+                        </p>
+                        <div class="modal-action">
+                            <button @click="open = false" class="btn btn-ghost">Cancel</button>
+                            <button @click="open = false" class="btn btn-primary">Confirm</button>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </section>
-
-    <!-- 3. Forms & Inputs -->
-    <section class="space-y-6">
-        <h2 class="text-3xl font-bold border-b border-base-300 pb-2">Forms & Validation</h2>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 border border-base-300 rounded-box bg-base-100 shadow-sm">
-            
-            <!-- Standard Input -->
-            <div class="form-control w-full">
-                <label class="label">
-                    <span class="label-text font-medium">Standard Input</span>
-                </label>
-                <input type="text" placeholder="Type here..." class="input input-bordered w-full focus:input-primary transition-all duration-200" />
-            </div>
-
-            <!-- Error State -->
-            <div class="form-control w-full">
-                <label class="label">
-                    <span class="label-text font-medium text-error">Error State</span>
-                </label>
-                <input type="text" value="Invalid Value" class="input input-bordered input-error w-full animate-shake" />
-                <label class="label">
-                    <span class="label-text-alt text-error">This field is required</span>
-                </label>
-            </div>
-
-            <!-- Floating Label (Custom CSS) -->
-            <div class="form-control w-full relative pt-4">
-                <input type="text" placeholder=" " class="input input-bordered w-full peer pt-6 pb-2" />
-                <label class="absolute top-4 left-4 text-sm text-base-content/60 duration-200 transform -translate-y-3 scale-75 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-primary pointer-events-none">
-                    Floating Label
-                </label>
-            </div>
-
-            <!-- Select -->
-            <div class="form-control w-full">
-                <label class="label">
-                    <span class="label-text">Select Option</span>
-                </label>
-                <select class="select select-bordered w-full">
-                    <option disabled selected>Pick one</option>
-                    <option>Star Wars</option>
-                    <option>Harry Potter</option>
-                    <option>Lord of the Rings</option>
-                </select>
-            </div>
-        </div>
-    </section>
-
-    <!-- 4. Cards & Layouts -->
-    <section class="space-y-6">
-        <h2 class="text-3xl font-bold border-b border-base-300 pb-2">Cards & Bloom Effects</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- Card 1 -->
-            <div class="card bg-base-100 shadow-xl shadow-bloom cursor-pointer border border-base-200">
-                <figure class="px-4 pt-4">
-                    <div class="w-full h-48 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl flex items-center justify-center text-primary">
-                        <span class="material-symbols-outlined text-6xl">image</span>
-                    </div>
-                </figure>
-                <div class="card-body">
-                    <h2 class="card-title">Bloom Effect</h2>
-                    <p class="text-sm text-base-content/70">Hover over this card to see the custom shadow bloom and lift animation.</p>
-                    <div class="card-actions justify-end mt-4">
-                        <button class="btn btn-sm btn-primary">Buy Now</button>
-                    </div>
+        </section>
+        <!-- 3. Forms & Inputs -->
+        <section class="space-y-6">
+            <h2 class="text-3xl font-bold border-b border-base-300 pb-2">Forms & Validation</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 p-8 border border-base-300 rounded-box bg-base-100 shadow-sm">
+                <!-- Standard Input -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium">Standard Input</span>
+                    </label>
+                    <input type="text"
+                           placeholder="Type here..."
+                           class="input input-bordered w-full focus:input-primary transition-all duration-200" />
+                </div>
+                <!-- Error State -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text font-medium text-error">Error State</span>
+                    </label>
+                    <input type="text"
+                           value="Invalid Value"
+                           class="input input-bordered input-error w-full animate-shake" />
+                    <label class="label">
+                        <span class="label-text-alt text-error">This field is required</span>
+                    </label>
+                </div>
+                <!-- Floating Label (Custom CSS) -->
+                <div class="form-control w-full relative pt-4">
+                    <input type="text"
+                           placeholder=" "
+                           class="input input-bordered w-full peer pt-6 pb-2" />
+                    <label class="absolute top-4 left-4 text-sm text-base-content/60 duration-200 transform -translate-y-3 scale-75 origin-[0] peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-3 peer-focus:text-primary pointer-events-none">
+                        Floating Label
+                    </label>
+                </div>
+                <!-- Select -->
+                <div class="form-control w-full">
+                    <label class="label">
+                        <span class="label-text">Select Option</span>
+                    </label>
+                    <select class="select select-bordered w-full">
+                        <option disabled selected>Pick one</option>
+                        <option>Star Wars</option>
+                        <option>Harry Potter</option>
+                        <option>Lord of the Rings</option>
+                    </select>
                 </div>
             </div>
-
-            <!-- Card 2 -->
-            <div class="card bg-base-100 shadow-xl shadow-bloom cursor-pointer border border-base-200">
-                <div class="card-body">
-                    <div class="flex items-center gap-4 mb-4">
-                        <div class="avatar placeholder">
-                            <div class="bg-neutral text-neutral-content rounded-full w-12">
-                                <span class="text-xl">UI</span>
+        </section>
+        <!-- 4. Cards & Layouts -->
+        <section class="space-y-6">
+            <h2 class="text-3xl font-bold border-b border-base-300 pb-2">Cards & Bloom Effects</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Card 1 -->
+                <div class="card bg-base-100 shadow-xl shadow-bloom cursor-pointer border border-base-200">
+                    <figure class="px-4 pt-4">
+                        <div class="w-full h-48 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-xl flex items-center justify-center text-primary">
+                            <span class="material-symbols-outlined text-6xl">image</span>
+                        </div>
+                    </figure>
+                    <div class="card-body">
+                        <h2 class="card-title">Bloom Effect</h2>
+                        <p class="text-sm text-base-content/70">Hover over this card to see the custom shadow bloom and lift animation.</p>
+                        <div class="card-actions justify-end mt-4">
+                            <button class="btn btn-sm btn-primary">Buy Now</button>
+                        </div>
+                    </div>
+                </div>
+                <!-- Card 2 -->
+                <div class="card bg-base-100 shadow-xl shadow-bloom cursor-pointer border border-base-200">
+                    <div class="card-body">
+                        <div class="flex items-center gap-4 mb-4">
+                            <div class="avatar placeholder">
+                                <div class="bg-neutral text-neutral-content rounded-full w-12">
+                                    <span class="text-xl">UI</span>
+                                </div>
+                            </div>
+                            <div>
+                                <h2 class="card-title">User Interface</h2>
+                                <p class="text-xs text-base-content/60">Designed for polish</p>
                             </div>
                         </div>
-                        <div>
-                            <h2 class="card-title">User Interface</h2>
-                            <p class="text-xs text-base-content/60">Designed for polish</p>
+                        <p>Includes built-in micro-interactions and smooth state transitions.</p>
+                    </div>
+                </div>
+                <!-- Card 3 -->
+                <div class="card bg-primary text-primary-content shadow-xl hover:-translate-y-1 transition-transform duration-300">
+                    <div class="card-body">
+                        <h2 class="card-title">Primary Card</h2>
+                        <p>A card using the primary color with automatic text contrast.</p>
+                        <div class="card-actions justify-end">
+                            <button class="btn btn-sm btn-glass text-white">Glass Button</button>
                         </div>
                     </div>
-                    <p>Includes built-in micro-interactions and smooth state transitions.</p>
                 </div>
             </div>
-
-             <!-- Card 3 -->
-             <div class="card bg-primary text-primary-content shadow-xl hover:-translate-y-1 transition-transform duration-300">
-                <div class="card-body">
-                    <h2 class="card-title">Primary Card</h2>
-                    <p>A card using the primary color with automatic text contrast.</p>
-                    <div class="card-actions justify-end">
-                        <button class="btn btn-sm btn-glass text-white">Glass Button</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-</div>
+        </section>
+    </div>
 {% endblock %}

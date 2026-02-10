@@ -108,7 +108,7 @@ class MockDataGenerator:
         sections.append(code_snippet_js)
 
         # 6. 总结 (H2)
-        sections.append(f"## 总结")
+        sections.append("## 总结")
         sections.append(self.fake.paragraph(nb_sentences=5))
         sections.append(f"**{self.fake.sentence()}**")
 

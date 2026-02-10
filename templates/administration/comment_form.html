@@ -1,151 +1,150 @@
 {% extends "administration/base.html" %}
 {% load capture_tags i18n %}
 {% load widget_tweaks %}
-
-{% block title %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
-
+{% block title %}
+    {% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ title }}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock %}
 {% block content %}
-<div class="text-sm breadcrumbs mb-4">
-    <ul>
-        <li><a href="{% url 'administration:index' %}">{% trans "首页" %}</a></li>
-        <li><a href="{% url 'administration:comment_list' %}">{% trans "评论管理" %}</a></li>
-        {% trans "编辑评论" as default_title %}
-        <li>{{ title|default:default_title }}</li>
-    </ul>
-</div>
-
-<form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-    {% csrf_token %}
-    
-    <!-- Left Column: Main Content -->
-    <div class="lg:col-span-2 space-y-6">
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-6">
-                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary">edit_note</span>
-                    {% trans "评论内容" %}
-                </h2>
-                
-                {% if form.non_field_errors %}
-                <div class="alert alert-error mb-4 shadow-sm">
-                    <span class="material-symbols-outlined">error</span>
-                    <div class="flex flex-col">
-                        <span class="font-bold">{% trans "表单错误" %}</span>
-                        {% for error in form.non_field_errors %}
-                        <span class="text-sm">{{ error }}</span>
-                        {% endfor %}
+    <div class="text-sm breadcrumbs mb-4">
+        <ul>
+            <li>
+                <a href="{% url 'administration:index' %}">{% trans "首页" %}</a>
+            </li>
+            <li>
+                <a href="{% url 'administration:comment_list' %}">{% trans "评论管理" %}</a>
+            </li>
+            {% trans "编辑评论" as default_title %}
+            <li>{{ title|default:default_title }}</li>
+        </ul>
+    </div>
+    <form method="post" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {% csrf_token %}
+        <!-- Left Column: Main Content -->
+        <div class="lg:col-span-2 space-y-6">
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+                <div class="card-body p-6">
+                    <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-primary">edit_note</span>
+                        {% trans "评论内容" %}
+                    </h2>
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-error mb-4 shadow-sm">
+                            <span class="material-symbols-outlined">error</span>
+                            <div class="flex flex-col">
+                                <span class="font-bold">{% trans "表单错误" %}</span>
+                                {% for error in form.non_field_errors %}<span class="text-sm">{{ error }}</span>{% endfor %}
+                            </div>
+                        </div>
+                    {% endif %}
+                    <!-- Content Field -->
+                    <div class="form-control w-full">
+                        <label class="label">
+                            <span class="label-text font-bold text-base">{% trans "内容" %} <span class="text-error">*</span></span>
+                        </label>
+                        {% trans "..." as suffix_dots %}
+                        {% render_field form.content class="textarea textarea-bordered h-64 focus:textarea-primary transition-all text-base leading-relaxed" placeholder=form.content.label|add:suffix_dots %}
+                        {% if form.content.errors %}
+                            <label class="label">
+                                <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
+                            </label>
+                        {% endif %}
                     </div>
                 </div>
-                {% endif %}
-
-                <!-- Content Field -->
-                <div class="form-control w-full">
-                    <label class="label">
-                        <span class="label-text font-bold text-base">{% trans "内容" %} <span class="text-error">*</span></span>
-                    </label>
-                    {% trans "..." as suffix_dots %}
-                    {% render_field form.content class="textarea textarea-bordered h-64 focus:textarea-primary transition-all text-base leading-relaxed" placeholder=form.content.label|add:suffix_dots %}
-                    {% if form.content.errors %}
-                    <label class="label">
-                        <span class="label-text-alt text-error">{{ form.content.errors.0 }}</span>
-                    </label>
-                    {% endif %}
-                </div>
             </div>
-        </div>
-
-        <!-- Author Info (Read Only) -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-6">
-                <h2 class="card-title text-lg mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-secondary">person</span>
-                    {% trans "作者信息" %}
-                </h2>
-                
-                <div class="flex items-center gap-4">
-                    <div class="avatar">
-                        <div class="w-16 h-16 rounded-full ring ring-base-200 ring-offset-2">
-                            <img src="{{ object.user.get_avatar_url }}" alt="{{ object.user.username }}" />
+            <!-- Author Info (Read Only) -->
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+                <div class="card-body p-6">
+                    <h2 class="card-title text-lg mb-4 flex items-center gap-2">
+                        <span class="material-symbols-outlined text-secondary">person</span>
+                        {% trans "作者信息" %}
+                    </h2>
+                    <div class="flex items-center gap-4">
+                        <div class="avatar">
+                            <div class="w-16 h-16 rounded-full ring ring-base-200 ring-offset-2">
+                                <img src="{{ object.user.get_avatar_url }}"
+                                     alt="{{ object.user.username }}" />
+                            </div>
+                        </div>
+                        <div>
+                            <div class="font-bold text-lg">{{ object.user.nickname|default:object.user.username }}</div>
+                            <div class="text-sm opacity-60">@{{ object.user.username }}</div>
+                            <div class="text-xs opacity-40 mt-1">{{ object.user.email }}</div>
+                        </div>
+                        <div class="ml-auto">
+                            <a href="{% url 'administration:user_edit' object.user.pk %}"
+                               class="btn btn-sm btn-outline">{% trans "查看用户" %}</a>
                         </div>
                     </div>
-                    <div>
-                        <div class="font-bold text-lg">{{ object.user.nickname|default:object.user.username }}</div>
-                        <div class="text-sm opacity-60">@{{ object.user.username }}</div>
-                        <div class="text-xs opacity-40 mt-1">{{ object.user.email }}</div>
-                    </div>
-                    <div class="ml-auto">
-                        <a href="{% url 'administration:user_edit' object.user.pk %}" class="btn btn-sm btn-outline">{% trans "查看用户" %}</a>
-                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Right Column: Sidebar -->
-    <div class="lg:col-span-1 space-y-6">
-        <!-- Publish Box -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">{% trans "发布" %}</h3>
-                
-                <div class="flex flex-col gap-3">
-                    <button type="submit" class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
-                        <span class="material-symbols-outlined">save</span>
-                        {% trans "更新评论" %}
-                    </button>
-                    
-                    <div class="divider my-1"></div>
-                    
-                    <div class="flex justify-between items-center">
-                        <a href="javascript:history.back()" class="btn btn-sm btn-ghost text-base-content/60">{% trans "取消" %}</a>
-                        <button type="button" onclick="confirmDelete('{% url 'administration:comment_delete' object.pk %}', '{% trans "确定要删除这条评论吗？" %}')" class="btn btn-sm btn-ghost text-error hover:bg-error/10">
-                            {% trans "删除评论" %}
+        <!-- Right Column: Sidebar -->
+        <div class="lg:col-span-1 space-y-6">
+            <!-- Publish Box -->
+            <div class="card bg-base-100 shadow-sm border border-base-content/5 sticky top-24">
+                <div class="card-body p-4">
+                    <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">
+                        {% trans "发布" %}
+                    </h3>
+                    <div class="flex flex-col gap-3">
+                        <button type="submit"
+                                class="btn btn-primary w-full gap-2 shadow-lg shadow-primary/20">
+                            <span class="material-symbols-outlined">save</span>
+                            {% trans "更新评论" %}
                         </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Meta Box -->
-        <div class="card bg-base-100 shadow-sm border border-base-content/5">
-            <div class="card-body p-4">
-                <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">{% trans "元数据" %}</h3>
-                
-                <!-- Status -->
-                <div class="form-control mb-4">
-                    <label class="label cursor-pointer justify-between">
-                        <span class="label-text font-medium">{% trans "公开可见" %}</span>
-                        {% render_field form.active class="toggle toggle-success" %}
-                    </label>
-                </div>
-
-                <div class="text-sm space-y-3">
-                    <div class="flex justify-between items-center pb-2 border-b border-base-200/50">
-                        <span class="opacity-60">{% trans "评论于" %}</span>
-                        <span class="font-mono">{{ object.created_at|date:"Y-m-d H:i" }}</span>
-                    </div>
-                    
-                    <div class="flex flex-col gap-1 pb-2 border-b border-base-200/50">
-                        <span class="opacity-60">{% trans "所属文章" %}</span>
-                        <a href="{% url 'post_detail' object.post.slug %}" target="_blank" class="font-medium hover:text-primary transition-colors line-clamp-2" title="{{ object.post.title }}">
-                            {{ object.post.title }}
-                        </a>
-                    </div>
-
-                    {% if object.parent %}
-                    <div class="flex flex-col gap-1">
-                        <span class="opacity-60">{% trans "回复给" %}</span>
-                        <div class="flex items-center gap-2">
-                            <span class="font-medium">{{ object.parent.user.nickname|default:object.parent.user.username }}</span>
-                            <a href="{% url 'administration:comment_edit' object.parent.pk %}" class="btn btn-xs btn-ghost btn-square">
-                                <span class="material-symbols-outlined text-xs">open_in_new</span>
-                            </a>
+                        <div class="divider my-1"></div>
+                        <div class="flex justify-between items-center">
+                            <a href="javascript:history.back()"
+                               class="btn btn-sm btn-ghost text-base-content/60">{% trans "取消" %}</a>
+                            <button type="button"
+                                    onclick="confirmDelete('{% url 'administration:comment_delete' object.pk %}', '{% trans "确定要删除这条评论吗？" %}')"
+                                    class="btn btn-sm btn-ghost text-error hover:bg-error/10">
+                                {% trans "删除评论" %}
+                            </button>
                         </div>
                     </div>
-                    {% endif %}
+                </div>
+            </div>
+            <!-- Meta Box -->
+            <div class="card bg-base-100 shadow-sm border border-base-content/5">
+                <div class="card-body p-4">
+                    <h3 class="font-bold text-sm text-base-content/70 uppercase tracking-wider mb-4 border-b border-base-200 pb-2">
+                        {% trans "元数据" %}
+                    </h3>
+                    <!-- Status -->
+                    <div class="form-control mb-4">
+                        <label class="label cursor-pointer justify-between">
+                            <span class="label-text font-medium">{% trans "公开可见" %}</span>
+                            {% render_field form.active class="toggle toggle-success" %}
+                        </label>
+                    </div>
+                    <div class="text-sm space-y-3">
+                        <div class="flex justify-between items-center pb-2 border-b border-base-200/50">
+                            <span class="opacity-60">{% trans "评论于" %}</span>
+                            <span class="font-mono">{{ object.created_at|date:"Y-m-d H:i" }}</span>
+                        </div>
+                        <div class="flex flex-col gap-1 pb-2 border-b border-base-200/50">
+                            <span class="opacity-60">{% trans "所属文章" %}</span>
+                            <a href="{% url 'post_detail' object.post.slug %}"
+                               target="_blank"
+                               class="font-medium hover:text-primary transition-colors line-clamp-2"
+                               title="{{ object.post.title }}">{{ object.post.title }}</a>
+                        </div>
+                        {% if object.parent %}
+                            <div class="flex flex-col gap-1">
+                                <span class="opacity-60">{% trans "回复给" %}</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="font-medium">{{ object.parent.user.nickname|default:object.parent.user.username }}</span>
+                                    <a href="{% url 'administration:comment_edit' object.parent.pk %}"
+                                       class="btn btn-xs btn-ghost btn-square">
+                                        <span class="material-symbols-outlined text-xs">open_in_new</span>
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-</form>
+    </form>
 {% endblock %}

@@ -55,9 +55,9 @@ class TestCoreViews:
         assert page.title in response.content.decode()
 
     def test_rosetta_intro_removed(self, client):
-        # Verify that the rosetta intro page is indeed gone (404)
-        # Note: In Django, if URL is removed, reverse will fail.
-        # So we check by manual path or expect NoReverseMatch if we try it.
+        # 验证 rosetta 介绍页面确实已移除 (404)
+        # 注意：在 Django 中，如果 URL 被移除，reverse 将会失败。
+        # 因此我们通过手动路径检查，或者在尝试时预期 NoReverseMatch。
         try:
             url = reverse("rosetta_intro")
             response = client.get(url)

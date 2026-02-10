@@ -19,7 +19,7 @@ def markdown_format(text):
     Markdown 渲染过滤器
 
     将 Markdown 文本转换为 HTML，并进行安全过滤 (Sanitization)。
-    
+
     特性:
     - 扩展支持: extra (表格等), codehilite (代码高亮), toc (目录)
     - 安全过滤: 使用 bleach 移除潜在的 XSS 攻击标签 (如 script, iframe 等)
@@ -86,14 +86,22 @@ def markdown_format(text):
     soup = BeautifulSoup(cleaned_html, "html.parser")
 
     # 1. 处理链接 (Links): 外链添加 noopener noreferrer
-    current_domain = urlparse(settings.META_SITE_DOMAIN).netloc if hasattr(settings, 'META_SITE_DOMAIN') else 'choyeon.cc'
-    
+    current_domain = (
+        urlparse(settings.META_SITE_DOMAIN).netloc
+        if hasattr(settings, "META_SITE_DOMAIN")
+        else "choyeon.cc"
+    )
+
     for a in soup.find_all("a"):
         href = a.get("href")
         if href:
             parsed_href = urlparse(href)
             # 如果是绝对路径且域名不匹配当前域名，则视为外链
-            if parsed_href.scheme and parsed_href.netloc and parsed_href.netloc != current_domain:
+            if (
+                parsed_href.scheme
+                and parsed_href.netloc
+                and parsed_href.netloc != current_domain
+            ):
                 a["target"] = "_blank"
                 a["rel"] = "noopener noreferrer"
 
@@ -101,7 +109,7 @@ def markdown_format(text):
     for img in soup.find_all("img"):
         # 强制懒加载
         img["loading"] = "lazy"
-        
+
         # 如果已有宽高，跳过
         if img.get("width") and img.get("height"):
             continue
@@ -114,13 +122,13 @@ def markdown_format(text):
         local_path = None
         if src.startswith(settings.MEDIA_URL):
             # /media/foo.jpg -> /path/to/media/foo.jpg
-            relative_path = src[len(settings.MEDIA_URL):]
+            relative_path = src[len(settings.MEDIA_URL) :]
             local_path = os.path.join(settings.MEDIA_ROOT, relative_path)
         elif src.startswith(settings.STATIC_URL):
             # /static/foo.jpg -> /path/to/static/foo.jpg
-            relative_path = src[len(settings.STATIC_URL):]
+            relative_path = src[len(settings.STATIC_URL) :]
             local_path = os.path.join(settings.STATIC_ROOT, relative_path)
-        
+
         if local_path and os.path.exists(local_path):
             try:
                 with Image.open(local_path) as im:
@@ -132,13 +140,15 @@ def markdown_format(text):
                 pass
 
     # 3. DaisyUI 样式注入
-    
-    # Tables
     for table in soup.find_all("table"):
         # 包装 table
         wrapper = soup.new_tag("div", **{"class": "overflow-x-auto"})
         table.wrap(wrapper)
         table["class"] = table.get("class", []) + ["table", "table-zebra"]
+    for code_block in soup.find_all(class_="codehilite"):
+        classes = code_block.get("class", [])
+        if "mockup-code" not in classes:
+            code_block["class"] = classes + ["mockup-code"]
 
     final_html = str(soup)
 

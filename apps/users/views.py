@@ -92,10 +92,10 @@ class UpdateThemeView(LoginRequiredMixin, View):
             data = json.loads(request.body or "{}")
             theme = data.get("theme")
             if theme:
-                # Validate theme name to prevent XSS (alphanumeric and hyphens only)
+                # 验证主题名称以防止 XSS 攻击 (仅允许字母数字和连字符)
                 if not re.match(r"^[a-zA-Z0-9-]+$", theme):
                     return JsonResponse(
-                        {"status": "error", "message": "Invalid theme name"}, status=400
+                        {"status": "error", "message": "无效的主题名称"}, status=400
                     )
 
                 UserPreference.objects.update_or_create(
@@ -119,7 +119,7 @@ class UpdateThemeView(LoginRequiredMixin, View):
 class UnifiedProfileView(View):
     """
     统一用户个人资料视图
-    
+
     这是一个聚合视图，集成了用户个人主页的所有功能。
     它根据当前用户和目标用户的关系（本人/他人），动态展示不同的内容和操作。
 
@@ -149,6 +149,7 @@ class UnifiedProfileView(View):
         - 否则返回 None。
         """
         from django.db.models import Sum
+
         if username:
             return get_object_or_404(
                 User.objects.select_related("preference").annotate(
@@ -158,11 +159,13 @@ class UnifiedProfileView(View):
             )
         # 如果未提供 username 且用户已登录，则默认为当前用户
         if self.request.user.is_authenticated:
-            # Re-fetch user to get annotation if needed, or rely on property
-            # Ideally we should annotate current user too if we use total_views
-            return User.objects.select_related("preference").annotate(
-                total_views_annotated=Sum("posts__views")
-            ).get(pk=self.request.user.pk)
+            # 重新获取用户以应用注解 (如果需要 total_views_annotated)
+            # 理想情况下，如果经常使用 total_views，也应该对当前用户进行注解
+            return (
+                User.objects.select_related("preference")
+                .annotate(total_views_annotated=Sum("posts__views"))
+                .get(pk=self.request.user.pk)
+            )
         return None
 
     def get(self, request, username=None):
@@ -241,15 +244,13 @@ class UnifiedProfileView(View):
                 )
 
             elif active_tab == "settings":
-                context["preference_form"] = UserPreferenceForm(
-                    instance=preference
-                )
-            
+                context["preference_form"] = UserPreferenceForm(instance=preference)
+
             elif active_tab == "security":
                 context["password_form"] = PasswordChangeForm(user=request.user)
 
         # HTMX 请求支持 (局部刷新内容区域)
-        if request.headers.get("HX-Request"):
+        if request.htmx:
             return render(
                 request,
                 "users/includes/profile_content.html",
@@ -288,7 +289,7 @@ class UnifiedProfileView(View):
             else:
                 messages.error(request, _("偏好设置更新失败"))
             return redirect(f"{profile_url}?tab=settings")
-        
+
         # --- 处理密码修改 ---
         if "change_password" in request.POST:
             password_form = PasswordChangeForm(request.user, request.POST)
@@ -303,18 +304,22 @@ class UnifiedProfileView(View):
                 # 我们需要重新构建上下文，这有点麻烦，但为了显示错误是必须的
                 # 或者我们可以简单地重定向并带上错误（但这不会显示具体的字段错误）
                 # 为了更好的体验，我们这里手动调用 get 方法的部分逻辑来重新渲染
-                
+
                 # 构建基本上下文
                 profile_user = request.user
-                preference, created = UserPreference.objects.get_or_create(user=profile_user)
+                preference, created = UserPreference.objects.get_or_create(
+                    user=profile_user
+                )
                 profile_user.preference = preference
-                
+
                 context = {
                     "profile_user": profile_user,
                     "active_tab": "security",
                     "is_private_profile": False,
-                    "comments_count": Comment.objects.filter(user=profile_user, active=True).count(),
-                    "password_form": password_form, # 包含错误的表单
+                    "comments_count": Comment.objects.filter(
+                        user=profile_user, active=True
+                    ).count(),
+                    "password_form": password_form,  # 包含错误的表单
                 }
                 return render(request, self.template_name, context)
 
@@ -368,7 +373,7 @@ class MarkNotificationReadView(LoginRequiredMixin, View):
         notification.save()
 
         # 如果是 HTMX 请求，返回空响应或更新后的 HTML
-        if request.headers.get("HX-Request"):
+        if request.htmx:
             return HttpResponse("")
 
         next_url = request.GET.get("next")
@@ -394,7 +399,7 @@ class DeleteNotificationView(LoginRequiredMixin, View):
         notification.delete()
 
         # 如果是 HTMX 请求，返回空响应让前端移除元素
-        if request.headers.get("HX-Request"):
+        if request.htmx:
             return HttpResponse("")
 
         messages.success(request, _("通知已删除"))

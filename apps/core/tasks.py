@@ -8,20 +8,22 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 @shared_task(bind=True)
 def debug_task(self):
     """
     一个简单的调试任务，打印请求信息。
     用于验证 Celery 是否正常工作。
     """
-    print(f'Request: {self.request!r}')
-    return f'Debug task executed at {timezone.now()}'
+    print(f"Request: {self.request!r}")
+    return f"Debug task executed at {timezone.now()}"
+
 
 @shared_task
 def send_test_email(recipient_list, subject="Test Email from Rosetta"):
     """
     向指定收件人发送测试邮件。
-    
+
     Args:
         recipient_list (list): 电子邮件地址列表。
         subject (str): 邮件主题。
@@ -30,8 +32,8 @@ def send_test_email(recipient_list, subject="Test Email from Rosetta"):
     try:
         # 验证 recipient_list 是否为列表
         if not isinstance(recipient_list, (list, tuple)):
-             recipient_list = [recipient_list]
-             
+            recipient_list = [recipient_list]
+
         send_mail(
             subject,
             f"This is a test email sent from Rosetta at {timezone.now()}.",
@@ -43,8 +45,9 @@ def send_test_email(recipient_list, subject="Test Email from Rosetta"):
     except Exception as e:
         logger.error(f"Failed to send email: {e}")
         # 在生产环境中，可能需要重试机制
-        # raise self.retry(exc=e, countdown=60) 
+        # raise self.retry(exc=e, countdown=60)
         raise
+
 
 @shared_task
 def backup_database_task():
@@ -56,12 +59,14 @@ def backup_database_task():
     """
     try:
         from core.utils import create_backup
+
         filename = create_backup()
         return f"Backup created: {filename}"
-            
+
     except Exception as e:
         logger.error(f"Database backup failed: {e}")
         raise
+
 
 @shared_task
 def clear_cache_task():
@@ -74,11 +79,12 @@ def clear_cache_task():
     cache.clear()
     return "Cache cleared"
 
+
 @shared_task(bind=True)
 def long_running_process(self, seconds=10):
     """
     模拟一个带有进度更新的长时间运行进程。
-    
+
     Args:
         seconds (int): 运行持续时间（秒）。
     """
@@ -87,6 +93,6 @@ def long_running_process(self, seconds=10):
         time.sleep(1)
         # 更新进度（如果有跟踪机制，例如通过缓存或数据库）
         # self.update_state(state='PROGRESS', meta={'current': i, 'total': seconds})
-        logger.info(f"Processing... {i+1}/{seconds}")
-    
+        logger.info(f"Processing... {i + 1}/{seconds}")
+
     return "Process completed"

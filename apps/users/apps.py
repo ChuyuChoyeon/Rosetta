@@ -7,6 +7,7 @@ class UsersConfig(AppConfig):
 
     Users 应用负责处理用户认证、注册、登录、个人资料管理以及通知系统。
     """
+
     default_auto_field = "django.db.models.BigAutoField"
     name = "users"
     verbose_name = "用户管理"

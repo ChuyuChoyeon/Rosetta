@@ -6,7 +6,6 @@ app_name = "administration"
 urlpatterns = [
     # --- Dashboard Home (管理后台首页) ---
     path("", views.IndexView.as_view(), name="index"),
-
     # --- Content Management (内容管理) ---
     # 文章管理
     path("posts/", views.PostListView.as_view(), name="post_list"),
@@ -18,7 +17,6 @@ urlpatterns = [
         views.PostDuplicateView.as_view(),
         name="post_duplicate",
     ),
-
     # 分类管理
     path("categories/", views.CategoryListView.as_view(), name="category_list"),
     path(
@@ -45,7 +43,6 @@ urlpatterns = [
     path(
         "categories/import/", views.CategoryImportView.as_view(), name="category_import"
     ),
-
     # 标签管理
     path("tags/", views.TagListView.as_view(), name="tag_list"),
     path("tags/create/", views.TagCreateView.as_view(), name="tag_create"),
@@ -56,7 +53,6 @@ urlpatterns = [
         views.TagAutocompleteView.as_view(),
         name="tag_autocomplete",
     ),
-
     # 评论管理
     path("comments/", views.CommentListView.as_view(), name="comment_list"),
     path(
@@ -74,7 +70,14 @@ urlpatterns = [
         views.CommentDeleteView.as_view(),
         name="comment_delete",
     ),
-
+    # 媒体库管理
+    path("media/", views.MediaListView.as_view(), name="media_list"),
+    path("media/upload/", views.MediaUploadView.as_view(), name="media_upload"),
+    path("media/create/", views.MediaCreateView.as_view(), name="media_create"),
+    path("media/<int:pk>/edit/", views.MediaUpdateView.as_view(), name="media_edit"),
+    path(
+        "media/<int:pk>/delete/", views.MediaDeleteView.as_view(), name="media_delete"
+    ),
     # 单页面管理
     path("pages/", views.PageListView.as_view(), name="page_list"),
     path("pages/create/", views.PageCreateView.as_view(), name="page_create"),
@@ -85,13 +88,11 @@ urlpatterns = [
         views.PageDuplicateView.as_view(),
         name="page_duplicate",
     ),
-
     # 投票管理
     path("polls/", views.PollListView.as_view(), name="poll_list"),
     path("polls/create/", views.PollCreateView.as_view(), name="poll_create"),
     path("polls/<int:pk>/edit/", views.PollUpdateView.as_view(), name="poll_edit"),
     path("polls/<int:pk>/delete/", views.PollDeleteView.as_view(), name="poll_delete"),
-
     # --- Appearance & Settings (外观与设置) ---
     # 导航菜单管理
     path("navigation/", views.NavigationListView.as_view(), name="navigation_list"),
@@ -120,7 +121,6 @@ urlpatterns = [
         views.NavigationImportView.as_view(),
         name="navigation_import",
     ),
-
     # 友情链接管理
     path("friendlinks/", views.FriendLinkListView.as_view(), name="friendlink_list"),
     path(
@@ -148,7 +148,6 @@ urlpatterns = [
         views.FriendLinkImportView.as_view(),
         name="friendlink_import",
     ),
-
     # 搜索占位符管理
     path(
         "placeholders/",
@@ -180,7 +179,6 @@ urlpatterns = [
         views.SearchPlaceholderImportView.as_view(),
         name="searchplaceholder_import",
     ),
-
     # --- User Management (用户管理) ---
     # 用户列表与基础操作
     path("users/", views.UserListView.as_view(), name="user_list"),
@@ -189,7 +187,6 @@ urlpatterns = [
     path("users/<int:pk>/delete/", views.UserDeleteView.as_view(), name="user_delete"),
     path("users/export/", views.UserExportView.as_view(), name="user_export"),
     path("users/import/", views.UserImportView.as_view(), name="user_import"),
-
     # 用户称号管理
     path("titles/", views.UserTitleListView.as_view(), name="usertitle_list"),
     path(
@@ -211,7 +208,6 @@ urlpatterns = [
     path(
         "titles/import/", views.UserTitleImportView.as_view(), name="usertitle_import"
     ),
-
     # 用户组管理
     path("groups/", views.GroupListView.as_view(), name="group_list"),
     path("groups/create/", views.GroupCreateView.as_view(), name="group_create"),
@@ -221,7 +217,6 @@ urlpatterns = [
     ),
     path("groups/export/", views.GroupExportView.as_view(), name="group_export"),
     path("groups/import/", views.GroupImportView.as_view(), name="group_import"),
-
     # --- Logs & Audit (日志与审计) ---
     # 操作日志 (Admin LogEntry)
     path("logs/audit/", views.LogEntryListView.as_view(), name="logentry_list"),
@@ -233,7 +228,6 @@ urlpatterns = [
     path(
         "logs/audit/export/", views.LogEntryExportView.as_view(), name="logentry_export"
     ),
-
     # 系统日志 (File Logs)
     path("logs/system/", views.LogFileListView.as_view(), name="logfile_list"),
     path(
@@ -251,38 +245,63 @@ urlpatterns = [
         views.LogFileDeleteView.as_view(),
         name="logfile_delete",
     ),
-
     # --- Maintenance & Tools (维护与工具) ---
     # 定时任务
     path("tasks/", views.PeriodicTaskListView.as_view(), name="periodic_task_list"),
-    path("tasks/create/", views.PeriodicTaskCreateView.as_view(), name="periodic_task_create"),
-    path("tasks/<int:pk>/edit/", views.PeriodicTaskUpdateView.as_view(), name="periodic_task_edit"),
-    path("tasks/<int:pk>/delete/", views.PeriodicTaskDeleteView.as_view(), name="periodic_task_delete"),
-    path("tasks/<int:pk>/run/", views.PeriodicTaskRunView.as_view(), name="periodic_task_run"),
-    path("tasks/<int:pk>/toggle/", views.PeriodicTaskToggleView.as_view(), name="periodic_task_toggle"),
-
+    path(
+        "tasks/create/",
+        views.PeriodicTaskCreateView.as_view(),
+        name="periodic_task_create",
+    ),
+    path(
+        "tasks/<int:pk>/edit/",
+        views.PeriodicTaskUpdateView.as_view(),
+        name="periodic_task_edit",
+    ),
+    path(
+        "tasks/<int:pk>/delete/",
+        views.PeriodicTaskDeleteView.as_view(),
+        name="periodic_task_delete",
+    ),
+    path(
+        "tasks/<int:pk>/run/",
+        views.PeriodicTaskRunView.as_view(),
+        name="periodic_task_run",
+    ),
+    path(
+        "tasks/<int:pk>/toggle/",
+        views.PeriodicTaskToggleView.as_view(),
+        name="periodic_task_toggle",
+    ),
     # 系统设置与工具
     path("settings/", views.SettingsView.as_view(), name="settings"),
     path("system/tools/", views.SystemToolsView.as_view(), name="system_tools"),
     path("system/monitor/", views.SystemMonitorView.as_view(), name="system_monitor"),
-    path("system/backup/download/<str:filename>/", views.BackupDownloadView.as_view(), name="backup_download"),
-
+    path(
+        "system/backup/download/<str:filename>/",
+        views.BackupDownloadView.as_view(),
+        name="backup_download",
+    ),
     # 调试工具 (仅 Debug 模式或管理员)
-    path("debug/", views.DebugDashboardView.as_view(), name="debug"),
-    path("debug/ui-test/", views.DebugUITestView.as_view(), name="debug_ui_test"),
     path(
         "debug/permission/",
         views.DebugPermissionView.as_view(),
         name="debug_permission",
     ),
-    path("debug/cache/", views.DebugCacheView.as_view(), name="debug_cache"),
-    path("debug/email/", views.DebugEmailView.as_view(), name="debug_email"),
-
+    path(
+        "debug/cache/",
+        views.DebugCacheView.as_view(),
+        name="debug_cache",
+    ),
+    path(
+        "debug/email/",
+        views.DebugEmailView.as_view(),
+        name="debug_email",
+    ),
     # 批量操作
     path(
         "bulk-action/<str:model>/", views.BulkActionView.as_view(), name="bulk_action"
     ),
-
     # 数据导入导出 (通用接口)
     path("export-all/<str:model>/", views.ExportAllView.as_view(), name="export_all"),
     path(

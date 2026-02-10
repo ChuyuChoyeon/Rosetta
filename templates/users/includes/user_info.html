@@ -8,7 +8,6 @@
             </label>
             <div class="text-lg font-medium">{{ profile_user.nickname|default:profile_user.username }}</div>
         </div>
-
         <div class="form-control group">
             <label class="label p-0 mb-1">
                 <span class="label-text font-bold text-base-content/50 text-xs uppercase tracking-wider group-hover:text-primary transition-colors">{% trans "邮箱" %}</span>
@@ -16,7 +15,6 @@
             {% trans "未设置" as not_set %}
             <div class="text-lg font-mono text-sm opacity-80">{{ profile_user.email|default:not_set }}</div>
         </div>
-
         <div class="form-control md:col-span-2 group">
             <label class="label p-0 mb-2">
                 <span class="label-text font-bold text-base-content/50 text-xs uppercase tracking-wider group-hover:text-primary transition-colors">{% trans "个人简介" %}</span>
@@ -26,54 +24,68 @@
                 {{ profile_user.bio|default:default_bio|linebreaksbr }}
             </div>
         </div>
-
         <div class="form-control group">
             <label class="label p-0 mb-1">
                 <span class="label-text font-bold text-base-content/50 text-xs uppercase tracking-wider group-hover:text-primary transition-colors">{% trans "个人网站" %}</span>
             </label>
             <div class="text-lg">
                 {% if profile_user.website %}
-                <a href="{{ profile_user.website }}" target="_blank" class="link link-primary link-hover flex items-center gap-2 w-fit">
-                    <span class="truncate max-w-[200px]">{{ profile_user.website }}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9 9 0 100-18 9 9 0 000 18z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.6 9h16.8M3.6 15h16.8M12 3a15.3 15.3 0 010 18M12 3a15.3 15.3 0 000 18" /></svg>
-                </a>
+                    <a href="{{ profile_user.website }}"
+                       target="_blank"
+                       class="link link-primary link-hover flex items-center gap-2 w-fit">
+                        <span class="truncate max-w-[200px]">{{ profile_user.website }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="h-4 w-4"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 21a9 9 0 100-18 9 9 0 000 18z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.6 9h16.8M3.6 15h16.8M12 3a15.3 15.3 0 010 18M12 3a15.3 15.3 0 000 18" />
+                        </svg>
+                    </a>
                 {% else %}
-                <span class="text-base-content/30 italic">{% trans "未设置" %}</span>
+                    <span class="text-base-content/30 italic">{% trans "未设置" %}</span>
                 {% endif %}
             </div>
         </div>
-
         <div class="form-control group">
             <label class="label p-0 mb-1">
                 <span class="label-text font-bold text-base-content/50 text-xs uppercase tracking-wider group-hover:text-primary transition-colors">GitHub</span>
             </label>
             <div class="text-lg">
                 {% if profile_user.github %}
-                <a href="{{ profile_user.github }}" target="_blank" class="link link-primary link-hover flex items-center gap-2 w-fit">
-                    <span class="truncate max-w-[200px]">{{ profile_user.github }}</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
-                </a>
+                    <a href="{{ profile_user.github }}"
+                       target="_blank"
+                       class="link link-primary link-hover flex items-center gap-2 w-fit">
+                        <span class="truncate max-w-[200px]">{{ profile_user.github }}</span>
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                             class="h-4 w-4"
+                             fill="none"
+                             viewBox="0 0 24 24"
+                             stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                    </a>
                 {% else %}
-                <span class="text-base-content/30 italic">{% trans "未设置" %}</span>
+                    <span class="text-base-content/30 italic">{% trans "未设置" %}</span>
                 {% endif %}
             </div>
         </div>
-
         <div class="form-control group">
             <label class="label p-0 mb-1">
                 <span class="label-text font-bold text-base-content/50 text-xs uppercase tracking-wider group-hover:text-primary transition-colors">{% trans "注册时间" %}</span>
             </label>
             <div class="text-base font-mono opacity-80">{{ profile_user.date_joined|date:"Y-m-d H:i" }}</div>
         </div>
-        
         <div class="form-control group">
             <label class="label p-0 mb-1">
                 <span class="label-text font-bold text-base-content/50 text-xs uppercase tracking-wider group-hover:text-primary transition-colors">{% trans "最后登录" %}</span>
             </label>
             {% trans "从未登录" as never_logged_in %}
-            <div class="text-base font-mono opacity-80">{{ profile_user.last_login|date:"Y-m-d H:i"|default:never_logged_in }}</div>
+            <div class="text-base font-mono opacity-80">
+                {{ profile_user.last_login|date:"Y-m-d H:i"|default:never_logged_in }}
+            </div>
         </div>
     </div>
-
     <!-- 操作按钮已移除，由父模板统一处理 -->
 </div>

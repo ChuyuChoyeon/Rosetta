@@ -1,33 +1,45 @@
 {% extends "administration/base.html" %}
 {% load capture_tags i18n %}
-
-{% block title %}{% trans "分类管理" %}{{ config.SITE_ADMIN_SUFFIX|default:" - Rosetta Dashboard" }}{% endblock %}
-
+{% block title %}
+    {% trans "分类管理" %}{% trans " - Rosetta Dashboard" as admin_suffix_default %}{{ config.SITE_ADMIN_SUFFIX|default:admin_suffix_default }}
+{% endblock %}
 {% block content %}
     <!-- Header -->
     {% url 'administration:category_create' as create_url %}
     {% captureas actions_block %}
-        <div class="dropdown dropdown-end">
-            <div tabindex="0" role="button" class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal hover:bg-base-200">
-                {% trans "更多" %}
-                <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
-            </div>
-            <ul tabindex="0" class="dropdown-content z-[50] menu p-2 shadow-xl bg-base-100 rounded-2xl w-52 border border-base-content/5 mt-2">
-                <li><a href="{% url 'administration:category_export' %}" target="_blank" class="rounded-xl"><span class="material-symbols-outlined">file_download</span> {% trans "导出全部 (JSON)" %}</a></li>
-                <li><button onclick="import_modal.showModal()" class="rounded-xl"><span class="material-symbols-outlined">file_upload</span> {% trans "导入数据 (JSON)" %}</button></li>
-            </ul>
+    <div class="dropdown dropdown-end">
+        <div tabindex="0"
+             role="button"
+             class="btn btn-sm btn-ghost border-base-200 gap-1 font-normal hover:bg-base-200">
+            {% trans "更多" %}
+            <span class="material-symbols-outlined text-xs opacity-50">expand_more</span>
         </div>
-        <a href="{{ create_url }}" class="btn btn-sm btn-primary gap-2 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105">
-            <span class="material-symbols-outlined text-lg">add_circle</span>
-            {% trans "新建分类" %}
-        </a>
-    {% endcaptureas %}
-
-    {% include "administration/components/header.html" with title=_("分类管理") subtitle=_("管理文章分类体系") breadcrumbs=None actions=actions_block %}
-
-    <!-- Import Modal -->
-    <dialog id="import_modal" class="modal">
-      <div class="modal-box rounded-2xl">
+        <ul tabindex="0"
+            class="dropdown-content z-[50] menu p-2 shadow-xl bg-base-100 rounded-2xl w-52 border border-base-content/5 mt-2">
+            <li>
+                <a href="{% url 'administration:category_export' %}"
+                   target="_blank"
+                   class="rounded-xl"><span class="material-symbols-outlined">file_download</span> {% trans "导出全部 (JSON)" %}</a>
+            </li>
+            <li>
+                <button onclick="import_modal.showModal()" class="rounded-xl">
+                    <span class="material-symbols-outlined">file_upload</span> {% trans "导入数据 (JSON)" %}
+                </button>
+            </li>
+        </ul>
+    </div>
+    <a href="{{ create_url }}"
+       class="btn btn-sm btn-primary gap-2 rounded-lg shadow-lg shadow-primary/20 hover:shadow-primary/30 transition-all hover:scale-105">
+        <span class="material-symbols-outlined text-lg">add_circle</span>
+        {% trans "新建分类" %}
+    </a>
+{% endcaptureas %}
+{% trans "分类管理" as t_title %}
+{% trans "管理文章分类体系" as t_subtitle %}
+{% include "administration/components/header.html" with title=_("分类管理") title=t_title breadcrumbs=None actions=actions_block %}
+<!-- Import Modal -->
+<dialog id="import_modal" class="modal">
+    <div class="modal-box rounded-2xl">
         <h3 class="font-bold text-lg flex items-center gap-2 mb-4">
             <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <span class="material-symbols-outlined">file_upload</span>
@@ -35,55 +47,66 @@
             {% trans "导入数据 (JSON)" %}
         </h3>
         <p class="py-4 text-sm opacity-70">{% trans "请选择要导入的 JSON 文件。注意：导入将覆盖相同 ID 的现有数据。" %}</p>
-        <form action="{% url 'administration:category_import' %}" method="post" enctype="multipart/form-data">
+        <form action="{% url 'administration:category_import' %}"
+              method="post"
+              enctype="multipart/form-data">
             {% csrf_token %}
-            <input type="file" name="json_file" class="file-input file-input-bordered file-input-sm w-full rounded-lg mb-6" accept=".json" required />
+            <input type="file"
+                   name="json_file"
+                   class="file-input file-input-bordered file-input-sm w-full rounded-lg mb-6"
+                   accept=".json"
+                   required />
             <div class="modal-action">
-                <button type="button" class="btn btn-sm btn-ghost rounded-lg" onclick="import_modal.close()">{% trans "取消" %}</button>
+                <button type="button"
+                        class="btn btn-sm btn-ghost rounded-lg"
+                        onclick="import_modal.close()">{% trans "取消" %}</button>
                 <button type="submit" class="btn btn-sm btn-primary rounded-lg">{% trans "开始导入" %}</button>
             </div>
         </form>
-      </div>
-      <form method="dialog" class="modal-backdrop">
-        <button>close</button>
-      </form>
-    </dialog>
-
-    <!-- Main List Container -->
-    {% captureas bulk_actions_block %}
-        <button type="button" onclick="submitBulkAction('delete')" class="btn btn-sm btn-error hover:bg-error-focus text-white border-none gap-2 rounded-lg">
-            <span class="material-symbols-outlined text-[16px]">delete</span> {% trans "删除" %}
-        </button>
-    {% endcaptureas %}
-
-    {% captureas table_content %}
-        <form id="bulk-form" method="post" action="{% url 'administration:bulk_action' model='category' %}">
-            {% csrf_token %}
-            <table class="table table-pin-rows w-full">
-                <thead class="bg-base-200/50 text-base-content/60 font-medium text-xs uppercase tracking-wider">
-                    <tr>
-                        <th class="w-10 pl-6">
-                            <label>
-                                <input type="checkbox" class="checkbox checkbox-xs rounded-sm" onclick="toggleAll(this)" />
-                            </label>
-                        </th>
-                        <th class="w-16 font-mono hidden md:table-cell">ID</th>
-                        <th>{% trans "名称 / 描述" %}</th>
-                        <th class="hidden lg:table-cell">Slug</th>
-                        <th class="w-24 text-center hidden sm:table-cell">{% trans "文章数" %}</th>
-                        <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
-                    </tr>
-                </thead>
-                <tbody id="category-table-body" class="divide-y divide-base-content/5">
-                    {% include "administration/partials/category_list_rows.html" %}
-                </tbody>
-            </table>
-        </form>
-    {% endcaptureas %}
-
-    {% include "administration/components/list_container.html" with title=_("分类列表") icon="category" search_url="." bulk_actions=bulk_actions_block content=table_content %}
-
-    <script>
+    </div>
+    <form method="dialog" class="modal-backdrop">
+        <button>{% trans "关闭" %}</button>
+    </form>
+</dialog>
+<!-- Main List Container -->
+{% captureas bulk_actions_block %}
+<button type="button"
+        onclick="submitBulkAction('delete')"
+        class="btn btn-sm btn-error hover:bg-error-focus text-white border-none gap-2 rounded-lg">
+    <span class="material-symbols-outlined text-[16px]">delete</span> {% trans "删除" %}
+</button>
+{% endcaptureas %}
+{% captureas table_content %}
+<form id="bulk-form"
+      method="post"
+      action="{% url 'administration:bulk_action' model='category' %}">
+    {% csrf_token %}
+    <table class="table table-pin-rows w-full">
+        <thead class="bg-base-200/50 text-base-content/60 font-medium text-xs uppercase tracking-wider">
+            <tr>
+                <th class="w-10 pl-6">
+                    <label>
+                        <input type="checkbox"
+                               class="checkbox checkbox-xs rounded-sm"
+                               onclick="toggleAll(this)" />
+                    </label>
+                </th>
+                <th class="w-16 font-mono hidden md:table-cell">{% trans "ID" %}</th>
+                <th>{% trans "名称 / 描述" %}</th>
+                <th class="hidden lg:table-cell">{% trans "Slug" %}</th>
+                <th class="w-24 text-center hidden sm:table-cell">{% trans "文章数" %}</th>
+                <th class="w-24 text-center pr-6">{% trans "操作" %}</th>
+            </tr>
+        </thead>
+        <tbody id="category-table-body" class="divide-y divide-base-content/5">
+            {% include "administration/partials/category_list_rows.html" %}
+        </tbody>
+    </table>
+</form>
+{% endcaptureas %}
+{% trans "分类列表" as t_title %}
+{% include "administration/components/list_container.html" with title=t_title icon="category" search_url="." bulk_actions=bulk_actions_block content=table_content %}
+<script>
         function submitBulkAction(action) {
             const checkedBoxes = document.querySelectorAll('.row-checkbox:checked');
             if (checkedBoxes.length === 0) {
@@ -108,5 +131,5 @@
                 }
             );
         }
-    </script>
+</script>
 {% endblock %}

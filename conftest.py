@@ -1,6 +1,5 @@
 import factory
 import pytest
-from constance import config
 from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 from blog.models import Post, Category, Tag, Comment
@@ -175,7 +174,6 @@ def friendlink(db):
 @pytest.fixture
 def notification(db):
     return NotificationFactory()
-
 
 
 @pytest.fixture

@@ -1,28 +1,31 @@
 {% extends "administration/base.html" %}
 {% load capture_tags %}
 {% load i18n %}
-
-{% block title %}{% trans "查看日志" %}: {{ filename }}{% endblock %}
-
+{% block title %}
+    {% trans "查看日志" %}: {{ filename }}
+{% endblock %}
 {% block content %}
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-2xl font-bold flex items-center gap-2">
-        <span class="material-symbols-outlined">description</span>
-        {{ filename }}
-    </h1>
-    <div class="flex gap-2">
-        <a href="{% url 'administration:logfile_download' filename %}" class="btn btn-sm btn-outline gap-2" hx-boost="false" download>
-            <span class="material-symbols-outlined">download</span> {% trans "下载" %}
-        </a>
-        <a href="{% url 'administration:logfile_list' %}" class="btn btn-sm btn-ghost">{% trans "返回列表" %}</a>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-2xl font-bold flex items-center gap-2">
+            <span class="material-symbols-outlined">description</span>
+            {{ filename }}
+        </h1>
+        <div class="flex gap-2">
+            <a href="{% url 'administration:logfile_download' filename %}"
+               class="btn btn-sm btn-outline gap-2"
+               hx-boost="false"
+               download>
+                <span class="material-symbols-outlined">download</span> {% trans "下载" %}
+            </a>
+            <a href="{% url 'administration:logfile_list' %}"
+               class="btn btn-sm btn-ghost">{% trans "返回列表" %}</a>
+        </div>
     </div>
-</div>
-
-<div class="mockup-code bg-[#1e1e1e] text-gray-300 w-full overflow-x-auto max-h-[80vh] overflow-y-auto" id="log-container">
-    <pre class="px-4 py-2 text-xs leading-5 font-mono"><code>{{ content }}</code></pre>
-</div>
-
-<script>
+    <div class="mockup-code bg-[#1e1e1e] text-gray-300 w-full overflow-x-auto max-h-[80vh] overflow-y-auto"
+         id="log-container">
+        <pre class="px-4 py-2 text-xs leading-5 font-mono"><code>{{ content }}</code></pre>
+    </div>
+    <script>
     (function() {
         const initLogScroll = (root) => {
             const scope = root || document;
@@ -38,6 +41,5 @@
             document.addEventListener('htmx:afterSettle', (evt) => initLogScroll(evt.target));
         }
     })();
-</script>
-
+    </script>
 {% endblock %}
