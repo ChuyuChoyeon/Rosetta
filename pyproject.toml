@@ -20,7 +20,7 @@ dependencies = [
     "faker",
     "dnspython>=2.8.0",
     "email-validator>=2.3.0",
-    "pillow>=12.1.1",
+    "pillow>=12.3.0",
     "redis>=5.0.0",
     "aiofiles>=24.1.0",
     "pypinyin>=0.55.0",
